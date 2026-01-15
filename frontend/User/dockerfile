@@ -1,0 +1,48 @@
+# Stage 1: Build
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+# Copy package files first (better caching for deps)
+COPY package.json package-lock.json* ./
+
+# Install dependencies using npm ci for reproducibility
+RUN npm ci --prefer-offline --no-audit
+
+# Copy rest of the project
+COPY . .
+
+# Build the app
+RUN npm run build
+
+# Stage 2: Production with Nginx
+FROM nginx:alpine
+
+LABEL maintainer="Basusoumik2003"
+LABEL description="Frontend User Dashboard - React + Vite + Nginx"
+
+# Copy custom nginx config FIRST
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy build output to Nginx html directory
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Fix permissions for nginx cache and run directories
+RUN mkdir -p /var/cache/nginx/client_temp && \
+    mkdir -p /var/run/nginx && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/run/nginx && \
+    chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html && \
+    chmod -R 755 /var/cache/nginx && \
+    chmod -R 755 /var/run/nginx
+
+# Expose port 80
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost/index.html || exit 1
+
+# Start nginx in foreground (required for Docker containers)
+CMD ["nginx", "-g", "daemon off;"]
