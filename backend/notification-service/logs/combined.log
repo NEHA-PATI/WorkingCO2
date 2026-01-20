@@ -213,3 +213,22 @@
 {"level":"info","message":"Login notification created for user: nehauser@gmail.com","service":"notification-service","timestamp":"2026-01-15 14:35:46"}
 {"level":"info","message":"Processing event: user.login","service":"notification-service","timestamp":"2026-01-15 14:36:17","user":"nehauser@gmail.com"}
 {"level":"info","message":"Login notification created for user: nehauser@gmail.com","service":"notification-service","timestamp":"2026-01-15 14:36:17"}
+{"level":"info","message":"\n        ================================\n        🚀 Notification Service Started\n        ================================\n        Service: notification-service\n        Port: 5001\n        Environment: development\n        Database: localhost:5432/gocarbonpositive\n        CORS: Enabled for http://localhost:3001\n        ================================\n      ","service":"notification-service","timestamp":"2026-01-16 17:06:54"}
+{"level":"info","message":"Processing event: user.login","service":"notification-service","timestamp":"2026-01-16 17:10:11","user":"falcon.group@gmail.com"}
+{"level":"info","message":"Login notification created for user: falcon.group@gmail.com","service":"notification-service","timestamp":"2026-01-16 17:10:11"}
+{"level":"info","message":"Processing event: user.login","service":"notification-service","timestamp":"2026-01-16 17:18:26","user":"falcon.group@gmail.com"}
+{"level":"info","message":"Login notification created for user: falcon.group@gmail.com","service":"notification-service","timestamp":"2026-01-16 17:18:26"}
+{"level":"info","message":"Processing event: user.signup","service":"notification-service","timestamp":"2026-01-16 17:19:55","user":"rahul@gmail.com"}
+{"level":"info","message":"Signup notification created for user: rahul@gmail.com","service":"notification-service","timestamp":"2026-01-16 17:19:55"}
+{"level":"info","message":"Processing event: user.email.verified","service":"notification-service","timestamp":"2026-01-16 17:20:19","user":"rahul@gmail.com"}
+{"level":"info","message":"Email verified for user: rahul@gmail.com","service":"notification-service","timestamp":"2026-01-16 17:20:19"}
+{"level":"info","message":"Processing event: user.login","service":"notification-service","timestamp":"2026-01-16 17:20:35","user":"rahul@gmail.com"}
+{"level":"info","message":"Login notification created for user: rahul@gmail.com","service":"notification-service","timestamp":"2026-01-16 17:20:35"}
+{"level":"info","message":"Processing event: user.login","service":"notification-service","timestamp":"2026-01-16 17:21:20","user":"rahul@gmail.com"}
+{"level":"info","message":"Login notification created for user: rahul@gmail.com","service":"notification-service","timestamp":"2026-01-16 17:21:20"}
+{"level":"info","message":"Processing event: user.login.failed","service":"notification-service","timestamp":"2026-01-16 17:29:19","user":"cat@gmail.com"}
+{"level":"warn","message":"Failed login attempt for: cat@gmail.com (Attempt: 1)","service":"notification-service","timestamp":"2026-01-16 17:29:19"}
+{"level":"info","message":"Processing event: user.login","service":"notification-service","timestamp":"2026-01-16 17:29:28","user":"cat@gmail.com"}
+{"level":"info","message":"Login notification created for user: cat@gmail.com","service":"notification-service","timestamp":"2026-01-16 17:29:28"}
+{"level":"info","message":"Processing event: user.login","service":"notification-service","timestamp":"2026-01-16 17:30:03","user":"cat@gmail.com"}
+{"level":"info","message":"Login notification created for user: cat@gmail.com","service":"notification-service","timestamp":"2026-01-16 17:30:03"}
