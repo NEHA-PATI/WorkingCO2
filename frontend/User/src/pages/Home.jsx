@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "../styles/user/Home.css";
 
 const features = [
@@ -24,7 +24,7 @@ const features = [
 ];
 
 const Home = () => {
-  const navigate = useNavigate();
+  const navigate = navigate();
 
   return (
     <>
