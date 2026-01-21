@@ -47,10 +47,10 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       padding: isMobile ? "0" : "20px",
     },
     modal: {
-      background: "#fff",
-      width: isMobile ? "100%" : "600px",
-      maxWidth: isMobile ? "100%" : "90vw",
-      maxHeight: isMobile ? "95vh" : "90vh",
+  background: "#fff",
+  width: isMobile ? "100%" : "480px",
+  maxWidth: "92vw",
+  maxHeight: isMobile ? "95vh" : "85vh",
       overflowY: "auto",
       borderRadius: isMobile ? "20px 20px 0 0" : "12px",
       boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
@@ -75,29 +75,31 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       zIndex: 10,
     },
     content: {
-      padding: isMobile ? "56px 24px 32px" : "48px 56px 56px",
-    },
+  padding: isMobile ? "32px 20px 24px" : "32px 36px 36px",
+},
     header: {
       marginBottom: isMobile ? "12px" : "8px",
     },
     title: {
-      fontSize: isMobile ? "32px" : "42px",
+      fontSize: isMobile ? "24px" : "30px",
       fontWeight: "700",
-      color: "#000",
+      background: "linear-gradient(135deg, #16a34a, #22c55e)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
       margin: "0 0 4px 0",
       lineHeight: "1.2",
     },
     subtitle: {
-      fontSize: isMobile ? "28px" : "42px",
+      fontSize: isMobile ? "22px" : "28px",
       fontWeight: "300",
       color: "#000",
       margin: "0 0 12px 0",
       lineHeight: "1.2",
     },
     description: {
-      fontSize: isMobile ? "14px" : "16px",
+      fontSize: isMobile ? "13px" : "14px",
       color: "#666",
-      marginBottom: isMobile ? "24px" : "32px",
+      marginBottom: isMobile ? "16px" : "20px",
       lineHeight: "1.5",
     },
     formContainer: {
@@ -107,10 +109,10 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     },
     input: {
       width: "100%",
-      padding: isMobile ? "14px 16px" : "16px 18px",
+      padding: isMobile ? "10px 12px" : "12px 14px",
       border: "1px solid #d1d5db",
       borderRadius: "8px",
-      fontSize: isMobile ? "15px" : "16px",
+      fontSize: isMobile ? "14px" : "14.5px",
       fontFamily: "inherit",
       transition: "all 0.2s ease",
       backgroundColor: "#fff",
@@ -145,7 +147,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     },
     button: {
       width: "100%",
-      padding: isMobile ? "14px" : "16px",
+      padding: isMobile ? "12px" : "12px",
       border: "none",
       borderRadius: "8px",
       fontSize: isMobile ? "15px" : "16px",
@@ -159,7 +161,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       color: "#fff",
     },
     primaryButtonDisabled: {
-      background: "#e5e3ef",
+       background: "linear-gradient(135deg, #16a34a, #22c55e)",
       cursor: "not-allowed",
       opacity: 0.7,
     },
@@ -167,7 +169,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       display: "flex",
       alignItems: "center",
       gap: "16px",
-      margin: isMobile ? "20px 0" : "28px 0",
+       margin: isMobile ? "14px 0" : "18px 0",
     },
     dividerLine: {
       flex: 1,
@@ -180,10 +182,10 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     },
     socialButton: {
       width: "100%",
-      padding: isMobile ? "12px" : "14px",
+      padding: isMobile ? "10px" : "11px",
       border: "1px solid #d1d5db",
       borderRadius: "8px",
-      fontSize: isMobile ? "14px" : "16px",
+      fontSize: isMobile ? "14px" : "14px",
       fontWeight: "500",
       cursor: "pointer",
       transition: "all 0.2s ease",
@@ -632,12 +634,12 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                     disabled={loading}
                     onMouseEnter={(e) => {
                       if (!loading) {
-                        e.currentTarget.style.background = "#a8a3c7";
+                        e.currentTarget.style.background = "linear-gradient(135deg, #15803d, #16a34a)";
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!loading) {
-                        e.currentTarget.style.background = "#b8b4d0";
+                        e.currentTarget.style.background = "linear-gradient(135deg, #16a34a, #22c55e)";
                       }
                     }}
                   >
