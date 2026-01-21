@@ -1,24 +1,3 @@
-// const express = require('express');
-// const cors = require('cors');
-// require('dotenv').config();
-
-// const app = express();
-
-// // ✅ Allow requests from frontend
-// app.use(cors({
-//   origin: 'https://www.gocarbonpositive.com', // your React app URL
-//   credentials: true, // if you use cookies
-// }));
-
-// app.use(express.json());
-
-// // Your routes
-// app.use('/api/auth', require('./routes/authRoutes'));
-
-// // Start server
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
 
 
 const express = require("express");
@@ -99,9 +78,16 @@ app.use(globalLimiter);
 // ==================== ROUTES ====================
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
+const passwordRoutes = require("./routes/passwordRoutes");
+const oauthRoutes = require("./routes/oauthRoutes");
 
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/users", userRoutes);
+// 🆕 Forgot password module
+app.use("/api/auth/password", authLimiter, passwordRoutes);
+
+// 🆕 OAuth module (Google now, DigiLocker later)
+app.use("/api/auth/oauth", oauthRoutes);
 
 // Health check
 app.get("/health", (req, res) => {
