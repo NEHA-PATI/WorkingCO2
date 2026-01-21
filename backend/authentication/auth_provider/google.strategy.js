@@ -6,9 +6,12 @@ exports.getGoogleAuthURL = () => {
     client_id: google.clientId,
     redirect_uri: google.redirectUri,
     response_type: "code",
-    scope: "openid email profile"
+    scope: "openid email profile",
+    access_type: "offline",
+    prompt: "consent",
   });
-  return `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 };
 
 exports.getGoogleProfile = async (code) => {
@@ -17,20 +20,23 @@ exports.getGoogleProfile = async (code) => {
     client_secret: google.clientSecret,
     code,
     redirect_uri: google.redirectUri,
-    grant_type: "authorization_code"
+    grant_type: "authorization_code",
   });
 
   const { access_token } = tokenRes.data;
 
   const profileRes = await axios.get(
     "https://openidconnect.googleapis.com/v1/userinfo",
-    { headers: { Authorization: `Bearer ${access_token}` } }
+    {
+      headers: { Authorization: `Bearer ${access_token}` },
+    }
   );
 
   return {
     id: profileRes.data.sub,
     email: profileRes.data.email,
     name: profileRes.data.name,
-    raw: profileRes.data
+    picture: profileRes.data.picture,
+    raw: profileRes.data,
   };
 };
