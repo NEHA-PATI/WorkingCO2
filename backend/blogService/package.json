@@ -1,0 +1,29 @@
+{
+  "name": "blog-service",
+  "version": "1.0.0",
+  "description": "Blog CMS Service with Sanity headless CMS",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "sanity": "cd sanity && npm run dev"
+  },
+  "keywords": ["blog", "cms", "sanity", "headless"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "@sanity/client": "^6.10.0",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "redis": "^4.6.12",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

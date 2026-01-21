@@ -1,168 +1,158 @@
-import React, { useState } from "react";
-import "../../styles/org/AddAsset.css";
-import PopupForms from "./popupforms";
+import React, { useState } from 'react';
+import '../styles/AddAsset.css';
+import PopupForms from './popupforms';
 
-import { LuTreePine } from "react-icons/lu";
-import { MdSolarPower } from "react-icons/md";
-
-import { MdElectricCar } from "react-icons/md";
-import { GiWindmill } from "react-icons/gi";
-import { GiWaterMill } from "react-icons/gi";
-import { GiPowder } from "react-icons/gi";
+import { MdSolarPower, MdElectricCar } from "react-icons/md";
+import { GiWindmill, GiWaterMill, GiPowder } from "react-icons/gi";
 import { FaFire } from "react-icons/fa";
+import { LuTreePine } from "react-icons/lu"; // 🌱 Plantation icon
+
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const AddAsset = () => {
-  const [activeEVPopup, setActiveEVPopup] = useState(false);
-  const [activeTreePopup, setActiveTreePopup] = useState(false);
-  const [activeSolarPopup, setActiveSolarPopup] = useState(false);
 
+  // ✅ Popup states
+  const [activeEVPopup, setActiveEVPopup] = useState(false);
+  const [activeSolarPopup, setActiveSolarPopup] = useState(false);
+  const [activePlantationPopup, setActivePlantationPopup] = useState(false);
+
+  // Counts
   const [evCount, setEvCount] = useState(0);
   const [solarCount, setSolarCount] = useState(0);
 
   const navigate = useNavigate();
 
+  /* =======================
+      CALLBACK HANDLERS
+  ======================= */
+
   const handleSaveEV = async (formData) => {
-    // If formData already has ev_id, it means it's saved data from popupforms
     if (formData && formData.ev_id) {
-      console.log("EV already saved:", formData);
+      console.log('EV already saved:', formData);
       setActiveEVPopup(false);
-      // Stay on the same page after successful save
       return;
     }
 
-    // This path should not be reached since popupforms handles the API call
     try {
-      const res = await axios.post(
-        "http://localhost:8080/api/evmasterdata",
-        formData
-      );
+      const res = await axios.post("http://localhost:8080/api/evmasterdata", formData);
       setEvCount(res.data.evCount);
       setActiveEVPopup(false);
-      // Stay on the same page after successful save
     } catch (error) {
       console.error("Error saving EV:", error);
-      // Don't close popup on error, let the user see the error message
     }
   };
 
-  const handleSaveTree = (data) => {
-    console.log("Saved Tree:", data);
-    setActiveTreePopup(false);
-    // Stay on the same page after successful save
+  const handleSaveSolar = (data) => {
+    console.log('Saved Solar:', data);
+    setSolarCount(prev => prev + 1);
+    setActiveSolarPopup(false);
   };
 
-  const handleSaveSolar = (data) => {
-    console.log("Saved Solar:", data);
-    setSolarCount(solarCount + 1);
-    setActiveSolarPopup(false);
-    // Stay on the same page after successful save
+  const handleSavePlantation = (data) => {
+    console.log('Saved Plantation:', data);
+    setActivePlantationPopup(false);
   };
+
+  /* =======================
+          UI
+  ======================= */
 
   return (
     <div className="dashboard-container">
+
+      {/* EV */}
       <div className="card electric-vehicle">
         <MdElectricCar className="card-icon" style={{ color: "#3b82f6" }} />
-
         <h2>Electric Vehicle</h2>
         <p className="subtitle">Smart mobility tracking</p>
-        <button
-          className="add-button blue"
-          onClick={() => setActiveEVPopup(true)}
-        >
+        <button className="add-button blue" onClick={() => setActiveEVPopup(true)}>
           + Add EV Details
         </button>
       </div>
 
+      {/* 🌱 Plantation */}
       <div className="card trees">
         <LuTreePine className="card-icon" style={{ color: "#10b981" }} />
-        <h2>Trees</h2>
-        <p className="subtitle">Nature conservation</p>
-        <button
-          className="add-button green"
-          onClick={() => setActiveTreePopup(true)}
-        >
-          + Add Tree Details
+        <h2>Plantation</h2>
+        <p className="subtitle">Afforestation & land restoration</p>
+        <button className="add-button green" onClick={() => setActivePlantationPopup(true)}>
+          + Add Plantation Details
         </button>
       </div>
 
+      {/* Solar */}
       <div className="card solar-panel">
         <MdSolarPower className="card-icon" style={{ color: "#f59e0b" }} />
         <h2>Solar Panel</h2>
         <p className="subtitle">Renewable energy</p>
-        <button
-          className="add-button orange"
-          onClick={() => setActiveSolarPopup(true)}
-        >
+        <button className="add-button orange" onClick={() => setActiveSolarPopup(true)}>
           + Add Solar Details
         </button>
       </div>
 
+      {/* Wind */}
       <div className="card solar-panel">
-        <GiWindmill className="card-icon" style={{ color: "D3F3FF" }} />
+        <GiWindmill className="card-icon" style={{ color: "#D3F3FF" }} />
         <h2>Wind Mill</h2>
         <p className="subtitle">Renewable energy</p>
-        <button
-          className="add-button orange"
-          onClick={() => setActiveSolarPopup(true)}
-        >
+        <button className="add-button orange">
           + Add WindMill Details
         </button>
       </div>
 
+      {/* Hydro */}
       <div className="card solar-panel">
-        <GiWaterMill className="card-icon" style={{ color: "8ed1e3" }} />
+        <GiWaterMill className="card-icon" style={{ color: "#8ed1e3" }} />
         <h2>Hydro Power</h2>
         <p className="subtitle">Renewable energy</p>
-        <button
-          className="add-button d4f1f9"
-          style={{ color: "white" }}
-          onClick={() => setActiveSolarPopup(true)}
-        >
+        <button className="add-button d4f1f9" style={{ color: "white" }}>
           + Add HydroPower Details
         </button>
       </div>
 
+      {/* Carbon Capture */}
       <div className="card solar-panel">
-        <GiPowder className="card-icon" style={{ color: "32454D" }} />
+        <GiPowder className="card-icon" style={{ color: "#32454D" }} />
         <h2>Carbon Capture</h2>
-        <p className="subtitle">Renewable energy</p>
-        <button
-          className="add-button "
-          style={{ color: "white" }}
-          onClick={() => setActiveSolarPopup(true)}
-        >
+        <p className="subtitle">Negative emission tech</p>
+        <button className="add-button" style={{ color: "white" }}>
           + Add CarbonCapture Details
         </button>
       </div>
 
+      {/* Thermal */}
       <div className="card solar-panel">
         <FaFire className="card-icon" style={{ color: "#e25822" }} />
         <h2>Thermal Power</h2>
-        <p className="subtitle">Renewable energy</p>
-        <button
-          className="add-button orange"
-          style={{ color: "white" }}
-          onClick={() => setActiveSolarPopup(true)}
-        >
-          + Add CarbonCapture Details
+        <p className="subtitle">Energy production</p>
+        <button className="add-button orange" style={{ color: "white" }}>
+          + Add Thermal Details
         </button>
       </div>
+
+      {/* =======================
+             POPUPS
+      ======================= */}
 
       <PopupForms
         activeEVPopup={activeEVPopup}
         setActiveEVPopup={setActiveEVPopup}
-        activeTreePopup={activeTreePopup}
-        setActiveTreePopup={setActiveTreePopup}
+
         activeSolarPopup={activeSolarPopup}
         setActiveSolarPopup={setActiveSolarPopup}
+
+        activePlantationPopup={activePlantationPopup}
+        setActivePlantationPopup={setActivePlantationPopup}
+
         handleSaveEV={handleSaveEV}
-        handleSaveTree={handleSaveTree}
         handleSaveSolar={handleSaveSolar}
+        handleSavePlantation={handleSavePlantation}
+
         setEvCount={setEvCount}
         setSolarCount={setSolarCount}
       />
+
     </div>
   );
 };

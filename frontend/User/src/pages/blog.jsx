@@ -1,428 +1,235 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
+import { Search, Clock, User, TrendingUp, Loader2 } from "lucide-react";
 import "../styles/user/blog.css";
-import { FaPlus, FaRegHeart, FaHeart } from "react-icons/fa";
-import api from "../services/apiClient";
-// Navbar and Footer are provided by BaseLayout
+import blogService from "../services/blog/blogService.js";
 
-const categories = [
-  "All",
-  "Carbon Credit",
-  "Sustainable Development",
-  "Others",
-];
+const CATEGORY_COLORS = {
+  INSIGHTS: "#9b59b6",
+  TUTORIAL: "#3498db",
+  "CASE STUDY": "#e74c3c",
+  GUIDE: "#f39c12",
+  RESEARCH: "#1abc9c",
+};
 
-const Blog = ({ isAuthenticated }) => {
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [showPostModal, setShowPostModal] = useState(false);
-  const [postTitle, setPostTitle] = useState("");
-  const [postSummary, setPostSummary] = useState("");
-  const [postFile, setPostFile] = useState(null);
-  const [postContent, setPostContent] = useState("");
-  const [postCategories, setPostCategories] = useState([]);
+const getCategoryColor = (categoryName) => {
+  return CATEGORY_COLORS[categoryName?.toUpperCase()] || "#2ecc71";
+};
+
+export default function BlogPage() {
+  const [activeTab, setActiveTab] = useState("for-you");
+  const [searchQuery, setSearchQuery] = useState("");
   const [blogs, setBlogs] = useState([]);
-  const fileInputRef = useRef();
-  const [commentInputs, setCommentInputs] = useState({});
-  const [modalBlog, setModalBlog] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, totalPages: 0 });
 
-  useEffect(() => {
-    api
-      .get("/")
-      .then((res) => setBlogs(res.data.blogs))
-      .catch((err) => console.error("Error loading blogs:", err));
+  const fetchBlogs = useCallback(async (query = "", page = 1) => {
+    setLoading(true);
+    setError(null);
+    try {
+      let response;
+      if (query) {
+        response = await blogService.searchPosts(query, page);
+      } else {
+        // Map tabs to backend logic if needed, for now just get all for "for-you"
+        response = await blogService.getPosts(page);
+      }
+
+      setBlogs(response.data || []);
+      if (response.pagination) {
+        setPagination(response.pagination);
+      }
+    } catch (err) {
+      console.error("Error fetching blogs:", err);
+      setError("Failed to load blog posts. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const filteredBlogs =
-    selectedCategory === "All"
-      ? blogs
-      : blogs.filter((blog) => blog.tags.includes(selectedCategory));
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      fetchBlogs(searchQuery);
+    }, 500);
 
-  const handlePostFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setPostFile(e.target.files[0]);
-    }
-  };
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, fetchBlogs]);
 
-  const handleCategoryChange = (cat) => {
-    setPostCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-    );
-  };
-
-  const handlePostSubmit = async (e) => {
-    e.preventDefault();
-    const form = new FormData();
-    form.append("title", postTitle);
-    form.append("content", postContent);
-    form.append("authorName", "You");
-    form.append(
-      "authorAvatar",
-      "https://randomuser.me/api/portraits/lego/1.jpg"
-    );
-    form.append("authorBio", "Frontend Dev");
-    form.append("tags", postCategories.join(","));
-    if (postFile) {
-      const field = postFile.type.startsWith("image/") ? "image" : "video";
-      form.append(field, postFile);
-    }
-
-    try {
-      const res = await api.post("/", form);
-      setBlogs((prev) => [res.data.blog, ...prev]);
-      setShowPostModal(false);
-      setPostTitle("");
-      setPostSummary("");
-      setPostFile(null);
-      setPostContent("");
-      setPostCategories([]);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch (err) {
-      console.error("Error creating blog:", err);
-    }
-  };
-
-  const handleLike = async (blogId) => {
-    try {
-      const res = await api.patch(`/${blogId}/like`);
-      setBlogs((prev) =>
-        prev.map((b) =>
-          b._id === blogId ? { ...b, likes: res.data.likes } : b
-        )
-      );
-    } catch (err) {
-      console.error("Like error:", err);
-    }
-  };
-
-  const handleCommentInput = (blogId, value) => {
-    setCommentInputs((prev) => ({ ...prev, [blogId]: value }));
-  };
-
-  const handleAddComment = async (blogId) => {
-    const text = (commentInputs[blogId] || "").trim();
-    if (!text) return;
-    try {
-      const res = await api.post(`/${blogId}/comments`, {
-        user: "You",
-        text,
-      });
-      setBlogs((prev) =>
-        prev.map((b) =>
-          b._id === blogId ? { ...b, comments: res.data.comments } : b
-        )
-      );
-      setCommentInputs((prev) => ({ ...prev, [blogId]: "" }));
-    } catch (err) {
-      console.error("Comment error:", err);
-    }
-  };
+  // Filter by tab on client side for now if we don't have specialized backend endpoints
+  const displayBlogs = blogs.filter((blog) => {
+    if (activeTab === "featured") return blog.status === "published"; // Replace with featured logic if added
+    if (activeTab === "trending") return true;
+    return true;
+  });
 
   return (
-    <div className="blog-main-wrapper">
-      {/* <Navbar /> */}
-
+    <div className="blog-page">
       {/* Hero Section */}
-
-      <div className="blog-hero-section">
-        <div className="blog-hero-bg" />
-
+      <div className="blog-hero">
         <div className="blog-hero-content">
-          <h1>Welcome to Carbon Credit Blogs</h1>
+          <div className="blog-hero-badge">
+            <TrendingUp size={16} />
+            <span>Latest Insights & Stories</span>
+          </div>
+          <h1 className="blog-hero-title">
+            Discover Ideas That <span className="gradient-text">Inspire</span>
+          </h1>
+          <p className="blog-hero-subtitle">
+            Explore cutting-edge insights, tutorials, and case studies from industry experts
+          </p>
         </div>
       </div>
 
-      {/* Category Filter */}
+      {/* Search */}
+      <div className="blog-search">
+        <div className="search-input-wrapper">
+          {loading ? (
+            <Loader2 className="search-icon animate-spin" size={20} />
+          ) : (
+            <Search className="search-icon" size={20} />
+          )}
+          <input
+            placeholder="Search articles, topics, authors..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <button className="join-community-btn">Join Community</button>
+      </div>
 
-      <div className="blog-category-filter">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            className={`blog-category-btn ${
-              selectedCategory === cat ? "active" : ""
-            }`} // ✅ fixed class spacing
-            onClick={() => setSelectedCategory(cat)}
-          >
-            {cat}
-          </button>
-        ))}
+      {/* Tabs */}
+      <div className="blog-tabs">
+        <span
+          className={activeTab === "for-you" ? "active" : ""}
+          onClick={() => setActiveTab("for-you")}
+        >
+          For you
+        </span>
+        <span
+          className={activeTab === "featured" ? "active" : ""}
+          onClick={() => setActiveTab("featured")}
+        >
+          Featured
+        </span>
+        <span
+          className={activeTab === "trending" ? "active" : ""}
+          onClick={() => setActiveTab("trending")}
+        >
+          Trending
+        </span>
+      </div>
 
-        {isAuthenticated && (
-          <button
-            className="blog-category-btn post-btn"
-            onClick={() => setShowPostModal(true)}
-          >
-            <FaPlus style={{ marginRight: 6, fontSize: "0.9em" }} /> Post
-          </button>
+      {/* Header */}
+      <div className="blog-heading">
+        <h1>
+          {activeTab === "for-you"
+            ? "For you"
+            : activeTab === "featured"
+              ? "Featured Posts"
+              : "Trending Now"}
+        </h1>
+        {!loading && (
+          <p>
+            {displayBlogs.length} article{displayBlogs.length !== 1 ? "s" : ""} found
+          </p>
         )}
       </div>
 
-      {/* Blog Grid */}
+      {/* Error State */}
+      {error && (
+        <div className="error-message">
+          <p>{error}</p>
+          <button onClick={() => fetchBlogs(searchQuery)}>Retry</button>
+        </div>
+      )}
 
-      <div className="blog-content-row">
-        <div className="blog-grid">
-          {filteredBlogs.map((blog) => (
-            <div
-              className="blog-card-modern"
-              key={blog._id}
-              onClick={() =>
-                setModalBlog({
-                  title: blog.title,
-
-                  content: blog.content,
-
-                  author: blog.author.name,
-
-                  authorAvatar: blog.author.avatar,
-
-                  date: blog.createdAt,
-
-                  categories: blog.tags,
-
-                  summary: blog.content.slice(0, 100),
-
-                  image: blog.imageUrl,
-                })
-              }
-            >
-              {blog.imageUrl && (
-                <img
-                  src={blog.imageUrl}
-                  alt={blog.title}
-                  className="blog-card-img"
-                />
-              )}
-
-              <div className="blog-card-body">
-                <div className="blog-card-meta">
-                  <img
-                    src={blog.author.avatar}
-                    alt={blog.author.name}
-                    className="blog-card-avatar"
-                  />
-
-                  <div>
-                    <div className="blog-card-author">{blog.author.name}</div>
-
-                    <div className="blog-card-date">
-                      {new Date(blog.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-
-                <h2 className="blog-card-title">{blog.title}</h2>
-
-                <p className="blog-card-summary">
-                  {blog.content.slice(0, 100)}...
-                </p>
-
-                <div className="blog-card-categories">
-                  {blog.tags.map((tag) => (
-                    <span className="blog-card-category" key={tag}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="blog-like-section">
-                  <button
-                    className="blog-like-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLike(blog._id);
-                    }}
-                  >
-                    <FaHeart /> {blog.likes || 0}
-                  </button>
-                </div>
-
-                <div className="blog-comment-section">
-                  <div className="blog-comments-list">
-                    {blog.comments &&
-                      blog.comments.map((c, idx) => (
-                        <div className="blog-comment" key={idx}>
-                          <span className="blog-comment-text">{c.text}</span>
-
-                          <span className="blog-comment-date">
-                            {new Date(c.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                      ))}
-                  </div>
-
-                  <div className="blog-comment-input-row">
-                    <input
-                      type="text"
-                      className="blog-comment-input"
-                      placeholder="Add a comment..."
-                      value={commentInputs[blog._id] || ""}
-                      onChange={(e) =>
-                        handleCommentInput(blog._id, e.target.value)
-                      }
-                    />
-
-                    <button
-                      className="blog-comment-add-btn"
-                      onClick={() => handleAddComment(blog._id)}
-                    >
-                      Post
-                    </button>
-                  </div>
-                </div>
+      {/* Loading State */}
+      {loading && blogs.length === 0 && (
+        <div className="loading-grid">
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <div key={n} className="blog-card skeleton">
+              <div className="blog-image skeleton-box"></div>
+              <div className="blog-content">
+                <div className="skeleton-line short"></div>
+                <div className="skeleton-line"></div>
+                <div className="skeleton-line"></div>
+                <div className="skeleton-line medium"></div>
               </div>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Post Modal */}
-
-      {showPostModal && (
-        <div
-          className="blog-modal-overlay"
-          onClick={() => setShowPostModal(false)}
-        >
-          <div
-            className="blog-modal post-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="modal-close-btn"
-              onClick={() => setShowPostModal(false)}
-            >
-              &times;
-            </button>
-
-            <h2 className="modal-title">Create a Blog Post</h2>
-
-            <form className="post-form" onSubmit={handlePostSubmit}>
-              <input
-                type="text"
-                value={postTitle}
-                onChange={(e) => setPostTitle(e.target.value)}
-                placeholder="Enter blog title"
-                required
-              />
-
-              <input
-                type="text"
-                value={postSummary}
-                onChange={(e) => setPostSummary(e.target.value)}
-                placeholder="Short summary"
-                required
-              />
-
-              <input
-                type="file"
-                accept="image/*,video/*"
-                onChange={handlePostFileChange}
-                ref={fileInputRef}
-              />
-
-              <div>
-                {categories
-                  .filter((cat) => cat !== "All")
-                  .map((cat) => (
-                    <label key={cat}>
-                      <input
-                        type="checkbox"
-                        checked={postCategories.includes(cat)}
-                        onChange={() => handleCategoryChange(cat)}
-                      />{" "}
-                      {cat}
-                    </label>
-                  ))}
-              </div>
-
-              <textarea
-                value={postContent}
-                onChange={(e) => setPostContent(e.target.value)}
-                rows={6}
-                required
-                placeholder="Write your blog here..."
-              />
-
-              <button type="submit" className="post-submit-btn">
-                Submit
-              </button>
-            </form>
-          </div>
-        </div>
       )}
 
-      {/* ✅ Blog View Modal */}
-
-      {modalBlog && (
-        <div className="blog-modal-overlay" onClick={() => setModalBlog(null)}>
+      {/* Blog Cards */}
+      <div className="blog-grid">
+        {!loading && displayBlogs.map((blog) => (
           <div
-            className="blog-modal post-modal"
-            onClick={(e) => e.stopPropagation()}
+            key={blog._id}
+            className={`blog-card ${blog.featured ? "featured-card" : ""}`}
           >
-            <button
-              className="modal-close-btn"
-              onClick={() => setModalBlog(null)}
-            >
-              &times;
-            </button>
-
             <div
-              className="blog-card-meta"
-              style={{ justifyContent: "center", marginBottom: 12 }}
+              className="blog-image"
+              style={{
+                backgroundImage: blog.coverImage ? `url(${blog.coverImage})` : 'none',
+                backgroundColor: !blog.coverImage ? getCategoryColor(blog.categories?.[0]?.title) + '20' : 'transparent',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
             >
-              <img
-                src={modalBlog.authorAvatar}
-                alt={modalBlog.author}
-                className="blog-card-avatar"
-              />
+              {blog.featured && (
+                <div className="featured-badge">
+                  <TrendingUp size={14} />
+                  Featured
+                </div>
+              )}
+            </div>
 
-              <div>
-                <div className="blog-card-author">{modalBlog.author}</div>
+            <div className="blog-content">
+              <div className="blog-categories">
+                {blog.categories?.map((cat) => (
+                  <span
+                    key={cat._id}
+                    className="blog-category"
+                    style={{ color: getCategoryColor(cat.title) }}
+                  >
+                    {cat.title}
+                  </span>
+                ))}
+              </div>
+              <h3>{blog.title}</h3>
+              <p>{blog.excerpt || blog.description}</p>
 
-                <div className="blog-card-date">
-                  {new Date(modalBlog.date).toLocaleDateString()}
+              <div className="blog-meta">
+                <div className="blog-author">
+                  <div className="author-avatar">
+                    {blog.author?.image ? (
+                      <img src={blog.author.image} alt={blog.author.name} />
+                    ) : (
+                      <User size={14} />
+                    )}
+                  </div>
+                  <span>{blog.author?.name || "Anonymous"}</span>
+                </div>
+                <div className="blog-read-time">
+                  <Clock size={14} />
+                  <span>{blog.readTime || "5 min read"}</span>
                 </div>
               </div>
-            </div>
 
-            <div
-              className="blog-card-categories"
-              style={{ justifyContent: "center", marginBottom: 8 }}
-            >
-              {modalBlog.categories.map((cat) => (
-                <span className="blog-card-category" key={cat}>
-                  {cat}
-                </span>
-              ))}
-            </div>
-
-            <h2 className="blog-card-title" style={{ textAlign: "center" }}>
-              {modalBlog.title}
-            </h2>
-
-            <p className="blog-card-summary" style={{ textAlign: "center" }}>
-              {modalBlog.summary}
-            </p>
-
-            {modalBlog.image && (
-              <img
-                src={modalBlog.image}
-                alt={modalBlog.title}
-                className="blog-card-img"
-                style={{ margin: "0 auto 18px auto", maxHeight: 220 }}
-              />
-            )}
-
-            <div className="blog-modal-content" style={{ marginTop: 10 }}>
-              {modalBlog.content
-                .split(/\n+/)
-                .map((para, idx) =>
-                  para.trim() ? <p key={idx}>{para}</p> : null
-                )}
+              <Link to={`/blog/${blog.slug?.current}`} className="read-more">
+                Read article <span>→</span>
+              </Link>
             </div>
           </div>
+        ))}
+      </div>
+
+      {!loading && displayBlogs.length === 0 && (
+        <div className="no-results">
+          <p>No articles found matching "{searchQuery}"</p>
         </div>
       )}
-      {/* Footer is provided by BaseLayout */}
     </div>
   );
-};
-
-export default Blog;
+}

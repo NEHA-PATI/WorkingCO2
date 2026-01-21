@@ -89,6 +89,19 @@ export const assetApiClient = createApiClient(API_CONFIG.ASSET_API, 'Asset Servi
 export const authApiClient = createApiClient(API_CONFIG.AUTH_API, 'Auth Service');
 export const notificationApiClient = createApiClient(API_CONFIG.NOTIFICATION_API, 'Notification Service');
 
+// Career Service (port 5006)
+export const careerApiClient = createApiClient(
+  import.meta.env.VITE_CAREER_SERVICE_URL || "http://localhost:5006",
+  "Career Service"
+);
+
+// Blog Service (port 4000)
+export const blogApiClient = createApiClient(
+  import.meta.env.VITE_BLOG_API_URL || "http://localhost:4000/api/blog",
+  "Blog Service"
+);
+
+
 // Default export
 export default assetApiClient;
 
