@@ -10,7 +10,6 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     username: "",
     email: "",
     password: "",
-    role: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -67,9 +66,9 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     }
 
     // Role validation
-    if (!formData.role) {
-      newErrors.role = "Please select a role";
-    }
+    // if (!formData.role) {
+    //   newErrors.role = "Please select a role";
+    // }
 
     setError(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -224,6 +223,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       if (onSwitchToLogin) {
         onSwitchToLogin();
       } else {
+        // eslint-disable-next-line no-undef
         navigate("/");
       }
     } catch (err) {
@@ -278,6 +278,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       }
 
       setError({ success: "OTP resent successfully! Check your email." });
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       setError({ general: "Failed to resend OTP. Please try again." });
     } finally {
@@ -370,7 +371,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
               )}
             </div>
 
-            {/* Role */}
+            {/* Role
             <div className="form-group">
               <select
                 id="role"
@@ -392,7 +393,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                   {error.role}
                 </span>
               )}
-            </div>
+            </div> */}
 
             {/* General Error */}
             {error.general && (
@@ -498,6 +499,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
             </div>
           </div>
         )}
+
 
         {/* Footer - Login Link */}
         {!showOTP && (

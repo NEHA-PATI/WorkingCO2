@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "../styles/user/Home.css";
 
 const features = [
@@ -24,42 +24,43 @@ const features = [
 ];
 
 const Home = () => {
-  const navigate = useNavigate();
- 
-
-  const handleGetStarted = () => {
-  navigate("/login");
-};
-
-
   return (
     <>
       <div className="home-hero-section">
         <div className="home-container">
           <div className="home-hero-layout">
             <div className="home-hero-content">
-              <h1>Building a Sustainable Future</h1>
+              <h1>
+                Building a Sustainable
+                <span className="hero-future">Future</span>
+              </h1>
+
               <p>
                 Join us in creating a better world through sustainable
                 development practices and environmental consciousness.
               </p>
-              <div className="home-hero-buttons">
-                <button
-                  className="home-btn home-btn-white"
-                  onClick={handleGetStarted}
-                >
-                  Get Started
-                </button>
-                <Link to="/about" className="home-btn home-btn-white">
+
+              {/* PRIMARY ACTIONS */}
+              <div className="home-primary-actions">
+                <button className="home-btn">Get Started</button>
+                <Link to="/about" className="home-btn">
                   Learn More
                 </Link>
+              </div>
+
+              {/* ORGANISATION CTA */}
+              <div className="home-organisation-cta">
+                <button className="org-btn"  >
+                  JOIN AS ORGANISATION
+                </button>
+                
               </div>
             </div>
 
             <div className="home-hero-image">
               <div className="home-image-container">
                 <img
-                  src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80"
+                  src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e"
                   alt="Sustainable Future"
                 />
               </div>
@@ -68,25 +69,25 @@ const Home = () => {
         </div>
       </div>
 
+      {/* FEATURES */}
       <section className="home-features-section">
         <div className="home-container">
           <h2 className="home-section-title">
             Why Choose Sustainable Development?
           </h2>
           <p className="home-features-subtitle">
-            Explore our core values and the impact we strive to make for a
-            greener tomorrow.
+            Explore our core values and the impact we strive to make for a greener
+            tomorrow.
           </p>
+
           <div className="home-features-inline">
             {features.map((feature, idx) => (
               <div className="home-feature-card" key={idx}>
-                <div className="home-feature-icon">
-                  <img
-                    src={feature.iconUrl}
-                    alt={`${feature.title} icon`}
-                    className="home-feature-icon-img"
-                  />
-                </div>
+                <img
+                  src={feature.iconUrl}
+                  alt={feature.title}
+                  className="home-feature-icon-img"
+                />
                 <h3 className="home-feature-title">{feature.title}</h3>
                 <p className="home-feature-desc">{feature.desc}</p>
               </div>
@@ -94,28 +95,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      
-      {/*{showLogin && (
-        <Login
-          onClose={closeModal}
-          onLogin={handleLoginSuccess}
-          onSwitchToSignup={() => {
-            setShowLogin(false);
-            setShowSignup(true);
-          }}
-        />
-      )}*/}
-
-      {/*{showSignup && (
-        <Signup
-          onClose={closeModal}
-          onSwitchToLogin={() => {
-            setShowSignup(false);
-            setShowLogin(true);
-          }}
-        />
-      )}*/}
     </>
   );
 };

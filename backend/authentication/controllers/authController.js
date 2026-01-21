@@ -10,8 +10,7 @@ const PASSWORD_REGEX =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 const MAX_ATTEMPTS = 5;
 const LOCK_TIME_MS = 30 * 60 * 1000; // 30 min
-const NOTIFICATION_SERVICE_URL =
-  process.env.NOTIFICATION_SERVICE_URL || "http://localhost:5001";
+const NOTIFICATION_SERVICE_URL = process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:5001';
 
 function validateEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -22,11 +21,7 @@ function validatePassword(pw) {
 }
 
 function validateUsername(name) {
-  return (
-    typeof name === "string" &&
-    name.trim().length >= 2 &&
-    name.trim().length <= 50
-  );
+  return typeof name === "string" && name.trim().length >= 2 && name.trim().length <= 50;
 }
 
 // ✅ REGISTER USER + SEND OTP
@@ -36,9 +31,7 @@ exports.register = async (req, res) => {
   try {
     // Basic validation
     if (!validateUsername(username)) {
-      return res
-        .status(400)
-        .json({ message: "Username must be 2–50 characters." });
+      return res.status(400).json({ message: "Username must be 2–50 characters." });
     }
     if (!validateEmail(email)) {
       return res.status(400).json({ message: "Invalid email format." });
@@ -51,9 +44,10 @@ exports.register = async (req, res) => {
     }
 
     // ✅ Check if user exists
-    const userCheck = await pool.query("SELECT id FROM users WHERE email=$1", [
-      email.toLowerCase(),
-    ]);
+    const userCheck = await pool.query(
+      "SELECT id FROM users WHERE email=$1",
+      [email.toLowerCase()]
+    );
     if (userCheck.rows.length > 0) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -61,40 +55,24 @@ exports.register = async (req, res) => {
     const hashed = await bcrypt.hash(password, 12);
 
     // Find role
-    let roleRes = await pool.query(
-      "SELECT id, role_name FROM roles WHERE UPPER(role_name) = $1",
-      [role?.toString().toUpperCase()]
-    );
-    let roleId = roleRes.rows[0]?.id ?? null;
+   const roleId = 1; // ✅ default USER role
 
-    // Fallback to USER role
-    if (!roleId) {
-      const fallback = await pool.query(
-        "SELECT id FROM roles WHERE UPPER(role_name)='USER' LIMIT 1"
-      );
-      if (!fallback.rows[0]) {
-        return res
-          .status(500)
-          .json({ message: "USER role not configured in roles table" });
-      }
-      roleId = fallback.rows[0].id;
-    }
 
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // ✅ Create user with 'pending' status
+    // ✅ Create user with 'active' status by default
     const userRes = await pool.query(
       `INSERT INTO users (username, email, password, role_id, otp_code, otp_expires_at, verified, login_attempts, lock_until, status, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, false, 0, NULL, 'pending', NOW(), NOW())
+       VALUES ($1, $2, $3, $4, $5, $6, false, 0, NULL, 'active', NOW(), NOW())
        RETURNING id, username, email, status`,
       [username.trim(), email.toLowerCase(), hashed, roleId, otp, expiresAt]
     );
 
     const userId = userRes.rows[0].id;
     const u_id = generateUID("USR", userId);
-
+    
     // Update with generated u_id
     await pool.query("UPDATE users SET u_id=$1 WHERE id=$2", [u_id, userId]);
 
@@ -111,27 +89,27 @@ exports.register = async (req, res) => {
 
     // ✅ Send signup notification event to notification service
     try {
-      await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notifications/event`, {
-        event_type: "user.signup",
-        user: {
-          id: userId,
-          username: username,
-          email: email.toLowerCase(),
-          role_name: "USER",
-        },
-        ip_address: req.ip || req.connection.remoteAddress || "unknown",
-        device_info: req.get("user-agent") || "Unknown device",
-      });
+    await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notifications/event`, {
+  event_type: 'user.signup',
+  user: {
+    id: userId,
+    username: username,
+    email: email.toLowerCase(),
+    role: 'USER'   // ✅ FIXED
+  },
+  ip_address: req.ip || req.connection.remoteAddress || 'unknown',
+  device_info: req.get('user-agent') || 'Unknown device'
+});
+
     } catch (notifError) {
-      console.error("Notification service error:", notifError.message);
+      console.error('Notification service error:', notifError.message);
       // Don't fail the signup if notification fails
     }
 
-    res.status(201).json({
-      message:
-        "Registration successful! Please check your email to verify your account.",
+    res.status(201).json({ 
+      message: "Registration successful! Please check your email to verify your account.", 
       email,
-      note: "After email verification, your account will be pending admin approval.",
+      note: "After email verification, your account will be pending admin approval."
     });
   } catch (err) {
     console.error("Register Error:", err);
@@ -179,14 +157,10 @@ exports.verifyOTP = async (req, res) => {
 
     // Check OTP
     const now = new Date();
-    const expiresAt = user.otp_expires_at
-      ? new Date(user.otp_expires_at)
-      : null;
+    const expiresAt = user.otp_expires_at ? new Date(user.otp_expires_at) : null;
 
     if (!user.otp_code) {
-      return res
-        .status(400)
-        .json({ message: "No OTP found. Please register again." });
+      return res.status(400).json({ message: "No OTP found. Please register again." });
     }
 
     if (user.otp_code !== otp) {
@@ -194,37 +168,31 @@ exports.verifyOTP = async (req, res) => {
     }
 
     if (!expiresAt || now > expiresAt) {
-      return res
-        .status(400)
-        .json({ message: "OTP expired. Please register again." });
+      return res.status(400).json({ message: "OTP expired. Please register again." });
     }
 
     // Update user as verified
-    // OLD: await pool.query(
-    //   "UPDATE users SET verified=true, otp_code=NULL, otp_expires_at=NULL, updated_at=NOW() WHERE email=$1",
-    //   [email.toLowerCase()]
-    // );
-    // NEW: Set status to 'active' after verification
     await pool.query(
-      "UPDATE users SET verified=true, status='active', otp_code=NULL, otp_expires_at=NULL, updated_at=NOW() WHERE email=$1",
+      "UPDATE users SET verified=true, otp_code=NULL, otp_expires_at=NULL, updated_at=NOW() WHERE email=$1",
       [email.toLowerCase()]
     );
 
     // ✅ Send email verified notification event
     try {
       await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notifications/event`, {
-        event_type: "user.email.verified",
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role_name: user.role_name,
-        },
-        ip_address: req.ip || req.connection.remoteAddress || "unknown",
-        device_info: req.get("user-agent") || "Unknown device",
-      });
+  event_type: 'user.email.verified',
+  user: {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    role: user.role_name   // 🔥 ensure this
+  },
+  ip_address: req.ip || req.connection.remoteAddress || 'unknown',
+  device_info: req.get('user-agent') || 'Unknown device'
+});
+
     } catch (notifError) {
-      console.error("Notification service error:", notifError.message);
+      console.error('Notification service error:', notifError.message);
     }
 
     const safeUser = {
@@ -234,19 +202,13 @@ exports.verifyOTP = async (req, res) => {
       email: user.email,
       role_name: user.role_name,
       verified: true,
-      // OLD: status: user.status || 'pending',
-      status: "active",
+      status: user.status || 'pending',
     };
 
-    // OLD: res.status(200).json({
-    //   message: "Email verified successfully! You can now login. Your account is pending admin approval.",
-    //   user: safeUser,
-    //   note: "You can login, but will have limited access until admin approves your account."
-    // });
-    res.status(200).json({
-      message:
-        "Email verified successfully! Your account is now active and you can login.",
+    res.status(200).json({ 
+      message: "Email verified successfully! You can now login. Your account is pending admin approval.", 
       user: safeUser,
+      note: "You can login, but will have limited access until admin approves your account."
     });
   } catch (err) {
     console.error("verifyOTP Error:", err);
@@ -261,9 +223,7 @@ exports.login = async (req, res) => {
   try {
     // Validation
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
+      return res.status(400).json({ message: "Email and password are required" });
     }
 
     if (!validateEmail(email)) {
@@ -288,39 +248,34 @@ exports.login = async (req, res) => {
     // Check if account is locked
     if (user.lock_until && new Date(user.lock_until) > new Date()) {
       return res.status(429).json({
-        message:
-          "Account locked due to multiple failed attempts. Try again later.",
+        message: "Account locked due to multiple failed attempts. Try again later.",
       });
     }
 
     // Check if email is verified
     if (!user.verified) {
-      return res
-        .status(400)
-        .json({ message: "Please verify your email first." });
+      return res.status(400).json({ message: "Please verify your email first." });
     }
 
     // ✅ ONLY BLOCK REJECTED, SUSPENDED, AND INACTIVE USERS (ALLOW PENDING)
-    if (user.status === "rejected") {
+    if (user.status === 'rejected') {
       return res.status(403).json({
-        message:
-          "Your account has been rejected. Please contact support for more information.",
-        status: "rejected",
+        message: "Your account has been rejected. Please contact support for more information.",
+        status: 'rejected'
       });
     }
 
-    if (user.status === "suspended") {
+    if (user.status === 'suspended') {
       return res.status(403).json({
         message: "Your account has been suspended. Please contact support.",
-        status: "suspended",
+        status: 'suspended'
       });
     }
 
-    if (user.status === "inactive") {
+    if (user.status === 'inactive') {
       return res.status(403).json({
-        message:
-          "Your account is inactive. Please contact support to reactivate.",
-        status: "inactive",
+        message: "Your account is inactive. Please contact support to reactivate.",
+        status: 'inactive'
       });
     }
 
@@ -330,56 +285,50 @@ exports.login = async (req, res) => {
       // Increment failed login attempts
       const attempts = (user.login_attempts || 0) + 1;
       let lockUntil = null;
-
+      
       if (attempts >= MAX_ATTEMPTS) {
         lockUntil = new Date(Date.now() + LOCK_TIME_MS);
       }
-
+      
       // Update user with failed attempts
       await pool.query(
         "UPDATE users SET login_attempts=$1, lock_until=$2, updated_at=NOW() WHERE id=$3",
         [attempts, lockUntil, user.id]
       );
-
+      
       // ✅ Send failed login notification event
       try {
-        await axios.post(
-          `${NOTIFICATION_SERVICE_URL}/api/notifications/event`,
-          {
-            event_type: "user.login.failed",
-            user: {
-              id: user.id,
-              email: email.toLowerCase(),
-            },
-            ip_address: req.ip || req.connection.remoteAddress || "unknown",
-            device_info: req.get("user-agent") || "Unknown device",
-            attempt_number: attempts,
-          }
-        );
+        await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notifications/event`, {
+          event_type: 'user.login.failed',
+          user: {
+            id: user.id,
+            email: email.toLowerCase()
+          },
+          ip_address: req.ip || req.connection.remoteAddress || 'unknown',
+          device_info: req.get('user-agent') || 'Unknown device',
+          attempt_number: attempts
+        });
       } catch (notifError) {
-        console.error("Notification service error:", notifError.message);
+        console.error('Notification service error:', notifError.message);
       }
-
+      
       // ✅ Send account locked notification if max attempts reached
       if (lockUntil) {
         try {
-          await axios.post(
-            `${NOTIFICATION_SERVICE_URL}/api/notifications/event`,
-            {
-              event_type: "user.account.locked",
-              user: {
-                id: user.id,
-                email: email.toLowerCase(),
-              },
-              ip_address: req.ip || req.connection.remoteAddress || "unknown",
-              device_info: req.get("user-agent") || "Unknown device",
-            }
-          );
+          await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notifications/event`, {
+            event_type: 'user.account.locked',
+            user: {
+              id: user.id,
+              email: email.toLowerCase()
+            },
+            ip_address: req.ip || req.connection.remoteAddress || 'unknown',
+            device_info: req.get('user-agent') || 'Unknown device'
+          });
         } catch (notifError) {
-          console.error("Notification service error:", notifError.message);
+          console.error('Notification service error:', notifError.message);
         }
       }
-
+      
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
@@ -404,19 +353,20 @@ exports.login = async (req, res) => {
 
     // ✅ Send successful login notification event
     try {
-      await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notifications/event`, {
-        event_type: "user.login",
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role_name: user.role_name,
-        },
-        ip_address: req.ip || req.connection.remoteAddress || "unknown",
-        device_info: req.get("user-agent") || "Unknown device",
-      });
+    await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notifications/event`, {
+  event_type: 'user.login',
+  user: {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    role: user.role_name     // ✅ FIX
+  },
+  ip_address: req.ip || req.connection.remoteAddress || 'unknown',
+  device_info: req.get('user-agent') || 'Unknown device'
+});
+
     } catch (notifError) {
-      console.error("Notification service error:", notifError.message);
+      console.error('Notification service error:', notifError.message);
     }
 
     const safeUser = {
@@ -430,14 +380,10 @@ exports.login = async (req, res) => {
     };
 
     // ✅ Different messages based on status
-    // OLD: let message = "Login successful!";
-    // if (user.status === 'pending') {
-    //   message = "Login successful! Your account is pending admin approval.";
-    // } else if (user.status === 'active') {
-    //   message = "Welcome back!";
-    // }
     let message = "Login successful!";
-    if (user.status === "active") {
+    if (user.status === 'pending') {
+      message = "Login successful! Your account is pending admin approval.";
+    } else if (user.status === 'active') {
       message = "Welcome back!";
     }
 
