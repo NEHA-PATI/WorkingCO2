@@ -109,7 +109,7 @@ export default function Navbar() {
               alt="CarbonCredit Logo"
               className="user-logo-icon"
             />
-            <span className="user-logo-text">CarbonPositive</span>
+            <span className="user-logo-text">Carbon Positive</span>
           </div>
 
           {sidebarOpen && (
