@@ -18,6 +18,18 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
   const [otp, setOtp] = useState("");
   const [tempEmail, setTempEmail] = useState("");
 
+  // Responsive breakpoint check
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Handle responsive resize
+  useState(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Inline Styles
   const styles = {
     overlay: {
@@ -29,24 +41,26 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       background: "rgba(0, 0, 0, 0.5)",
       backdropFilter: "blur(4px)",
       display: "flex",
-      alignItems: "center",
+      alignItems: isMobile ? "flex-end" : "center",
       justifyContent: "center",
       zIndex: 999,
+      padding: isMobile ? "0" : "20px",
     },
     modal: {
       background: "#fff",
-      width: "600px",
-      maxWidth: "90vw",
-      maxHeight: "90vh",
+      width: isMobile ? "100%" : "600px",
+      maxWidth: isMobile ? "100%" : "90vw",
+      maxHeight: isMobile ? "95vh" : "90vh",
       overflowY: "auto",
-      borderRadius: "12px",
+      borderRadius: isMobile ? "20px 20px 0 0" : "12px",
       boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
       position: "relative",
+      animation: isMobile ? "slideUpMobile 0.3s ease-out" : "none",
     },
     closeBtn: {
       position: "absolute",
-      top: "24px",
-      right: "24px",
+      top: isMobile ? "16px" : "24px",
+      right: isMobile ? "16px" : "24px",
       background: "transparent",
       border: "none",
       color: "#666",
@@ -58,43 +72,45 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       alignItems: "center",
       justifyContent: "center",
       transition: "all 0.2s ease",
+      zIndex: 10,
     },
     content: {
-      padding: "48px 56px 56px",
+      padding: isMobile ? "56px 24px 32px" : "48px 56px 56px",
     },
     header: {
-      marginBottom: "8px",
+      marginBottom: isMobile ? "12px" : "8px",
     },
     title: {
-      fontSize: "42px",
+      fontSize: isMobile ? "32px" : "42px",
       fontWeight: "700",
       color: "#000",
       margin: "0 0 4px 0",
       lineHeight: "1.2",
     },
     subtitle: {
-      fontSize: "42px",
+      fontSize: isMobile ? "28px" : "42px",
       fontWeight: "300",
       color: "#000",
-      margin: "0 0 16px 0",
+      margin: "0 0 12px 0",
       lineHeight: "1.2",
     },
     description: {
-      fontSize: "16px",
+      fontSize: isMobile ? "14px" : "16px",
       color: "#666",
-      marginBottom: "32px",
+      marginBottom: isMobile ? "24px" : "32px",
+      lineHeight: "1.5",
     },
     formContainer: {
       display: "flex",
       flexDirection: "column",
-      gap: "16px",
+      gap: isMobile ? "14px" : "16px",
     },
     input: {
       width: "100%",
-      padding: "16px 18px",
+      padding: isMobile ? "14px 16px" : "16px 18px",
       border: "1px solid #d1d5db",
       borderRadius: "8px",
-      fontSize: "16px",
+      fontSize: isMobile ? "15px" : "16px",
       fontFamily: "inherit",
       transition: "all 0.2s ease",
       backgroundColor: "#fff",
@@ -118,7 +134,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       flexShrink: 0,
     },
     checkboxLabel: {
-      fontSize: "15px",
+      fontSize: isMobile ? "13px" : "15px",
       color: "#666",
       lineHeight: "1.5",
     },
@@ -129,10 +145,10 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     },
     button: {
       width: "100%",
-      padding: "16px",
+      padding: isMobile ? "14px" : "16px",
       border: "none",
       borderRadius: "8px",
-      fontSize: "16px",
+      fontSize: isMobile ? "15px" : "16px",
       fontWeight: "600",
       cursor: "pointer",
       transition: "all 0.3s ease",
@@ -151,7 +167,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       display: "flex",
       alignItems: "center",
       gap: "16px",
-      margin: "28px 0",
+      margin: isMobile ? "20px 0" : "28px 0",
     },
     dividerLine: {
       flex: 1,
@@ -164,30 +180,30 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     },
     socialButton: {
       width: "100%",
-      padding: "14px",
+      padding: isMobile ? "12px" : "14px",
       border: "1px solid #d1d5db",
       borderRadius: "8px",
-      fontSize: "16px",
+      fontSize: isMobile ? "14px" : "16px",
       fontWeight: "500",
       cursor: "pointer",
       transition: "all 0.2s ease",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      gap: "12px",
+      gap: isMobile ? "8px" : "12px",
       background: "#fff",
-      marginBottom: "12px",
+      marginBottom: isMobile ? "10px" : "12px",
     },
     socialRow: {
       display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: "12px",
-      marginTop: "12px",
+      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+      gap: isMobile ? "10px" : "12px",
+      marginTop: isMobile ? "10px" : "12px",
     },
     footer: {
       textAlign: "center",
-      marginTop: "32px",
-      fontSize: "16px",
+      marginTop: isMobile ? "24px" : "32px",
+      fontSize: isMobile ? "14px" : "16px",
       color: "#666",
     },
     footerLink: {
@@ -216,19 +232,19 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       textAlign: "center",
     },
     otpTitle: {
-      fontSize: "28px",
+      fontSize: isMobile ? "24px" : "28px",
       fontWeight: "700",
       marginBottom: "12px",
     },
     otpDescription: {
-      fontSize: "16px",
+      fontSize: isMobile ? "14px" : "16px",
       color: "#666",
       marginBottom: "24px",
     },
     otpInput: {
       textAlign: "center",
-      fontSize: "24px",
-      letterSpacing: "8px",
+      fontSize: isMobile ? "20px" : "24px",
+      letterSpacing: isMobile ? "6px" : "8px",
       fontWeight: "600",
     },
     infoBox: {
@@ -445,6 +461,16 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+        @keyframes slideUpMobile {
+          from {
+            transform: translateY(100%);
+            opacity: 0.8;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
         }
       `}</style>
       <div style={styles.overlay} onClick={onClose}>

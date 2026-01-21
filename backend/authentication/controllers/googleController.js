@@ -1,18 +1,29 @@
-const googleAuth = require("../auth/google.strategy");
+const googleAuth = require("../auth_provider/google.strategy");
 const oauthService = require("../services/oauth.service");
 
 exports.googleLogin = (req, res) => {
-  res.redirect(googleAuth.getGoogleAuthURL());
+  const url = googleAuth.getGoogleAuthURL();
+  res.redirect(url);
 };
 
 exports.googleCallback = async (req, res) => {
   try {
-    const profile = await googleAuth.getGoogleProfile(req.query.code);
-    const tokens = await oauthService.handleOAuthLogin("google", profile);
+    const { code } = req.query;
 
-    res.json({ success: true, tokens });
+    const profile = await googleAuth.getGoogleProfile(code);
+    const { token, user } = await oauthService.handleOAuthLogin(
+      "google",
+      profile
+    );
+
+    // redirect to frontend with token
+    res.redirect(
+      `${process.env.FRONTEND_URL}/oauth-success?token=${token}`
+    );
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "OAuth failed" });
+    console.error("GOOGLE OAUTH ERROR:", err);
+    res.redirect(
+      `${process.env.FRONTEND_URL}/login?error=google_auth_failed`
+    );
   }
 };

@@ -1,134 +1,646 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "../styles/user/Login.css";
+import { useState } from "react";
 import { RxCross1 } from "react-icons/rx";
-import { FcGoogle } from "react-icons/fc";
-import DigiLockerLogo from "../assets/digilocker.png";
+import { FaGoogle, FaLinkedin, FaGithub } from "react-icons/fa";
 
-const Login = ({ onClose, onSwitchToSignup }) => {
+const Login = ({ onLogin, onClose, onSwitchToSignup, navigate }) => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
-  const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    rememberMe: false,
+  });
+
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  // Responsive breakpoint
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-    if (!email || !password) {
-      setError("Email and password required");
-      return;
+  useState(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Inline Styles
+  const styles = {
+    overlay: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: "rgba(0, 0, 0, 0.5)",
+      backdropFilter: "blur(4px)",
+      display: "flex",
+      alignItems: isMobile ? "flex-end" : "center",
+      justifyContent: "center",
+      zIndex: 999,
+      padding: isMobile ? "0" : "20px",
+    },
+    modal: {
+      background: "#fff",
+      width: isMobile ? "100%" : "600px",
+      maxWidth: isMobile ? "100%" : "90vw",
+      maxHeight: isMobile ? "95vh" : "90vh",
+      overflowY: "auto",
+      borderRadius: isMobile ? "20px 20px 0 0" : "12px",
+      boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
+      position: "relative",
+      animation: isMobile ? "slideUpMobile 0.3s ease-out" : "none",
+    },
+    closeBtn: {
+      position: "absolute",
+      top: isMobile ? "16px" : "24px",
+      right: isMobile ? "16px" : "24px",
+      background: "transparent",
+      border: "none",
+      color: "#666",
+      cursor: "pointer",
+      width: "32px",
+      height: "32px",
+      borderRadius: "50%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      transition: "all 0.2s ease",
+      zIndex: 10,
+    },
+    content: {
+      padding: isMobile ? "56px 24px 32px" : "48px 56px 56px",
+    },
+    header: {
+      marginBottom: isMobile ? "12px" : "16px",
+    },
+    title: {
+      fontSize: isMobile ? "32px" : "42px",
+      fontWeight: "700",
+      color: "#000",
+      margin: "0 0 4px 0",
+      lineHeight: "1.2",
+    },
+    subtitle: {
+      fontSize: isMobile ? "28px" : "42px",
+      fontWeight: "300",
+      color: "#000",
+      margin: "0 0 12px 0",
+      lineHeight: "1.2",
+    },
+    description: {
+      fontSize: isMobile ? "14px" : "16px",
+      color: "#666",
+      marginBottom: isMobile ? "24px" : "32px",
+      lineHeight: "1.5",
+    },
+    formContainer: {
+      display: "flex",
+      flexDirection: "column",
+      gap: isMobile ? "14px" : "16px",
+    },
+    input: {
+      width: "100%",
+      padding: isMobile ? "14px 16px" : "16px 18px",
+      border: "1px solid #d1d5db",
+      borderRadius: "8px",
+      fontSize: isMobile ? "15px" : "16px",
+      fontFamily: "inherit",
+      transition: "all 0.2s ease",
+      backgroundColor: "#fff",
+      boxSizing: "border-box",
+    },
+    inputError: {
+      borderColor: "#dc2626",
+      backgroundColor: "#fef2f2",
+    },
+    errorText: {
+      color: "#dc2626",
+      fontSize: "14px",
+      marginTop: "6px",
+      display: "block",
+    },
+    rememberRow: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: "4px",
+      marginBottom: "4px",
+    },
+    checkboxContainer: {
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+    },
+    checkbox: {
+      width: "18px",
+      height: "18px",
+      cursor: "pointer",
+    },
+    checkboxLabel: {
+      fontSize: isMobile ? "13px" : "14px",
+      color: "#666",
+      cursor: "pointer",
+    },
+    forgotLink: {
+      fontSize: isMobile ? "13px" : "14px",
+      color: "#5469d4",
+      textDecoration: "none",
+      cursor: "pointer",
+      fontWeight: "500",
+    },
+    button: {
+      width: "100%",
+      padding: isMobile ? "14px" : "16px",
+      border: "none",
+      borderRadius: "8px",
+      fontSize: isMobile ? "15px" : "16px",
+      fontWeight: "600",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+      marginTop: "8px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "8px",
+    },
+    primaryButton: {
+      background: "#b8b4d0",
+      color: "#fff",
+    },
+    primaryButtonDisabled: {
+      background: "#e5e3ef",
+      cursor: "not-allowed",
+      opacity: 0.7,
+    },
+    divider: {
+      display: "flex",
+      alignItems: "center",
+      gap: "16px",
+      margin: isMobile ? "20px 0" : "28px 0",
+    },
+    dividerLine: {
+      flex: 1,
+      height: "1px",
+      background: "#e0e0e0",
+    },
+    dividerText: {
+      color: "#999",
+      fontSize: "14px",
+    },
+    socialButton: {
+      width: "100%",
+      padding: isMobile ? "12px" : "14px",
+      border: "1px solid #d1d5db",
+      borderRadius: "8px",
+      fontSize: isMobile ? "14px" : "16px",
+      fontWeight: "500",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: isMobile ? "8px" : "12px",
+      background: "#fff",
+      marginBottom: isMobile ? "10px" : "12px",
+    },
+    socialRow: {
+      display: "grid",
+      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+      gap: isMobile ? "10px" : "12px",
+      marginTop: isMobile ? "10px" : "12px",
+    },
+    footer: {
+      textAlign: "center",
+      marginTop: isMobile ? "24px" : "32px",
+      fontSize: isMobile ? "14px" : "16px",
+      color: "#666",
+    },
+    footerLink: {
+      color: "#5469d4",
+      textDecoration: "none",
+      cursor: "pointer",
+      fontWeight: "500",
+    },
+    spinner: {
+      width: "16px",
+      height: "16px",
+      border: "2px solid rgba(255, 255, 255, 0.3)",
+      borderTopColor: "white",
+      borderRadius: "50%",
+      animation: "spin 0.8s linear infinite",
+      display: "inline-block",
+    },
+    errorBanner: {
+      background: "#fef2f2",
+      border: "1px solid #fecaca",
+      borderRadius: "8px",
+      padding: "12px 16px",
+      marginTop: "8px",
+      marginBottom: "8px",
+    },
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
     }
 
+    if (errors.general) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.general;
+        return newErrors;
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.email) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Invalid email format";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
     setLoading(true);
+    setErrors({});
+
     try {
-      const res = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email.toLowerCase().trim(),
+          password: formData.password,
+        }),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.message || "Login failed");
+      const data = await response.json();
+      console.log("🟢 Login API Response:", data);
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          setErrors({
+            general:
+              "Account locked due to multiple failed attempts. Try again later.",
+          });
+        } else if (response.status === 403) {
+          setErrors({ general: data.message || "Access denied" });
+        } else if (response.status === 400) {
+          setErrors({ general: data.message || "Invalid email or password" });
+        } else if (response.status === 500) {
+          setErrors({ general: "Server error. Please try again later." });
+        } else {
+          setErrors({
+            general: data.message || "Login failed. Please try again.",
+          });
+        }
+        return;
+      }
+
+      if (!data.user || !data.token) {
+        setErrors({ general: "Login failed. Missing token or user data." });
+        return;
+      }
+
+      if (!data.user.verified) {
+        setErrors({ general: "Please verify your email first." });
         return;
       }
 
       localStorage.setItem("authToken", data.token);
       localStorage.setItem("authUser", JSON.stringify(data.user));
 
+      if (onLogin) onLogin(data.user);
       if (onClose) onClose();
-      navigate("/");
-    } catch {
-      setError("Server error");
+
+      const status = data.user.status;
+
+      if (status !== "active") {
+        setErrors({
+          general: `Account status: ${status}. Please contact support.`,
+        });
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("authUser");
+        return;
+      }
+
+      const role = data.user.role_name?.toUpperCase() || data.user.role?.toUpperCase();
+
+      // Call navigate prop if provided
+      if (navigate) {
+        switch (role) {
+          case "USER":
+            navigate("/user/dashboard", { replace: true });
+            break;
+          case "ORGANIZATION":
+            navigate("/org/dashboard", { replace: true });
+            break;
+          case "ADMIN":
+            navigate("/admin/dashboard", { replace: true });
+            break;
+          default:
+            console.warn("Unknown role:", role);
+            navigate("/", { replace: true });
+        }
+      }
+    } catch (err) {
+      console.error("❌ Login Error:", err);
+
+      if (err.name === "TypeError" && err.message.includes("fetch")) {
+        setErrors({
+          general: "Cannot connect to server. Please check your connection.",
+        });
+      } else if (err.name === "SyntaxError") {
+        setErrors({
+          general: "Invalid response from server. Please try again.",
+        });
+      } else {
+        setErrors({
+          general: "An unexpected error occurred. Please try again later.",
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSocialLogin = (provider) => {
+  if (provider === "Google") {
+    window.location.href = `${API_URL}/api/auth/oauth/google/login`;
+  }
+};
+
   const handleForgotPassword = () => {
-    if (onClose) onClose();
+  if (navigate) {
     navigate("/forgot-password");
-  };
-
-  // 🔥 GOOGLE OAUTH
-  const handleGoogleLogin = () => {
-    window.location.href = `${API_URL}/api/auth/google`;
-  };
-
-  // 🔥 DIGILOCKER OAUTH
-  const handleDigiLockerLogin = () => {
-    window.location.href = `${API_URL}/api/auth/digilocker`;
-  };
+  } else {
+    window.location.href = "/forgot-password";
+  }
+};
 
   return (
-    <div className="modal-overlay">
-      <div className="auth-card">
-        <button className="close-btn" onClick={onClose}>
-          <RxCross1 size={20} />
-        </button>
-
-        <h2 className="auth-title">Welcome Back</h2>
-        <p className="auth-subtitle">Sign in to your account</p>
-
-        <form onSubmit={handleLogin} className="auth-form">
-          <input
-            type="email"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <input
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
+    <>
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        @keyframes slideUpMobile {
+          from {
+            transform: translateY(100%);
+            opacity: 0.8;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
+      <div style={styles.overlay} onClick={onClose}>
+        <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
           <button
-            type="button"
-            className="forgot-link"
-            onClick={handleForgotPassword}
+            style={styles.closeBtn}
+            onClick={onClose}
+            disabled={loading}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#f5f5f5";
+              e.currentTarget.style.transform = "rotate(90deg)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.transform = "rotate(0deg)";
+            }}
           >
-            Forgot password?
+            <RxCross1 size={20} />
           </button>
 
-          {error && <div className="error-banner">{error}</div>}
+          <div style={styles.content}>
+            <div style={styles.header}>
+              <h1 style={styles.title}>Welcome back!</h1>
+              <h2 style={styles.subtitle}>Login to your account</h2>
+            </div>
+            <p style={styles.description}>
+              It's nice to see you again. Ready to code?
+            </p>
 
-          <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
-        </form>
+            <div style={styles.formContainer}>
+              <div>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Your username or email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  style={{
+                    ...styles.input,
+                    ...(errors.email ? styles.inputError : {}),
+                  }}
+                  disabled={loading}
+                  autoComplete="email"
+                  onFocus={(e) => {
+                    e.target.style.borderColor = "#5469d4";
+                  }}
+                  onBlur={(e) => {
+                    if (!errors.email) e.target.style.borderColor = "#d1d5db";
+                  }}
+                />
+                {errors.email && (
+                  <span style={styles.errorText}>{errors.email}</span>
+                )}
+              </div>
 
-        <div className="divider">
-          <span>or</span>
-        </div>
+              <div>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Your password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  style={{
+                    ...styles.input,
+                    ...(errors.password ? styles.inputError : {}),
+                  }}
+                  disabled={loading}
+                  autoComplete="current-password"
+                  onFocus={(e) => {
+                    e.target.style.borderColor = "#5469d4";
+                  }}
+                  onBlur={(e) => {
+                    if (!errors.password) e.target.style.borderColor = "#d1d5db";
+                  }}
+                />
+                {errors.password && (
+                  <span style={styles.errorText}>{errors.password}</span>
+                )}
+              </div>
 
-        <div className="social-buttons">
-          <button className="social-btn" onClick={handleGoogleLogin}>
-            <FcGoogle size={20} />
-            Continue with Google
-          </button>
+              {errors.general && (
+                <div style={styles.errorBanner}>
+                  <span style={styles.errorText}>{errors.general}</span>
+                </div>
+              )}
 
-          <button className="social-btn" onClick={handleDigiLockerLogin}>
-            <img
-              src={DigiLockerLogo}
-              className="social-icon"
-              alt="DigiLocker"
-            />
-            Continue with DigiLocker
-          </button>
-        </div>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                style={{
+                  ...styles.button,
+                  ...styles.primaryButton,
+                  ...(loading ? styles.primaryButtonDisabled : {}),
+                }}
+                disabled={loading}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.background = "#a8a3c7";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.background = "#b8b4d0";
+                  }
+                }}
+              >
+                {loading ? (
+                  <>
+                    <span style={styles.spinner}></span>
+                    Signing In...
+                  </>
+                ) : (
+                  "Log In"
+                )}
+              </button>
 
-        <div className="auth-footer">
-          <span>Don’t have an account?</span>
-          <button onClick={onSwitchToSignup}>Sign Up</button>
+              <div style={styles.rememberRow}>
+                <div style={styles.checkboxContainer}>
+                  <input
+                    type="checkbox"
+                    name="rememberMe"
+                    checked={formData.rememberMe}
+                    onChange={handleChange}
+                    style={styles.checkbox}
+                    disabled={loading}
+                  />
+                  <label style={styles.checkboxLabel}>Remember me</label>
+                </div>
+                <a
+                  style={styles.forgotLink}
+                  onClick={handleForgotPassword}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.textDecoration = "underline";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.textDecoration = "none";
+                  }}
+                >
+                  Forgot password?
+                </a>
+              </div>
+            </div>
+
+            <div style={styles.divider}>
+              <div style={styles.dividerLine}></div>
+              <span style={styles.dividerText}>or</span>
+              <div style={styles.dividerLine}></div>
+            </div>
+
+            <button
+              style={styles.socialButton}
+              onClick={() => handleSocialLogin("Google")}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "#9ca3af";
+                e.currentTarget.style.backgroundColor = "#f9fafb";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "#d1d5db";
+                e.currentTarget.style.backgroundColor = "#fff";
+              }}
+            >
+              <FaGoogle size={20} color="#4285F4" />
+              Continue with Google
+            </button>
+
+            <div style={styles.socialRow}>
+              {/* <button
+                style={styles.socialButton}
+                onClick={() => handleSocialLogin("LinkedIn")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "#9ca3af";
+                  e.currentTarget.style.backgroundColor = "#f9fafb";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#d1d5db";
+                  e.currentTarget.style.backgroundColor = "#fff";
+                }}
+              >
+                <FaLinkedin size={20} color="#0A66C2" />
+                LinkedIn
+              </button>
+              <button
+                style={styles.socialButton}
+                onClick={() => handleSocialLogin("GitHub")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "#9ca3af";
+                  e.currentTarget.style.backgroundColor = "#f9fafb";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#d1d5db";
+                  e.currentTarget.style.backgroundColor = "#fff";
+                }}
+              >
+                <FaGithub size={20} color="#000" />
+                GitHub
+              </button> */}
+            </div>
+
+            <div style={styles.footer}>
+              Don't have an account?{" "}
+              <a
+                style={styles.footerLink}
+                onClick={onSwitchToSignup}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.textDecoration = "underline";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.textDecoration = "none";
+                }}
+              >
+                Sign up
+              </a>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
