@@ -67,7 +67,7 @@ export default function RegisterForm() {
     city: ''
   });
 
-  const [step, setStep] = useState('form');
+  
   const [emailVerified, setEmailVerified] = useState(false);
   const [showOTP, setShowOTP] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
