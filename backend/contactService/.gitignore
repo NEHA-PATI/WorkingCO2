@@ -4,7 +4,7 @@ node_modules/
 # Build and cache folders
 dist/
 build/
-.cache/
+.cache
 .vite/
 .next/
 out/

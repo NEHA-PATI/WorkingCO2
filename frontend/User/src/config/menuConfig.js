@@ -26,7 +26,7 @@ export const USER_ORG_MENU = {
     { label: "Careers", path: "/careers", icon: FaBriefcase, color: "#6f42c1" },
     { label: "About Us", path: "/about", icon: FaInfoCircle, color: "#fd7e14" },
     { label: "Contact Us", path: "/contact", icon: FaEnvelope, color: "#20c997" },
-    // { label: "Sign Up", path: "/signup", icon: FaUserPlus, color: "#ffc107" },
+   // { label: "Sign Up", path: "/signup", icon: FaUserPlus, color: "#ffc107" },
   ],
 
   user: [

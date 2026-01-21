@@ -24,6 +24,8 @@ const features = [
 ];
 
 const Home = () => {
+  const navigate = navigate();
+
   return (
     <>
       <div className="home-hero-section">
@@ -50,10 +52,12 @@ const Home = () => {
 
               {/* ORGANISATION CTA */}
               <div className="home-organisation-cta">
-                <button className="org-btn"  >
+                <button
+                  className="org-btn"
+                  onClick={() => navigate("/join-organisation")}
+                >
                   JOIN AS ORGANISATION
                 </button>
-                
               </div>
             </div>
 
