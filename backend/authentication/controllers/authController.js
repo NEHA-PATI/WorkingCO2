@@ -184,90 +184,49 @@ function validateUsername(name) {
 
 // ✅ REGISTER USER + SEND OTP
 exports.register = async (req, res) => {
-  const { username, email, password, role } = req.body;
+  const { username, email, password } = req.body;
 
   try {
-    // Basic validation
     if (!validateUsername(username)) {
-      return res.status(400).json({ message: "Username must be 2–50 characters." });
+      return res.status(400).json({ message: "Invalid username" });
     }
     if (!validateEmail(email)) {
-      return res.status(400).json({ message: "Invalid email format." });
+      return res.status(400).json({ message: "Invalid email" });
     }
     if (!validatePassword(password)) {
-      return res.status(400).json({
-        message:
-          "Password must be 8+ chars and include uppercase, lowercase, number, and special character.",
-      });
+      return res.status(400).json({ message: "Weak password" });
     }
 
-    // ✅ Check if user exists
-    const userCheck = await pool.query(
+    // Check already exists
+    const exists = await pool.query(
       "SELECT id FROM users WHERE email=$1",
       [email.toLowerCase()]
     );
-    if (userCheck.rows.length > 0) {
+    if (exists.rows.length > 0) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const hashed = await bcrypt.hash(password, 12);
-
-    // Find role
-   const roleId = 1; // ✅ default USER role
-
-
-    // Generate OTP
+    const passwordHash = await bcrypt.hash(password, 12);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // ✅ Create user with 'active' status by default
-    const userRes = await pool.query(
-      `INSERT INTO users (username, email, password, role_id, otp_code, otp_expires_at, verified, login_attempts, lock_until, status, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, false, 0, NULL, 'active', NOW(), NOW())
-       RETURNING id, username, email, status`,
-      [username.trim(), email.toLowerCase(), hashed, roleId, otp, expiresAt]
+    // 🔐 TEMP JWT (NO DB)
+    const tempToken = jwt.sign(
+      {
+        username: username.trim(),
+        email: email.toLowerCase(),
+        passwordHash,
+        roleId: 1,
+        otp,
+      },
+      process.env.JWT_OTP_SECRET,
+      { expiresIn: "10m" }
     );
 
-    const userId = userRes.rows[0].id;
-    const u_id = generateUID("USR", userId);
-    
-    // Update with generated u_id
-    await pool.query("UPDATE users SET u_id=$1 WHERE id=$2", [u_id, userId]);
+    await sendOTP(email, otp);
 
-    // Send OTP
-    try {
-      await sendOTP(email, otp);
-    } catch (mailErr) {
-      console.error("Send OTP Error:", mailErr);
-      await pool.query("DELETE FROM users WHERE id=$1", [userId]);
-      return res.status(500).json({
-        message: "Failed to send OTP. Check email configuration.",
-      });
-    }
-
-    // ✅ Send signup notification event to notification service
-    try {
-    await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notifications/event`, {
-  event_type: 'user.signup',
-  user: {
-    id: userId,
-    username: username,
-    email: email.toLowerCase(),
-    role: 'USER'   // ✅ FIXED
-  },
-  ip_address: req.ip || req.connection.remoteAddress || 'unknown',
-  device_info: req.get('user-agent') || 'Unknown device'
-});
-
-    } catch (notifError) {
-      console.error('Notification service error:', notifError.message);
-      // Don't fail the signup if notification fails
-    }
-
-    res.status(201).json({ 
-      message: "Registration successful! Please check your email to verify your account.", 
-      email,
-      note: "After email verification, your account will be pending admin approval."
+    return res.status(200).json({
+      message: "OTP sent to your email",
+      tempToken, // 🔥 frontend must keep this
     });
   } catch (err) {
     console.error("Register Error:", err);
@@ -275,104 +234,61 @@ exports.register = async (req, res) => {
   }
 };
 
+
 // ✅ VERIFY OTP
 exports.verifyOTP = async (req, res) => {
-  const { email, otp } = req.body;
+  const { otp, tempToken } = req.body;
 
   try {
-    // Validation
-    if (!email || !otp) {
-      return res.status(400).json({ message: "Email and OTP are required" });
+    if (!otp || !tempToken) {
+      return res.status(400).json({ message: "OTP and token required" });
     }
 
-    if (!validateEmail(email)) {
-      return res.status(400).json({ message: "Invalid email format" });
-    }
-
-    if (otp.length !== 6 || !/^\d+$/.test(otp)) {
-      return res.status(400).json({ message: "OTP must be 6 digits" });
-    }
-
-    // Fetch user with role
-    const result = await pool.query(
-      `SELECT u.*, r.role_name 
-       FROM users u 
-       LEFT JOIN roles r ON u.role_id = r.id 
-       WHERE u.email=$1`,
-      [email.toLowerCase()]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const user = result.rows[0];
-
-    // Check if already verified
-    if (user.verified) {
-      return res.status(400).json({ message: "Email already verified" });
-    }
-
-    // Check OTP
-    const now = new Date();
-    const expiresAt = user.otp_expires_at ? new Date(user.otp_expires_at) : null;
-
-    if (!user.otp_code) {
-      return res.status(400).json({ message: "No OTP found. Please register again." });
-    }
-
-    if (user.otp_code !== otp) {
-      return res.status(400).json({ message: "Invalid OTP" });
-    }
-
-    if (!expiresAt || now > expiresAt) {
+    let payload;
+    try {
+      payload = jwt.verify(tempToken, process.env.JWT_OTP_SECRET);
+    } catch {
       return res.status(400).json({ message: "OTP expired. Please register again." });
     }
 
-    // Update user as verified
-    await pool.query(
-      "UPDATE users SET verified=true, otp_code=NULL, otp_expires_at=NULL, updated_at=NOW() WHERE email=$1",
-      [email.toLowerCase()]
-    );
-
-    // ✅ Send email verified notification event
-    try {
-      await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notifications/event`, {
-  event_type: 'user.email.verified',
-  user: {
-    id: user.id,
-    username: user.username,
-    email: user.email,
-    role: user.role_name   // 🔥 ensure this
-  },
-  ip_address: req.ip || req.connection.remoteAddress || 'unknown',
-  device_info: req.get('user-agent') || 'Unknown device'
-});
-
-    } catch (notifError) {
-      console.error('Notification service error:', notifError.message);
+    if (payload.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
     }
 
-    const safeUser = {
-      id: user.id,
-      u_id: user.u_id,
-      username: user.username,
-      email: user.email,
-      role_name: user.role_name,
-      verified: true,
-      status: user.status || 'pending',
-    };
+    // 🔥 FIRST TIME DB INSERT
+    const userRes = await pool.query(
+      `INSERT INTO users
+       (username, email, password, role_id, verified, status, created_at, updated_at)
+       VALUES ($1,$2,$3,$4,true,'active',NOW(),NOW())
+       RETURNING id`,
+      [
+        payload.username,
+        payload.email,
+        payload.passwordHash,
+        payload.roleId,
+      ]
+    );
 
-    res.status(200).json({ 
-      message: "Email verified successfully! You can now login. Your account is pending admin approval.", 
-      user: safeUser,
-      note: "You can login, but will have limited access until admin approves your account."
+    const userId = userRes.rows[0].id;
+    const u_id = generateUID("USR", userId);
+    await pool.query("UPDATE users SET u_id=$1 WHERE id=$2", [u_id, userId]);
+
+    return res.status(201).json({
+      message: "Email verified successfully. Account created.",
+      user: {
+        id: userId,
+        u_id,
+        email: payload.email,
+        verified: true,
+        status: "pending",
+      },
     });
   } catch (err) {
     console.error("verifyOTP Error:", err);
     res.status(500).json({ message: "OTP verification failed" });
   }
 };
+
 
 // ✅ LOGIN USER (ALLOWS PENDING USERS)
 exports.login = async (req, res) => {
@@ -555,3 +471,44 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Login failed" });
   }
 };
+
+// ✅ RESEND OTP
+exports.resendOTP = async (req, res) => {
+  const { tempToken } = req.body;
+
+  try {
+    let payload;
+    try {
+      payload = jwt.verify(tempToken, process.env.JWT_OTP_SECRET);
+    } catch {
+      return res.status(400).json({
+        message: "Session expired. Please register again.",
+      });
+    }
+
+    const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const newTempToken = jwt.sign(
+      {
+        username: payload.username,
+        email: payload.email,
+        passwordHash: payload.passwordHash,
+        roleId: payload.roleId,
+        otp: newOtp,
+      },
+      process.env.JWT_OTP_SECRET,
+      { expiresIn: "10m" }
+    );
+
+    await sendOTP(payload.email, newOtp);
+
+    return res.status(200).json({
+      message: "OTP resent successfully",
+      tempToken: newTempToken, // 🔥 MUST replace old one on frontend
+    });
+  } catch (err) {
+    console.error("Resend OTP Error:", err);
+    res.status(500).json({ message: "Failed to resend OTP" });
+  }
+};
+

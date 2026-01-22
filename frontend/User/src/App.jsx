@@ -86,6 +86,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+<Route path="/oauth-success" element={<OAuthSuccess />} />
 
           <Route
             path="/view-assets"
@@ -113,15 +114,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-          <Route
-  path="/user/dashboard"
-  element={
-    <ProtectedRoute requiredRole="user">
-      <UserDashboard />
-    </ProtectedRoute>
-  }
-/>
 
           {/* ================= USER DASHBOARD ROUTES ================= */}
           <Route

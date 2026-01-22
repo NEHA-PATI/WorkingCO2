@@ -26,7 +26,8 @@ import "../../styles/user/userNavbar.css";
  */
 export default function Navbar() {
   const navigate = useNavigate();
-  const { user, role, isAuthenticated, logout } = useAuth();
+  const { user, role, isAuthenticated, authLoading, logout } = useAuth();
+
   const { openLogin, openSignup } = useModal();
 
   /* ================= STATE ================= */
@@ -51,8 +52,8 @@ export default function Navbar() {
     if (user?.email) return user.email.split("@")[0];
     return "User";
   };
-
   const getDashboardRoute = () => {
+    if (!role) return "/user/dashboard";
     if (role === "admin") return "/admin/dashboard";
     if (role === "organization") return "/org/dashboard";
     return "/user/dashboard";
@@ -92,6 +93,7 @@ export default function Navbar() {
   }, []);
 
   /* ================= RENDER ================= */
+  if (authLoading) return null;
 
   return (
     <>
@@ -103,7 +105,11 @@ export default function Navbar() {
             onClick={() => setSidebarOpen((s) => !s)}
           />
 
-          <div className="user-logo">
+          <div
+            className="user-logo"
+            onClick={() => navigate("/")}
+            style={{ cursor: "pointer" }}
+          >
             <img
               src="/GoCarbonPositive_LOGO.svg"
               alt="CarbonCredit Logo"
@@ -136,7 +142,6 @@ export default function Navbar() {
                 className="wallet-icon"
                 style={{ color: "#f59e0b", fontSize: "2rem" }}
               />
-            
             </div>
           </div>
         )}
@@ -203,7 +208,7 @@ export default function Navbar() {
                           {getDisplayName()}
                         </div>
                         <div className="user-profile-dropdown-email">
-                          {user?.email || "user@example.com"}
+                          {user?.email || ""}
                         </div>
                       </div>
 

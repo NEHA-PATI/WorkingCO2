@@ -3,13 +3,15 @@ const passwordService = require("../services/password.service");
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
 
-  if (!email) return res.status(400).json({ message: "Email required" });
+  if (!email) {
+    return res.status(400).json({ message: "Email required" });
+  }
 
   try {
     await passwordService.forgotPassword(email);
     res.json({ message: "If the email exists, reset link sent." });
   } catch (err) {
-    console.error("FORGOT PASSWORD:", err);
+    console.error("FORGOT PASSWORD ERROR:", err);
     res.status(500).json({ message: "Failed to process request" });
   }
 };

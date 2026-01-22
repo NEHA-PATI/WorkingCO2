@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { FaGoogle, FaLinkedin, FaGithub } from "react-icons/fa";
 import LoadingPopup from "../components/user/LoadingPopup";
-import { useEffect } from "react";
+import useAuth from "../auth/useAuth";
+import { useNavigate } from "react-router-dom";
 
 
 const Signup = ({ onClose, onSwitchToLogin }) => {
@@ -23,6 +24,10 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
   const [otpDigits, setOtpDigits] = useState(Array(6).fill(""));
   const [otpTimer, setOtpTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
+const { login } = useAuth();
+const navigate = useNavigate();
+const [tempToken, setTempToken] = useState("");
+
 
   // Responsive breakpoint check
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -378,6 +383,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       }
 
       setTempEmail(formData.email.toLowerCase().trim());
+      setTempToken(data.tempToken);
       setShowOTP(true);
       setError({
         success: "OTP sent! Check your email.",
@@ -392,53 +398,48 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     }
   };
 
-  const handleVerifyOtp = async () => {
-   if (otp.length !== 6) {
-  setError({ general: "Please enter a valid 6-digit OTP" });
-  return;
-}
+const handleVerifyOtp = async () => {
+  if (!otp.trim() || otp.trim().length !== 6) {
+    setError({ general: "Please enter a valid 6-digit OTP" });
+    return;
+  }
 
-    setLoading(true);
-    setError({});
+  setLoading(true);
+  setError({});
 
-    try {
-      const response = await fetch(`${API_URL}/api/auth/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: tempEmail,
-          otp: otp.trim(),
-        }),
-      });
+  try {
+    const response = await fetch(`${API_URL}/api/auth/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        otp: otp.trim(),
+        tempToken, // 🔥 ONLY THESE TWO
+      }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        setError({ general: data.message || "OTP verification failed" });
-        return;
-      }
-
-      localStorage.setItem("authUser", JSON.stringify(data.user));
-      if (data.token) {
-        localStorage.setItem("authToken", data.token);
-      }
-
-      if (onClose) onClose();
-
-      alert(
-        "✅ Email verified successfully!\n\nYour account is now active.\nPlease login to continue.",
-      );
-
-      if (onSwitchToLogin) {
-        onSwitchToLogin();
-      }
-    } catch (err) {
-      console.error("OTP Verification Error:", err);
-      setError({ general: "OTP verification failed. Please try again." });
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      setError({ general: data.message || "OTP verification failed" });
+      return;
     }
-  };
+
+    alert("✅ Email verified successfully!");
+
+    // 👉 User ko login page pe bhejo (BEST PRACTICE)
+    if (onClose) onClose();
+    navigate("/login", { replace: true });
+
+  } catch (err) {
+    console.error("OTP Verification Error:", err);
+    setError({ general: "OTP verification failed. Please try again." });
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
 
   const handleOtpDigitChange = (index, value) => {
     if (!/^\d?$/.test(value)) return;
@@ -463,38 +464,40 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
 
 
   const handleResendOtp = async () => {
-    setLoading(true);
-    setError({});
+  setLoading(true);
+  setError({});
 
-    try {
-      const response = await fetch(`${API_URL}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.fullName.trim(),
-          email: tempEmail,
-          password: formData.password,
-        }),
-      });
+  try {
+    const response = await fetch(`${API_URL}/api/auth/resend-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tempToken, // 🔥 ONLY THIS
+      }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        setError({ general: data.message || "Failed to resend OTP" });
-        return;
-      }
-
-      setError({ success: "OTP resent successfully! Check your email." });
-      // eslint-disable-next-line no-unused-vars
-    } catch (err) {
-      setError({ general: "Failed to resend OTP. Please try again." });
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      setError({ general: data.message || "Failed to resend OTP" });
+      return;
     }
-  };
+
+    // 🔥 VERY IMPORTANT — replace old token
+    setTempToken(data.tempToken);
+
+    setError({ success: "OTP resent successfully! Check your email." });
+  } catch (err) {
+    console.error("Resend OTP Error:", err);
+    setError({ general: "Failed to resend OTP. Please try again." });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSocialLogin = (provider) => {
-    alert(`${provider} login - Integration pending`);
+    window.location.href = `${API_URL}/api/auth/oauth/google/login`;
+
   };
 
   return (
