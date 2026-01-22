@@ -49,12 +49,12 @@ const navigate = useNavigate();
     },
     modal: {
       background: "#fff",
-      width: isMobile ? "100%" : "600px",
-      maxWidth: isMobile ? "100%" : "90vw",
-      maxHeight: isMobile ? "95vh" : "90vh",
+      width: isMobile ? "100%" : "460px",
+      maxWidth: isMobile ? "92vh" : "90vw",
+      maxHeight: isMobile ? "90vh" : "90vh",
       overflowY: "auto",
-      borderRadius: isMobile ? "20px 20px 0 0" : "12px",
-      boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
+      borderRadius: isMobile ? "20px 20px 0 0" : "14px",
+      boxShadow: "0 20px 60px rgba(0, 0, 0, 0.25)",
       position: "relative",
       animation: isMobile ? "slideUpMobile 0.3s ease-out" : "none",
     },
@@ -76,29 +76,31 @@ const navigate = useNavigate();
       zIndex: 10,
     },
     content: {
-      padding: isMobile ? "56px 24px 32px" : "48px 56px 56px",
+      padding: isMobile ? "40px 20px 28px" : "36px 32px 32px",
     },
     header: {
       marginBottom: isMobile ? "12px" : "16px",
     },
     title: {
-      fontSize: isMobile ? "32px" : "42px",
+      fontSize: isMobile ? "24px" : "30px",
       fontWeight: "700",
-      color: "#000",
-      margin: "0 0 4px 0",
+      background: "linear-gradient(135deg, #16a34a, #22c55e)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+      margin: "0 0 2px 0",
       lineHeight: "1.2",
     },
     subtitle: {
-      fontSize: isMobile ? "28px" : "42px",
-      fontWeight: "300",
-      color: "#000",
-      margin: "0 0 12px 0",
+      fontSize: isMobile ? "18px" : "22px",
+      fontWeight: "400",
+      color: "#111",
+      margin: "0 0 10px 0",
       lineHeight: "1.2",
     },
     description: {
-      fontSize: isMobile ? "14px" : "16px",
+      fontSize: isMobile ? "14px" : "14px",
       color: "#666",
-      marginBottom: isMobile ? "24px" : "32px",
+      marginBottom: isMobile ? "18px" : "20px",
       lineHeight: "1.5",
     },
     formContainer: {
@@ -172,7 +174,7 @@ const navigate = useNavigate();
       gap: "8px",
     },
     primaryButton: {
-      background: "#b8b4d0",
+      background: "linear-gradient(135deg, #16a34a, #22c55e)",
       color: "#fff",
     },
     primaryButtonDisabled: {
@@ -331,7 +333,11 @@ const navigate = useNavigate();
     }
 
     // ✅ SINGLE SOURCE OF TRUTH
-    login(data.token, data.user);
+    // ✅ SINGLE SOURCE OF TRUTH
+login({
+  token: data.token,
+  user: data.user,
+});
 
 const role =
   data.user.role?.toLowerCase() ||
@@ -414,7 +420,7 @@ setTimeout(() => {
               <h2 style={styles.subtitle}>Login to your account</h2>
             </div>
             <p style={styles.description}>
-              It's nice to see you again. Ready to code?
+              It's nice to see you again. Ready to start?
             </p>
 
             <div style={styles.formContainer}>
@@ -485,12 +491,12 @@ setTimeout(() => {
                 disabled={loading}
                 onMouseEnter={(e) => {
                   if (!loading) {
-                    e.currentTarget.style.background = "#a8a3c7";
+                    e.currentTarget.style.background = "linear-gradient(135deg, #15803d, #16a34a)";
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!loading) {
-                    e.currentTarget.style.background = "#b8b4d0";
+                    e.currentTarget.style.background = "linear-gradient(135deg, #16a34a, #22c55e)";
                   }
                 }}
               >

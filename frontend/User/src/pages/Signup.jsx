@@ -22,6 +22,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
   const [tempEmail, setTempEmail] = useState("");
 const { login } = useAuth();
 const navigate = useNavigate();
+const [tempToken, setTempToken] = useState("");
 
 
   // Responsive breakpoint check
@@ -54,10 +55,10 @@ const navigate = useNavigate();
       padding: isMobile ? "0" : "20px",
     },
     modal: {
-      background: "#fff",
-      width: isMobile ? "100%" : "600px",
-      maxWidth: isMobile ? "100%" : "90vw",
-      maxHeight: isMobile ? "95vh" : "90vh",
+  background: "#fff",
+  width: isMobile ? "100%" : "480px",
+  maxWidth: "92vw",
+  maxHeight: isMobile ? "95vh" : "85vh",
       overflowY: "auto",
       borderRadius: isMobile ? "20px 20px 0 0" : "12px",
       boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
@@ -82,29 +83,31 @@ const navigate = useNavigate();
       zIndex: 10,
     },
     content: {
-      padding: isMobile ? "56px 24px 32px" : "48px 56px 56px",
-    },
+  padding: isMobile ? "32px 20px 24px" : "32px 36px 36px",
+},
     header: {
       marginBottom: isMobile ? "12px" : "8px",
     },
     title: {
-      fontSize: isMobile ? "32px" : "42px",
+      fontSize: isMobile ? "24px" : "30px",
       fontWeight: "700",
-      color: "#000",
+      background: "linear-gradient(135deg, #16a34a, #22c55e)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
       margin: "0 0 4px 0",
       lineHeight: "1.2",
     },
     subtitle: {
-      fontSize: isMobile ? "28px" : "42px",
+      fontSize: isMobile ? "22px" : "28px",
       fontWeight: "300",
       color: "#000",
       margin: "0 0 12px 0",
       lineHeight: "1.2",
     },
     description: {
-      fontSize: isMobile ? "14px" : "16px",
+      fontSize: isMobile ? "13px" : "14px",
       color: "#666",
-      marginBottom: isMobile ? "24px" : "32px",
+      marginBottom: isMobile ? "16px" : "20px",
       lineHeight: "1.5",
     },
     formContainer: {
@@ -114,10 +117,10 @@ const navigate = useNavigate();
     },
     input: {
       width: "100%",
-      padding: isMobile ? "14px 16px" : "16px 18px",
+      padding: isMobile ? "10px 12px" : "12px 14px",
       border: "1px solid #d1d5db",
       borderRadius: "8px",
-      fontSize: isMobile ? "15px" : "16px",
+      fontSize: isMobile ? "14px" : "14.5px",
       fontFamily: "inherit",
       transition: "all 0.2s ease",
       backgroundColor: "#fff",
@@ -152,7 +155,7 @@ const navigate = useNavigate();
     },
     button: {
       width: "100%",
-      padding: isMobile ? "14px" : "16px",
+      padding: isMobile ? "12px" : "12px",
       border: "none",
       borderRadius: "8px",
       fontSize: isMobile ? "15px" : "16px",
@@ -166,7 +169,7 @@ const navigate = useNavigate();
       color: "#fff",
     },
     primaryButtonDisabled: {
-      background: "#e5e3ef",
+       background: "linear-gradient(135deg, #16a34a, #22c55e)",
       cursor: "not-allowed",
       opacity: 0.7,
     },
@@ -174,7 +177,7 @@ const navigate = useNavigate();
       display: "flex",
       alignItems: "center",
       gap: "16px",
-      margin: isMobile ? "20px 0" : "28px 0",
+       margin: isMobile ? "14px 0" : "18px 0",
     },
     dividerLine: {
       flex: 1,
@@ -187,10 +190,10 @@ const navigate = useNavigate();
     },
     socialButton: {
       width: "100%",
-      padding: isMobile ? "12px" : "14px",
+      padding: isMobile ? "10px" : "11px",
       border: "1px solid #d1d5db",
       borderRadius: "8px",
-      fontSize: isMobile ? "14px" : "16px",
+      fontSize: isMobile ? "14px" : "14px",
       fontWeight: "500",
       cursor: "pointer",
       transition: "all 0.2s ease",
@@ -357,6 +360,7 @@ const navigate = useNavigate();
       }
 
       setTempEmail(formData.email.toLowerCase().trim());
+      setTempToken(data.tempToken);
       setShowOTP(true);
       setError({
         success: "OTP sent! Check your email.",
@@ -371,7 +375,7 @@ const navigate = useNavigate();
     }
   };
 
-  const handleVerifyOtp = async () => {
+const handleVerifyOtp = async () => {
   if (!otp.trim() || otp.trim().length !== 6) {
     setError({ general: "Please enter a valid 6-digit OTP" });
     return;
@@ -385,8 +389,8 @@ const navigate = useNavigate();
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: tempEmail,
         otp: otp.trim(),
+        tempToken, // 🔥 ONLY THESE TWO
       }),
     });
 
@@ -397,18 +401,11 @@ const navigate = useNavigate();
       return;
     }
 
-    // ✅ CORRECT AUTH HYDRATION
-    login({
-      token: data.token,
-      user: data.user,
-    });
-
-    if (onClose) onClose();
-
     alert("✅ Email verified successfully!");
 
-    
-     navigate("/user/dashboard", { replace: true });
+    // 👉 User ko login page pe bhejo (BEST PRACTICE)
+    if (onClose) onClose();
+    navigate("/login", { replace: true });
 
   } catch (err) {
     console.error("OTP Verification Error:", err);
@@ -417,6 +414,8 @@ const navigate = useNavigate();
     setLoading(false);
   }
 };
+
+
 
 
   const handleOtpChange = (e) => {
@@ -430,35 +429,36 @@ const navigate = useNavigate();
   };
 
   const handleResendOtp = async () => {
-    setLoading(true);
-    setError({});
+  setLoading(true);
+  setError({});
 
-    try {
-      const response = await fetch(`${API_URL}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.fullName.trim(),
-          email: tempEmail,
-          password: formData.password,
-        }),
-      });
+  try {
+    const response = await fetch(`${API_URL}/api/auth/resend-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tempToken, // 🔥 ONLY THIS
+      }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        setError({ general: data.message || "Failed to resend OTP" });
-        return;
-      }
-
-      setError({ success: "OTP resent successfully! Check your email." });
-    // eslint-disable-next-line no-unused-vars
-    } catch (err) {
-      setError({ general: "Failed to resend OTP. Please try again." });
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      setError({ general: data.message || "Failed to resend OTP" });
+      return;
     }
-  };
+
+    // 🔥 VERY IMPORTANT — replace old token
+    setTempToken(data.tempToken);
+
+    setError({ success: "OTP resent successfully! Check your email." });
+  } catch (err) {
+    console.error("Resend OTP Error:", err);
+    setError({ general: "Failed to resend OTP. Please try again." });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSocialLogin = (provider) => {
     window.location.href = `${API_URL}/api/auth/oauth/google/login`;
@@ -641,12 +641,12 @@ const navigate = useNavigate();
                     disabled={loading}
                     onMouseEnter={(e) => {
                       if (!loading) {
-                        e.currentTarget.style.background = "#a8a3c7";
+                        e.currentTarget.style.background = "linear-gradient(135deg, #15803d, #16a34a)";
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!loading) {
-                        e.currentTarget.style.background = "#b8b4d0";
+                        e.currentTarget.style.background = "linear-gradient(135deg, #16a34a, #22c55e)";
                       }
                     }}
                   >

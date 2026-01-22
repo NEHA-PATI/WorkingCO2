@@ -208,6 +208,8 @@ import Upload from "./components/upload";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import JoinOrganisation from "./pages/JoinOrganisation";
+// import NotFoundAnimation from "./pages/NotFoundAnimation";
+
 import OAuthSuccess from "./pages/OAuthSuccess";
 
 function App() {
@@ -223,7 +225,6 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/join-organisation" element={<JoinOrganisation />} />
-<Route path="/oauth-success" element={<OAuthSuccess />} />
 
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
@@ -231,6 +232,7 @@ function App() {
           <Route path="/community" element={<Community />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/case-studies" element={<CaseStudy />} />
+          {/* <Route path="/settings" element={<NotFoundAnimation />} /> */}
 
           {/* ================= PROTECTED ROUTES (PUBLIC LAYOUT) ================= */}
           {/* These routes are in BaseLayout but require authentication */}
@@ -245,6 +247,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+<Route path="/oauth-success" element={<OAuthSuccess />} />
 
           <Route
             path="/view-assets"
@@ -272,15 +275,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-          <Route
-  path="/user/dashboard"
-  element={
-    <ProtectedRoute requiredRole="user">
-      <UserDashboard />
-    </ProtectedRoute>
-  }
-/>
 
           {/* ================= USER DASHBOARD ROUTES ================= */}
           <Route
@@ -331,7 +325,10 @@ function App() {
             <Route path="security" element={<AdminSecurity />} />
             <Route path="configuration" element={<AdminConfiguration />} />
             <Route path="analytics" element={<AdminAnalytics />} />
-            <Route path="career-management" element={<AdminCareerManagement />} />
+            <Route
+              path="career-management"
+              element={<AdminCareerManagement />}
+            />
             <Route
               path="case-study-management"
               element={<AdminCaseStudyManagement />}

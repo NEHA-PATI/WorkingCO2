@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
 
+  // 🔁 Restore session
   useEffect(() => {
     try {
       const token = localStorage.getItem("authToken");
@@ -40,16 +41,22 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = (token, userData) => {
+  // ✅ NEW: OBJECT-BASED LOGIN (🔥 IMPORTANT)
+  const login = ({ token, user }) => {
+    if (!token || !user) {
+      console.error("❌ Invalid login payload", { token, user });
+      return;
+    }
+
     localStorage.setItem("authToken", token);
-    localStorage.setItem("authUser", JSON.stringify(userData));
+    localStorage.setItem("authUser", JSON.stringify(user));
 
     const normalizedRole =
-      userData.role?.toLowerCase() ||
-      userData.role_name?.toLowerCase() ||
+      user.role?.toLowerCase() ||
+      user.role_name?.toLowerCase() ||
       null;
 
-    setUser(userData);
+    setUser(user);
     setRole(normalizedRole);
     setIsAuthenticated(true);
   };
