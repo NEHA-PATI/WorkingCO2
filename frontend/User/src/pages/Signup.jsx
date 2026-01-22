@@ -2,6 +2,7 @@ import { useState } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { FaGoogle, FaLinkedin, FaGithub } from "react-icons/fa";
 import LoadingPopup from "../components/user/LoadingPopup";
+import { useEffect } from "react";
 
 
 const Signup = ({ onClose, onSwitchToLogin }) => {
@@ -19,17 +20,40 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
   const [showOTP, setShowOTP] = useState(false);
   const [otp, setOtp] = useState("");
   const [tempEmail, setTempEmail] = useState("");
+  const [otpDigits, setOtpDigits] = useState(Array(6).fill(""));
+  const [otpTimer, setOtpTimer] = useState(30);
+  const [canResend, setCanResend] = useState(false);
 
   // Responsive breakpoint check
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    if (!showOTP) return;
+
+    setOtpTimer(30);
+    setCanResend(false);
+
+    const interval = setInterval(() => {
+      setOtpTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setCanResend(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [showOTP]);
 
   // Handle responsive resize
   useState(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Inline Styles
@@ -49,10 +73,10 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       padding: isMobile ? "0" : "20px",
     },
     modal: {
-  background: "#fff",
-  width: isMobile ? "100%" : "480px",
-  maxWidth: "92vw",
-  maxHeight: isMobile ? "95vh" : "85vh",
+      background: "#fff",
+      width: isMobile ? "100%" : "480px",
+      maxWidth: "92vw",
+      maxHeight: isMobile ? "95vh" : "85vh",
       overflowY: "auto",
       borderRadius: isMobile ? "20px 20px 0 0" : "12px",
       boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
@@ -77,8 +101,8 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       zIndex: 10,
     },
     content: {
-  padding: isMobile ? "32px 20px 24px" : "32px 36px 36px",
-},
+      padding: isMobile ? "32px 20px 24px" : "32px 36px 36px",
+    },
     header: {
       marginBottom: isMobile ? "12px" : "8px",
     },
@@ -86,8 +110,8 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       fontSize: isMobile ? "24px" : "30px",
       fontWeight: "700",
       background: "linear-gradient(135deg, #16a34a, #22c55e)",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
+      WebkitBackgroundClip: "text",
+      WebkitTextFillColor: "transparent",
       margin: "0 0 4px 0",
       lineHeight: "1.2",
     },
@@ -163,7 +187,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       color: "#fff",
     },
     primaryButtonDisabled: {
-       background: "linear-gradient(135deg, #16a34a, #22c55e)",
+      background: "linear-gradient(135deg, #16a34a, #22c55e)",
       cursor: "not-allowed",
       opacity: 0.7,
     },
@@ -171,7 +195,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       display: "flex",
       alignItems: "center",
       gap: "16px",
-       margin: isMobile ? "14px 0" : "18px 0",
+      margin: isMobile ? "14px 0" : "18px 0",
     },
     dividerLine: {
       flex: 1,
@@ -304,7 +328,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       newErrors.password = "Password must be at least 8 characters";
     } else if (
       !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
-        formData.password
+        formData.password,
       )
     ) {
       newErrors.password =
@@ -369,10 +393,10 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
   };
 
   const handleVerifyOtp = async () => {
-    if (!otp.trim() || otp.trim().length !== 6) {
-      setError({ general: "Please enter a valid 6-digit OTP" });
-      return;
-    }
+   if (otp.length !== 6) {
+  setError({ general: "Please enter a valid 6-digit OTP" });
+  return;
+}
 
     setLoading(true);
     setError({});
@@ -402,7 +426,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       if (onClose) onClose();
 
       alert(
-        "✅ Email verified successfully!\n\nYour account is now active.\nPlease login to continue."
+        "✅ Email verified successfully!\n\nYour account is now active.\nPlease login to continue.",
       );
 
       if (onSwitchToLogin) {
@@ -416,15 +440,27 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     }
   };
 
-  const handleOtpChange = (e) => {
-    const value = e.target.value.replace(/\D/g, "");
-    if (value.length <= 6) {
-      setOtp(value);
-      if (error.general) {
-        setError({});
-      }
+  const handleOtpDigitChange = (index, value) => {
+    if (!/^\d?$/.test(value)) return;
+
+    const newOtp = [...otpDigits];
+    newOtp[index] = value;
+    setOtpDigits(newOtp);
+    setOtp(newOtp.join(""));
+
+    if (value && index < 5) {
+      document.getElementById(`otp-${index + 1}`)?.focus();
+    }
+
+    if (error.general) setError({});
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
+      document.getElementById(`otp-${index - 1}`)?.focus();
     }
   };
+
 
   const handleResendOtp = async () => {
     setLoading(true);
@@ -449,7 +485,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       }
 
       setError({ success: "OTP resent successfully! Check your email." });
-    // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line no-unused-vars
     } catch (err) {
       setError({ general: "Failed to resend OTP. Please try again." });
     } finally {
@@ -463,8 +499,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
 
   return (
     <>
-
-    <LoadingPopup isVisible={loading} />
+      <LoadingPopup isVisible={loading} />
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
@@ -503,11 +538,11 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
               <>
                 <div style={styles.header}>
                   <h1 style={styles.title}>Join us</h1>
-                  <h2 style={styles.subtitle}>Create a Carbon Positive account</h2>
+                  <h2 style={styles.subtitle}>
+                    Create a Carbon Positive account
+                  </h2>
                 </div>
-                <p style={styles.description}>
-                  Be a part of our community
-                </p>
+                <p style={styles.description}>Be a part of our community</p>
 
                 <div style={styles.formContainer}>
                   <div>
@@ -526,7 +561,8 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                         e.target.style.borderColor = "#5469d4";
                       }}
                       onBlur={(e) => {
-                        if (!error.fullName) e.target.style.borderColor = "#d1d5db";
+                        if (!error.fullName)
+                          e.target.style.borderColor = "#d1d5db";
                       }}
                     />
                     {error.fullName && (
@@ -550,7 +586,8 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                         e.target.style.borderColor = "#5469d4";
                       }}
                       onBlur={(e) => {
-                        if (!error.email) e.target.style.borderColor = "#d1d5db";
+                        if (!error.email)
+                          e.target.style.borderColor = "#d1d5db";
                       }}
                     />
                     {error.email && (
@@ -574,7 +611,8 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                         e.target.style.borderColor = "#5469d4";
                       }}
                       onBlur={(e) => {
-                        if (!error.password) e.target.style.borderColor = "#d1d5db";
+                        if (!error.password)
+                          e.target.style.borderColor = "#d1d5db";
                       }}
                     />
                     {error.password && (
@@ -639,12 +677,14 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                     disabled={loading}
                     onMouseEnter={(e) => {
                       if (!loading) {
-                        e.currentTarget.style.background = "linear-gradient(135deg, #15803d, #16a34a)";
+                        e.currentTarget.style.background =
+                          "linear-gradient(135deg, #15803d, #16a34a)";
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!loading) {
-                        e.currentTarget.style.background = "linear-gradient(135deg, #16a34a, #22c55e)";
+                        e.currentTarget.style.background =
+                          "linear-gradient(135deg, #16a34a, #22c55e)";
                       }
                     }}
                   >
@@ -744,7 +784,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                   </p>
                 </div> */}
 
-                <input
+                {/* <input
                   type="text"
                   placeholder="Enter 6-digit OTP"
                   value={otp}
@@ -757,7 +797,42 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                   disabled={loading}
                   maxLength={6}
                   autoFocus
-                />
+                /> */}
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: "10px",
+                  }}
+                >
+                  {otpDigits.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`otp-${index}`}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      disabled={loading}
+                      onChange={(e) =>
+                        handleOtpDigitChange(index, e.target.value)
+                      }
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                      style={{
+                        width: "44px",
+                        height: "52px",
+                        textAlign: "center",
+                        fontSize: "20px",
+                        fontWeight: "600",
+                        borderRadius: "8px",
+                        border: error.general
+                          ? "1px solid #dc2626"
+                          : "1px solid #d1d5db",
+                      }}
+                    />
+                  ))}
+                </div>
 
                 {error.general && (
                   <p style={{ ...styles.errorText, marginTop: "12px" }}>
@@ -799,29 +874,25 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                 </button>
 
                 <div style={styles.resendSection}>
-                  <p style={{ fontSize: "14px", color: "#666", margin: "0 0 8px 0" }}>
-                    Didn't receive the code?
-                  </p>
-                  <button
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#5469d4",
-                      cursor: "pointer",
-                      fontWeight: "600",
-                      fontSize: "15px",
-                    }}
-                    onClick={handleResendOtp}
-                    disabled={loading}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.textDecoration = "underline";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.textDecoration = "none";
-                    }}
-                  >
-                    Resend OTP
-                  </button>
+                  {!canResend ? (
+                    <p style={{ color: "#999", fontSize: "14px" }}>
+                      Resend OTP in {otpTimer}s
+                    </p>
+                  ) : (
+                    <button
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#5469d4",
+                        cursor: "pointer",
+                        fontWeight: "600",
+                        fontSize: "15px",
+                      }}
+                      onClick={handleResendOtp}
+                    >
+                      Resend OTP
+                    </button>
+                  )}
                 </div>
               </div>
             )}
