@@ -71,6 +71,7 @@ body {
   color: #16a34a;
 }
 
+/* icon padding fix */
 .icon-input input {
   padding-left: 35px;
 }
@@ -159,18 +160,17 @@ body {
   background: #16a34a;
 }
 
-
 /* Fix for icon alignment in country field */
 .form-row.icon-input {
   display: flex;
-  align-items: center; /* ✅ keeps input + icon aligned */
+  align-items: center;
   width: 100%;
 }
 
 .form-row.icon-input input {
   flex: 1;
-  margin-bottom: 0; /* avoid extra spacing issues */
-  padding-left: 38px; /* space for the icon */
+  margin-bottom: 0;
+  padding-left: 38px;
 }
 
 .input-icon {
@@ -178,7 +178,54 @@ body {
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 16px;   /* ✅ match input font size */
+  font-size: 16px;
   color: #16a34a;
-  pointer-events: none; /* prevent blocking input clicks */
+  pointer-events: none;
+}
+
+/* ===================================================== */
+/* ✅ NEW: PHONE NUMBER WITH COUNTRY CODE (ADDED SAFELY) */
+/* ===================================================== */
+
+.phone-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.phone-group .phone-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #16a34a;
+  pointer-events: none;
+}
+
+/* Country code dropdown */
+.country-code {
+  width: 32%;
+  padding: 10px 10px 10px 38px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+/* Phone number input */
+.phone-input {
+  width: 68%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* Focus styles for consistency */
+.country-code:focus,
+.phone-input:focus {
+  border-color: #16a34a;
+  outline: none;
 }

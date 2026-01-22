@@ -3,9 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { FaGoogle } from "react-icons/fa";
 import useAuth from "../auth/useAuth";
+import {  FaLinkedin, FaGithub } from "react-icons/fa";
+import LoadingPopup from "../components/user/LoadingPopup";
 
 
 const Login = ({ onClose, onSwitchToSignup }) => {
+
 
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
@@ -381,6 +384,8 @@ setTimeout(() => {
 
   return (
     <>
+
+    <LoadingPopup isVisible={loading} />
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }

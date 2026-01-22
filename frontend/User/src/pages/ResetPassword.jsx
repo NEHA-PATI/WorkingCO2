@@ -16,11 +16,17 @@ const ResetPassword = () => {
 
     if (!password || password !== confirm) return;
 
-    await fetch(`${API_URL}/api/auth/reset-password/${token}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
+   const res = await fetch(`${API_URL}/api/auth/password/reset/${token}`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ password }),
+});
+
+if (!res.ok) {
+  alert("Reset link invalid or expired");
+  return;
+}
+
 
     setSuccess(true);
 

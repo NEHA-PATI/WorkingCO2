@@ -3,6 +3,7 @@ import { RxCross1 } from "react-icons/rx";
 import { FaGoogle, FaLinkedin, FaGithub } from "react-icons/fa";
 import useAuth from "../auth/useAuth";
 import { useNavigate } from "react-router-dom";
+import LoadingPopup from "../components/user/LoadingPopup";
 
 
 const Signup = ({ onClose, onSwitchToLogin }) => {
@@ -467,6 +468,8 @@ const handleVerifyOtp = async () => {
 
   return (
     <>
+
+    <LoadingPopup isVisible={loading} />
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
@@ -482,7 +485,7 @@ const handleVerifyOtp = async () => {
           }
         }
       `}</style>
-      <div style={styles.overlay} onClick={onClose}>
+      <div style={styles.overlay} onClick={!loading ? onClose : undefined}>
         <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
           <button
             style={styles.closeBtn}
@@ -739,12 +742,12 @@ const handleVerifyOtp = async () => {
                   Enter the 6-digit OTP sent to <b>{tempEmail}</b>
                 </p>
 
-                <div style={styles.infoBox}>
+                {/* <div style={styles.infoBox}>
                   <p style={styles.infoText}>
                     ℹ️ After verification, your account will be active and you
                     can login.
                   </p>
-                </div>
+                </div> */}
 
                 <input
                   type="text"
