@@ -1,6 +1,7 @@
 import { useState ,useEffect} from "react";
 import { RxCross1 } from "react-icons/rx";
 import { FaGoogle, FaLinkedin, FaGithub } from "react-icons/fa";
+import LoadingPopup from "../components/user/LoadingPopup";
 
 const Login = ({ onLogin, onClose, onSwitchToSignup, navigate }) => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
@@ -412,6 +413,8 @@ const Login = ({ onLogin, onClose, onSwitchToSignup, navigate }) => {
 
   return (
     <>
+
+    <LoadingPopup isVisible={loading} />
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }

@@ -136,7 +136,7 @@ export default function Navbar() {
                 className="wallet-icon"
                 style={{ color: "#f59e0b", fontSize: "2rem" }}
               />
-              <span className="wallet-text">Wallet</span>
+            
             </div>
           </div>
         )}
