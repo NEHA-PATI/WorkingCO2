@@ -14,7 +14,7 @@ const Upload = () => {
   const [activeTreePopup, setActiveTreePopup] = useState(false);
   const [activeSolarPopup, setActiveSolarPopup] = useState(false);
 
-  const [evCount, setEvCount] = useState(0);
+  const [, setEvCount] = useState(0);
   const [solarCount, setSolarCount] = useState(0);
 
   // const handleSaveEV = (data) => {
@@ -29,6 +29,7 @@ const Upload = () => {
         formData
       );
 
+      // eslint-disable-next-line no-undef
       setEvList((prev) => [...prev, res.data.data]);
       setEvCount(res.data.evCount);
       setActiveEVPopup(false);

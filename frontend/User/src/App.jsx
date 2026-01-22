@@ -205,6 +205,11 @@ import ViewAssets from "./pages/ViewAssets";
 import Profile from "./pages/profile";
 import Wallet from "./pages/wallet";
 import Upload from "./components/upload";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import JoinOrganisation from "./pages/JoinOrganisation";
+
+
 
 function App() {
   return (
@@ -216,6 +221,10 @@ function App() {
           {/* Login and Signup are handled by BaseLayout modals, not routes */}
           <Route path="/login" element={<Navigate to="/" replace />} />
           <Route path="/signup" element={<Navigate to="/" replace />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/join-organisation" element={<JoinOrganisation />} />
+
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/careers" element={<Careers />} />

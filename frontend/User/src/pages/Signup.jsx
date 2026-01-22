@@ -447,6 +447,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       }
 
       setError({ success: "OTP resent successfully! Check your email." });
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       setError({ general: "Failed to resend OTP. Please try again." });
     } finally {

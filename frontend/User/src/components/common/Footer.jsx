@@ -25,96 +25,128 @@ const Footer = () => {
             rewards for their environmental impact through sustainable
             practices.
           </p>
-          <div className="footer__socials">
-            <a
-              href="https://facebook.com/yourpage"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer__social-icon"
-            >
-              <FaFacebookF />
-            </a>
-
-            <a
-              href="https://x.com/yourhandle"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer__social-icon"
-            >
-              <FaTwitter />
-            </a>
-
-            <a
-              href="https://linkedin.com/in/yourprofile"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer__social-icon"
-            >
-              <FaLinkedinIn />
-            </a>
-
-            <a
-              href="https://www.instagram.com/gocarbonpositive?igsh=MW0waXk1OGFwN2N6cg=="
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer__social-icon"
-            >
-              <BsInstagram />
-            </a>
-          </div>
         </div>
 
-        {/* Quick Links */}
+        {/* Products */}
         <div className="footer_section footer_links">
-          <h3 className="footer__heading">Quick Links</h3>
+          <h3 className="footer__heading">Products</h3>
           <ul className="footer__list">
             <li className="footer__item">
-              <Link to="/about">About</Link>
+              <Link to="/engage">Engage</Link>
             </li>
             <li className="footer__item">
-              <Link to="/user/dashboard">Services</Link>
+              <Link to="/user/dashboard">Dashboard</Link>
             </li>
             <li className="footer__item">
-              <Link to="/blog">Blog</Link>
-            </li>
-            <li className="footer__item">
-              <Link to="/contact">Contact</Link>
+              <Link to="/wallet">Marketplace</Link>
             </li>
           </ul>
         </div>
 
-        {/* Contact */}
+        {/* Resources */}
+        <div className="footer_section footer_links">
+          <h3 className="footer__heading">Resources</h3>
+          <ul className="footer__list">
+            <li className="footer__item">
+              <Link to="/blog">Blog</Link>
+            </li>
+            <li className="footer__item">
+              <Link to="/case-studies">Case Studies</Link>
+            </li>
+            <li className="footer__item">
+              <Link to="/community">Community</Link>
+            </li>
+            
+          </ul>
+        </div>
+
+
+         {/* Company */}
+        <div className="footer_section footer_links">
+          <h3 className="footer__heading">Company</h3>
+          <ul className="footer__list">
+            <li className="footer__item">
+              <Link to="/about">About Us</Link>
+            </li>
+            <li className="footer__item">
+              <Link to="/case-studies">Sustainability Mission</Link>
+            </li>
+            <li className="footer__item">
+              <Link to="/contact">Contact</Link>
+            </li>
+             <li className="footer__item">
+              <Link to="/engage">FAQs</Link>
+            </li>
+            
+          </ul>
+        </div>
+
+        {/* Contact
         <div className="footer_section footer_contact">
           <h3 className="footer__heading">Contact</h3>
           <ul className="footer__list">
             <li className="footer__item">
-              <HiOutlineMail /> support@carboncredit.com
+              <HiOutlineMail /> Debadarsan.Mohanty@gocarbonpositive.com
             </li>
             <li className="footer__item">
               <HiOutlinePhone /> +91 8018246346
             </li>
             <li className="footer__item">
-              <HiOutlineLocationMarker /> STPI, Bhubaneswar, India
+              <HiOutlineLocationMarker /> STPI, Bhubaneswar, Odisha, India
             </li>
           </ul>
-        </div>
+        </div> */}
       </div>
 
-      {/* Newsletter */}
-      <div className="footer__newsletter">
-        <h3 className="footer__heading">Stay Updated</h3>
-        <p className="footer__text">
-          Get the latest updates on sustainability and carbon credits
-        </p>
-        <div className="footer__newsletter-form">
-          <input type="email" placeholder="Enter your email" />
-          <button className="footer__newsletter-btn">Subscribe</button>
-        </div>
-      </div>
+      {/* ===== FOOTER BOTTOM BAR ===== */}
+      <div className="footer__bottom-bar">
+        {/* Social Icons (LEFT) */}
 
-      {/* Footer Bottom */}
-      <div className="footer__bottom">
-        © 2025 GoCarbon Positive | All rights reserved.
+        {/* Copyright (RIGHT) */}
+        <div className="footer__bottom">
+          <div className="footer__socials footer__socials-left">
+            <a
+              href="https://www.facebook.com/gocarbonpositive"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer__social-icon"
+              aria-label="Facebook"
+            >
+              <FaFacebookF />
+            </a>
+
+            <a
+              href="https://x.com/gocarbonpositive"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer__social-icon"
+              aria-label="Twitter"
+            >
+              <FaTwitter />
+            </a>
+
+            <a
+              href="https://www.linkedin.com/company/gocarbonpositive"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer__social-icon"
+              aria-label="LinkedIn"
+            >
+              <FaLinkedinIn />
+            </a>
+
+            <a
+              href="https://www.instagram.com/gocarbonpositive"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer__social-icon"
+              aria-label="Instagram"
+            >
+              <BsInstagram />
+            </a>
+          </div>
+          © 2025 GoCarbon Positive | All rights reserved.
+        </div>
       </div>
     </footer>
   );
