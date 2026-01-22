@@ -18,7 +18,6 @@ import { MdCategory, MdScience } from "react-icons/md";
 import { BsLightningChargeFill } from "react-icons/bs";
 import { IoMdFlash } from "react-icons/io";
 import ActivityItem from "../components/user/ActivityItem";
-// Navbar and Footer are provided by BaseLayout - no need to import here
 import "../styles/user/userDashboard.css";
 import { useNavigate } from "react-router-dom";
 import evService from "../services/user/evService";
@@ -37,6 +36,12 @@ const UserDashboard = () => {
   const [totalCredits, setTotalCredits] = useState(0);
   const [activityList, setActivityList] = useState([]);
   const [loadingActivity, setLoadingActivity] = useState(true);
+
+  // filters + pagination
+  const [activityFilter, setActivityFilter] = useState("All");
+  const [activityPage, setActivityPage] = useState(1);
+  const pageSize = 10;
+
   const [openIndex, setOpenIndex] = useState(null);
 
   const storedUser = JSON.parse(localStorage.getItem("authUser"));
@@ -111,18 +116,18 @@ const UserDashboard = () => {
       range: item.range
         ? `${item.range} km`
         : item.Range
-          ? `${item.Range} km`
-          : "N/A",
+        ? `${item.Range} km`
+        : "N/A",
       topSpeed: item.top_speed
         ? `${item.top_speed} km/h`
         : item.Top_Speed
-          ? `${item.Top_Speed} km/h`
-          : "N/A",
+        ? `${item.Top_Speed} km/h`
+        : "N/A",
       energy: item.energy_consumed
         ? `${item.energy_consumed} kWh`
         : item.Energy_Consumed
-          ? `${item.Energy_Consumed} kWh`
-          : "N/A",
+        ? `${item.Energy_Consumed} kWh`
+        : "N/A",
       time: new Date(
         item.created_at || item.Created_At || Date.now()
       ).toLocaleString(),
@@ -142,13 +147,13 @@ const UserDashboard = () => {
         generation: item.energy_generation_value
           ? `${item.energy_generation_value} kWh`
           : item.Energy_Generation_Value
-            ? `${item.Energy_Generation_Value} kWh`
-            : "N/A",
+          ? `${item.Energy_Generation_Value} kWh`
+          : "N/A",
         capacity: item.installed_capacity
           ? `${item.installed_capacity} kW`
           : item.Installed_Capacity
-            ? `${item.Installed_Capacity} kW`
-            : "N/A",
+          ? `${item.Installed_Capacity} kW`
+          : "N/A",
         panelType: item.panel_type || item.Panel_Type || "Standard Panel",
         time: new Date(
           item.created_at || item.Created_At || Date.now()
@@ -223,18 +228,9 @@ const UserDashboard = () => {
     });
 
     setActivityList(allActivities);
+    setActivityPage(1); // reset page on new data
     console.log("📋 Activity List:", allActivities);
   };
-
-  // useEffect(() => {
-  //   history.pushState(null, null, window.location.href);
-  //   window.onpopstate = function () {
-  //     history.go(1);
-  //   };
-  //   return () => {
-  //     window.onpopstate = null;
-  //   };
-  // }, []);
 
   const handleQuickAdd = () => {
     navigate("/upload");
@@ -248,6 +244,7 @@ const UserDashboard = () => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
+  // credits total
   useEffect(() => {
     const sum = activityList.reduce((acc, item) => {
       const creditsValue = parseInt(item.credits.replace("+", ""), 10) || 0;
@@ -256,6 +253,7 @@ const UserDashboard = () => {
     setTotalCredits(sum);
   }, [activityList]);
 
+  // credits percent change
   useEffect(() => {
     if (backendCredits === 0) {
       setPercentChange(0);
@@ -376,21 +374,49 @@ const UserDashboard = () => {
     },
   ];
 
+  // ---- Recent activity filter + pagination ----
+  const filteredActivities =
+    activityFilter === "All"
+      ? activityList
+      : activityList.filter((a) => a.type === activityFilter);
+
+  const totalPages = Math.max(1, Math.ceil(filteredActivities.length / pageSize));
+  const currentPage = Math.min(activityPage, totalPages);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedActivities = filteredActivities.slice(
+    startIndex,
+    startIndex + pageSize
+  );
+
+  const handleFilterChange = (e) => {
+    const value = e.target.value;
+    setActivityFilter(value);
+    setActivityPage(1); // reset page when filter changes
+  };
+
+  const handlePrevPage = () => {
+    setActivityPage((prev) => Math.max(1, prev - 1));
+  };
+
+  const handleNextPage = () => {
+    setActivityPage((prev) => Math.min(totalPages, prev + 1));
+  };
+
   return (
-    <div className="dashboard-wrapper">
-      <div className="dashboard">
-        <div className="top-bar-button">
+    <div className="ud-dashboard-wrapper">
+      <div className="ud-dashboard">
+        <div className="ud-top-bar-button">
           <h1></h1>
-          <div className="actions">
+          <div className="ud-actions">
             <div className="flex items-center gap-4">
               <button
-                className="view-asset flex items-center gap-2"
+                className="ud-view-asset flex items-center gap-2"
                 onClick={handleViewAssets}
               >
                 View Assets
               </button>
 
-              <button className="quick-add" onClick={handleQuickAdd}>
+              <button className="ud-quick-add" onClick={handleQuickAdd}>
                 + Quick Add
               </button>
             </div>
@@ -416,16 +442,50 @@ const UserDashboard = () => {
         />
 
         {/* Recent Activity */}
-        <div className="recent-section">
-          <h2>Recent Activity</h2>
-          <div className="activity-list">
+        <div className="ud-recent-section">
+          <div className="ud-recent-header">
+            <h2>Recent Activity</h2>
+
+            <div className="ud-activity-controls">
+              <select
+                className="ud-activity-filter"
+                value={activityFilter}
+                onChange={handleFilterChange}
+              >
+                <option value="All">All</option>
+                <option value="EV">EV</option>
+                <option value="Solar">Solar</option>
+                <option value="Tree">Tree</option>
+              </select>
+
+              <div className="ud-activity-pagination">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                >
+                  Prev
+                </button>
+                <span>
+                  {currentPage}/{totalPages}
+                </span>
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="ud-activity-list">
             {loadingActivity ? (
-              <div className="loading-state">
-                <div className="spinner"></div>
+              <div className="ud-loading-state">
+                <div className="ud-spinner"></div>
                 <p>Loading recent activity...</p>
               </div>
-            ) : activityList.length > 0 ? (
-              activityList.map((item, idx) => {
+            ) : paginatedActivities.length > 0 ? (
+              paginatedActivities.map((item, idx) => {
                 let detailText = null;
                 let titleText = "";
                 let titleIcon = null;
@@ -433,31 +493,31 @@ const UserDashboard = () => {
                 if (item.type === "EV") {
                   titleIcon = (
                     <FaCar
-                      className="activity-title-icon"
+                      className="ud-activity-title-icon"
                       style={{ color: "#2196F3" }}
                     />
                   );
                   titleText = "NEW VEHICLE ADDED!";
                   detailText = (
-                    <div className="activity-detail-row">
-                      <span className="activity-detail-item">
-                        <FaIndustry className="detail-icon" />
+                    <div className="ud-activity-detail-row">
+                      <span className="ud-activity-detail-item">
+                        <FaIndustry className="ud-detail-icon" />
                         {item.detail} {item.model}
                       </span>
-                      <span className="activity-detail-item">
-                        <MdCategory className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <MdCategory className="ud-detail-icon" />
                         {item.category}
                       </span>
-                      <span className="activity-detail-item">
-                        <FaCalendarAlt className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <FaCalendarAlt className="ud-detail-icon" />
                         {item.year}
                       </span>
-                      <span className="activity-detail-item">
-                        <FaBolt className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <FaBolt className="ud-detail-icon" />
                         {item.range}
                       </span>
-                      <span className="activity-detail-item">
-                        <FaTachometerAlt className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <FaTachometerAlt className="ud-detail-icon" />
                         {item.topSpeed}
                       </span>
                     </div>
@@ -465,31 +525,31 @@ const UserDashboard = () => {
                 } else if (item.type === "Solar") {
                   titleIcon = (
                     <FaSun
-                      className="activity-title-icon"
+                      className="ud-activity-title-icon"
                       style={{ color: "#FF9800" }}
                     />
                   );
                   titleText = "NEW SOLAR ADDED!";
                   detailText = (
-                    <div className="activity-detail-row">
-                      <span className="activity-detail-item">
-                        <FaMicrochip className="detail-icon" />
+                    <div className="ud-activity-detail-row">
+                      <span className="ud-activity-detail-item">
+                        <FaMicrochip className="ud-detail-icon" />
                         {item.detail}
                       </span>
-                      <span className="activity-detail-item">
-                        <FaSolarPanel className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <FaSolarPanel className="ud-detail-icon" />
                         {item.panelType}
                       </span>
-                      <span className="activity-detail-item">
-                        <FaCalendarAlt className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <FaCalendarAlt className="ud-detail-icon" />
                         {item.year}
                       </span>
-                      <span className="activity-detail-item">
-                        <BsLightningChargeFill className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <BsLightningChargeFill className="ud-detail-icon" />
                         {item.generation}
                       </span>
-                      <span className="activity-detail-item">
-                        <IoMdFlash className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <IoMdFlash className="ud-detail-icon" />
                         {item.capacity}
                       </span>
                     </div>
@@ -497,35 +557,35 @@ const UserDashboard = () => {
                 } else if (item.type === "Tree") {
                   titleIcon = (
                     <FaTree
-                      className="activity-title-icon"
+                      className="ud-activity-title-icon"
                       style={{ color: "#4CAF50" }}
                     />
                   );
                   titleText = "NEW TREE PLANTED!";
                   detailText = (
-                    <div className="activity-detail-row">
-                      <span className="activity-detail-item">
-                        <GiTreeBranch className="detail-icon" />
+                    <div className="ud-activity-detail-row">
+                      <span className="ud-activity-detail-item">
+                        <GiTreeBranch className="ud-detail-icon" />
                         {item.treename}
                       </span>
-                      <span className="activity-detail-item">
-                        <MdScience className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <MdScience className="ud-detail-icon" />
                         {item.scientificname}
                       </span>
-                      <span className="activity-detail-item">
-                        <FaLeaf className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <FaLeaf className="ud-detail-icon" />
                         {item.treeType}
                       </span>
-                      <span className="activity-detail-item">
-                        <FaCalendarAlt className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <FaCalendarAlt className="ud-detail-icon" />
                         {item.plantingdate}
                       </span>
-                      <span className="activity-detail-item">
-                        <FaMapMarkerAlt className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <FaMapMarkerAlt className="ud-detail-icon" />
                         {item.location}
                       </span>
-                      <span className="activity-detail-item">
-                        <FaRuler className="detail-icon" />
+                      <span className="ud-activity-detail-item">
+                        <FaRuler className="ud-detail-icon" />
                         {item.height}
                       </span>
                     </div>
@@ -534,7 +594,7 @@ const UserDashboard = () => {
 
                 return (
                   <ActivityItem
-                    key={idx}
+                    key={`${item.type}-${idx}-${item.time}`}
                     type={item.type}
                     titleIcon={titleIcon}
                     title={titleText}
@@ -546,12 +606,12 @@ const UserDashboard = () => {
                 );
               })
             ) : (
-              <div className="empty-state">
+              <div className="ud-empty-state">
                 <p>No recent activity</p>
                 <p>
                   Start adding your eco-friendly assets to track your impact!
                 </p>
-                <button className="quick-add-small" onClick={handleQuickAdd}>
+                <button className="ud-quick-add-small" onClick={handleQuickAdd}>
                   + Add Your First Asset
                 </button>
               </div>
@@ -560,23 +620,23 @@ const UserDashboard = () => {
         </div>
 
         {/* FAQ Section */}
-        <div className="faq-section">
+        <div className="ud-faq-section">
           <h2>Frequently Asked Questions</h2>
-          <div className="faq-list">
+          <div className="ud-faq-list">
             {faqData.map((item, index) => (
               <div
                 key={index}
-                className={`faq-item ${openIndex === index ? "open" : ""}`}
+                className={`ud-faq-item ${openIndex === index ? "ud-open" : ""}`}
                 onClick={() => toggleFAQ(index)}
               >
-                <div className="faq-question">
+                <div className="ud-faq-question">
                   {item.question}
-                  <span className="faq-icon">
+                  <span className="ud-faq-icon">
                     {openIndex === index ? "−" : "+"}
                   </span>
                 </div>
                 <div
-                  className="faq-answer"
+                  className="ud-faq-answer"
                   style={{
                     maxHeight: openIndex === index ? "200px" : "0",
                     opacity: openIndex === index ? 1 : 0,
