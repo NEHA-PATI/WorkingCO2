@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 import { RxCross1 } from "react-icons/rx";
 import { FaGoogle, FaLinkedin, FaGithub } from "react-icons/fa";
 
@@ -17,14 +17,13 @@ const Login = ({ onLogin, onClose, onSwitchToSignup, navigate }) => {
   // Responsive breakpoint
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  useState(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
+  useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
   // Inline Styles
   const styles = {
     overlay: {
