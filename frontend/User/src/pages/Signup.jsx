@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { FaGoogle, FaLinkedin, FaGithub } from "react-icons/fa";
+import useAuth from "../auth/useAuth";
+import { useNavigate } from "react-router-dom";
+
 
 const Signup = ({ onClose, onSwitchToLogin }) => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
@@ -17,18 +20,22 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
   const [showOTP, setShowOTP] = useState(false);
   const [otp, setOtp] = useState("");
   const [tempEmail, setTempEmail] = useState("");
+const { login } = useAuth();
+const navigate = useNavigate();
+
 
   // Responsive breakpoint check
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   // Handle responsive resize
-  useState(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+ useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
+
 
   // Inline Styles
   const styles = {
@@ -365,52 +372,52 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
   };
 
   const handleVerifyOtp = async () => {
-    if (!otp.trim() || otp.trim().length !== 6) {
-      setError({ general: "Please enter a valid 6-digit OTP" });
+  if (!otp.trim() || otp.trim().length !== 6) {
+    setError({ general: "Please enter a valid 6-digit OTP" });
+    return;
+  }
+
+  setLoading(true);
+  setError({});
+
+  try {
+    const response = await fetch(`${API_URL}/api/auth/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: tempEmail,
+        otp: otp.trim(),
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setError({ general: data.message || "OTP verification failed" });
       return;
     }
 
-    setLoading(true);
-    setError({});
+    // ✅ CORRECT AUTH HYDRATION
+    login({
+      token: data.token,
+      user: data.user,
+    });
 
-    try {
-      const response = await fetch(`${API_URL}/api/auth/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: tempEmail,
-          otp: otp.trim(),
-        }),
-      });
+    if (onClose) onClose();
 
-      const data = await response.json();
+    alert("✅ Email verified successfully!");
 
-      if (!response.ok) {
-        setError({ general: data.message || "OTP verification failed" });
-        return;
-      }
+    
+     navigate("/user/dashboard", { replace: true });
 
-      localStorage.setItem("authUser", JSON.stringify(data.user));
-      if (data.token) {
-        localStorage.setItem("authToken", data.token);
-      }
+  } catch (err) {
+    console.error("OTP Verification Error:", err);
+    setError({ general: "OTP verification failed. Please try again." });
+  } finally {
+    setLoading(false);
+  }
+};
 
-      if (onClose) onClose();
-
-      alert(
-        "✅ Email verified successfully!\n\nYour account is now active.\nPlease login to continue."
-      );
-
-      if (onSwitchToLogin) {
-        onSwitchToLogin();
-      }
-    } catch (err) {
-      console.error("OTP Verification Error:", err);
-      setError({ general: "OTP verification failed. Please try again." });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleOtpChange = (e) => {
     const value = e.target.value.replace(/\D/g, "");
@@ -454,7 +461,8 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
   };
 
   const handleSocialLogin = (provider) => {
-    alert(`${provider} login - Integration pending`);
+    window.location.href = `${API_URL}/api/auth/oauth/google/login`;
+
   };
 
   return (

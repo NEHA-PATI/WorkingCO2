@@ -26,7 +26,8 @@ import "../../styles/user/userNavbar.css";
  */
 export default function Navbar() {
   const navigate = useNavigate();
-  const { user, role, isAuthenticated, logout } = useAuth();
+  const { user, role, isAuthenticated, authLoading, logout } = useAuth();
+
   const { openLogin, openSignup } = useModal();
 
   /* ================= STATE ================= */
@@ -51,12 +52,13 @@ export default function Navbar() {
     if (user?.email) return user.email.split("@")[0];
     return "User";
   };
+const getDashboardRoute = () => {
+  if (!role) return "/user/dashboard";
+  if (role === "admin") return "/admin/dashboard";
+  if (role === "organization") return "/org/dashboard";
+  return "/user/dashboard";
+};
 
-  const getDashboardRoute = () => {
-    if (role === "admin") return "/admin/dashboard";
-    if (role === "organization") return "/org/dashboard";
-    return "/user/dashboard";
-  };
 
   /* ================= ACTIONS ================= */
 
@@ -92,6 +94,7 @@ export default function Navbar() {
   }, []);
 
   /* ================= RENDER ================= */
+if (authLoading) return null;
 
   return (
     <>
@@ -203,8 +206,9 @@ export default function Navbar() {
                           {getDisplayName()}
                         </div>
                         <div className="user-profile-dropdown-email">
-                          {user?.email || "user@example.com"}
-                        </div>
+  {user?.email || ""}
+</div>
+
                       </div>
 
                       <NavLink

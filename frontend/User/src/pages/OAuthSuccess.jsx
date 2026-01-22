@@ -15,7 +15,7 @@ const OAuthSuccess = () => {
       return;
     }
 
-    // Decode JWT payload
+    // Decode JWT safely
     const payload = JSON.parse(atob(token.split(".")[1]));
 
     const user = {
@@ -23,10 +23,11 @@ const OAuthSuccess = () => {
       u_id: payload.u_id,
       email: payload.email,
       status: payload.status,
-      role: "user", // Google OAuth always = user
+      role: "user", // OAuth users = user
     };
 
-    login({ token, user });
+    // ✅ CORRECT CALL
+    login(token, user);
 
     navigate("/user/dashboard", { replace: true });
   }, []);

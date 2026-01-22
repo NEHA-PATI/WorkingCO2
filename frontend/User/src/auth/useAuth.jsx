@@ -1,92 +1,60 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-/**
- * AuthContext
- */
 const AuthContext = createContext(null);
 
-/**
- * AuthProvider
- */
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
 
-  /**
-   * 🔁 Hydrate auth state from localStorage on app load
-   */
   useEffect(() => {
-    const initAuth = () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        const rawUser = localStorage.getItem("authUser");
+    try {
+      const token = localStorage.getItem("authToken");
+      const storedUser = localStorage.getItem("authUser");
 
-        if (token && rawUser && rawUser !== "undefined") {
-          const parsedUser = JSON.parse(rawUser);
+      if (token && storedUser) {
+        const parsedUser = JSON.parse(storedUser);
 
-          const normalizedRole =
-            parsedUser?.role?.toLowerCase() ||
-            parsedUser?.role_name?.toLowerCase() ||
-            null;
+        const normalizedRole =
+          parsedUser.role?.toLowerCase() ||
+          parsedUser.role_name?.toLowerCase() ||
+          null;
 
-          setUser(parsedUser);
-          setRole(normalizedRole);
-          setIsAuthenticated(true);
-
-          console.log("✅ Auth initialized:", {
-            userId: parsedUser?.u_id,
-            role: normalizedRole,
-          });
-        } else {
-          clearAuth();
-        }
-      } catch (err) {
-        console.error("❌ Auth init failed:", err);
-        clearAuth();
-      } finally {
-        setAuthLoading(false);
+        setUser(parsedUser);
+        setRole(normalizedRole);
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setRole(null);
+        setIsAuthenticated(false);
       }
-    };
-
-    initAuth();
+    } catch (err) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("authUser");
+      setUser(null);
+      setRole(null);
+      setIsAuthenticated(false);
+    } finally {
+      setAuthLoading(false);
+    }
   }, []);
 
-  /**
-   * 🔑 Login (used by Email + Google OAuth)
-   */
-  const login = ({ token, user }) => {
+  const login = (token, userData) => {
     localStorage.setItem("authToken", token);
-    localStorage.setItem("authUser", JSON.stringify(user));
+    localStorage.setItem("authUser", JSON.stringify(userData));
 
     const normalizedRole =
-      user?.role?.toLowerCase() ||
-      user?.role_name?.toLowerCase() ||
+      userData.role?.toLowerCase() ||
+      userData.role_name?.toLowerCase() ||
       null;
 
-    setUser(user);
+    setUser(userData);
     setRole(normalizedRole);
     setIsAuthenticated(true);
-
-    console.log("✅ User logged in:", {
-      userId: user?.u_id,
-      role: normalizedRole,
-    });
   };
 
-  /**
-   * 🚪 Logout
-   */
   const logout = () => {
-    clearAuth();
-    console.log("✅ User logged out");
-  };
-
-  /**
-   * 🧹 Clear auth helper
-   */
-  const clearAuth = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("authUser");
     setUser(null);
@@ -96,29 +64,17 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        role,
-        isAuthenticated,
-        authLoading,
-        login,
-        logout,
-      }}
+      value={{ user, role, isAuthenticated, authLoading, login, logout }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
 
-/**
- * useAuth hook
- */
 const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
 };
 
 export default useAuth;

@@ -1,8 +1,13 @@
-import { useState ,useEffect} from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-import { FaGoogle, FaLinkedin, FaGithub } from "react-icons/fa";
+import { FaGoogle } from "react-icons/fa";
+import useAuth from "../auth/useAuth";
 
-const Login = ({ onLogin, onClose, onSwitchToSignup, navigate }) => {
+
+const Login = ({ onClose, onSwitchToSignup }) => {
+
+
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
 
   const [formData, setFormData] = useState({
@@ -16,6 +21,8 @@ const Login = ({ onLogin, onClose, onSwitchToSignup, navigate }) => {
 
   // Responsive breakpoint
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+const { login } = useAuth();
+const navigate = useNavigate();
 
   useEffect(() => {
   const handleResize = () => {
@@ -285,114 +292,72 @@ const Login = ({ onLogin, onClose, onSwitchToSignup, navigate }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  if (!validateForm()) return;
 
-    if (!validateForm()) return;
+  setLoading(true);
+  setErrors({});
 
-    setLoading(true);
-    setErrors({});
+  try {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: formData.email.toLowerCase().trim(),
+        password: formData.password,
+      }),
+    });
 
-    try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email.toLowerCase().trim(),
-          password: formData.password,
-        }),
-      });
+    const data = await response.json();
 
-      const data = await response.json();
-      console.log("🟢 Login API Response:", data);
-
-      if (!response.ok) {
-        if (response.status === 429) {
-          setErrors({
-            general:
-              "Account locked due to multiple failed attempts. Try again later.",
-          });
-        } else if (response.status === 403) {
-          setErrors({ general: data.message || "Access denied" });
-        } else if (response.status === 400) {
-          setErrors({ general: data.message || "Invalid email or password" });
-        } else if (response.status === 500) {
-          setErrors({ general: "Server error. Please try again later." });
-        } else {
-          setErrors({
-            general: data.message || "Login failed. Please try again.",
-          });
-        }
-        return;
-      }
-
-      if (!data.user || !data.token) {
-        setErrors({ general: "Login failed. Missing token or user data." });
-        return;
-      }
-
-      if (!data.user.verified) {
-        setErrors({ general: "Please verify your email first." });
-        return;
-      }
-
-      localStorage.setItem("authToken", data.token);
-      localStorage.setItem("authUser", JSON.stringify(data.user));
-
-      if (onLogin) onLogin(data.user);
-      if (onClose) onClose();
-
-      const status = data.user.status;
-
-      if (status !== "active") {
-        setErrors({
-          general: `Account status: ${status}. Please contact support.`,
-        });
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("authUser");
-        return;
-      }
-
-      const role = data.user.role_name?.toUpperCase() || data.user.role?.toUpperCase();
-
-      // Call navigate prop if provided
-      if (navigate) {
-        switch (role) {
-          case "USER":
-            navigate("/user/dashboard", { replace: true });
-            break;
-          case "ORGANIZATION":
-            navigate("/org/dashboard", { replace: true });
-            break;
-          case "ADMIN":
-            navigate("/admin/dashboard", { replace: true });
-            break;
-          default:
-            console.warn("Unknown role:", role);
-            navigate("/", { replace: true });
-        }
-      }
-    } catch (err) {
-      console.error("❌ Login Error:", err);
-
-      if (err.name === "TypeError" && err.message.includes("fetch")) {
-        setErrors({
-          general: "Cannot connect to server. Please check your connection.",
-        });
-      } else if (err.name === "SyntaxError") {
-        setErrors({
-          general: "Invalid response from server. Please try again.",
-        });
-      } else {
-        setErrors({
-          general: "An unexpected error occurred. Please try again later.",
-        });
-      }
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      setErrors({ general: data.message || "Login failed" });
+      return;
     }
-  };
+
+    if (!data.user || !data.token) {
+      setErrors({ general: "Missing login data" });
+      return;
+    }
+
+    if (!data.user.verified) {
+      setErrors({ general: "Please verify your email first." });
+      return;
+    }
+
+    if (data.user.status !== "active") {
+      setErrors({ general: `Account status: ${data.user.status}` });
+      return;
+    }
+
+    // ✅ SINGLE SOURCE OF TRUTH
+    login(data.token, data.user);
+
+const role =
+  data.user.role?.toLowerCase() ||
+  data.user.role_name?.toLowerCase();
+
+if (role === "admin") {
+  navigate("/admin/dashboard", { replace: true });
+} else if (role === "organization") {
+  navigate("/org/dashboard", { replace: true });
+} else {
+  navigate("/user/dashboard", { replace: true });
+}
+
+// close modal AFTER navigation
+setTimeout(() => {
+  onClose?.();
+}, 0);
+
+
+  } catch (err) {
+    setErrors({ general: "Login failed. Try again." });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleSocialLogin = (provider) => {
   if (provider === "Google") {
