@@ -15,6 +15,7 @@ export default function ProfileSetup() {
     firstName: "",
     lastName: "",
     email: "",
+    countryCode: "+91",
     phone: "",
     dob: "",
     addresses: [
@@ -37,9 +38,7 @@ export default function ProfileSetup() {
     if (firstName && lastName && email && phone && dob) {
       setStep(2);
     } else {
-      alert(
-        "Please fill in all personal information fields before continuing."
-      );
+      alert("Please fill in all personal information fields before continuing.");
     }
   };
 
@@ -64,7 +63,7 @@ export default function ProfileSetup() {
         <div className={`circle ${step === 2 ? "active" : ""}`}>2</div>
       </div>
 
-      {/* Step 1: Personal Information */}
+      {/* STEP 1 */}
       {step === 1 && (
         <div className="form-card">
           <FaUser className="form-icon-big" />
@@ -99,14 +98,30 @@ export default function ProfileSetup() {
             />
           </div>
 
-          <div className="form-row icon-input">
-            <FaPhone className="input-icon" />
+          {/* ✅ PHONE WITH COUNTRY CODE */}
+          <div className="phone-group">
+            <FaPhone className="input-icon phone-icon" />
+
+            <select
+              name="countryCode"
+              value={formData.countryCode}
+              onChange={handleChange}
+              className="country-code"
+            >
+              <option value="+91">🇮🇳 +91</option>
+              <option value="+1">🇺🇸 +1</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+61">🇦🇺 +61</option>
+              <option value="+81">🇯🇵 +81</option>
+            </select>
+
             <input
-              type="text"
+              type="tel"
               name="phone"
-              placeholder="Phone Number"
+              placeholder="Mobile Number"
               value={formData.phone}
               onChange={handleChange}
+              className="phone-input"
             />
           </div>
 
@@ -126,7 +141,7 @@ export default function ProfileSetup() {
         </div>
       )}
 
-      {/* Step 2: Address Information */}
+      {/* STEP 2 */}
       {step === 2 && (
         <div className="form-card">
           <FaHome className="form-icon-big" />
@@ -149,6 +164,7 @@ export default function ProfileSetup() {
                 value={address.apt}
                 onChange={(e) => handleChange(e, index, true)}
               />
+
               <div className="form-row">
                 <input
                   type="text"
@@ -188,10 +204,7 @@ export default function ProfileSetup() {
             </div>
           ))}
 
-          <button
-            className="btn-secondary small-btn"
-            onClick={addAnotherAddress}
-          >
+          <button className="btn-secondary small-btn" onClick={addAnotherAddress}>
             + Add Another Address
           </button>
 
@@ -206,6 +219,7 @@ export default function ProfileSetup() {
               Complete Setup
             </button>
           </div>
+
           <p className="info-text">
             Your information is secure and will not be shared
           </p>
