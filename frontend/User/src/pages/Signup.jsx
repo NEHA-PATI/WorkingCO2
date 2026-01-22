@@ -737,12 +737,12 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                   Enter the 6-digit OTP sent to <b>{tempEmail}</b>
                 </p>
 
-                <div style={styles.infoBox}>
+                {/* <div style={styles.infoBox}>
                   <p style={styles.infoText}>
                     ℹ️ After verification, your account will be active and you
                     can login.
                   </p>
-                </div>
+                </div> */}
 
                 <input
                   type="text"

@@ -5,6 +5,8 @@ import UserLayout from "./layouts/UserLayout";
 import OrgLayout from "./layouts/OrgLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PrivacyPolicy from "./components/common/Privacy";
+import TermsAndConditions from "./components/common/T&C";
 
 // Public pages
 import Home from "./pages/Home";
@@ -43,6 +45,7 @@ import ResetPassword from "./pages/ResetPassword";
 import JoinOrganisation from "./pages/JoinOrganisation";
 import NotFoundAnimation from "./pages/NotFoundAnimation";
 
+
 function App() {
   return (
     <ModalProvider>
@@ -64,6 +67,10 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/case-studies" element={<CaseStudy />} />
           <Route path="/settings" element={<NotFoundAnimation />} />
+         <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+         <Route path="/termsandconditions" element={<TermsAndConditions/>} />
+
+
 
           {/* ================= PROTECTED ROUTES (PUBLIC LAYOUT) ================= */}
           {/* These routes are in BaseLayout but require authentication */}
