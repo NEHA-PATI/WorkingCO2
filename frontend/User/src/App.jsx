@@ -208,7 +208,7 @@ import Upload from "./components/upload";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import JoinOrganisation from "./pages/JoinOrganisation";
-
+import OAuthSuccess from "./pages/OAuthSuccess";
 
 function App() {
   return (
@@ -223,6 +223,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/join-organisation" element={<JoinOrganisation />} />
+<Route path="/oauth-success" element={<OAuthSuccess />} />
 
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
@@ -271,6 +272,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+  path="/user/dashboard"
+  element={
+    <ProtectedRoute requiredRole="user">
+      <UserDashboard />
+    </ProtectedRoute>
+  }
+/>
 
           {/* ================= USER DASHBOARD ROUTES ================= */}
           <Route

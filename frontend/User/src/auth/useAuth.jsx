@@ -1,57 +1,51 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 /**
- * AuthContext - Provides authentication state across the app
- * Prevents race conditions by managing loading state properly
+ * AuthContext
  */
 const AuthContext = createContext(null);
 
 /**
- * AuthProvider Component
- * Wraps the app to provide auth state to all components
+ * AuthProvider
  */
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true); // 🔑 Start as loading
+  const [authLoading, setAuthLoading] = useState(true);
 
-  // Hydrate auth state from localStorage on mount
+  /**
+   * 🔁 Hydrate auth state from localStorage on app load
+   */
   useEffect(() => {
     const initAuth = () => {
       try {
         const token = localStorage.getItem("authToken");
-        const storedUser = localStorage.getItem("authUser");
+        const rawUser = localStorage.getItem("authUser");
 
-        if (token && storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          
-          // Extract role (support both role and role_name fields)
+        if (token && rawUser && rawUser !== "undefined") {
+          const parsedUser = JSON.parse(rawUser);
+
           const normalizedRole =
-            parsedUser.role?.toLowerCase() ||
-            parsedUser.role_name?.toLowerCase() ||
+            parsedUser?.role?.toLowerCase() ||
+            parsedUser?.role_name?.toLowerCase() ||
             null;
 
           setUser(parsedUser);
           setRole(normalizedRole);
           setIsAuthenticated(true);
-          
-          console.log("✅ Auth initialized:", { role: normalizedRole, userId: parsedUser.u_id });
+
+          console.log("✅ Auth initialized:", {
+            userId: parsedUser?.u_id,
+            role: normalizedRole,
+          });
         } else {
-          setUser(null);
-          setRole(null);
-          setIsAuthenticated(false);
+          clearAuth();
         }
       } catch (err) {
         console.error("❌ Auth init failed:", err);
-        // Clear corrupted data
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("authUser");
-        setUser(null);
-        setRole(null);
-        setIsAuthenticated(false);
+        clearAuth();
       } finally {
-        // 🔑 CRITICAL: Always set loading to false after init
         setAuthLoading(false);
       }
     };
@@ -59,58 +53,71 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  // Login function - updates state and localStorage
-  const login = (token, userData) => {
+  /**
+   * 🔑 Login (used by Email + Google OAuth)
+   */
+  const login = ({ token, user }) => {
     localStorage.setItem("authToken", token);
-    localStorage.setItem("authUser", JSON.stringify(userData));
-    
+    localStorage.setItem("authUser", JSON.stringify(user));
+
     const normalizedRole =
-      userData.role?.toLowerCase() ||
-      userData.role_name?.toLowerCase() ||
+      user?.role?.toLowerCase() ||
+      user?.role_name?.toLowerCase() ||
       null;
 
-    setUser(userData);
+    setUser(user);
     setRole(normalizedRole);
     setIsAuthenticated(true);
-    
-    console.log("✅ User logged in:", { role: normalizedRole, userId: userData.u_id });
+
+    console.log("✅ User logged in:", {
+      userId: user?.u_id,
+      role: normalizedRole,
+    });
   };
 
-  // Logout function - clears state and localStorage
+  /**
+   * 🚪 Logout
+   */
   const logout = () => {
+    clearAuth();
+    console.log("✅ User logged out");
+  };
+
+  /**
+   * 🧹 Clear auth helper
+   */
+  const clearAuth = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("authUser");
     setUser(null);
     setRole(null);
     setIsAuthenticated(false);
-    
-    console.log("✅ User logged out");
   };
 
-  const value = {
-    user,
-    role,
-    isAuthenticated,
-    authLoading,
-    login,
-    logout,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        role,
+        isAuthenticated,
+        authLoading,
+        login,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 /**
- * useAuth Hook
- * Access auth state from any component
- * Must be used within AuthProvider
+ * useAuth hook
  */
 const useAuth = () => {
   const context = useContext(AuthContext);
-  
   if (!context) {
     throw new Error("useAuth must be used within AuthProvider");
   }
-  
   return context;
 };
 
