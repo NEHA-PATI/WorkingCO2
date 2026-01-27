@@ -656,10 +656,10 @@ const Overview = () => {
             Monitor your carbon positive progress and key metrics
           </p>
         </div>
-        <div className="org-overview-badge">
+        {/* <div className="org-overview-badge">
           <span className="org-overview-badge-icon">♻️</span>
           <span className="org-overview-badge-text">CARBON POSITIVE</span>
-        </div>
+        </div> */}
       </div>
 
       {/* Stat Cards Grid */}
@@ -679,10 +679,9 @@ const Overview = () => {
                   className="org-overview-stat-icon"
                   style={{
                     backgroundColor: `${card.color}20`,
-                    color: card.color,
                   }}
                 >
-                  <IconComponent size={24} />
+                  <IconComponent size={24} color={card.color} />
                 </div>
                 <span className="org-overview-stat-trend">{card.trend}</span>
               </div>
@@ -707,7 +706,7 @@ const Overview = () => {
             <div key={metric.label} className="org-overview-metric-mini">
               <IconComponent
                 size={20}
-                style={{ color: metric.color }}
+                color={metric.color}
               />
               <div className="org-overview-metric-info">
                 <span className="org-overview-metric-label">{metric.label}</span>
@@ -724,7 +723,7 @@ const Overview = () => {
         <div className="org-overview-section org-overview-goals">
           <div className="org-overview-section-header">
             <div className="org-overview-section-icon">
-              <FaBullseye size={24} style={{ color: '#3b82f6' }} />
+              <FaBullseye size={24} color='#3b82f6' />
             </div>
             <div className="org-overview-section-title">
               <h2>Goal Progress</h2>
@@ -767,7 +766,7 @@ const Overview = () => {
         <div className="org-overview-section org-overview-compliance">
           <div className="org-overview-section-header">
             <div className="org-overview-section-icon">
-              <FaShieldAlt size={24} style={{ color: '#10b981' }} />
+              <FaShieldAlt size={24} color='#10b981' />
             </div>
             <div className="org-overview-section-title">
               <h2>Compliance Status</h2>

@@ -29,7 +29,7 @@ import CreditEarnings from "../components/org/CreditEarnings";
 import ComplianceReports from "../components/org/ComplianceReports";
 import TeamManagement from "../components/org/TeamManagement";
 import QuickActions from "../components/org/QuickActions";
-import "../styles/org/global1.css";
+import "../styles/org/Overview.css";
 import "../styles/org/TeamManagement.css";
 import "../styles/org/OrgDashboard.css";
 
@@ -171,15 +171,15 @@ const DASHBOARD_TABS = [
 
 const OrgDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  ///const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
+  //const [showNotifications, setShowNotifications] = useState(false);
 
-  const [notifications] = useState([
-    { id: 1, type: "alert", message: "Compliance report due in 3 days" },
-    { id: 2, type: "success", message: "EV-001 credits verified" },
-    { id: 3, type: "warning", message: "Solar panel maintenance overdue" },
-  ]);
+  // const [notifications] = useState([
+  //   { id: 1, type: "alert", message: "Compliance report due in 3 days" },
+  //   { id: 2, type: "success", message: "EV-001 credits verified" },
+  //   { id: 3, type: "warning", message: "Solar panel maintenance overdue" },
+  // ]);
 
   // const ActiveComponent = DASHBOARD_TABS.find((tab) => tab.id === activeTab)?.component || Overview;
 
@@ -191,29 +191,28 @@ const OrgDashboard = () => {
     }, 300);
   };
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle("dark");
-  };
+  // const toggleDarkMode = () => {
+  //   setIsDarkMode(!isDarkMode);
+  //   document.documentElement.classList.toggle("dark");
+  // };
 
   return (
     <motion.div
-      className={`org-dashboard min-h-screen bg-gray-50 ${isDarkMode ? "dark" : ""
-        }`}
+      className="org-dashboard min-h-screen bg-gray-50"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
       {/* Top Bar */}
-      <div className="org-topbar">
-        {/* <div className="topbar-left">
+      {/*<div className="org-topbar">
+        <div className="topbar-left">
           <h1 className="text-2xl font-bold">Organization Dashboard</h1>
           <p className="text-sm text-secondary">
             Manage your carbon credit assets and track your impact
           </p>
-        </div> */}
+        </div>
 
-        <div className="topbar-right">
+         <div className="topbar-right">
           <NotificationDropdown
             notifications={notifications}
             isOpen={showNotifications}
@@ -228,7 +227,7 @@ const OrgDashboard = () => {
             )}
           </Button>
         </div>
-      </div>
+      </div>*/}
 
       <div className="p-6">
         <Tabs

@@ -102,7 +102,6 @@
   position: relative;
   overflow: hidden;
   animation: scaleIn 0.5s ease-out forwards;
-  opacity: 0;
   transform: translateY(10px);
 }
 
@@ -174,7 +173,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .org-overview-stat-card:hover .org-overview-stat-icon {
@@ -197,17 +196,17 @@
 }
 
 .org-overview-stat-value {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 800;
   color: #1e293b;
   margin: 0;
-  margin-bottom: 4px;
+  margin-bottom: 0px;
   letter-spacing: -0.5px;
 }
 
 .org-overview-stat-label {
   font-size: 12px;
-  color: #94a3b8;
+  color: #677588;
   margin: 0;
   font-weight: 600;
   text-transform: uppercase;
@@ -232,7 +231,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
   padding: 0;
 }
 
@@ -320,7 +319,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0f9ff;
+  background: #c8e0f2;
   flex-shrink: 0;
   transition: all 0.3s ease;
 }
@@ -335,12 +334,12 @@
   font-weight: 700;
   color: #1e293b;
   margin: 0;
-  margin-bottom: 4px;
+  margin-bottom: 0px;
 }
 
 .org-overview-section-title p {
   font-size: 13px;
-  color: #94a3b8;
+  color: #7d8b9e;
   margin: 0;
   font-weight: 500;
 }
@@ -349,7 +348,7 @@
 .org-overview-goals-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 0px;
 }
 
 .org-overview-goal-item {
@@ -388,7 +387,7 @@
 .org-overview-goal-progress-text {
   font-size: 14px;
   font-weight: 700;
-  color: #3b82f6;
+  color: #2664c7;
   background: #eff6ff;
   padding: 2px 8px;
   border-radius: 4px;
@@ -396,7 +395,7 @@
 
 .org-overview-goal-meta {
   font-size: 12px;
-  color: #94a3b8;
+  color: #7d8b9e;
   margin: 0;
 }
 
@@ -410,7 +409,7 @@
 .org-overview-progress-bar-bg {
   flex: 1;
   height: 6px;
-  background: #e2e8f0;
+  background: #c7ccd2;
   border-radius: 6px;
   overflow: hidden;
   position: relative;
@@ -418,7 +417,7 @@
 
 .org-overview-progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6 0%, #0ea5e9 100%);
+  background: linear-gradient(90deg, #3b82f6 0%, #49bdf3 100%);
   border-radius: 6px;
   animation: fillProgressBar 1.2s ease-out forwards;
   opacity: 0;
@@ -427,7 +426,7 @@
 
 .org-overview-goal-date {
   font-size: 11px;
-  color: #cbd5e1;
+  color: #7d8b9e;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -608,6 +607,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -619,6 +619,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -630,6 +631,7 @@
     opacity: 0;
     transform: scale(0.95) translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -641,6 +643,7 @@
     opacity: 0;
     width: 0;
   }
+
   to {
     opacity: 1;
     width: 100%;
@@ -737,6 +740,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }

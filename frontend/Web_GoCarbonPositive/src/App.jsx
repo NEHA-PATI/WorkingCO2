@@ -202,7 +202,7 @@ import AdminReports from "./pages/admin/Reports";
 
 // Protected routes (in public layout)
 import ViewAssets from "./pages/ViewAssets";
-import Profile from "./pages/profile";
+import Profile from "./components/common/Profile";
 import Wallet from "./pages/wallet";
 import Upload from "./components/upload";
 import ForgotPassword from "./pages/ForgotPassword";
