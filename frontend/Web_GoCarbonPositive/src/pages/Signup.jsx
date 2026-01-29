@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { FaGoogle, FaLinkedin, FaGithub } from "react-icons/fa";
-import LoadingPopup from "../components/user/LoadingPopup";
 import useAuth from "../auth/useAuth";
 import { useNavigate } from "react-router-dom";
+import LoadingPopup from "../components/user/LoadingPopup";
 
 
 const Signup = ({ onClose, onSwitchToLogin }) => {

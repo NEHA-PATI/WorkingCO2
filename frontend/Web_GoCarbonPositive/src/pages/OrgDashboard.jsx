@@ -34,15 +34,15 @@ import "../styles/org/TeamManagement.css";
 import "../styles/org/OrgDashboard.css";
 
 // SVG Icons
-const BellIcon = () => <FiBell size={20} style={{ color: "#f59e0b" }} />;
+// const BellIcon = () => <FiBell size={20} style={{ color: "#f59e0b" }} />;
 
-const CalendarIcon = () => (
-  <FiCalendar size={20} style={{ color: "#3b82f6" }} />
-);
+// const CalendarIcon = () => (
+//   <FiCalendar size={20} style={{ color: "#3b82f6" }} />
+// );
 
-const MoonIcon = () => <FiMoon size={20} style={{ color: "#6366f1" }} />;
+// const MoonIcon = () => <FiMoon size={20} style={{ color: "#6366f1" }} />;
 
-const SunIcon = () => <FiSun size={20} style={{ color: "#f59e0b" }} />;
+// const SunIcon = () => <FiSun size={20} style={{ color: "#f59e0b" }} />;
 
 const ActivityIcon = () => (
   <FiActivity size={16} style={{ color: "#3b82f6" }} />
@@ -54,7 +54,7 @@ const TrendingUpIcon = () => (
   <FiTrendingUp size={16} style={{ color: "#f59e0b" }} />
 );
 
-const TruckIcon = () => <FiTruck size={16} style={{ color: "#8b5cf6" }} />;
+// const TruckIcon = () => <FiTruck size={16} style={{ color: "#8b5cf6" }} />;
 
 const FileTextIcon = () => (
   <FiFileText size={16} style={{ color: "#ef4444" }} />
@@ -65,56 +65,56 @@ const UsersIcon = () => <FiUsers size={16} style={{ color: "#6366f1" }} />;
 const ZapIcon = () => <FiZap size={16} style={{ color: "#10b981" }} />;
 
 // Notification Dropdown Component
-const NotificationDropdown = ({ notifications, isOpen, onToggle }) => (
-  <motion.div
-    className="notification-dropdown"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.3 }}
-  >
-    <Button className="button-ghost p-2 relative" onClick={onToggle}>
-      <BellIcon className="w-5 h-5" />
-      {notifications.length > 0 && (
-        <Badge className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs bg-red-600 text-white">
-          {notifications.length}
-        </Badge>
-      )}
-    </Button>
-    {isOpen && (
-      <>
-        <div className="fixed inset-0 z-40" onClick={onToggle} />
-        <motion.div
-          className="dropdown-content dropdown-content-end w-80"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="notification-header">Notifications</div>
-          {notifications.map((notification) => (
-            <div key={notification.id} className="dropdown-item">
-              <div className="flex items-start space-x-2">
-                <div
-                  className={`notification-dot ${notification.type === "alert"
-                    ? "bg-red-500"
-                    : notification.type === "success"
-                      ? "bg-green-500"
-                      : "bg-yellow-500"
-                    }`}
-                />
-                <div className="flex-1">
-                  <div className="notification-message">
-                    {notification.message}
-                  </div>
-                  <div className="notification-time">2 hours ago</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </motion.div>
-      </>
-    )}
-  </motion.div>
-);
+// const NotificationDropdown = ({ notifications, isOpen, onToggle }) => (
+//   <motion.div
+//     className="notification-dropdown"
+//     initial={{ opacity: 0 }}
+//     animate={{ opacity: 1 }}
+//     transition={{ duration: 0.3 }}
+//   >
+//     <Button className="button-ghost p-2 relative" onClick={onToggle}>
+//       <BellIcon className="w-5 h-5" />
+//       {notifications.length > 0 && (
+//         <Badge className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs bg-red-600 text-white">
+//           {notifications.length}
+//         </Badge>
+//       )}
+//     </Button>
+//     {isOpen && (
+//       <>
+//         <div className="fixed inset-0 z-40" onClick={onToggle} />
+//         <motion.div
+//           className="dropdown-content dropdown-content-end w-80"
+//           initial={{ opacity: 0, y: -10 }}
+//           animate={{ opacity: 1, y: 0 }}
+//           transition={{ duration: 0.3 }}
+//         >
+//           <div className="notification-header">Notifications</div>
+//           {notifications.map((notification) => (
+//             <div key={notification.id} className="dropdown-item">
+//               <div className="flex items-start space-x-2">
+//                 <div
+//                   className={`notification-dot ${notification.type === "alert"
+//                     ? "bg-red-500"
+//                     : notification.type === "success"
+//                       ? "bg-green-500"
+//                       : "bg-yellow-500"
+//                     }`}
+//                 />
+//                 <div className="flex-1">
+//                   <div className="notification-message">
+//                     {notification.message}
+//                   </div>
+//                   <div className="notification-time">2 hours ago</div>
+//                 </div>
+//               </div>
+//             </div>
+//           ))}
+//         </motion.div>
+//       </>
+//     )}
+//   </motion.div>
+// );
 
 // Dashboard tabs configuration
 const DASHBOARD_TABS = [

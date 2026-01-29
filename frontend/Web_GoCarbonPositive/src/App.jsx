@@ -45,8 +45,12 @@ import Upload from "./components/upload";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import JoinOrganisation from "./pages/JoinOrganisation";
-import NotFoundAnimation from "./pages/NotFoundAnimation";
+// import NotFoundAnimation from "./pages/NotFoundAnimation";
+
 import OAuthSuccess from "./pages/OAuthSuccess";
+
+import NotFoundAnimation from "./pages/NotFoundAnimation";
+
 
 function App() {
   return (
@@ -69,14 +73,14 @@ function App() {
           <Route path="/community" element={<Community />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/case-studies" element={<CaseStudy />} />
-          <Route path="/faq" element={<Faq />} />
-
-          {/* <Route path="/settings" element={<NotFoundAnimation />} /> */}
           <Route path="/settings" element={<NotFoundAnimation />} />
          <Route path="/privacypolicy" element={<PrivacyPolicy />} />
          <Route path="/termsandconditions" element={<TermsAndConditions/>} />
 
 
+          <Route path="/faq" element={<Faq />} />
+
+          {/* <Route path="/settings" element={<NotFoundAnimation />} /> */}
 
           {/* ================= PROTECTED ROUTES (PUBLIC LAYOUT) ================= */}
           {/* These routes are in BaseLayout but require authentication */}

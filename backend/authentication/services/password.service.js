@@ -28,7 +28,8 @@ exports.forgotPassword = async (email) => {
     expires_at: new Date(Date.now() + 15 * 60 * 1000),
   });
 
-  const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password/${rawToken}`;
+
 
   await sendResetEmail(user.email, resetLink);
 };
