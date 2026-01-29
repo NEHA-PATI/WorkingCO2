@@ -49,7 +49,7 @@ export const USER_ORG_MENU = {
     { label: "Community", path: "/community", icon: FaUsers, color: "#28a745" },
     { label: "Blog", path: "/blog", icon: FaBlog, color: "#ff5722" },
     { label: "Case Studies", path: "/case-studies", icon: FaBookOpen, color: "#17a2b8" },
-    { label: "Careers", path: "/careers", icon: FaBriefcase, color: "#6f42c1" },
+    // { label: "Careers", path: "/careers", icon: FaBriefcase, color: "#6f42c1" },
     { label: "About Us", path: "/about", icon: FaInfoCircle, color: "#fd7e14" },
     { label: "Contact Us", path: "/contact", icon: FaEnvelope, color: "#20c997" },
     { label: "Logout", action: "logout", icon: FaSignOutAlt, color: "#e53935" },

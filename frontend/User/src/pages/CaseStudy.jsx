@@ -124,8 +124,7 @@ export default function CaseStudy() {
       <header className="caseStudy-navbar">
         <div className="caseStudy-navbar-left">
           <div className="caseStudy-logo">
-            <div className="caseStudy-logo-icon">🍃</div>
-            <span className="caseStudy-brand">EcoImpact</span>
+            
           </div>
         </div>
         <nav className="caseStudy-nav">
@@ -139,7 +138,7 @@ export default function CaseStudy() {
         </nav>
         <div className="caseStudy-navbar-right">
           <select className="caseStudy-filter">
-            <option>All</option>
+           
           </select>
           <button
             className="caseStudy-downloadBtn"

@@ -1,230 +1,496 @@
-import React, { useState } from "react";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { ChevronDown } from 'lucide-react';
 import {
-  FaUser,
-  FaEnvelope,
-  FaPhone,
-  FaCalendarAlt,
-  FaHome,
-  FaGlobe,
-} from "react-icons/fa";
-import "../styles/user/profile.css";
+  FaBuilding,
+  FaUniversity,
+  FaCity,
+  FaCheckCircle,
+  FaMapMarkerAlt,
+} from 'react-icons/fa';
+import '../styles/user/profile.css';
 
-export default function ProfileSetup() {
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    countryCode: "+91",
-    phone: "",
-    dob: "",
-    addresses: [
-      { street: "", apt: "", city: "", state: "", zip: "", country: "" },
-    ],
-  });
+export default function OrganizationProfile() {
+  const [orgType, setOrgType] = useState('industry');
+  const [idType, setIdType] = useState('PAN');
+  const [idNumber, setIdNumber] = useState('');
+  const [isIdVerified, setIsIdVerified] = useState(false);
+  const [showIdOtp, setShowIdOtp] = useState(false);
+  const [idOtp, setIdOtp] = useState('');
+  const [idOtpTimer, setIdOtpTimer] = useState(0);
 
-  const handleChange = (e, index, isAddress = false) => {
-    if (isAddress) {
-      const updatedAddresses = [...formData.addresses];
-      updatedAddresses[index][e.target.name] = e.target.value;
-      setFormData({ ...formData, addresses: updatedAddresses });
-    } else {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
+  const [dob, setDob] = useState('');
+  const [orgName, setOrgName] = useState('');
+  const [websiteProtocol, setWebsiteProtocol] = useState('https');
+  const [websiteUrl, setWebsiteUrl] = useState('');
+
+  const [country] = useState('India');
+  const [state, setState] = useState('');
+  const [city, setCity] = useState('');
+  const [pinCode, setPinCode] = useState('');
+  const [fullAddress, setFullAddress] = useState('');
+
+  const [email, setEmail] = useState('');
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [showEmailOtp, setShowEmailOtp] = useState(false);
+  const [emailOtp, setEmailOtp] = useState('');
+  const [emailOtpTimer, setEmailOtpTimer] = useState(0);
+
+  // ID OTP Timer
+  useEffect(() => {
+    if (idOtpTimer > 0) {
+      const timer = setTimeout(() => setIdOtpTimer(idOtpTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [idOtpTimer]);
+
+  // Email OTP Timer
+  useEffect(() => {
+    if (emailOtpTimer > 0) {
+      const timer = setTimeout(
+        () => setEmailOtpTimer(emailOtpTimer - 1),
+        1000
+      );
+      return () => clearTimeout(timer);
+    }
+  }, [emailOtpTimer]);
+
+  const handleVerifyId = () => {
+    if (idNumber.trim()) {
+      setShowIdOtp(true);
+      setIdOtpTimer(30);
     }
   };
 
-  const nextStep = () => {
-    const { firstName, lastName, email, phone, dob } = formData;
-    if (firstName && lastName && email && phone && dob) {
-      setStep(2);
-    } else {
-      alert("Please fill in all personal information fields before continuing.");
+  const handleVerifyIdOtp = () => {
+    if (idOtp.length === 6) {
+      setIsIdVerified(true);
+      setShowIdOtp(false);
+      setIdOtp('');
+      alert('ID verified successfully!');
     }
   };
 
-  const prevStep = () => setStep(1);
+  const handleResendIdOtp = () => {
+    if (idOtpTimer === 0) {
+      setIdOtpTimer(30);
+      setIdOtp('');
+    }
+  };
 
-  const addAnotherAddress = () => {
-    setFormData({
-      ...formData,
-      addresses: [
-        ...formData.addresses,
-        { street: "", apt: "", city: "", state: "", zip: "", country: "" },
-      ],
-    });
+  const handleVerifyEmail = () => {
+    if (email.trim()) {
+      setShowEmailOtp(true);
+      setEmailOtpTimer(30);
+    }
+  };
+
+  const handleVerifyEmailOtp = () => {
+    if (emailOtp.length === 6) {
+      setIsEmailVerified(true);
+      setShowEmailOtp(false);
+      setEmailOtp('');
+      alert('Email verified successfully!');
+    }
+  };
+
+  const handleResendEmailOtp = () => {
+    if (emailOtpTimer === 0) {
+      setEmailOtpTimer(30);
+      setEmailOtp('');
+    }
+  };
+
+  const handleUpdateProfile = () => {
+    if (
+      !idNumber ||
+      !orgName ||
+      !email ||
+      !state ||
+      !city ||
+      !pinCode ||
+      !fullAddress
+    ) {
+      alert('Please fill all required fields');
+      return;
+    }
+    if (!isIdVerified || !isEmailVerified) {
+      alert('Please verify ID and Email');
+      return;
+    }
+    alert('Profile updated successfully!');
   };
 
   return (
-    <div className="profile-container">
-      {/* Step Indicator */}
-      <div className="step-indicator">
-        <div className={`circle ${step === 1 ? "active" : ""}`}>1</div>
-        <div className="line"></div>
-        <div className={`circle ${step === 2 ? "active" : ""}`}>2</div>
-      </div>
+    <div className="orgp-page-root">
+      <div className="orgp-profile-container">
+        {/* Left Side - Form (Scrollable only this section) */}
+        <div className="orgp-form-section">
+          <form className="orgp-form">
+            {/* Organization Type */}
+            <div className="orgp-form-group">
+              <label className="orgp-form-label">
+                What's the type of your organization?
+              </label>
+              <div className="orgp-org-type-selector">
+                <button
+                  type="button"
+                  className={`orgp-org-type-btn ${
+                    orgType === 'industry' ? 'orgp-active' : ''
+                  }`}
+                  onClick={() => setOrgType('industry')}
+                >
+                  <FaBuilding className="orgp-org-icon" />
+                  Industry & Private Sector
+                </button>
+                <button
+                  type="button"
+                  className={`orgp-org-type-btn ${
+                    orgType === 'central' ? 'orgp-active' : ''
+                  }`}
+                  onClick={() => setOrgType('central')}
+                >
+                  <FaUniversity className="orgp-org-icon" />
+                  Central Government
+                </button>
+                <button
+                  type="button"
+                  className={`orgp-org-type-btn ${
+                    orgType === 'state' ? 'orgp-active' : ''
+                  }`}
+                  onClick={() => setOrgType('state')}
+                >
+                  <FaCity className="orgp-org-icon" />
+                  State Government
+                </button>
+              </div>
+            </div>
 
-      {/* STEP 1 */}
-      {step === 1 && (
-        <div className="form-card">
-          <FaUser className="form-icon-big" />
-          <h2>Personal Information</h2>
-          <p>Please provide your personal details to continue</p>
+            {/* Select ID */}
+            <div className="orgp-form-group">
+              <label className="orgp-form-label">Select ID*</label>
+              <div className="orgp-select-wrapper">
+                <select
+                  value={idType}
+                  onChange={(e) => setIdType(e.target.value)}
+                  className="orgp-form-select"
+                >
+                  <option value="PAN">PAN</option>
+                  <option value="TAN">TAN</option>
+                  <option value="GSTIN">GSTIN</option>
+                </select>
+                <ChevronDown className="orgp-select-icon" size={18} />
+              </div>
+            </div>
 
-          <div className="form-row">
-            <input
-              type="text"
-              name="firstName"
-              placeholder="First Name"
-              value={formData.firstName}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="lastName"
-              placeholder="Last Name"
-              value={formData.lastName}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-row icon-input">
-            <FaEnvelope className="input-icon" />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email Address"
-              value={formData.email}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* ✅ PHONE WITH COUNTRY CODE */}
-          <div className="phone-group">
-            <FaPhone className="input-icon phone-icon" />
-
-            <select
-              name="countryCode"
-              value={formData.countryCode}
-              onChange={handleChange}
-              className="country-code"
-            >
-              <option value="+91">🇮🇳 +91</option>
-              <option value="+1">🇺🇸 +1</option>
-              <option value="+44">🇬🇧 +44</option>
-              <option value="+61">🇦🇺 +61</option>
-              <option value="+81">🇯🇵 +81</option>
-            </select>
-
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Mobile Number"
-              value={formData.phone}
-              onChange={handleChange}
-              className="phone-input"
-            />
-          </div>
-
-          <div className="form-row icon-input">
-            <FaCalendarAlt className="input-icon" />
-            <input
-              type="date"
-              name="dob"
-              value={formData.dob}
-              onChange={handleChange}
-            />
-          </div>
-
-          <button className="btn" onClick={nextStep}>
-            Continue to Address
-          </button>
-        </div>
-      )}
-
-      {/* STEP 2 */}
-      {step === 2 && (
-        <div className="form-card">
-          <FaHome className="form-icon-big" />
-          <h2>Address Information</h2>
-          <p>Complete your profile with address details</p>
-
-          {formData.addresses.map((address, index) => (
-            <div key={index} className="address-block">
-              <input
-                type="text"
-                name="street"
-                placeholder="Street Address"
-                value={address.street}
-                onChange={(e) => handleChange(e, index, true)}
-              />
-              <input
-                type="text"
-                name="apt"
-                placeholder="Apartment/Suite (Optional)"
-                value={address.apt}
-                onChange={(e) => handleChange(e, index, true)}
-              />
-
-              <div className="form-row">
+            {/* ID Number */}
+            <div className="orgp-form-group">
+              <label className="orgp-form-label">{idType}*</label>
+              <div className="orgp-input-with-button">
                 <input
                   type="text"
-                  name="city"
-                  placeholder="City"
-                  value={address.city}
-                  onChange={(e) => handleChange(e, index, true)}
+                  value={idNumber}
+                  onChange={(e) => setIdNumber(e.target.value)}
+                  placeholder={`Enter ${idType}`}
+                  className="orgp-form-input"
+                  disabled={isIdVerified}
                 />
+                <button
+                  type="button"
+                  onClick={handleVerifyId}
+                  disabled={isIdVerified || !idNumber}
+                  className={`orgp-verify-btn ${
+                    isIdVerified ? 'orgp-verified' : ''
+                  }`}
+                >
+                  {isIdVerified ? '✓ Verified' : 'Verify'}
+                </button>
+              </div>
+            </div>
+
+            {/* ID OTP Section */}
+            {showIdOtp && (
+              <div className="orgp-otp-section">
+                <label className="orgp-form-label">Enter 6-digit OTP*</label>
                 <input
                   type="text"
-                  name="state"
-                  placeholder="State/Province"
-                  value={address.state}
-                  onChange={(e) => handleChange(e, index, true)}
+                  maxLength={6}
+                  value={idOtp}
+                  onChange={(e) =>
+                    setIdOtp(e.target.value.replace(/\D/g, ''))
+                  }
+                  placeholder="000000"
+                  className="orgp-form-input orgp-otp-input"
+                />
+                <div className="orgp-otp-actions">
+                  <button
+                    type="button"
+                    onClick={handleVerifyIdOtp}
+                    disabled={idOtp.length !== 6}
+                    className="orgp-verify-btn"
+                  >
+                    Verify OTP
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResendIdOtp}
+                    disabled={idOtpTimer > 0}
+                    className="orgp-resend-btn"
+                  >
+                    {idOtpTimer > 0
+                      ? `Resend in ${idOtpTimer}s`
+                      : 'Resend OTP'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Date of Incorporation */}
+            <div className="orgp-form-group">
+              <label className="orgp-form-label">
+                Date of Incorporation (DOI)*
+              </label>
+              <input
+                type="date"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+                className="orgp-form-input"
+              />
+            </div>
+
+            {/* Organization Name */}
+            <div className="orgp-form-group">
+              <label className="orgp-form-label">Organization Name*</label>
+              <input
+                type="text"
+                value={orgName}
+                onChange={(e) => setOrgName(e.target.value)}
+                placeholder="Enter organization name"
+                className="orgp-form-input"
+              />
+            </div>
+
+            {/* Website URL */}
+            <div className="orgp-form-group">
+              <label className="orgp-form-label">
+                Organization Website URL*
+              </label>
+              <div className="orgp-website-input">
+                <div className="orgp-select-wrapper">
+                  <select
+                    value={websiteProtocol}
+                    onChange={(e) =>
+                      setWebsiteProtocol(e.target.value)
+                    }
+                    className="orgp-form-select"
+                  >
+                    <option value="http">http</option>
+                    <option value="https">https</option>
+                    <option value="ssh">ssh</option>
+                  </select>
+                  <ChevronDown className="orgp-select-icon" size={18} />
+                </div>
+                <input
+                  type="text"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  placeholder="www.example.com"
+                  className="orgp-form-input"
                 />
               </div>
+            </div>
 
-              <div className="form-row">
-                <input
-                  type="text"
-                  name="zip"
-                  placeholder="ZIP/Postal Code"
-                  value={address.zip}
-                  onChange={(e) => handleChange(e, index, true)}
-                />
-                <div className="form-row icon-input">
-                  <FaGlobe className="input-icon" />
+            {/* Address Section */}
+            <div className="orgp-form-group">
+              <label className="orgp-form-label">Address*</label>
+
+              <div className="orgp-address-grid">
+                <div>
+                  <label className="orgp-form-label orgp-small">
+                    Country
+                  </label>
                   <input
                     type="text"
-                    name="country"
-                    placeholder="Country"
-                    value={address.country}
-                    onChange={(e) => handleChange(e, index, true)}
+                    value={country}
+                    readOnly
+                    className="orgp-form-input"
+                  />
+                </div>
+                <div>
+                  <label className="orgp-form-label orgp-small">
+                    State*
+                  </label>
+                  <div className="orgp-select-wrapper">
+                    <select
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      className="orgp-form-select"
+                    >
+                      <option value="">Select State</option>
+                      <option value="Odisha">Odisha</option>
+                      <option value="Delhi">Delhi</option>
+                      <option value="Maharashtra">Maharashtra</option>
+                      <option value="Karnataka">Karnataka</option>
+                      <option value="Tamil Nadu">Tamil Nadu</option>
+                    </select>
+                    <ChevronDown className="orgp-select-icon" size={18} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="orgp-address-grid">
+                <div>
+                  <label className="orgp-form-label orgp-small">
+                    City*
+                  </label>
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="Enter city"
+                    className="orgp-form-input"
+                  />
+                </div>
+                <div>
+                  <label className="orgp-form-label orgp-small">
+                    Pin Code*
+                  </label>
+                  <input
+                    type="text"
+                    value={pinCode}
+                    onChange={(e) =>
+                      setPinCode(
+                        e.target.value.replace(/\D/g, '').slice(0, 6)
+                      )
+                    }
+                    placeholder="000000"
+                    className="orgp-form-input"
                   />
                 </div>
               </div>
+
+              <div className="orgp-full-address-block">
+                <label className="orgp-form-label orgp-small">
+                  Full Address*
+                </label>
+                <textarea
+                  value={fullAddress}
+                  onChange={(e) => setFullAddress(e.target.value)}
+                  placeholder="Enter full address"
+                  className="orgp-form-input orgp-textarea"
+                  rows={3}
+                />
+              </div>
             </div>
-          ))}
 
-          <button className="btn-secondary small-btn" onClick={addAnotherAddress}>
-            + Add Another Address
-          </button>
+            {/* Email */}
+            <div className="orgp-form-group">
+              <label className="orgp-form-label">
+                Official Domain's Email*
+              </label>
+              <div className="orgp-input-with-button">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter official email"
+                  className="orgp-form-input"
+                  disabled={isEmailVerified}
+                />
+                <button
+                  type="button"
+                  onClick={handleVerifyEmail}
+                  disabled={isEmailVerified || !email}
+                  className={`orgp-verify-btn ${
+                    isEmailVerified ? 'orgp-verified' : ''
+                  }`}
+                >
+                  {isEmailVerified ? '✓ Verified' : 'Verify Email'}
+                </button>
+              </div>
+              <p className="orgp-help-text">
+                Please enter your official organization email address.
+              </p>
+            </div>
 
-          <div className="form-actions">
-            <button className="btn-secondary small-btn" onClick={prevStep}>
-              Back to Profile
-            </button>
+            {/* Email OTP Section */}
+            {showEmailOtp && (
+              <div className="orgp-otp-section">
+                <label className="orgp-form-label">
+                  Enter 6-digit OTP*
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={emailOtp}
+                  onChange={(e) =>
+                    setEmailOtp(e.target.value.replace(/\D/g, ''))
+                  }
+                  placeholder="000000"
+                  className="orgp-form-input orgp-otp-input"
+                />
+                <div className="orgp-otp-actions">
+                  <button
+                    type="button"
+                    onClick={handleVerifyEmailOtp}
+                    disabled={emailOtp.length !== 6}
+                    className="orgp-verify-btn"
+                  >
+                    Verify OTP
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResendEmailOtp}
+                    disabled={emailOtpTimer > 0}
+                    className="orgp-resend-btn"
+                  >
+                    {emailOtpTimer > 0
+                      ? `Resend in ${emailOtpTimer}s`
+                      : 'Resend OTP'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Update Profile Button */}
             <button
-              className="btn small-btn"
-              onClick={() => alert("Profile Setup Complete!")}
+              type="button"
+              onClick={handleUpdateProfile}
+              className="orgp-update-btn"
             >
-              Complete Setup
+              Update Profile
             </button>
-          </div>
-
-          <p className="info-text">
-            Your information is secure and will not be shared
-          </p>
+          </form>
         </div>
-      )}
+
+        {/* Right Side - Tagline (Fixed / Non-scrollable) */}
+        <div className="orgp-tagline-section">
+          <div className="orgp-tagline-content">
+            <FaMapMarkerAlt className="orgp-tagline-icon" />
+            <h2>Complete Your Profile</h2>
+            <p>
+              To complete the process, please provide all the required
+              information about your organization. This helps serve you
+              better and ensure secure transactions.
+            </p>
+            <div className="orgp-tagline-features">
+              <div className="orgp-feature">
+                <FaCheckCircle className="orgp-feature-icon" />
+                <span>Secure & Verified</span>
+              </div>
+              <div className="orgp-feature">
+                <FaCheckCircle className="orgp-feature-icon" />
+                <span>Professional Setup</span>
+              </div>
+              <div className="orgp-feature">
+                <FaCheckCircle className="orgp-feature-icon" />
+                <span>Address Validated</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
