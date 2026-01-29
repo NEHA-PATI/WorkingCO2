@@ -183,6 +183,8 @@ import Careers from "./pages/Careers";
 import Community from "./pages/community";
 import Contact from "./pages/contact";
 import CaseStudy from "./pages/CaseStudy";
+import Faq from "./pages/Faq";
+
 
 // Dashboard pages
 import UserDashboard from "./pages/userDashboard";
@@ -208,7 +210,9 @@ import Upload from "./components/upload";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import JoinOrganisation from "./pages/JoinOrganisation";
+// import NotFoundAnimation from "./pages/NotFoundAnimation";
 
+import OAuthSuccess from "./pages/OAuthSuccess";
 
 function App() {
   return (
@@ -230,6 +234,9 @@ function App() {
           <Route path="/community" element={<Community />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/case-studies" element={<CaseStudy />} />
+          <Route path="/faq" element={<Faq />} />
+
+          {/* <Route path="/settings" element={<NotFoundAnimation />} /> */}
 
           {/* ================= PROTECTED ROUTES (PUBLIC LAYOUT) ================= */}
           {/* These routes are in BaseLayout but require authentication */}
@@ -244,6 +251,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+<Route path="/oauth-success" element={<OAuthSuccess />} />
 
           <Route
             path="/view-assets"
@@ -321,7 +329,10 @@ function App() {
             <Route path="security" element={<AdminSecurity />} />
             <Route path="configuration" element={<AdminConfiguration />} />
             <Route path="analytics" element={<AdminAnalytics />} />
-            <Route path="career-management" element={<AdminCareerManagement />} />
+            <Route
+              path="career-management"
+              element={<AdminCareerManagement />}
+            />
             <Route
               path="case-study-management"
               element={<AdminCaseStudyManagement />}

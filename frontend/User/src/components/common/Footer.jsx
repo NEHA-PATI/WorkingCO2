@@ -75,7 +75,7 @@ const Footer = () => {
               <Link to="/contact">Contact</Link>
             </li>
              <li className="footer__item">
-              <Link to="/engage">FAQs</Link>
+              <Link to="/faq">FAQs</Link>
             </li>
             
           </ul>

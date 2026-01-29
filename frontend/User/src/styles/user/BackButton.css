@@ -1,0 +1,14 @@
+.page-back-btn {
+  margin-bottom: 16px;
+  background: #1a5a3a;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.page-back-btn:hover {
+  background: #0f3d28;
+}
