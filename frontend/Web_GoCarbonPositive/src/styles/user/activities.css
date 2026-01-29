@@ -1,0 +1,842 @@
+:root {
+  --font-large: 2.2rem;
+  --font-medium: 1.15rem;
+  --font-small: 0.98rem;
+  --color-bg: #f7fafc;
+  --color-card: #fff;
+  --color-accent1: #b3d8f6;
+  --color-accent2: #ffe5b4;
+  --color-accent3: #ffd6e0;
+  --color-accent4: #c8f7c5;
+  --color-text: #222;
+  --color-number: #7ab6e6;
+  
+    --color-accent1: #e0ffe0;
+    --color-accent2: #e0f7ff;
+    --color-accent3: #fff0e0;
+    --color-accent4: #f0e0ff;
+  }
+
+
+.activities-main-bg {
+  min-height: 100vh;
+  font-family: 'Poppins', Arial, sans-serif !important;
+  position: relative;
+  overflow-x: hidden;
+  padding: 2rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.activities-header {
+  margin-top: 10px;
+  width: 100%;
+  text-align: center;
+  background-size: cover;
+}
+.activities-header h2 {
+  font-size: var(--font-large);
+
+  font-weight: 700;
+  margin-bottom: 0.2em;
+  letter-spacing: 1px;
+}
+.activities-header h3 {
+  font-size: var(--font-medium);
+  
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin-top: 0.5rem;
+}
+.activities-header-underline {
+  width: 80px;
+  height: 4px;
+  background-color: #00a86b;
+  margin: 1rem auto;
+  border-radius: 5px;
+}
+.activities-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.activity-card {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(8px);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.activity-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.activity-card-number {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 1rem;
+  color: #444;
+}
+.activity-card-img-wrap {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+.activity-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.activity-card:hover .activity-card-img {
+  transform: scale(1.05);
+}
+.activity-card-content {
+  padding: 1rem;
+}
+
+.activity-card-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.activity-card-desc {
+  font-size: 1rem;
+  color: #444;
+  line-height: 1.5;
+}
+
+
+
+
+
+
+
+
+
+/* Decorative wavy background and leaves */
+.activities-main-bg::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 220px;
+  background: linear-gradient(120deg, #b3d8f6 0%, #ffe5b4 100%);
+  border-bottom-left-radius: 80px 40px;
+  border-bottom-right-radius: 120px 60px;
+  z-index: 0;
+  opacity: 0.18;
+}
+.activities-leaf {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+.leaf-top-right {
+  top: 18px;
+  right: 32px;
+  width: 80px;
+  opacity: 0.7;
+}
+.leaf-bottom-left {
+  bottom: 0;
+  left: 0;
+  width: 110px;
+  opacity: 0.7;
+}
+
+@media (max-width: 900px) {
+  .activities-cards-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, 1fr);
+    gap: 36px;
+    padding: 24px 0 0 0;
+  }
+  .activity-card {
+    width: 220px;
+    height: 220px;
+  }
+}
+
+@media (max-width: 600px) {
+  .activities-header {
+    margin-top: 28px;
+    margin-bottom: 18px;
+    padding-left: 10px;
+  }
+  .activities-cards-container {
+    gap: 18px;
+    padding: 10px 0 0 0;
+  }
+  .activity-card {
+    width: 90vw;
+    max-width: 260px;
+    height: 180px;
+  }
+} 
+
+.activity-detail-bg {
+  min-height: 80vh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding: 80px 16px 0 16px; /* Increased top padding for navbar gap */
+}
+
+.streak-reset {
+  font-size: 0.9rem;
+  color: #888;
+  margin-left: 8px;
+}
+
+
+.activity-detail-content {
+  background: #f6f0ff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(160, 132, 232, 0.10);
+  padding: 40px 32px 32px 32px;
+  max-width: 500px;
+  width: 100%;
+  margin-top: 150px;
+  text-align: center;
+}
+
+.activity-detail-content h2 {
+  color: #6c4fa1;
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.activity-detail-desc {
+  color: #444;
+  font-size: 1.1rem;
+  margin-bottom: 18px;
+}
+
+.activity-detail-details {
+  color: #555;
+  font-size: 1rem;
+  margin-bottom: 28px;
+}
+
+.activity-detail-btn {
+  background: linear-gradient(90deg, #a084e8 60%, #6c4fa1 100%);
+  color: #fff;
+  border: none;
+  border-radius: 22px;
+  padding: 10px 32px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px 0 rgba(160, 132, 232, 0.10);
+  transition: background 0.18s, box-shadow 0.18s;
+}
+.activity-detail-btn:hover {
+  background: linear-gradient(90deg, #6c4fa1 60%, #a084e8 100%);
+  box-shadow: 0 4px 16px 0 rgba(160, 132, 232, 0.18);
+}
+
+  .activity-detail-bg {
+    padding: 70px 8px 0 8px; /* Also increase for mobile */
+  }
+  .activity-detail-content {
+    padding: 24px 8px 18px 8px;
+    margin-top: 60px;
+  }
+
+
+.plant-tree-detail-bg {
+  min-height: 80vh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 80px 16px 0 16px;
+  min-height: 400px;
+}
+
+.plant-tree-detail-bg .streak-tracker {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  margin-top: 0;
+  z-index: 2;
+}
+
+.plant-tree-detail-container {
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: center;
+  max-width: 1800px;
+  width: 100%;
+  gap: 32px;
+  margin-top: 130px;
+}
+
+.plant-tree-detail-left {
+  flex: 1 1 50%;
+  max-width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding-left: 32px;
+}
+
+.plant-tree-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 18px;
+  letter-spacing: 1.5px;
+}
+.plant-tree-title span {
+  color: #388e3c;
+}
+
+.plant-tree-green-desc {
+  font-size: 1.2rem;
+  color: #219150;
+  margin-bottom: 32px;
+  max-width: 500px;
+  font-weight: 500;
+}
+
+.plant-tree-btn {
+  background: #185c2b;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px 0 rgba(30, 132, 73, 0.10);
+  transition: background 0.18s, box-shadow 0.18s;
+}
+.plant-tree-btn:hover {
+  background: #388e3c;
+  box-shadow: 0 4px 16px 0 rgba(30, 132, 73, 0.18);
+}
+
+.plant-tree-detail-right {
+  flex: 1 1 50%;
+  max-width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 400px;
+}
+
+.plant-tree-bg-shape {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 480px;
+  background: radial-gradient(circle at 60% 40%, #b6e2c6 60%, #e6f7ec 100%);
+  border-radius: 48% 52% 60% 40% / 60% 40% 60% 40%;
+  z-index: 1;
+  filter: blur(0.5px);
+  overflow: visible;
+}
+
+.plant-tree-img-on-bg {
+  position: relative;
+  width: 520px;
+  max-width: 90vw;
+  height: auto;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px 0 rgba(30, 132, 73, 0.10);
+  z-index: 3;
+  background: transparent;
+}
+
+.plant-tree-bubble {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.7;
+  z-index: 4;
+animation: floatBubble 6s ease-in-out infinite alternate;
+}
+
+.bubble1 { animation-delay: 0s; }
+.bubble2 { animation-delay: 2s; }
+.bubble3 { animation-delay: 1s; }
+.bubble4 { animation-delay: 3s; }
+.bubble1 {
+  width: 60px;
+  height: 60px;
+  background: #7ed957;
+  left: 10px;
+  top: 40px;
+}
+.bubble2 {
+  width: 36px;
+  height: 36px;
+  background: #43a047;
+  right: 10px;
+  top: 100px;
+}
+.bubble3 {
+  width: 24px;
+  height: 24px;
+  background: #388e3c;
+  right: 20px;
+  bottom: 80px;
+}
+.bubble4 {
+  width: 40px;
+  height: 40px;
+  background: #b6e2c6;
+  left: 20px;
+  bottom: 60px;
+}
+
+
+  .plant-tree-detail-container {
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .plant-tree-detail-left, .plant-tree-detail-right {
+    padding-left: 0;
+    align-items: center;
+    text-align: center;
+  }
+  .plant-tree-title {
+    font-size: 2.1rem;
+  }
+  .plant-tree-img {
+    max-width: 320px;
+  }
+
+/* Set Poppins font for the plant-tree activity section */
+.plant-tree-detail-bg, .plant-tree-detail-bg * {
+  font-family: 'Poppins', Arial, sans-serif !important;
+}
+
+.plant-tree-upload-section {
+  margin: 60px auto 0 auto;
+  padding: 40px 32px 32px 32px;
+  background: #f6f0ff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(160, 132, 232, 0.10);
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+}
+
+.plant-tree-upload-section h2 {
+  color: #24713b;
+  font-size: 2rem;
+  margin-bottom: 24px;
+  font-weight: 700;
+}
+
+.plant-tree-upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.plant-tree-upload-form label {
+  color: #185c2b;
+  font-weight: 500;
+  text-align: left;
+  margin-bottom: 4px;
+}
+
+.plant-tree-upload-form input[type="text"] {
+  padding: 10px 12px;
+  border: 1.5px solid #b6e2c6;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  font-family: 'Poppins', Arial, sans-serif;
+}
+
+.plant-tree-upload-form input[type="file"] {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.plant-tree-upload-preview {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 12px auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px 0 rgba(30, 132, 73, 0.10);
+  display: block;
+}
+
+.plant-tree-upload-form button {
+  background: #185c2b;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.18s, box-shadow 0.18s;
+}
+.plant-tree-upload-form button:hover {
+  background: #388e3c;
+}
+
+.plant-tree-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(44, 62, 80, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+.plant-tree-modal {
+  position: relative;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18);
+  padding: 8px 32px 8px 32px; /* wider padding for more width */
+  min-width: 340px; /* increased min-width */
+  max-width: 480px; /* increased max-width */
+  max-height: 600px; /* increased max-height for a bit more height */
+  overflow-y: auto; /* allow scroll if content overflows */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: stretch;
+  text-align: center;
+}
+.plant-tree-modal h2 {
+  color: #2b2a2a;
+  margin-bottom: 10px;
+  font-size: 2rem;
+  font-weight: 700;
+}
+.plant-tree-modal p {
+  color: #185c2b;
+  font-size: 1.1rem;
+  margin-bottom: 18px;
+}
+
+.plant-tree-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* reduced gap */
+  align-items: stretch;
+  margin-bottom: 6px; /* reduced margin */
+}
+.plant-tree-modal-form label,
+.plant-tree-modal-form input,
+.plant-tree-modal-form select,
+.plant-tree-modal-form textarea,
+.plant-tree-modal-form button {
+  font-family: 'Poppins', Arial, sans-serif !important;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+.plant-tree-modal-form input,
+.plant-tree-modal-form select,
+.plant-tree-modal-form textarea {
+  padding: 10px 12px;
+  border: 1.5px solid #b6e2c6;
+  border-radius: 5px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  width: 98%; /* reduced width */
+  margin-left: auto;
+  margin-right: auto;
+}
+.plant-tree-modal-form label {
+  color: #222;
+  font-weight: 500;
+  text-align: left;
+  margin-bottom: 4px;
+}
+.plant-tree-modal-form button {
+  background: #185c2b;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.18s, box-shadow 0.18s;
+}
+.plant-tree-modal-form button:hover {
+  background: #388e3c;
+}
+
+.plant-tree-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  font-size: 2rem;
+  color: #185c2b;
+  cursor: pointer;
+  font-weight: bold;
+  z-index: 10;
+  background: none;
+  border: none;
+  transition: color 0.18s;
+}
+.plant-tree-modal-close:hover {
+  color: #e74c3c;
+}
+
+.plant-tree-submission-card {
+  margin: 40px auto 0 auto;
+  padding: 32px 24px 24px 24px;
+  background: #e6f7ec;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px 0 rgba(36, 113, 59, 0.10);
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  font-family: 'Poppins', Arial, sans-serif;
+}
+.plant-tree-submission-card h3 {
+  color: #24713b;
+  font-size: 1.4rem;
+  margin-bottom: 18px;
+  font-weight: 700;
+}
+.plant-tree-submission-card div {
+  color: #185c2b;
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+.plant-tree-submission-card img,
+.plant-tree-submission-card video {
+  margin-top: 12px;
+  border-radius: 10px;
+  max-width: 320px;
+  width: 100%;
+  box-shadow: 0 2px 8px 0 rgba(30, 132, 73, 0.10);
+}
+
+.plant-tree-reward-streak-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 18px;
+  margin-top: 8px;
+}
+.plant-tree-reward {
+  background: #e6f7ec;
+  color: #24713b;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 18px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.plant-tree-reward span {
+  font-weight: 700;
+  color: #185c2b;
+}
+.plant-tree-streak {
+  background: #f6f0ff;
+  color: #a084e8;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 18px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.plant-tree-renew-note {
+  color: #e67e22;
+  font-size: 1rem;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+.plant-tree-btn-row {
+  display: flex;
+  gap: 18px;
+  margin-top: 18px;
+  align-items: center;
+}
+.plant-tree-btn-cancel {
+  background: #fff;
+  color: #fff;
+  border: 2px solid #e74c3c;
+  font-weight: 600;
+  transition: background 0.18s, color 0.18s;
+}
+.plant-tree-btn-cancel:disabled {
+  color: #aaa;
+  border-color: #eee;
+  background: #f8f8f8;
+  cursor: not-allowed;
+}
+.plant-tree-btn-cancel:hover:not(:disabled) {
+  background: #e74c3c;
+  color: #fff;
+}
+.plant-tree-congrats {
+  margin-top: 18px;
+  color: #388e3c;
+  font-size: 1.15rem;
+  font-weight: 700;
+  background: #e6f7ec;
+  border-radius: 12px;
+  padding: 12px 18px;
+  box-shadow: 0 2px 8px 0 rgba(30, 132, 73, 0.10);
+  text-align: center;
+}
+
+.plant-tree-theme .plant-tree-bg-shape {
+  background: radial-gradient(circle at 60% 40%, #b6e2c6 60%, #e6f7ec 100%);
+  top: 55%;
+}
+/* Teal theme for Clean-Up Drive */
+.cleanup-theme .plant-tree-bg-shape {
+  background: radial-gradient(circle at 60% 40%, #b2f7ef 60%, #e0f7fa 100%);
+  margin-top: 30px;
+
+}
+.eco-commute-theme .plant-tree-bg-shape {
+  background: radial-gradient(circle at 60% 40%, #7ad5ff 60%, #87d9ff 100%);
+}
+.plastic-free-theme .plant-tree-bg-shape {
+  background: radial-gradient(circle at 60% 40%, #ffffff 60%, #ffffff 100%);
+  margin-top:35px;
+}
+
+.plant-tree-theme .plant-tree-bubble {
+  background: #7ed957;
+}
+.cleanup-theme .plant-tree-bubble {
+  background: #38b48b;
+}
+.eco-commute-theme .plant-tree-bubble {
+  background: #d8eefe;
+}
+.plastic-free-theme .plant-tree-bubble {
+  background: #d9b6fa;
+}
+
+.plant-tree-theme .plant-tree-title {
+  color: #24713b; /* Green for Plant Tree */
+}
+.cleanup-theme .plant-tree-title {
+  color: #219b86; /* Sea green for Clean-Up Drive title */
+}
+.eco-commute-theme .plant-tree-title {
+  color:#5d91b6; /* Light blue for Eco-Friendly Commute */
+}
+.plastic-free-theme .plant-tree-title {
+  color: #965ec4; /* Yellow/Orange for Energy Saver Challenge */
+}
+
+.plant-tree-theme .plant-tree-btn {
+  background: #185c2b;
+  color: #fff;
+}
+.cleanup-theme .plant-tree-btn {
+  background: #219b86; /* Sea green for Clean-Up Drive button */
+  color: #fff;
+}
+.eco-commute-theme .plant-tree-btn {
+  background: #5d91b6;
+  color: #fff;
+}
+.plastic-free-theme .plant-tree-btn {
+  background: #965ec4;
+  color: #fff;
+}
+
+.plant-tree-theme .plant-tree-btn:hover {
+  background: #388e3c;
+  color: #fff;
+}
+.cleanup-theme .plant-tree-btn:hover {
+  background: #178d87; /* Darker sea green on hover */
+  color: #fff;
+}
+.eco-commute-theme .plant-tree-btn:hover {
+  background: #0288d1;
+  color: #fff;
+}
+.plastic-free-theme.plant-tree-btn:hover {
+  background: #e2bb3b;
+  color: #fff;
+}
+
+.plant-tree-theme .plant-tree-green-desc {
+  color: #219150;
+}
+.cleanup-theme .plant-tree-green-desc {
+  color: #218a6a;
+}
+.eco-commute-theme .plant-tree-green-desc {
+  color: #039be5;
+}
+.plastic-free-theme .plant-tree-green-desc {
+   color: #965ec4;
+}
+
+.cleanup-theme .plant-tree-img-on-bg {
+  margin-top: 50px;
+  
+  width: 520px;
+  max-width: 90vw;
+}
+
+.cleanup-theme.plant-tree-detail-bg, .cleanup-theme .plant-tree-detail-bg {
+  background: transparent !important;
+}
+
+.eco-commute-theme .plant-tree-bg-shape {
+  display: none !important;
+}
+
+.eco-commute-theme .plant-tree-img-on-bg {
+  box-shadow: none !important;
+}
+
+.plastic-free-theme.plant-tree-bg-shape {
+  display: none !important;
+}
+.plastic-free-theme .plant-tree-img-on-bg {
+  box-shadow: none !important;
+}
+
+.plant-tree-theme .plant-tree-img-on-bg {
+  margin-top: 60px;
+  width: 490px;
+  max-width: 60vw;
+}

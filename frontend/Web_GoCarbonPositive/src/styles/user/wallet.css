@@ -1,0 +1,95 @@
+.wallet-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.wallet-modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 320px;
+}
+
+.wallet-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.wallet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wallet-header h2 {
+  font-size: 20px;
+  margin: 0;
+  color: #000;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+}
+
+.wallet-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.wallet-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wallet-label {
+  font-size: 16px;
+  color: #333;
+}
+
+.wallet-value {
+  font-weight: 600;
+  font-size: 16px;
+  color: #000;
+}
+
+.wallet-icon.trophy {
+  color: #3b82f6;
+  font-size: 20px;
+}
+
+.wallet-icon.coins {
+  color: #facc15;
+  font-size: 20px;
+}
+
+.wallet-icon.leaf {
+  color: #22c55e;
+  font-size: 20px;
+}
+
+.marketplace-btn {
+  background: #ff5a1f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}

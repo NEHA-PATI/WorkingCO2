@@ -1,0 +1,473 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+/* Base styles */
+/* Start Screen Styles */
+.eco-start-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.eco-start-content {
+  max-width: 700px;
+  max-height: 900px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 35px;
+  border-radius: 5px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.eco-game-logo {
+  font-size: 4rem;
+  margin: 20px 0;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.eco-game-about, .eco-game-rules {
+  margin: 30px 0;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.eco-game-rules ul {
+  padding-left: 20px;
+}
+
+.eco-game-rules li {
+  margin-bottom: 10px;
+}
+
+.eco-start-button {
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  background: #185231;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 0;
+  transition: all 0.3s;
+  box-shadow: 0 4px 0 #1f5a3a;
+}
+
+.eco-start-button:hover {
+  background: #2c7e52;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 #1f5a3a;
+}
+
+.eco-start-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #1f5a3a;
+}
+
+.eco-game-footer {
+  margin-top: 40px;
+  font-style: italic;
+  color: #555;
+}
+
+/* Keep all your existing CSS styles below this line */
+
+.eco-memory-game {
+  max-width: 750px;
+  margin: 0 auto;
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 5px;
+  box-shadow: 0 8px 32px 0 rgba(5, 8, 59, 0.15);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Background with green theme */
+body {
+  background-image: url('https://images.unsplash.com/photo-1506765515384-028b60a970df?auto=format&fit=crop&w=1500&q=80');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-size: 0.95rem;
+}
+
+/* Card styling - OPAQUE to prevent seeing answers */
+.eco-card-front, .eco-card-back {
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5em;
+}
+
+.eco-card-back {
+  background: rgba(46, 139, 87, 0.85);
+  color: white;
+  transform: rotateY(1deg);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.eco-card-front {
+  background: rgba(255, 255, 255, 0.85);
+  transform: rotateY(180deg);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 2rem;
+  font-family: 'Poppins', Arial, sans-serif;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.eco-game-settings {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+}
+
+.eco-game-settings div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+select {
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #bdc3c7;
+  background: white;
+}
+
+.eco-game-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  background: rgba(44, 62, 80, 0.9);
+  border-radius: 10px;
+}
+
+.eco-game-info div {
+  display: flex;
+  gap: 20px;
+}
+
+button {
+  padding: 8px 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+  font-size: 1.2rem;
+  font-family: 'Poppins', Arial, sans-serif;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+.eco-sound-controls button {
+  background-color: #9b59b6;
+  font-size: 0.9rem;
+  padding: 6px 8px;
+  border-radius: 3px;
+}
+
+.eco-sound-controls button:hover {
+  background-color: #8e44ad;
+}
+
+.eco-cards-container {
+  display: grid;
+  gap: 15px;
+  margin: 20px auto;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+}
+
+.eco-card {
+  height: 30px;
+  perspective: 1000px;
+  cursor: pointer;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
+
+.eco-card.flipped .eco-card-back {
+  transform: rotateY(180deg);
+}
+
+.eco-card.flipped .eco-card-front {
+  transform: rotateY(360deg);
+}
+
+.eco-game-complete {
+  margin: 20px 0;
+  padding: 20px;
+  color: white;
+  animation: pulse 1.5s infinite;
+  background: rgba(46, 204, 113, 0.9);
+  border-radius: 10px;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.eco-game-tips {
+  margin-top: 20px;
+  font-style: italic;
+  color: black;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 600px) {
+  .eco-cards-container {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  .eco-game-settings {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .eco-game-info {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .eco-game-info div {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+.eco-sdg-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 5px;
+  text-align: center;
+}
+
+.eco-sdg-number {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.eco-sdg-title {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+/* Background effects */
+.eco-background-elements {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.eco-leaf {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.3;
+  animation: float 15s infinite linear;
+}
+
+.eco-leaf-1 { top: 10%; left: 5%; animation-delay: 0s; }
+.eco-leaf-2 { top: 30%; right: 8%; animation-delay: 3s; }
+.eco-leaf-3 { bottom: 20%; left: 10%; animation-delay: 6s; }
+.eco-leaf-4 { bottom: 40%; right: 15%; animation-delay: 9s; }
+
+.eco-solar-panel, .eco-wind-turbine {
+  position: absolute;
+  font-size: 3rem;
+  opacity: 0.1;
+}
+
+.eco-solar-panel {
+  bottom: 10%;
+  right: 5%;
+  animation: pulse 4s infinite alternate;
+}
+
+.eco-wind-turbine {
+  top: 15%;
+  left: 3%;
+  animation: spin 8s infinite linear;
+}
+
+@keyframes float {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-50px) rotate(180deg); }
+  100% { transform: translateY(0) rotate(360deg); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.eco-theme-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.eco-card-emoji {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.eco-card-label {
+  font-size: 0.8rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Theme info modal */
+.eco-theme-info-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(86, 171, 47, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.eco-theme-info-box {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  width: 80%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: fadeIn 0.5s;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.eco-theme-description-card.vertical-layout {
+  font-family: 'Poppins', Arial, sans-serif;
+}
+/* Responsive styles for all device sizes */
+@media (max-width: 900px) {
+  .eco-memory-game {
+    max-width: 98vw;
+    padding: 10px;
+  }
+  .eco-start-content {
+    max-width: 95vw;
+    padding: 18px;
+  }
+  .eco-theme-info-box {
+    width: 95vw;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .eco-memory-game {
+    max-width: 100vw;
+    padding: 4vw 2vw;
+    border-radius: 0;
+  }
+  .eco-start-content {
+    max-width: 100vw;
+    padding: 10px;
+    border-radius: 0;
+  }
+  .eco-game-logo {
+    font-size: 2.2rem;
+  }
+  .eco-game-about, .eco-game-rules {
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+  .eco-game-settings {
+    flex-direction: column;
+    gap: 10px;
+    padding: 8px;
+  }
+  .eco-cards-container {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px;
+    margin: 10px auto;
+  }
+  .eco-card {
+    min-width: 60px;
+    min-height: 60px;
+    font-size: 1.2em;
+  }
+  .eco-card-front, .eco-card-back {
+    font-size: 1.3em;
+  }
+  .eco-game-tips {
+    font-size: 0.95rem;
+    margin-top: 10px;
+  }
+  .eco-theme-info-box {
+    width: 98vw;
+    padding: 0.5rem;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .eco-game-logo {
+    font-size: 1.3rem;
+  }
+  .eco-card-front, .eco-card-back {
+    font-size: 1em;
+  }
+}

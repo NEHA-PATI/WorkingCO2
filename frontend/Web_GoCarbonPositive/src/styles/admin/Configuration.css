@@ -1,0 +1,290 @@
+/* src/styles/Configuration.css */
+
+/* Page container - namespaced */
+.config-page__container {
+  font-family: "Poppins", sans-serif;
+  background: #f9fafb;
+  min-height: 100vh;
+  padding: 18px 26px;
+  color: #0f172a;
+  box-sizing: border-box;
+}
+
+/* Tabs */
+.config-page__tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.config-tab {
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 600;
+  color: #1f2d3d;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.config-tab svg { font-size: 16px; }
+
+.config-tab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
+}
+
+.config-tab.active {
+  background: white;
+  border: 1px solid #cfe3ff;
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.03);
+}
+
+/* Content wrapper */
+.config-page__content {
+  margin-top: 6px;
+}
+
+/* Card base */
+.config-card {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  margin-bottom: 18px;
+}
+
+/* Header inside each card */
+.config-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.config-card__header h2 {
+  font-size: 1.4rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.config-icon {
+  color: #0f172a;
+  font-size: 20px;
+}
+
+/* Actions on right */
+.config-actions-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Buttons */
+.config-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.config-btn--primary {
+  background: #16a34a;
+  color: white;
+}
+.config-btn--primary:hover { transform: translateY(-2px); }
+
+.config-btn--outline {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e6eef8;
+}
+
+/* Grid helpers */
+.config-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.config-grid.two-col {
+  grid-template-columns: 1fr 1fr;
+}
+
+.config-grid.single-col {
+  grid-template-columns: 1fr;
+}
+
+/* Field */
+.config-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.config-field label {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.config-field input,
+.config-field select,
+.config-field textarea {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #e6eef8;
+  background: #ffffff;
+  outline: none;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+.config-field input:focus,
+.config-field select:focus,
+.config-field textarea:focus {
+  border-color: #cfe3ff;
+  box-shadow: 0 4px 12px rgba(2, 6, 23, 0.04);
+}
+
+/* small helper text */
+.config-field small {
+  color: #64748b;
+  font-size: 0.84rem;
+}
+
+/* Toggle row layout */
+.config-toggle-row {
+  margin-top: 12px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.config-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f3f6f7;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #eef4f6;
+}
+
+/* default checkbox looking like toggle */
+.config-toggle input[type="checkbox"] {
+  width: 36px;
+  height: 20px;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 16px;
+  background: #e6eef8;
+  position: relative;
+  outline: none;
+  cursor: pointer;
+}
+.config-toggle input[type="checkbox"]::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  left: 4px;
+  top: 2px;
+  transition: transform 0.18s ease;
+  box-shadow: 0 1px 2px rgba(2,6,23,0.12);
+}
+.config-toggle input[type="checkbox"]:checked {
+  background: #2563eb;
+}
+.config-toggle input[type="checkbox"]:checked::after {
+  transform: translateX(16px);
+}
+
+/* small utility badge */
+.config-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: lowercase;
+}
+.config-badge.green { background: #dcfce7; color: #166534; }
+.config-badge.gray { background: #f1f5f9; color: #475569; }
+
+/* API list rows */
+.config-api-list { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+.config-api-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #eef3f7;
+  align-items: center;
+  background: #fff;
+}
+.config-api-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.api-name { display: flex; gap: 8px; align-items: center; }
+.api-sub { color: #64748b; font-size: 0.9rem; }
+.api-key-visual { padding: 8px 12px; background: #f3f6f8; border-radius: 8px; width: 260px; color: #64748b; }
+
+/* small action buttons */
+.small-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e6eef8;
+  font-weight: 600;
+  cursor: pointer;
+}
+.small-btn.outline {
+  background: transparent;
+  border: 1px solid #e6eef8;
+}
+
+/* toast */
+.config-toast {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  background: rgba(15,23,42,0.95);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(2,6,23,0.25);
+  z-index: 9999;
+}
+
+/* responsive */
+@media (max-width: 980px) {
+  .config-grid.two-col {
+    grid-template-columns: 1fr;
+  }
+  .config-actions-right { flex-wrap: wrap; }
+  .config-tab { padding: 8px 10px; font-size: 0.95rem; }
+}
+
+/* end of file */
+
+
+

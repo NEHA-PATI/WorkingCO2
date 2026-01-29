@@ -1,0 +1,463 @@
+.admin-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.5rem 1.5rem;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+/* Left Section */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.logo {
+  height: 50px;
+  width: 50px;
+}
+
+.header-text h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.header-text p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+/* Hamburger and Dropdown */
+.hamburger-container {
+  position: relative;
+}
+
+.hamburger {
+  font-size: 1.6rem;
+  cursor: pointer;
+  color: #1e293b;
+  transition: 0.2s ease;
+}
+.admin-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.5rem 1.5rem;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+/* Left Section */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.logo {
+  height: 50px;
+  width: 50px;
+}
+
+.header-text h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.header-text p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+/* Hamburger and Dropdown */
+.hamburger-container {
+  position: relative;
+}
+
+.hamburger {
+  font-size: 1.6rem;
+  cursor: pointer;
+  color: #1e293b;
+  transition: 0.2s ease;
+}
+
+.hamburger:hover {
+  color: #4caf50;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+  position: absolute;
+  top: 45px;
+  left: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  width: 220px;
+  z-index: 1001;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.dropdown-menu li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1.2rem;
+  font-size: 0.95rem;
+  color: #1e293b;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-menu li:hover {
+  background-color: #f1f5f9;
+  color: #000000;
+}
+
+/* Unique Menu Icon Colors */
+.dropdown-menu li:nth-child(1) .menu-icon {
+  color: #ff5722; /* Blog */
+}
+.dropdown-menu li:nth-child(2) .menu-icon {
+  color: #2196f3; /* Case Study */
+}
+.dropdown-menu li:nth-child(3) .menu-icon {
+  color: #9c27b0; /* Analytics */
+}
+.dropdown-menu li:nth-child(4) .menu-icon {
+  color: #4caf50; /* Asset Management */
+}
+.dropdown-menu li:nth-child(5) .menu-icon {
+  color: #ff9800; /* Market Place */
+}
+.dropdown-menu li:nth-child(6) .menu-icon {
+  color: #e91e63; /* Community */
+}
+.dropdown-menu li:nth-child(7) .menu-icon {
+  color: #795548; /* Career */
+}
+
+.menu-icon {
+  font-size: 1.1rem;
+}
+
+/* Right Section */
+.header-right {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+/* Admin chip like "Tom" */
+.admin-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background-color: #e7f1ff;
+  cursor: pointer;
+}
+
+.admin-avatar-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1d4ed8;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.admin-chip-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* Profile Popup */
+.profile-popup {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  width: 150px;
+  z-index: 1002;
+}
+
+.profile-popup ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.profile-popup li {
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  color: #1e293b;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.profile-popup li:hover {
+  background-color: #f1f5f9;
+  color: #4caf50;
+}
+
+/* Logout Success Popup */
+.logout-popup {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: #4caf50;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  animation: fadeInOut 2s ease forwards;
+  z-index: 2000;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+}
+
+/* Limit user-select only to header, not global */
+.admin-header,
+.admin-header * {
+  user-select: none;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .logo {
+    height: 40px;
+    width: 40px;
+  }
+
+  .header-text {
+    display: none;
+  }
+}
+
+.hamburger:hover {
+  color: #4caf50;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+  position: absolute;
+  top: 45px;
+  left: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  width: 220px;
+  z-index: 1001;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.dropdown-menu li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1.2rem;
+  font-size: 0.95rem;
+  color: #1e293b;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-menu li:hover {
+  background-color: #f1f5f9;
+  color: #000000;
+}
+
+/* Unique Menu Icon Colors */
+.dropdown-menu li:nth-child(1) .menu-icon {
+  color: #ff5722; /* Blog */
+}
+.dropdown-menu li:nth-child(2) .menu-icon {
+  color: #2196f3; /* Case Study */
+}
+.dropdown-menu li:nth-child(3) .menu-icon {
+  color: #9c27b0; /* Analytics */
+}
+.dropdown-menu li:nth-child(4) .menu-icon {
+  color: #4caf50; /* Asset Management */
+}
+.dropdown-menu li:nth-child(5) .menu-icon {
+  color: #ff9800; /* Market Place */
+}
+.dropdown-menu li:nth-child(6) .menu-icon {
+  color: #e91e63; /* Community */
+}
+.dropdown-menu li:nth-child(7) .menu-icon {
+  color: #795548; /* Career */
+}
+
+.menu-icon {
+  font-size: 1.1rem;
+}
+
+/* Right Section */
+.header-right {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.profile-icon {
+  font-size: 2rem;
+  color: #1e293b;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.profile-icon:hover {
+  color: #4caf50;
+}
+
+/* Profile Popup */
+.profile-popup {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  width: 150px;
+  z-index: 1002;
+}
+
+.profile-popup ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+
+.profile-popup li {
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  color: #1e293b;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.profile-popup li:hover {
+  background-color: #f1f5f9;
+  color: #4caf50;
+}
+
+/* Logout Success Popup */
+.logout-popup {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: #4caf50;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  animation: fadeInOut 2s ease forwards;
+  z-index: 2000;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+}
+
+/* Remove all text cursor and blinking caret */
+* {
+  user-select: none;
+  caret-color: transparent !important;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .logo {
+    height: 40px;
+    width: 40px;
+  }
+
+  .header-text {
+    display: none;
+  }
+}

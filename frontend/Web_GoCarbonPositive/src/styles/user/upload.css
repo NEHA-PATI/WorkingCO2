@@ -1,0 +1,115 @@
+.dashboard-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  background: #f5f5f7;
+  padding: 2rem;
+}
+
+.card {
+  background: #ffffff; /* white background */
+  border-radius: 20px;
+  padding: 1.5rem;
+  color: #000000; /* text black */
+  width: 320px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center; /* center text */
+  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  filter: brightness(1.03);
+}
+
+.card-icon {
+  font-size: 3rem;
+  margin: 0 auto 0.5rem auto; /* center horizontally using auto margins */
+  display: block; /* ensure it behaves as a block element for auto margins */
+  color: #2563eb; /* highlight color */
+}
+
+h2 {
+  margin: 0.5rem 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  font-size: 1rem;
+  opacity: 0.85;
+  margin: 0.5rem 0;
+}
+
+.description {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+  line-height: 1.4;
+}
+
+.add-button {
+  background-color: #2563eb; /* soft blue */
+  color: #382f2f;
+  padding: 0.6rem 1.4rem;
+  border-radius: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.add-button:hover {
+  background-color: #1e4fcb; /* slightly darker on hover */
+  transform: scale(1.05);
+}
+
+.blog-points {
+  list-style: none;
+  padding-left: 1rem;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  text-align: left; /* keep bullet points left-aligned */
+}
+
+.blog-points li::before {
+  content: '•';
+  color: #000;
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+}
+.add-button.blue {
+  background-color: #93c5fd; /* light blue */
+}
+
+.add-button.blue:hover {
+  background-color: #60a5fa;
+}
+
+.add-button.green {
+  background-color: #86efac; /* light green */
+}
+
+.add-button.green:hover {
+  background-color: #4ade80;
+}
+
+.add-button.orange {
+  background-color: #fdba74; /* light orange */
+}
+
+.add-button.orange:hover {
+  background-color: #fb923c;
+}
+
+.add-button.purple {
+  background-color: #c4b5fd; /* light purple */
+}
+
+.add-button.purple:hover {
+  background-color: #a78bfa;
+}
