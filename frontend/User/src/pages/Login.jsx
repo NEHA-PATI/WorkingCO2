@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-import { FaGoogle } from "react-icons/fa";
+import { FaGoogle, FaLinkedin, FaGithub } from "react-icons/fa";
+import LoadingPopup from "../components/user/LoadingPopup";
 import useAuth from "../auth/useAuth";
 
-
 const Login = ({ onClose, onSwitchToSignup }) => {
-
-
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
 
   const [formData, setFormData] = useState({
@@ -21,16 +19,16 @@ const Login = ({ onClose, onSwitchToSignup }) => {
 
   // Responsive breakpoint
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-const { login } = useAuth();
-const navigate = useNavigate();
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-  const handleResize = () => {
-    setIsMobile(window.innerWidth < 768);
-  };
-  window.addEventListener("resize", handleResize);
-  return () => window.removeEventListener("resize", handleResize);
-}, []);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   // Inline Styles
   const styles = {
     overlay: {
@@ -85,8 +83,8 @@ const navigate = useNavigate();
       fontSize: isMobile ? "24px" : "30px",
       fontWeight: "700",
       background: "linear-gradient(135deg, #16a34a, #22c55e)",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
+      WebkitBackgroundClip: "text",
+      WebkitTextFillColor: "transparent",
       margin: "0 0 2px 0",
       lineHeight: "1.2",
     },
@@ -294,93 +292,92 @@ const navigate = useNavigate();
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validateForm()) return;
+    e.preventDefault();
+    if (!validateForm()) return;
 
-  setLoading(true);
-  setErrors({});
+    setLoading(true);
+    setErrors({});
 
-  try {
-    const response = await fetch(`${API_URL}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: formData.email.toLowerCase().trim(),
-        password: formData.password,
-      }),
-    });
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email.toLowerCase().trim(),
+          password: formData.password,
+        }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      setErrors({ general: data.message || "Login failed" });
-      return;
+      if (!response.ok) {
+        setErrors({ general: data.message || "Login failed" });
+        return;
+      }
+
+      if (!data.user || !data.token) {
+        setErrors({ general: "Missing login data" });
+        return;
+      }
+
+      if (!data.user.verified) {
+        setErrors({ general: "Please verify your email first." });
+        return;
+      }
+
+      if (data.user.status !== "active") {
+        setErrors({ general: `Account status: ${data.user.status}` });
+        return;
+      }
+
+      // ✅ SINGLE SOURCE OF TRUTH
+      // ✅ SINGLE SOURCE OF TRUTH
+      login({
+        token: data.token,
+        user: data.user,
+      });
+
+      const role =
+        data.user.role?.toLowerCase() || data.user.role_name?.toLowerCase();
+
+      if (role === "admin") {
+        navigate("/admin/dashboard", { replace: true });
+      } else if (role === "organization") {
+        navigate("/org/dashboard", { replace: true });
+      } else {
+        navigate("/user/dashboard", { replace: true });
+      }
+
+      // close modal AFTER navigation
+      setTimeout(() => {
+        onClose?.();
+      }, 0);
+
+      // eslint-disable-next-line no-unused-vars
+    } catch (err) {
+      setErrors({ general: "Login failed. Try again." });
+    } finally {
+      setLoading(false);
     }
-
-    if (!data.user || !data.token) {
-      setErrors({ general: "Missing login data" });
-      return;
-    }
-
-    if (!data.user.verified) {
-      setErrors({ general: "Please verify your email first." });
-      return;
-    }
-
-    if (data.user.status !== "active") {
-      setErrors({ general: `Account status: ${data.user.status}` });
-      return;
-    }
-
-    // ✅ SINGLE SOURCE OF TRUTH
-    // ✅ SINGLE SOURCE OF TRUTH
-login({
-  token: data.token,
-  user: data.user,
-});
-
-const role =
-  data.user.role?.toLowerCase() ||
-  data.user.role_name?.toLowerCase();
-
-if (role === "admin") {
-  navigate("/admin/dashboard", { replace: true });
-} else if (role === "organization") {
-  navigate("/org/dashboard", { replace: true });
-} else {
-  navigate("/user/dashboard", { replace: true });
-}
-
-// close modal AFTER navigation
-setTimeout(() => {
-  onClose?.();
-}, 0);
-
-
-  } catch (err) {
-    setErrors({ general: "Login failed. Try again." });
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const handleSocialLogin = (provider) => {
-  if (provider === "Google") {
-    window.location.href = `${API_URL}/api/auth/oauth/google/login`;
-  }
-};
+    if (provider === "Google") {
+      window.location.href = `${API_URL}/api/auth/oauth/google/login`;
+    }
+  };
 
   const handleForgotPassword = () => {
-  if (navigate) {
-    navigate("/forgot-password");
-  } else {
-    window.location.href = "/forgot-password";
-  }
-};
+    if (navigate) {
+      navigate("/forgot-password");
+    } else {
+      window.location.href = "/forgot-password";
+    }
+  };
 
   return (
     <>
+      <LoadingPopup isVisible={loading} />
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
@@ -466,7 +463,8 @@ setTimeout(() => {
                     e.target.style.borderColor = "#5469d4";
                   }}
                   onBlur={(e) => {
-                    if (!errors.password) e.target.style.borderColor = "#d1d5db";
+                    if (!errors.password)
+                      e.target.style.borderColor = "#d1d5db";
                   }}
                 />
                 {errors.password && (
@@ -491,12 +489,14 @@ setTimeout(() => {
                 disabled={loading}
                 onMouseEnter={(e) => {
                   if (!loading) {
-                    e.currentTarget.style.background = "linear-gradient(135deg, #15803d, #16a34a)";
+                    e.currentTarget.style.background =
+                      "linear-gradient(135deg, #15803d, #16a34a)";
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!loading) {
-                    e.currentTarget.style.background = "linear-gradient(135deg, #16a34a, #22c55e)";
+                    e.currentTarget.style.background =
+                      "linear-gradient(135deg, #16a34a, #22c55e)";
                   }
                 }}
               >
@@ -559,38 +559,7 @@ setTimeout(() => {
               Continue with Google
             </button>
 
-            <div style={styles.socialRow}>
-              {/* <button
-                style={styles.socialButton}
-                onClick={() => handleSocialLogin("LinkedIn")}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "#9ca3af";
-                  e.currentTarget.style.backgroundColor = "#f9fafb";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "#d1d5db";
-                  e.currentTarget.style.backgroundColor = "#fff";
-                }}
-              >
-                <FaLinkedin size={20} color="#0A66C2" />
-                LinkedIn
-              </button>
-              <button
-                style={styles.socialButton}
-                onClick={() => handleSocialLogin("GitHub")}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "#9ca3af";
-                  e.currentTarget.style.backgroundColor = "#f9fafb";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "#d1d5db";
-                  e.currentTarget.style.backgroundColor = "#fff";
-                }}
-              >
-                <FaGithub size={20} color="#000" />
-                GitHub
-              </button> */}
-            </div>
+            <div style={styles.socialRow}></div>
 
             <div style={styles.footer}>
               Don't have an account?{" "}

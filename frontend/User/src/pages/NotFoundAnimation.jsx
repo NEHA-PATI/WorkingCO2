@@ -6,7 +6,7 @@ export default function NotFoundAnimation() {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 flex items-center justify-center overflow-hidden relative">
+    <div className="notfound-page min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50 flex items-center justify-center overflow-hidden relative">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Floating leaf 1 */}
@@ -102,9 +102,9 @@ export default function NotFoundAnimation() {
         </div>
 
         {/* Footer text */}
-        <div className="mt-12 text-sm text-gray-500">
+        {/* <div className="mt-12 text-sm text-gray-500">
           <p>Error Code: <span className="font-mono font-semibold text-gray-700">404_COMPOSTED</span></p>
-        </div>
+        </div> */}
       </div>
 
       {/* Bottom accent */}

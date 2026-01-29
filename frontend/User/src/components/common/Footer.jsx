@@ -3,11 +3,6 @@
 import React from "react";
 import { BsInstagram } from "react-icons/bs";
 import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
-import {
-  HiOutlineMail,
-  HiOutlinePhone,
-  HiOutlineLocationMarker,
-} from "react-icons/hi";
 import "../../styles/user/Footer.css";
 import { Link } from "react-router-dom";
 
@@ -31,15 +26,9 @@ const Footer = () => {
         <div className="footer_section footer_links">
           <h3 className="footer__heading">Products</h3>
           <ul className="footer__list">
-            <li className="footer__item">
-              <Link to="/engage">Engage</Link>
-            </li>
-            <li className="footer__item">
-              <Link to="/user/dashboard">Dashboard</Link>
-            </li>
-            <li className="footer__item">
-              <Link to="/wallet">Marketplace</Link>
-            </li>
+            <li className="footer__item"><Link to="/engage">Engage</Link></li>
+            <li className="footer__item"><Link to="/user/dashboard">Dashboard</Link></li>
+            <li className="footer__item"><Link to="/wallet">Marketplace</Link></li>
           </ul>
         </div>
 
@@ -47,105 +36,55 @@ const Footer = () => {
         <div className="footer_section footer_links">
           <h3 className="footer__heading">Resources</h3>
           <ul className="footer__list">
-            <li className="footer__item">
-              <Link to="/blog">Blog</Link>
-            </li>
-            <li className="footer__item">
-              <Link to="/case-studies">Case Studies</Link>
-            </li>
-            <li className="footer__item">
-              <Link to="/community">Community</Link>
-            </li>
-            
+            <li className="footer__item"><Link to="/blog">Blog</Link></li>
+            <li className="footer__item"><Link to="/case-studies">Case Studies</Link></li>
+            <li className="footer__item"><Link to="/community">Community</Link></li>
           </ul>
         </div>
 
-
-         {/* Company */}
+        {/* Company */}
         <div className="footer_section footer_links">
           <h3 className="footer__heading">Company</h3>
           <ul className="footer__list">
-            <li className="footer__item">
-              <Link to="/about">About Us</Link>
-            </li>
-            <li className="footer__item">
-              <Link to="/case-studies">Sustainability Mission</Link>
-            </li>
-            <li className="footer__item">
-              <Link to="/contact">Contact</Link>
-            </li>
-             <li className="footer__item">
-              <Link to="/faq">FAQs</Link>
-            </li>
-            
+            <li className="footer__item"><Link to="/about">About Us</Link></li>
+            <li className="footer__item"><Link to="/case-studies">Sustainability Mission</Link></li>
+            <li className="footer__item"><Link to="/contact">Contact</Link></li>
+            <li className="footer__item"><Link to="/engage">FAQs</Link></li>
           </ul>
         </div>
-
-        {/* Contact
-        <div className="footer_section footer_contact">
-          <h3 className="footer__heading">Contact</h3>
-          <ul className="footer__list">
-            <li className="footer__item">
-              <HiOutlineMail /> Debadarsan.Mohanty@gocarbonpositive.com
-            </li>
-            <li className="footer__item">
-              <HiOutlinePhone /> +91 8018246346
-            </li>
-            <li className="footer__item">
-              <HiOutlineLocationMarker /> STPI, Bhubaneswar, Odisha, India
-            </li>
-          </ul>
-        </div> */}
       </div>
 
       {/* ===== FOOTER BOTTOM BAR ===== */}
       <div className="footer__bottom-bar">
-        {/* Social Icons (LEFT) */}
+        <div className="footer__bottom footer__bottom-layout">
 
-        {/* Copyright (RIGHT) */}
-        <div className="footer__bottom">
+          {/* LEFT: Social Icons */}
           <div className="footer__socials footer__socials-left">
-            <a
-              href="https://www.facebook.com/gocarbonpositive"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer__social-icon"
-              aria-label="Facebook"
-            >
+            <a href="https://www.facebook.com/gocarbonpositive" target="_blank" rel="noopener noreferrer" className="footer__social-icon">
               <FaFacebookF />
             </a>
-
-            <a
-              href="https://x.com/gocarbonpositive"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer__social-icon"
-              aria-label="Twitter"
-            >
+            <a href="https://x.com/gocarbonpositive" target="_blank" rel="noopener noreferrer" className="footer__social-icon">
               <FaTwitter />
             </a>
-
-            <a
-              href="https://www.linkedin.com/company/gocarbonpositive"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer__social-icon"
-              aria-label="LinkedIn"
-            >
+            <a href="https://www.linkedin.com/company/gocarbonpositive" target="_blank" rel="noopener noreferrer" className="footer__social-icon">
               <FaLinkedinIn />
             </a>
-
-            <a
-              href="https://www.instagram.com/gocarbonpositive"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer__social-icon"
-              aria-label="Instagram"
-            >
+            <a href="https://www.instagram.com/gocarbonpositive" target="_blank" rel="noopener noreferrer" className="footer__social-icon">
               <BsInstagram />
             </a>
           </div>
-          © 2025 GoCarbon Positive | All rights reserved.
+
+          {/* CENTER: Copyright */}
+          <div className="footer__copyright">
+            © 2025 GoCarbon Positive | All rights reserved.
+          </div>
+
+          {/* RIGHT: Legal Links */}
+          <div className="footer__legal-links">
+            <Link to="/privacypolicy">Privacy Policy</Link>
+            <Link to="/termsandconditions">Terms & Conditions</Link>
+          </div>
+
         </div>
       </div>
     </footer>
