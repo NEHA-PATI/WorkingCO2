@@ -1,4 +1,6 @@
-require('dotenv').config();
+const path = require('path');
+// Load .env from root directory (backend/assetService/.env)
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -20,10 +22,19 @@ const config = {
   },
   
   cors: {
-    origins: process.env.ALLOWED_ORIGINS 
-      ? process.env.ALLOWED_ORIGINS.split(',') 
-      : ['http://localhost:3000', 'http://localhost:5173']
-  },
+  origins: process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",")
+    : [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+        "http://[::1]:3000",
+        "http://[::1]:3001"
+      ]
+}
+,
   
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000,
