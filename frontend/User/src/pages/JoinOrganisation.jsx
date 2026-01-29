@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Country, State } from 'country-state-city';
 import "../styles/user/JoinOrganisation.css";
+import axios from "axios";
+
 
 const dropdownArrowSvg =
   `data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a5a3a' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e`;
@@ -265,17 +267,47 @@ export default function JoinOrganisation() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      console.log('Form submitted:', formData);
-      setShowToast(true);
-      setTimeout(() => {
-        setShowToast(false);
-        window.location.href = '/';
-      }, 2000);
-    }
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!validateForm()) return;
+
+  try {
+    const payload = {
+      org_name: formData.organizationName,
+      org_type:
+        formData.organizationType === "others"
+          ? formData.organizationTypeOther
+          : formData.organizationType,
+      org_mail: formData.email,
+      org_contact_number: `${formData.phoneCode}${formData.phoneNumber}`,
+      org_contact_person: formData.spocName,
+      org_designation: formData.spocDesignation,
+      org_country: formData.countryName,
+      org_state: formData.stateName,
+      org_city: formData.city,
+    };
+
+    const res = await axios.post(
+      "http://localhost:5003/api/org-requests",
+      payload
+    );
+
+    console.log("SUCCESS:", res.data);
+
+    setShowToast(true);
+
+    setTimeout(() => {
+      setShowToast(false);
+      window.location.href = "/";
+    }, 2000);
+
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.message || "Something went wrong");
+  }
+};
+
 
   const countryOptions = countries
     .slice()
