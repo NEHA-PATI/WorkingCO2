@@ -46,10 +46,19 @@ const Footer = () => {
         <div className="footer_section footer_links">
           <h3 className="footer__heading">Company</h3>
           <ul className="footer__list">
-            <li className="footer__item"><Link to="/about">About Us</Link></li>
-            <li className="footer__item"><Link to="/case-studies">Sustainability Mission</Link></li>
-            <li className="footer__item"><Link to="/contact">Contact</Link></li>
-            <li className="footer__item"><Link to="/engage">FAQs</Link></li>
+            <li className="footer__item">
+              <Link to="/about">About Us</Link>
+            </li>
+            <li className="footer__item">
+              <Link to="/case-studies">Sustainability Mission</Link>
+            </li>
+            <li className="footer__item">
+              <Link to="/contact">Contact</Link>
+            </li>
+             <li className="footer__item">
+              <Link to="/faq">FAQs</Link>
+            </li>
+            
           </ul>
         </div>
       </div>

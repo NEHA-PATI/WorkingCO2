@@ -42,8 +42,6 @@ const UserDashboard = () => {
   const [activityPage, setActivityPage] = useState(1);
   const pageSize = 10;
 
-  const [openIndex, setOpenIndex] = useState(null);
-
   const storedUser = JSON.parse(localStorage.getItem("authUser"));
   const userId =
     storedUser?.u_id || localStorage.getItem("userId") || "USR_SAMPLE_001";
@@ -72,10 +70,6 @@ const UserDashboard = () => {
         }),
       ]);
 
-      console.log("✅ EV Data:", evData);
-      console.log("✅ Solar Data:", solarData);
-      console.log("✅ Tree Data:", treeData);
-
       const evs = evData.data || [];
       const solars = solarData.data || [];
       const trees = treeData.data || [];
@@ -94,19 +88,6 @@ const UserDashboard = () => {
   };
 
   const buildActivityList = (evs, solars, trees) => {
-    if (evs.length > 0) {
-      console.log("🔍 EV Fields:", Object.keys(evs[0]));
-      console.log("🔍 Sample EV:", evs[0]);
-    }
-    if (solars.length > 0) {
-      console.log("🔍 Solar Fields:", Object.keys(solars[0]));
-      console.log("🔍 Sample Solar:", solars[0]);
-    }
-    if (trees.length > 0) {
-      console.log("🔍 Tree Fields:", Object.keys(trees[0]));
-      console.log("🔍 Sample Tree:", trees[0]);
-    }
-
     const evActivities = evs.map((item) => ({
       type: "EV",
       detail: item.manufacturers || item.Manufacturers || "Unknown",
@@ -200,14 +181,14 @@ const UserDashboard = () => {
 
       return {
         type: "Tree",
-        treename: treename,
-        scientificname: scientificname,
+        treename,
+        scientificname,
         plantingdate: plantingYear,
-        location: location,
+        location,
         height: heightM ? `${heightM}m` : "N/A",
         dbh: dbh ? `${dbh}cm` : "N/A",
         treeType: "Deciduous",
-        imageUrl: imageUrl,
+        imageUrl,
         time: new Date(
           item.created_at || item.Created_At || Date.now()
         ).toLocaleString(),
@@ -221,15 +202,10 @@ const UserDashboard = () => {
       ...treeActivities,
     ];
 
-    allActivities.sort((a, b) => {
-      const timeA = new Date(a.time);
-      const timeB = new Date(b.time);
-      return timeB - timeA;
-    });
+    allActivities.sort((a, b) => new Date(b.time) - new Date(a.time));
 
     setActivityList(allActivities);
-    setActivityPage(1); // reset page on new data
-    console.log("📋 Activity List:", allActivities);
+    setActivityPage(1);
   };
 
   const handleQuickAdd = () => {
@@ -238,10 +214,6 @@ const UserDashboard = () => {
 
   const handleViewAssets = () => {
     navigate("/view-assets");
-  };
-
-  const toggleFAQ = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
   };
 
   // credits total
@@ -266,13 +238,10 @@ const UserDashboard = () => {
   }, [totalCredits, backendCredits]);
 
   const getPercentChangeText = () => {
-    if (percentChange === 0) {
-      return "No change in credits 🤝";
-    } else if (percentChange > 0) {
+    if (percentChange === 0) return "No change in credits 🤝";
+    if (percentChange > 0)
       return `You gained +${percentChange.toFixed(1)}% credits 🎉`;
-    } else {
-      return `You spent ${percentChange.toFixed(1)}% credits 💸`;
-    }
+    return `You spent ${percentChange.toFixed(1)}% credits 💸`;
   };
 
   // CO2 Calculations (kg)
@@ -312,9 +281,9 @@ const UserDashboard = () => {
       : `${percentCO2Change.toFixed(1)}% 🌎 Lower offset`;
 
   // Value Calculations
-  const co2FromEVs = evList.length * 1; // tons
-  const co2FromSolar = solarList.length * 0.5; // tons
-  const co2FromTrees = treeList.length * 0.02; // tons
+  const co2FromEVs = evList.length * 1;
+  const co2FromSolar = solarList.length * 0.5;
+  const co2FromTrees = treeList.length * 0.02;
 
   const totalCO2Offset = co2FromEVs + co2FromSolar + co2FromTrees;
   const valueFromCO2 = totalCO2Offset * 3000;
@@ -349,30 +318,6 @@ const UserDashboard = () => {
     userRankPercent < 1 ? 1 : userRankPercent.toFixed(1);
   const rankNumber = Math.floor((userRankPercent / 100) * totalUsers);
   const rankText = `Top ${displayRankPercent}% globally`;
-  const rankValue = `#${rankNumber}`;
-
-  const faqData = [
-    {
-      question: "How to earn credits?",
-      answer:
-        "You can earn credits by logging EV trips, planting trees, and generating solar energy. Each action contributes specific credit points to your account.",
-    },
-    {
-      question: "How to redeem credits?",
-      answer:
-        "Credits can be redeemed through our partner stores, or used to offset your carbon footprint. Visit the Redeem page to see all options.",
-    },
-    {
-      question: "What are green credits?",
-      answer:
-        "Green credits are points awarded for eco-friendly actions. They help you track your positive environmental impact and can be exchanged for rewards.",
-    },
-    {
-      question: "How do I track my solar energy?",
-      answer:
-        "Your solar panel data is updated automatically. You can also manually upload meter readings on the Upload page for more accurate tracking.",
-    },
-  ];
 
   // ---- Recent activity filter + pagination ----
   const filteredActivities =
@@ -389,9 +334,8 @@ const UserDashboard = () => {
   );
 
   const handleFilterChange = (e) => {
-    const value = e.target.value;
-    setActivityFilter(value);
-    setActivityPage(1); // reset page when filter changes
+    setActivityFilter(e.target.value);
+    setActivityPage(1);
   };
 
   const handlePrevPage = () => {
@@ -616,36 +560,6 @@ const UserDashboard = () => {
                 </button>
               </div>
             )}
-          </div>
-        </div>
-
-        {/* FAQ Section */}
-        <div className="ud-faq-section">
-          <h2>Frequently Asked Questions</h2>
-          <div className="ud-faq-list">
-            {faqData.map((item, index) => (
-              <div
-                key={index}
-                className={`ud-faq-item ${openIndex === index ? "ud-open" : ""}`}
-                onClick={() => toggleFAQ(index)}
-              >
-                <div className="ud-faq-question">
-                  {item.question}
-                  <span className="ud-faq-icon">
-                    {openIndex === index ? "−" : "+"}
-                  </span>
-                </div>
-                <div
-                  className="ud-faq-answer"
-                  style={{
-                    maxHeight: openIndex === index ? "200px" : "0",
-                    opacity: openIndex === index ? 1 : 0,
-                  }}
-                >
-                  <p>{item.answer}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>

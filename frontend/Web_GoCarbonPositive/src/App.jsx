@@ -18,6 +18,8 @@ import Careers from "./pages/Careers";
 import Community from "./pages/community";
 import Contact from "./pages/contact";
 import CaseStudy from "./pages/CaseStudy";
+import Faq from "./pages/Faq";
+
 
 // Dashboard pages
 import UserDashboard from "./pages/userDashboard";
@@ -76,6 +78,9 @@ function App() {
          <Route path="/termsandconditions" element={<TermsAndConditions/>} />
 
 
+          <Route path="/faq" element={<Faq />} />
+
+          {/* <Route path="/settings" element={<NotFoundAnimation />} /> */}
 
           {/* ================= PROTECTED ROUTES (PUBLIC LAYOUT) ================= */}
           {/* These routes are in BaseLayout but require authentication */}
