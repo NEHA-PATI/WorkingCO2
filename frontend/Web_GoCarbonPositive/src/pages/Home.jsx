@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useModal } from "../contexts/ModalContext";
 import "../styles/user/Home.css";
 
 const features = [
@@ -25,6 +26,7 @@ const features = [
 
 const Home = () => {
   const navigate = useNavigate();
+  const { switchToLogin } = useModal(); // ✅ modal trigger
 
   return (
     <>
@@ -44,7 +46,12 @@ const Home = () => {
 
               {/* PRIMARY ACTIONS */}
               <div className="home-primary-actions">
-                <button className="home-btn">Get Started</button>
+                {/* ✅ OPEN LOGIN POPUP */}
+                <button className="home-btn" onClick={switchToLogin}>
+                  Get Started
+                </button>
+
+                {/* ✅ NORMAL ROUTE */}
                 <Link to="/about" className="home-btn">
                   Learn More
                 </Link>
@@ -80,8 +87,8 @@ const Home = () => {
             Why Choose Sustainable Development?
           </h2>
           <p className="home-features-subtitle">
-            Explore our core values and the impact we strive to make for a greener
-            tomorrow.
+            Explore our core values and the impact we strive to make for a
+            greener tomorrow.
           </p>
 
           <div className="home-features-inline">

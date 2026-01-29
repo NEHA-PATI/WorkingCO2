@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { FaGoogle, FaLinkedin, FaGithub } from "react-icons/fa";
+import useAuth from "../auth/useAuth";
+import { useNavigate } from "react-router-dom";
+import LoadingPopup from "../components/user/LoadingPopup";
+
 
 const Signup = ({ onClose, onSwitchToLogin }) => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
@@ -17,17 +21,44 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
   const [showOTP, setShowOTP] = useState(false);
   const [otp, setOtp] = useState("");
   const [tempEmail, setTempEmail] = useState("");
+  const [otpDigits, setOtpDigits] = useState(Array(6).fill(""));
+  const [otpTimer, setOtpTimer] = useState(30);
+  const [canResend, setCanResend] = useState(false);
+const { login } = useAuth();
+const navigate = useNavigate();
+const [tempToken, setTempToken] = useState("");
+
 
   // Responsive breakpoint check
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    if (!showOTP) return;
+
+    setOtpTimer(30);
+    setCanResend(false);
+
+    const interval = setInterval(() => {
+      setOtpTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setCanResend(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [showOTP]);
 
   // Handle responsive resize
   useState(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Inline Styles
@@ -48,9 +79,9 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     },
     modal: {
       background: "#fff",
-      width: isMobile ? "100%" : "600px",
-      maxWidth: isMobile ? "100%" : "90vw",
-      maxHeight: isMobile ? "95vh" : "90vh",
+      width: isMobile ? "100%" : "480px",
+      maxWidth: "92vw",
+      maxHeight: isMobile ? "95vh" : "85vh",
       overflowY: "auto",
       borderRadius: isMobile ? "20px 20px 0 0" : "12px",
       boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
@@ -75,29 +106,31 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       zIndex: 10,
     },
     content: {
-      padding: isMobile ? "56px 24px 32px" : "48px 56px 56px",
+      padding: isMobile ? "32px 20px 24px" : "32px 36px 36px",
     },
     header: {
       marginBottom: isMobile ? "12px" : "8px",
     },
     title: {
-      fontSize: isMobile ? "32px" : "42px",
+      fontSize: isMobile ? "24px" : "30px",
       fontWeight: "700",
-      color: "#000",
+      background: "linear-gradient(135deg, #16a34a, #22c55e)",
+      WebkitBackgroundClip: "text",
+      WebkitTextFillColor: "transparent",
       margin: "0 0 4px 0",
       lineHeight: "1.2",
     },
     subtitle: {
-      fontSize: isMobile ? "28px" : "42px",
+      fontSize: isMobile ? "22px" : "28px",
       fontWeight: "300",
       color: "#000",
       margin: "0 0 12px 0",
       lineHeight: "1.2",
     },
     description: {
-      fontSize: isMobile ? "14px" : "16px",
+      fontSize: isMobile ? "13px" : "14px",
       color: "#666",
-      marginBottom: isMobile ? "24px" : "32px",
+      marginBottom: isMobile ? "16px" : "20px",
       lineHeight: "1.5",
     },
     formContainer: {
@@ -107,10 +140,10 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     },
     input: {
       width: "100%",
-      padding: isMobile ? "14px 16px" : "16px 18px",
+      padding: isMobile ? "10px 12px" : "12px 14px",
       border: "1px solid #d1d5db",
       borderRadius: "8px",
-      fontSize: isMobile ? "15px" : "16px",
+      fontSize: isMobile ? "14px" : "14.5px",
       fontFamily: "inherit",
       transition: "all 0.2s ease",
       backgroundColor: "#fff",
@@ -145,7 +178,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     },
     button: {
       width: "100%",
-      padding: isMobile ? "14px" : "16px",
+      padding: isMobile ? "12px" : "12px",
       border: "none",
       borderRadius: "8px",
       fontSize: isMobile ? "15px" : "16px",
@@ -159,7 +192,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       color: "#fff",
     },
     primaryButtonDisabled: {
-      background: "#e5e3ef",
+      background: "linear-gradient(135deg, #16a34a, #22c55e)",
       cursor: "not-allowed",
       opacity: 0.7,
     },
@@ -167,7 +200,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       display: "flex",
       alignItems: "center",
       gap: "16px",
-      margin: isMobile ? "20px 0" : "28px 0",
+      margin: isMobile ? "14px 0" : "18px 0",
     },
     dividerLine: {
       flex: 1,
@@ -180,10 +213,10 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     },
     socialButton: {
       width: "100%",
-      padding: isMobile ? "12px" : "14px",
+      padding: isMobile ? "10px" : "11px",
       border: "1px solid #d1d5db",
       borderRadius: "8px",
-      fontSize: isMobile ? "14px" : "16px",
+      fontSize: isMobile ? "14px" : "14px",
       fontWeight: "500",
       cursor: "pointer",
       transition: "all 0.2s ease",
@@ -300,7 +333,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       newErrors.password = "Password must be at least 8 characters";
     } else if (
       !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
-        formData.password
+        formData.password,
       )
     ) {
       newErrors.password =
@@ -350,6 +383,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       }
 
       setTempEmail(formData.email.toLowerCase().trim());
+      setTempToken(data.tempToken);
       setShowOTP(true);
       setError({
         success: "OTP sent! Check your email.",
@@ -364,101 +398,111 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     }
   };
 
-  const handleVerifyOtp = async () => {
-    if (!otp.trim() || otp.trim().length !== 6) {
-      setError({ general: "Please enter a valid 6-digit OTP" });
+const handleVerifyOtp = async () => {
+  if (!otp.trim() || otp.trim().length !== 6) {
+    setError({ general: "Please enter a valid 6-digit OTP" });
+    return;
+  }
+
+  setLoading(true);
+  setError({});
+
+  try {
+    const response = await fetch(`${API_URL}/api/auth/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        otp: otp.trim(),
+        tempToken, // 🔥 ONLY THESE TWO
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setError({ general: data.message || "OTP verification failed" });
       return;
     }
 
-    setLoading(true);
-    setError({});
+    alert("✅ Email verified successfully!");
 
-    try {
-      const response = await fetch(`${API_URL}/api/auth/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: tempEmail,
-          otp: otp.trim(),
-        }),
-      });
+    // 👉 User ko login page pe bhejo (BEST PRACTICE)
+    if (onClose) onClose();
+    navigate("/login", { replace: true });
 
-      const data = await response.json();
+  } catch (err) {
+    console.error("OTP Verification Error:", err);
+    setError({ general: "OTP verification failed. Please try again." });
+  } finally {
+    setLoading(false);
+  }
+};
 
-      if (!response.ok) {
-        setError({ general: data.message || "OTP verification failed" });
-        return;
-      }
 
-      localStorage.setItem("authUser", JSON.stringify(data.user));
-      if (data.token) {
-        localStorage.setItem("authToken", data.token);
-      }
 
-      if (onClose) onClose();
 
-      alert(
-        "✅ Email verified successfully!\n\nYour account is now active.\nPlease login to continue."
-      );
+  const handleOtpDigitChange = (index, value) => {
+    if (!/^\d?$/.test(value)) return;
 
-      if (onSwitchToLogin) {
-        onSwitchToLogin();
-      }
-    } catch (err) {
-      console.error("OTP Verification Error:", err);
-      setError({ general: "OTP verification failed. Please try again." });
-    } finally {
-      setLoading(false);
+    const newOtp = [...otpDigits];
+    newOtp[index] = value;
+    setOtpDigits(newOtp);
+    setOtp(newOtp.join(""));
+
+    if (value && index < 5) {
+      document.getElementById(`otp-${index + 1}`)?.focus();
+    }
+
+    if (error.general) setError({});
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
+      document.getElementById(`otp-${index - 1}`)?.focus();
     }
   };
 
-  const handleOtpChange = (e) => {
-    const value = e.target.value.replace(/\D/g, "");
-    if (value.length <= 6) {
-      setOtp(value);
-      if (error.general) {
-        setError({});
-      }
-    }
-  };
 
   const handleResendOtp = async () => {
-    setLoading(true);
-    setError({});
+  setLoading(true);
+  setError({});
 
-    try {
-      const response = await fetch(`${API_URL}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.fullName.trim(),
-          email: tempEmail,
-          password: formData.password,
-        }),
-      });
+  try {
+    const response = await fetch(`${API_URL}/api/auth/resend-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tempToken, // 🔥 ONLY THIS
+      }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        setError({ general: data.message || "Failed to resend OTP" });
-        return;
-      }
-
-      setError({ success: "OTP resent successfully! Check your email." });
-    // eslint-disable-next-line no-unused-vars
-    } catch (err) {
-      setError({ general: "Failed to resend OTP. Please try again." });
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      setError({ general: data.message || "Failed to resend OTP" });
+      return;
     }
-  };
+
+    // 🔥 VERY IMPORTANT — replace old token
+    setTempToken(data.tempToken);
+
+    setError({ success: "OTP resent successfully! Check your email." });
+  } catch (err) {
+    console.error("Resend OTP Error:", err);
+    setError({ general: "Failed to resend OTP. Please try again." });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSocialLogin = (provider) => {
-    alert(`${provider} login - Integration pending`);
+    window.location.href = `${API_URL}/api/auth/oauth/google/login`;
+
   };
 
   return (
     <>
+      <LoadingPopup isVisible={loading} />
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
@@ -474,7 +518,7 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
           }
         }
       `}</style>
-      <div style={styles.overlay} onClick={onClose}>
+      <div style={styles.overlay} onClick={!loading ? onClose : undefined}>
         <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
           <button
             style={styles.closeBtn}
@@ -497,11 +541,11 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
               <>
                 <div style={styles.header}>
                   <h1 style={styles.title}>Join us</h1>
-                  <h2 style={styles.subtitle}>Create a Carbon Positive account</h2>
+                  <h2 style={styles.subtitle}>
+                    Create a Carbon Positive account
+                  </h2>
                 </div>
-                <p style={styles.description}>
-                  Be a part of our community
-                </p>
+                <p style={styles.description}>Be a part of our community</p>
 
                 <div style={styles.formContainer}>
                   <div>
@@ -520,7 +564,8 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                         e.target.style.borderColor = "#5469d4";
                       }}
                       onBlur={(e) => {
-                        if (!error.fullName) e.target.style.borderColor = "#d1d5db";
+                        if (!error.fullName)
+                          e.target.style.borderColor = "#d1d5db";
                       }}
                     />
                     {error.fullName && (
@@ -544,7 +589,8 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                         e.target.style.borderColor = "#5469d4";
                       }}
                       onBlur={(e) => {
-                        if (!error.email) e.target.style.borderColor = "#d1d5db";
+                        if (!error.email)
+                          e.target.style.borderColor = "#d1d5db";
                       }}
                     />
                     {error.email && (
@@ -568,7 +614,8 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                         e.target.style.borderColor = "#5469d4";
                       }}
                       onBlur={(e) => {
-                        if (!error.password) e.target.style.borderColor = "#d1d5db";
+                        if (!error.password)
+                          e.target.style.borderColor = "#d1d5db";
                       }}
                     />
                     {error.password && (
@@ -633,12 +680,14 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                     disabled={loading}
                     onMouseEnter={(e) => {
                       if (!loading) {
-                        e.currentTarget.style.background = "#a8a3c7";
+                        e.currentTarget.style.background =
+                          "linear-gradient(135deg, #15803d, #16a34a)";
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!loading) {
-                        e.currentTarget.style.background = "#b8b4d0";
+                        e.currentTarget.style.background =
+                          "linear-gradient(135deg, #16a34a, #22c55e)";
                       }
                     }}
                   >
@@ -731,14 +780,14 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                   Enter the 6-digit OTP sent to <b>{tempEmail}</b>
                 </p>
 
-                <div style={styles.infoBox}>
+                {/* <div style={styles.infoBox}>
                   <p style={styles.infoText}>
                     ℹ️ After verification, your account will be active and you
                     can login.
                   </p>
-                </div>
+                </div> */}
 
-                <input
+                {/* <input
                   type="text"
                   placeholder="Enter 6-digit OTP"
                   value={otp}
@@ -751,7 +800,42 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                   disabled={loading}
                   maxLength={6}
                   autoFocus
-                />
+                /> */}
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: "10px",
+                  }}
+                >
+                  {otpDigits.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`otp-${index}`}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      disabled={loading}
+                      onChange={(e) =>
+                        handleOtpDigitChange(index, e.target.value)
+                      }
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                      style={{
+                        width: "44px",
+                        height: "52px",
+                        textAlign: "center",
+                        fontSize: "20px",
+                        fontWeight: "600",
+                        borderRadius: "8px",
+                        border: error.general
+                          ? "1px solid #dc2626"
+                          : "1px solid #d1d5db",
+                      }}
+                    />
+                  ))}
+                </div>
 
                 {error.general && (
                   <p style={{ ...styles.errorText, marginTop: "12px" }}>
@@ -793,29 +877,25 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
                 </button>
 
                 <div style={styles.resendSection}>
-                  <p style={{ fontSize: "14px", color: "#666", margin: "0 0 8px 0" }}>
-                    Didn't receive the code?
-                  </p>
-                  <button
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#5469d4",
-                      cursor: "pointer",
-                      fontWeight: "600",
-                      fontSize: "15px",
-                    }}
-                    onClick={handleResendOtp}
-                    disabled={loading}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.textDecoration = "underline";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.textDecoration = "none";
-                    }}
-                  >
-                    Resend OTP
-                  </button>
+                  {!canResend ? (
+                    <p style={{ color: "#999", fontSize: "14px" }}>
+                      Resend OTP in {otpTimer}s
+                    </p>
+                  ) : (
+                    <button
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#5469d4",
+                        cursor: "pointer",
+                        fontWeight: "600",
+                        fontSize: "15px",
+                      }}
+                      onClick={handleResendOtp}
+                    >
+                      Resend OTP
+                    </button>
+                  )}
                 </div>
               </div>
             )}

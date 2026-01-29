@@ -16,10 +16,11 @@ exports.googleCallback = async (req, res) => {
       profile
     );
 
-    // redirect to frontend with token
-    res.redirect(
-      `${process.env.FRONTEND_URL}/oauth-success?token=${token}`
-    );
+    // redirect to user dashboard
+   res.redirect(
+  `${process.env.FRONTEND_URL}/oauth-success?token=${token}`
+);
+
   } catch (err) {
     console.error("GOOGLE OAUTH ERROR:", err);
     res.redirect(

@@ -12,33 +12,35 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!email) return;
+    if (!email || loading) return;
 
     setLoading(true);
+    setMessage("");
 
     try {
-      // 🔹 Backend ko mail bhejne bol do
-      await fetch(`${API_URL}/api/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+      const res = await fetch(
+        `http://localhost:5002/api/auth/password/forgot-password`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
 
-      // ✅ Step 1: Message dikhao
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Too many requests");
+      }
+
       setMessage("Please check your mail");
 
-      // ✅ Step 2: 2 second baad page hata do
       setTimeout(() => {
         navigate("/", { replace: true });
       }, 2000);
     } catch (err) {
-      console.error("Forgot password error:", err);
-      setMessage("Please check your mail");
-
-      setTimeout(() => {
-        navigate("/", { replace: true });
-      }, 2000);
+      console.error("Forgot password error:", err.message);
+      setMessage(err.message || "Too many requests. Try later.");
     } finally {
       setLoading(false);
     }
@@ -64,7 +66,6 @@ const ForgotPassword = () => {
         </button>
       </form>
 
-      {/* ✅ MESSAGE UI */}
       {message && (
         <p className="info-text" style={{ marginTop: "12px" }}>
           {message}
