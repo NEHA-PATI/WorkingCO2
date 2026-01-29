@@ -1,5 +1,4 @@
 import React from "react";
-import BackButton from "../components/BackButton";
 import "../styles/user/about.css";
 
 const features = [
