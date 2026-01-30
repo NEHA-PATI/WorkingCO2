@@ -74,8 +74,8 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/case-studies" element={<CaseStudy />} />
           <Route path="/settings" element={<NotFoundAnimation />} />
-         <Route path="/privacypolicy" element={<PrivacyPolicy />} />
-         <Route path="/termsandconditions" element={<TermsAndConditions/>} />
+          <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+          <Route path="/termsandconditions" element={<TermsAndConditions />} />
 
 
           <Route path="/faq" element={<Faq />} />
@@ -95,7 +95,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-<Route path="/oauth-success" element={<OAuthSuccess />} />
+          <Route path="/oauth-success" element={<OAuthSuccess />} />
 
           <Route
             path="/view-assets"
