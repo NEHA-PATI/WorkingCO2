@@ -384,7 +384,6 @@ const UserProfile = () => {
 
 function AddressBlock({
     address,
-    index,
     countries,
     filteredStates,
     filteredCities,
