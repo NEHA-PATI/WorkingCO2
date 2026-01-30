@@ -7,18 +7,18 @@ class EVModel {
    */
   static async create(evData) {
     const {
-      U_ID,
-      Category,
-      Manufacturers,
-      Model,
-      Purchase_Year,
-      Energy_Consumed,
-      Primary_Charging_Type,
-      Range,
-      Grid_Emission_Factor,
-      Top_Speed,
-      Charging_Time,
-      Motor_Power,
+      u_id,
+      category,
+      manufacturers,
+      model,
+      purchase_year,
+      energy_consumed,
+      primary_charging_type,
+      range,
+      grid_emission_factor,
+      top_speed,
+      charging_time,
+      motor_power,
     } = evData;
 
     const VUID = `VUID_${uuidv4()}`;
@@ -34,18 +34,18 @@ class EVModel {
 
     const values = [
       VUID,
-      U_ID,
-      Category,
-      Manufacturers,
-      Model,
-      Purchase_Year,
-      Energy_Consumed,
-      Primary_Charging_Type,
-      Range,
-      Grid_Emission_Factor,
-      Top_Speed,
-      Charging_Time,
-      Motor_Power,
+      u_id,
+      category,
+      manufacturers,
+      model,
+      purchase_year,
+      energy_consumed,
+      primary_charging_type,
+      range,
+      grid_emission_factor,
+      top_speed,
+      charging_time,
+      motor_power,
       "pending",
     ];
 

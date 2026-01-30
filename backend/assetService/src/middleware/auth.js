@@ -62,18 +62,32 @@ const verifyAssetOwnership = (assetType) => {
  */
 const logUserAction = (actionType) => {
   return (req, res, next) => {
-    const userId = req.userId || req.body.U_ID || req.body.u_id || req.body.UID || 'unknown';
-    const ip = req.ip || req.connection.remoteAddress;
-    
-    logger.info(`User Action: ${actionType}`, {
-      userId,
-      ip,
-      method: req.method,
-      path: req.path,
-      timestamp: new Date().toISOString()
-    });
+    try {
+      // For multipart/form-data, body might not be parsed yet
+      // Try to get userId from various sources
+      let userId = req.userId || 'unknown';
+      
+      // Only try to access req.body if it exists and is not a multipart request
+      if (req.body && typeof req.body === 'object' && !req.headers['content-type']?.includes('multipart/form-data')) {
+        userId = req.body.U_ID || req.body.u_id || req.body.UID || userId;
+      }
+      
+      const ip = req.ip || req.connection.remoteAddress;
+      
+      logger.info(`User Action: ${actionType}`, {
+        userId,
+        ip,
+        method: req.method,
+        path: req.path,
+        timestamp: new Date().toISOString()
+      });
 
-    next();
+      next();
+    } catch (error) {
+      // Don't block the request if logging fails
+      logger.warn(`Failed to log user action ${actionType}:`, error.message);
+      next();
+    }
   };
 };
 

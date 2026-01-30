@@ -18,7 +18,7 @@ import Careers from "./pages/Careers";
 import Community from "./pages/community";
 import Contact from "./pages/contact";
 import CaseStudy from "./pages/CaseStudy";
-import Faq from "./pages/Faq";
+import Faq from "./pages/FAQ";
 
 
 // Dashboard pages

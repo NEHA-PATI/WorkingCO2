@@ -1,51 +1,53 @@
-# Dependencies
+# Node modules
 node_modules/
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
 
-# Environment variables
+# Build and cache folders
+dist/
+build/
+.cache
+.vite/
+.next/
+out/
+coverage/
+
+# Environment files
 .env
 .env.local
-.env.development
-.env.production
-.env.test
+.env.*.local
 
-# Logs
-logs/
-*.log
+# Log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
 
-# OS files
+# System files (OS-specific)
 .DS_Store
 Thumbs.db
+
+# IDE and editor settings
+.vscode/
+.idea/
 *.swp
 *.swo
 
-# IDE
-.vscode/
-.idea/
-*.sublime-project
-*.sublime-workspace
+# Temporary files
+*.tmp
+*.temp
+*.bak
 
-# Testing
+# Test coverage
 coverage/
-.nyc_output/
 
-# Build
-dist/
-build/
-
-# Uploads (if storing locally)
-uploads/
-temp/
-
-# Database
-*.sqlite
-*.db
+# Optional lock files (if you use only one package manager)
+# Uncomment if needed
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
 
 # Misc
-.cache/
-.temp/
+*.zip
+*.tar
+*.gz
