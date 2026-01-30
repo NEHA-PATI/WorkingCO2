@@ -55,3 +55,42 @@ exports.createCompleteProfile = async (u_id, profile, addresses) => {
     client.release();
   }
 };
+exports.getCompleteProfile = async (u_id) => {
+  // 🔹 profile + email from users table
+  const profileRes = await pool.query(
+    `
+    SELECT 
+      up.u_id,
+      up.first_name,
+      up.middle_name,
+      up.last_name,
+      up.mobile_number,
+      up.dob,
+      u.email
+    FROM user_profile up
+    JOIN users u ON u.u_id = up.u_id
+    WHERE up.u_id = $1
+    `,
+    [u_id]
+  );
+
+  if (!profileRes.rows.length) {
+    return null;
+  }
+
+  // 🔹 addresses
+  const addressRes = await pool.query(
+    `
+    SELECT *
+    FROM user_address
+    WHERE u_id = $1
+    ORDER BY is_default DESC
+    `,
+    [u_id]
+  );
+
+  return {
+    profile: profileRes.rows[0],
+    addresses: addressRes.rows,
+  };
+};
