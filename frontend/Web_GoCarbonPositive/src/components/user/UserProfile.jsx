@@ -8,6 +8,7 @@ const UserProfile = () => {
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(true);
+const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -179,6 +180,131 @@ const UserProfile = () => {
   const handleEditProfile = () => {
     setIsEditing(true);
   };
+
+
+  const handleSubmit = async () => {
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const u_id = storedUser?.u_id || localStorage.getItem("userId");
+
+  if (!u_id) {
+    alert("User not logged in ❌");
+    return;
+  }
+
+  const payload = {
+    profile: {
+      first_name: formData.firstName,
+      middle_name: formData.middleName,
+      last_name: formData.lastName,
+      mobile_number: formData.phone,
+      dob: formData.dob,
+    },
+    addresses: addresses.map((addr, index) => ({
+      address_type: addr.type.toUpperCase(),
+      address_line: addr.address,
+      country: addr.countryName,
+      pincode: addr.pincode,
+      is_default: index === 0,
+    })),
+  };
+
+  try {
+    const res = await fetch("http://localhost:5006/api/profiles/complete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-id": u_id,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Failed to save profile ❌");
+      return;
+    }
+
+    alert("Profile & addresses saved successfully ✅");
+    setIsEditing(false);   // 🔥 THIS FIXES IT
+    console.log(data);
+
+  } catch (err) {
+    alert("Server error ❌");
+  }
+};
+
+
+useEffect(() => {
+  const fetchProfile = async () => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const u_id = storedUser?.u_id || localStorage.getItem("userId");
+
+    if (!u_id) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        "http://localhost:5006/api/profiles/complete",
+        {
+          headers: { "x-user-id": u_id },
+        }
+      );
+
+      if (!res.ok) {
+        // ❗ profile nahi mila → form
+        setIsEditing(true);
+        return;
+      }
+
+      const data = await res.json();
+
+      if (data?.profile) {
+        setFormData({
+          firstName: data.profile.first_name,
+          middleName: data.profile.middle_name || "",
+          lastName: data.profile.last_name,
+          email: data.profile.email || "",
+          phone: data.profile.mobile_number || "",
+          dob: data.profile.dob || "",
+          countryCode: "+91",
+          phoneCountryIso: "IN",
+        });
+
+        setAddresses(
+          data.addresses.map((a) => ({
+            id: a.address_id,
+            type: a.address_type.toLowerCase(),
+            address: a.address_line,
+            countryName: a.country,
+            pincode: a.pincode,
+            countryCode: "",
+            stateCode: "",
+            stateName: "",
+            city: "",
+          }))
+        );
+
+        setIsEditing(false); // 🔥 CARD SHOW
+      } else {
+        setIsEditing(true);
+      }
+    } catch (err) {
+      console.error("Fetch profile failed", err);
+      setIsEditing(true);
+    } finally {
+      setLoading(false); // 🔥 VERY IMPORTANT
+    }
+  };
+
+  fetchProfile();
+}, []);
+
+if (loading) {
+  return <div style={{ padding: 40 }}>Loading profile...</div>;
+}
 
   return (
     <div className="pf-wrapper">
@@ -398,11 +524,7 @@ const UserProfile = () => {
 
               {/* Submit Button */}
               <div className="pf-button-group">
-                <button
-                  type="button"
-                  className="pf-save-btn"
-                  onClick={handleSaveChanges}
-                >
+                 <button className="pf-save-btn" onClick={handleSubmit}>
                   Save Changes
                 </button>
                 <button
