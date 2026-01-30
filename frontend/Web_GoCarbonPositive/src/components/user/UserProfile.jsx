@@ -43,6 +43,10 @@ const statesByCuntry = {
     ],
 };
 
+
+
+
+
 const UserProfile = () => {
     const [formData, setFormData] = useState({
         firstName: '',
@@ -66,6 +70,64 @@ const UserProfile = () => {
             city: '',
         },
     ]);
+
+
+const handleSubmit = async () => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const u_id = storedUser?.u_id || localStorage.getItem("userId");
+
+    if (!u_id) {
+        alert("User not logged in ❌");
+        return;
+    }
+
+    const payload = {
+        profile: {
+            first_name: formData.firstName,
+            middle_name: formData.middleName,
+            last_name: formData.lastName,
+            mobile_number: formData.phone,
+            dob: formData.dob,
+        },
+        addresses: addresses.map((addr, index) => ({
+            address_type: addr.type.toUpperCase(),
+            address_line: addr.address,
+            country: addr.country,
+            pincode: addr.pincode,
+            is_default: index === 0,
+        })),
+    };
+
+    try {
+        const res = await fetch(
+            "http://localhost:5006/api/profiles/complete",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-user-id": u_id, // ✅ THIS IS THE KEY FIX
+                },
+                body: JSON.stringify(payload),
+            }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            console.error("Backend error:", data);
+            alert(data.message || "Failed to save profile ❌");
+            return;
+        }
+
+        alert("Profile & addresses saved successfully ✅");
+        console.log(data);
+    } catch (err) {
+        console.error("API error:", err);
+        alert("Server error ❌");
+    }
+};
+
+
 
     const [showAddNewAddress, setShowAddNewAddress] = useState(false);
 
@@ -224,10 +286,11 @@ const UserProfile = () => {
                                     className="pf-country-code-select"
                                 >
                                     {countryCodes.map((c) => (
-                                        <option key={c.code} value={c.code}>
-                                            {c.code}
-                                        </option>
-                                    ))}
+    <option key={`${c.code}-${c.country}`} value={c.code}>
+        {c.code}
+    </option>
+))}
+
                                 </select>
                                 <input
                                     type="tel"
@@ -325,9 +388,10 @@ const UserProfile = () => {
 
                     {/* Submit Button */}
                     <div className="pf-button-group">
-                        <button className="pf-save-btn">
-                            Save Changes
-                        </button>
+                        <button className="pf-save-btn" onClick={handleSubmit}>
+    Save Changes
+</button>
+
                         <button className="pf-cancel-btn">
                             Cancel
                         </button>
