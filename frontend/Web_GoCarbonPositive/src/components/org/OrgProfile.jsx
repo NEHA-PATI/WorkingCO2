@@ -1,174 +1,129 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { ChevronDown, MapPin, Plus, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronDown } from "lucide-react";
+import {
+  FaBuilding,
+  FaUniversity,
+  FaCity,
+  FaCheckCircle,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { Country, State } from "country-state-city";
-import "../../styles/user/UserProfile.css";
+import "../../styles/org/OrgProfile.css";
 
-const UserProfile = () => {
+const OrgProfile = () => {
   const navigate = useNavigate();
 
+  const [orgType, setOrgType] = useState("industry");
+  const [idType, setIdType] = useState("PAN");
+  const [idNumber, setIdNumber] = useState("");
+  const [isIdVerified, setIsIdVerified] = useState(false);
+  const [showIdOtp, setShowIdOtp] = useState(false);
+  const [idOtp, setIdOtp] = useState("");
+  const [idOtpTimer, setIdOtpTimer] = useState(0);
+
+  const [dob, setDob] = useState("");
+  const [orgName, setOrgName] = useState("");
+  const [websiteProtocol, setWebsiteProtocol] = useState("https");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+
+  const [country] = useState("India");
+  const [state, setState] = useState("");
+  const [city, setCity] = useState("");
+  const [pinCode, setPinCode] = useState("");
+  const [fullAddress, setFullAddress] = useState("");
+
+  const [email, setEmail] = useState("");
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [showEmailOtp, setShowEmailOtp] = useState(false);
+  const [emailOtp, setEmailOtp] = useState("");
+  const [emailOtpTimer, setEmailOtpTimer] = useState(0);
+
+  // NEW: show summary vs form
   const [isEditing, setIsEditing] = useState(true);
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    email: "",
-    countryCode: "+91",      // display dial code
-    phoneCountryIso: "IN",   // phone dropdown selection
-    phone: "",
-    dob: "",
-  });
-
-  const [addresses, setAddresses] = useState([
-    {
-      id: "1",
-      type: "home",
-      typeSpecify: "",
-      address: "",
-      countryCode: "",   // ISO country code
-      countryName: "",
-      pincode: "",
-      stateCode: "",
-      stateName: "",
-      city: "",
-    },
-  ]);
-
-  const [showAddNewAddress, setShowAddNewAddress] = useState(false);
-
-  // All countries for dropdowns
-  const allCountries = useMemo(() => Country.getAllCountries(), []);
-
-  const getStatesForCountry = (countryCode) =>
-    State.getStatesOfCountry(countryCode) || [];
-
-  const getDialCodeForIso = (iso) => {
-    const c = allCountries.find((c) => c.isoCode === iso);
-    return c ? `+${c.phonecode}` : formData.countryCode;
-  };
-
-  // Sync phone dropdown <-> dial code
+  // ID OTP Timer
   useEffect(() => {
-    if (!formData.phoneCountryIso) return;
-    const dial = getDialCodeForIso(formData.phoneCountryIso);
-    setFormData((prev) => ({
-      ...prev,
-      countryCode: dial,
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.phoneCountryIso, allCountries]);
+    if (idOtpTimer > 0) {
+      const timer = setTimeout(() => setIdOtpTimer(idOtpTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [idOtpTimer]);
 
-  // Optionally sync with primary address country
+  // Email OTP Timer
   useEffect(() => {
-    const addr = addresses[0];
-    if (!addr.countryCode) return;
-    const c = allCountries.find((c) => c.isoCode === addr.countryCode);
-    if (!c) return;
-    setFormData((prev) => ({
-      ...prev,
-      phoneCountryIso: addr.countryCode,
-      countryCode: `+${c.phonecode}`,
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addresses, allCountries]);
+    if (emailOtpTimer > 0) {
+      const timer = setTimeout(
+        () => setEmailOtpTimer(emailOtpTimer - 1),
+        1000
+      );
+      return () => clearTimeout(timer);
+    }
+  }, [emailOtpTimer]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleVerifyId = () => {
+    if (idNumber.trim()) {
+      setShowIdOtp(true);
+      setIdOtpTimer(30);
+    }
   };
 
-  const handleAddressChange = (id, field, value) => {
-    setAddresses((prev) =>
-      prev.map((addr) => (addr.id === id ? { ...addr, [field]: value } : addr))
-    );
+  const handleVerifyIdOtp = () => {
+    if (idOtp.length === 6) {
+      setIsIdVerified(true);
+      setShowIdOtp(false);
+      setIdOtp("");
+      alert("ID verified successfully!");
+    }
   };
 
-  const handlePincodeChange = (id, pincode) => {
-    handleAddressChange(id, "pincode", pincode);
+  const handleResendIdOtp = () => {
+    if (idOtpTimer === 0) {
+      setIdOtpTimer(30);
+      setIdOtp("");
+    }
   };
 
-  const handleCountrySelect = (id, isoCode) => {
-    const countryObj = allCountries.find((c) => c.isoCode === isoCode);
-    setAddresses((prev) =>
-      prev.map((addr) =>
-        addr.id === id
-          ? {
-              ...addr,
-              countryCode: isoCode,
-              countryName: countryObj?.name || "",
-              stateCode: "",
-              stateName: "",
-              city: "",
-            }
-          : addr
-      )
-    );
+  const handleVerifyEmail = () => {
+    if (email.trim()) {
+      setShowEmailOtp(true);
+      setEmailOtpTimer(30);
+    }
   };
 
-  const handleStateSelect = (id, stateIso) => {
-    const addr = addresses.find((a) => a.id === id);
-    if (!addr || !addr.countryCode) {
-      handleAddressChange(id, "stateCode", stateIso);
+  const handleVerifyEmailOtp = () => {
+    if (emailOtp.length === 6) {
+      setIsEmailVerified(true);
+      setShowEmailOtp(false);
+      setEmailOtp("");
+      alert("Email verified successfully!");
+    }
+  };
+
+  const handleResendEmailOtp = () => {
+    if (emailOtpTimer === 0) {
+      setEmailOtpTimer(30);
+      setEmailOtp("");
+    }
+  };
+
+  const handleUpdateProfile = () => {
+    if (
+      !idNumber ||
+      !orgName ||
+      !email ||
+      !state ||
+      !city ||
+      !pinCode ||
+      !fullAddress
+    ) {
+      alert("Please fill all required fields");
       return;
     }
-    const states = getStatesForCountry(addr.countryCode);
-    const stateObj = states.find((s) => s.isoCode === stateIso);
-    setAddresses((prev) =>
-      prev.map((a) =>
-        a.id === id
-          ? {
-              ...a,
-              stateCode: stateIso,
-              stateName: stateObj?.name || "",
-              city: "",
-            }
-          : a
-      )
-    );
-  };
-
-  const handleAddNewAddress = () => {
-    const newAddress = {
-      id: Date.now().toString(),
-      type: "office",
-      typeSpecify: "",
-      address: "",
-      countryCode: "",
-      countryName: "",
-      pincode: "",
-      stateCode: "",
-      stateName: "",
-      city: "",
-    };
-    setAddresses((prev) => [...prev, newAddress]);
-    setShowAddNewAddress(false);
-  };
-
-  const handleRemoveAddress = (id) => {
-    if (addresses.length > 1) {
-      setAddresses((prev) => prev.filter((addr) => addr.id !== id));
-    }
-  };
-
-  const primaryStates = useMemo(() => {
-    if (!addresses[0].countryCode) return [];
-    return getStatesForCountry(addresses[0].countryCode);
-  }, [addresses]);
-
-  const handleSaveChanges = () => {
-    if (!formData.firstName || !formData.lastName || !formData.email) {
-      alert("Please fill first name, last name and email.");
+    if (!isIdVerified || !isEmailVerified) {
+      alert("Please verify ID and Email");
       return;
     }
-    if (!addresses[0].address || !addresses[0].countryCode) {
-      alert("Please fill your primary address and country.");
-      return;
-    }
+    // Show summary card instead of form
     setIsEditing(false);
   };
 
@@ -180,297 +135,428 @@ const UserProfile = () => {
     setIsEditing(true);
   };
 
+  // Helper: label from orgType
+  const orgTypeLabel =
+    orgType === "industry"
+      ? "Industry & Private Sector"
+      : orgType === "central"
+      ? "Central Government"
+      : "State Government";
+
   return (
-    <div className="up-wrapper">
-      {/* Left Side - Scrollable area */}
-      <div className="up-left-container">
-        <div className="up-content-area">
-          <div className="up-header">
-            <h1 className="up-title">Your Profile</h1>
-            <p className="up-subtitle">
-              Update your personal details and address information
-            </p>
-          </div>
-
+    <div className="orgp-page-root">
+      <div className="orgp-profile-container">
+        {/* Left Side - Form / Summary (Scrollable only this section) */}
+        <div className="orgp-form-section">
           {isEditing ? (
-            <>
-              {/* Personal Information Section */}
-              <section className="up-section">
-                <h2 className="up-section-title">
-                  <span className="up-section-number">1</span>
-                  Personal Information
-                </h2>
-
-                <div className="up-grid-two">
-                  <div>
-                    <label className="up-label">
-                      First Name <span className="up-required">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="firstName"
-                      placeholder="John"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      className="up-input"
-                    />
-                  </div>
-                  <div>
-                    <label className="up-label">Middle Name</label>
-                    <input
-                      type="text"
-                      name="middleName"
-                      placeholder="David"
-                      value={formData.middleName}
-                      onChange={handleInputChange}
-                      className="up-input"
-                    />
-                  </div>
+            <form className="orgp-form">
+              {/* Organization Type */}
+              <div className="orgp-form-group">
+                <label className="orgp-form-label">
+                  What's the type of your organization?
+                </label>
+                <div className="orgp-org-type-selector">
+                  <button
+                    type="button"
+                    className={`orgp-org-type-btn ${
+                      orgType === "industry" ? "orgp-active" : ""
+                    }`}
+                    onClick={() => setOrgType("industry")}
+                  >
+                    <FaBuilding className="orgp-org-icon" />
+                    Industry & Private Sector
+                  </button>
+                  <button
+                    type="button"
+                    className={`orgp-org-type-btn ${
+                      orgType === "central" ? "orgp-active" : ""
+                    }`}
+                    onClick={() => setOrgType("central")}
+                  >
+                    <FaUniversity className="orgp-org-icon" />
+                    Central Government
+                  </button>
+                  <button
+                    type="button"
+                    className={`orgp-org-type-btn ${
+                      orgType === "state" ? "orgp-active" : ""
+                    }`}
+                    onClick={() => setOrgType("state")}
+                  >
+                    <FaCity className="orgp-org-icon" />
+                    State Government
+                  </button>
                 </div>
+              </div>
 
-                <div>
-                  <label className="up-label">
-                    Last Name <span className="up-required">*</span>
+              {/* Select ID */}
+              <div className="orgp-form-group">
+                <label className="orgp-form-label">Select ID*</label>
+                <div className="orgp-select-wrapper">
+                  <select
+                    value={idType}
+                    onChange={(e) => setIdType(e.target.value)}
+                    className="orgp-form-select"
+                  >
+                    <option value="PAN">PAN</option>
+                    <option value="TAN">TAN</option>
+                    <option value="GSTIN">GSTIN</option>
+                  </select>
+                  <ChevronDown className="orgp-select-icon" size={18} />
+                </div>
+              </div>
+
+              {/* ID Number */}
+              <div className="orgp-form-group">
+                <label className="orgp-form-label">{idType}*</label>
+                <div className="orgp-input-with-button">
+                  <input
+                    type="text"
+                    value={idNumber}
+                    onChange={(e) => setIdNumber(e.target.value)}
+                    placeholder={`Enter ${idType}`}
+                    className="orgp-form-input"
+                    disabled={isIdVerified}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleVerifyId}
+                    disabled={isIdVerified || !idNumber}
+                    className={`orgp-verify-btn ${
+                      isIdVerified ? "orgp-verified" : ""
+                    }`}
+                  >
+                    {isIdVerified ? "✓ Verified" : "Verify"}
+                  </button>
+                </div>
+              </div>
+
+              {/* ID OTP Section */}
+              {showIdOtp && (
+                <div className="orgp-otp-section">
+                  <label className="orgp-form-label">
+                    Enter 6-digit OTP*
                   </label>
                   <input
                     type="text"
-                    name="lastName"
-                    placeholder="Smith"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    className="up-input"
+                    maxLength={6}
+                    value={idOtp}
+                    onChange={(e) =>
+                      setIdOtp(e.target.value.replace(/\D/g, ""))
+                    }
+                    placeholder="000000"
+                    className="orgp-form-input orgp-otp-input"
                   />
-                </div>
-              </section>
-
-              {/* Contact Information Section */}
-              <section className="up-section">
-                <h2 className="up-section-title">
-                  <span className="up-section-number">2</span>
-                  Contact Information
-                </h2>
-
-                <div className="up-form-group">
-                  <label className="up-label">
-                    Email <span className="up-required">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="john@example.com"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="up-input"
-                  />
-                </div>
-
-                <div className="up-form-group">
-                  <label className="up-label">
-                    Phone Number <span className="up-required">*</span>
-                  </label>
-                  <div className="up-phone-input-wrapper">
-                    {/* Country code dropdown for phone */}
-                    <select
-                      name="phoneCountryIso"
-                      value={formData.phoneCountryIso}
-                      onChange={(e) => {
-                        const iso = e.target.value;
-                        const c = allCountries.find(
-                          (c) => c.isoCode === iso
-                        );
-                        setFormData((prev) => ({
-                          ...prev,
-                          phoneCountryIso: iso,
-                          countryCode: c
-                            ? `+${c.phonecode}`
-                            : prev.countryCode,
-                        }));
-                      }}
-                      className="up-country-code-select"
+                  <div className="orgp-otp-actions">
+                    <button
+                      type="button"
+                      onClick={handleVerifyIdOtp}
+                      disabled={idOtp.length !== 6}
+                      className="orgp-verify-btn"
                     >
-                      {allCountries.map((c) => (
-                        <option key={c.isoCode} value={c.isoCode}>
-                          +{c.phonecode} ({c.name})
-                        </option>
-                      ))}
-                    </select>
+                      Verify OTP
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleResendIdOtp}
+                      disabled={idOtpTimer > 0}
+                      className="orgp-resend-btn"
+                    >
+                      {idOtpTimer > 0
+                        ? `Resend in ${idOtpTimer}s`
+                        : "Resend OTP"}
+                    </button>
+                  </div>
+                </div>
+              )}
 
+              {/* Date of Incorporation */}
+              <div className="orgp-form-group">
+                <label className="orgp-form-label">
+                  Date of Incorporation (DOI)*
+                </label>
+                <input
+                  type="date"
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  className="orgp-form-input"
+                />
+              </div>
+
+              {/* Organization Name */}
+              <div className="orgp-form-group">
+                <label className="orgp-form-label">Organization Name*</label>
+                <input
+                  type="text"
+                  value={orgName}
+                  onChange={(e) => setOrgName(e.target.value)}
+                  placeholder="Enter organization name"
+                  className="orgp-form-input"
+                />
+              </div>
+
+              {/* Website URL */}
+              <div className="orgp-form-group">
+                <label className="orgp-form-label">
+                  Organization Website URL*
+                </label>
+                <div className="orgp-website-input">
+                  <div className="orgp-select-wrapper">
+                    <select
+                      value={websiteProtocol}
+                      onChange={(e) => setWebsiteProtocol(e.target.value)}
+                      className="orgp-form-select"
+                    >
+                      <option value="http">http</option>
+                      <option value="https">https</option>
+                      <option value="ssh">ssh</option>
+                    </select>
+                    <ChevronDown className="orgp-select-icon" size={18} />
+                  </div>
+                  <input
+                    type="text"
+                    value={websiteUrl}
+                    onChange={(e) => setWebsiteUrl(e.target.value)}
+                    placeholder="www.example.com"
+                    className="orgp-form-input"
+                  />
+                </div>
+              </div>
+
+              {/* Address Section */}
+              <div className="orgp-form-group">
+                <label className="orgp-form-label">Address*</label>
+
+                <div className="orgp-address-grid">
+                  <div>
+                    <label className="orgp-form-label orgp-small">
+                      Country
+                    </label>
                     <input
-                      type="tel"
-                      name="phone"
-                      placeholder="9876543210"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="up-input up-phone-input"
+                      type="text"
+                      value={country}
+                      readOnly
+                      className="orgp-form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="orgp-form-label orgp-small">
+                      State*
+                    </label>
+                    <div className="orgp-select-wrapper">
+                      <select
+                        value={state}
+                        onChange={(e) => setState(e.target.value)}
+                        className="orgp-form-select"
+                      >
+                        <option value="">Select State</option>
+                        <option value="Odisha">Odisha</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Karnataka">Karnataka</option>
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                      </select>
+                      <ChevronDown className="orgp-select-icon" size={18} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="orgp-address-grid">
+                  <div>
+                    <label className="orgp-form-label orgp-small">
+                      City*
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="Enter city"
+                      className="orgp-form-input"
+                    />
+                  </div>
+                  <div>
+                    <label className="orgp-form-label orgp-small">
+                      Pin Code*
+                    </label>
+                    <input
+                      type="text"
+                      value={pinCode}
+                      onChange={(e) =>
+                        setPinCode(
+                          e.target.value.replace(/\D/g, "").slice(0, 6)
+                        )
+                      }
+                      placeholder="000000"
+                      className="orgp-form-input"
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="up-label">
-                    Date of Birth <span className="up-required">*</span>
+                <div className="orgp-full-address-block">
+                  <label className="orgp-form-label orgp-small">
+                    Full Address*
                   </label>
-                  <input
-                    type="date"
-                    name="dob"
-                    value={formData.dob}
-                    onChange={handleInputChange}
-                    className="up-input"
+                  <textarea
+                    value={fullAddress}
+                    onChange={(e) => setFullAddress(e.target.value)}
+                    placeholder="Enter full address"
+                    className="orgp-form-input orgp-textarea"
+                    rows={3}
                   />
                 </div>
-              </section>
+              </div>
 
-              {/* Address Information Section */}
-              <section className="up-section">
-                <h2 className="up-section-title">
-                  <span className="up-section-number">3</span>
-                  Address Information
-                </h2>
-
-                {/* Primary Address */}
-                <AddressBlock
-                  address={addresses[0]}
-                  countries={allCountries}
-                  states={primaryStates}
-                  onAddressChange={handleAddressChange}
-                  onPincodeChange={handlePincodeChange}
-                  onCountrySelect={handleCountrySelect}
-                  onStateSelect={handleStateSelect}
-                  isPrimary={true}
-                />
-
-                {/* Additional Addresses */}
-                {addresses.slice(1).map((address, index) => {
-                  const statesForThis = getStatesForCountry(
-                    address.countryCode
-                  );
-                  return (
-                    <div key={address.id} className="up-additional-address">
-                      <div className="up-address-header">
-                        <h3 className="up-address-title">
-                          Address {index + 2}
-                        </h3>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveAddress(address.id)}
-                          className="up-remove-btn"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
-                      </div>
-                      <AddressBlock
-                        address={address}
-                        countries={allCountries}
-                        states={statesForThis}
-                        onAddressChange={handleAddressChange}
-                        onPincodeChange={handlePincodeChange}
-                        onCountrySelect={handleCountrySelect}
-                        onStateSelect={handleStateSelect}
-                        isPrimary={false}
-                      />
-                    </div>
-                  );
-                })}
-
-                {/* Add Another Address Button */}
-                {!showAddNewAddress && (
+              {/* Email */}
+              <div className="orgp-form-group">
+                <label className="orgp-form-label">
+                  Official Domain's Email*
+                </label>
+                <div className="orgp-input-with-button">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter official email"
+                    className="orgp-form-input"
+                    disabled={isEmailVerified}
+                  />
                   <button
                     type="button"
-                    onClick={() => setShowAddNewAddress(true)}
-                    className="up-add-address-btn"
+                    onClick={handleVerifyEmail}
+                    disabled={isEmailVerified || !email}
+                    className={`orgp-verify-btn ${
+                      isEmailVerified ? "orgp-verified" : ""
+                    }`}
                   >
-                    <Plus className="w-5 h-5" />
-                    Add Another Address
+                    {isEmailVerified ? "✓ Verified" : "Verify Email"}
                   </button>
-                )}
+                </div>
+                <p className="orgp-help-text">
+                  Please enter your official organization email address.
+                </p>
+              </div>
 
-                {showAddNewAddress && (
-                  <button
-                    type="button"
-                    onClick={handleAddNewAddress}
-                    className="up-confirm-add-btn"
-                  >
-                    <Plus className="w-5 h-5" />
-                    Confirm Add Address
-                  </button>
-                )}
-              </section>
+              {/* Email OTP Section */}
+              {showEmailOtp && (
+                <div className="orgp-otp-section">
+                  <label className="orgp-form-label">
+                    Enter 6-digit OTP*
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={emailOtp}
+                    onChange={(e) =>
+                      setEmailOtp(e.target.value.replace(/\D/g, ""))
+                    }
+                    placeholder="000000"
+                    className="orgp-form-input orgp-otp-input"
+                  />
+                  <div className="orgp-otp-actions">
+                    <button
+                      type="button"
+                      onClick={handleVerifyEmailOtp}
+                      disabled={emailOtp.length !== 6}
+                      className="orgp-verify-btn"
+                    >
+                      Verify OTP
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleResendEmailOtp}
+                      disabled={emailOtpTimer > 0}
+                      className="orgp-resend-btn"
+                    >
+                      {emailOtpTimer > 0
+                        ? `Resend in ${emailOtpTimer}s`
+                        : "Resend OTP"}
+                    </button>
+                  </div>
+                </div>
+              )}
 
-              {/* Submit Button */}
-              <div className="up-button-group">
+              {/* Update / Cancel Buttons */}
+              <div className="orgp-button-group">
                 <button
                   type="button"
-                  className="up-save-btn"
-                  onClick={handleSaveChanges}
+                  onClick={handleUpdateProfile}
+                  className="orgp-update-btn"
                 >
-                  Save Changes
+                  Update Profile
                 </button>
                 <button
                   type="button"
-                  className="up-cancel-btn"
                   onClick={handleCancel}
+                  className="orgp-cancel-btn"
                 >
                   Cancel
                 </button>
               </div>
-            </>
+            </form>
           ) : (
-            // Summary card when not editing
-            <div className="up-summary-card">
-              <h2 className="up-summary-title">Profile Summary</h2>
+            // Summary card after update
+            <div className="orgp-summary-card">
+              <div className="orgp-summary-header">
+                <div className="orgp-summary-badge">Organization Profile</div>
+                <h2 className="orgp-summary-title">{orgName}</h2>
+                <p className="orgp-summary-subtitle">{orgTypeLabel}</p>
+              </div>
 
-              <div className="up-summary-section">
-                <h3 className="up-summary-section-title">Personal</h3>
+              <div className="orgp-summary-section">
+                <h3 className="orgp-summary-section-title">Registration</h3>
                 <p>
-                  <strong>Name: </strong>
-                  {formData.firstName}{" "}
-                  {formData.middleName && `${formData.middleName} `}{" "}
-                  {formData.lastName}
+                  <span className="orgp-summary-label">ID Type</span>
+                  <span className="orgp-summary-value">
+                    {idType} {isIdVerified && "• Verified"}
+                  </span>
                 </p>
                 <p>
-                  <strong>Email: </strong>
-                  {formData.email}
+                  <span className="orgp-summary-label">ID Number</span>
+                  <span className="orgp-summary-value">{idNumber}</span>
                 </p>
                 <p>
-                  <strong>Phone: </strong>
-                  {formData.countryCode} {formData.phone}
-                </p>
-                <p>
-                  <strong>Date of Birth: </strong>
-                  {formData.dob}
+                  <span className="orgp-summary-label">DOI</span>
+                  <span className="orgp-summary-value">{dob}</span>
                 </p>
               </div>
 
-              <div className="up-summary-section">
-                <h3 className="up-summary-section-title">Addresses</h3>
-                {addresses.map((addr, idx) => (
-                  <div key={addr.id} className="up-summary-address">
-                    <p className="up-summary-address-title">
-                      {idx === 0 ? "Primary Address" : `Address ${idx + 1}`}
-                    </p>
-                    <p>{addr.address}</p>
-                    <p>
-                      {addr.city && `${addr.city}, `}
-                      {addr.stateName && `${addr.stateName}, `}
-                      {addr.countryName}
-                    </p>
-                    {addr.pincode && <p>Pin Code: {addr.pincode}</p>}
-                    {addr.type && <p>Type: {addr.type}</p>}
-                  </div>
-                ))}
+              <div className="orgp-summary-section">
+                <h3 className="orgp-summary-section-title">Contact</h3>
+                <p>
+                  <span className="orgp-summary-label">Website</span>
+                  <span className="orgp-summary-value">
+                    {websiteProtocol}://{websiteUrl}
+                  </span>
+                </p>
+                <p>
+                  <span className="orgp-summary-label">Email</span>
+                  <span className="orgp-summary-value">
+                    {email} {isEmailVerified && "• Verified"}
+                  </span>
+                </p>
               </div>
 
-              <div className="up-button-group up-summary-buttons">
+              <div className="orgp-summary-section">
+                <h3 className="orgp-summary-section-title">Address</h3>
+                <div className="orgp-summary-address">
+                  <p className="orgp-summary-address-line">{fullAddress}</p>
+                  <p className="orgp-summary-address-line">
+                    {city}, {state}, {country} - {pinCode}
+                  </p>
+                </div>
+              </div>
+
+              <div className="orgp-summary-buttons">
                 <button
                   type="button"
-                  className="up-save-btn"
+                  className="orgp-edit-btn"
                   onClick={handleEditProfile}
                 >
                   Edit Profile
                 </button>
                 <button
                   type="button"
-                  className="up-cancel-btn"
+                  className="orgp-cancel-btn"
                   onClick={handleCancel}
                 >
                   Cancel
@@ -479,195 +565,35 @@ const UserProfile = () => {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Right Side - Sticky, not overlapping footer */}
-      <div className="up-right-container">
-        <div className="up-right-content">
-          <div className="up-icon-wrapper">
-            <div className="up-icon-circle">
-              <MapPin className="w-12 h-12" strokeWidth={1.5} />
-            </div>
-            <div className="up-checkmark">✓</div>
-          </div>
-
-          <h2 className="up-right-title">Where You Belong</h2>
-          <p className="up-right-subtitle">
-            Your address is the foundation of your presence. Keep it accurate
-            and let opportunities find you.
-          </p>
-
-          <div className="up-features-box">
-            <div className="up-features-list">
-              <div className="up-feature-item">
-                <div className="up-feature-dot" />
-                <p className="up-feature-text">
-                  Manage multiple locations with ease
-                </p>
-              </div>
-              <div className="up-feature-item">
-                <div className="up-feature-dot" />
-                <p className="up-feature-text">
-                  Flexible address types for every need
-                </p>
-              </div>
-              <div className="up-feature-item">
-                <div className="up-feature-dot" />
-                <p className="up-feature-text">
-                  Global reach with local precision
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="up-footer-text">
+        {/* Right Side - Tagline (Fixed / Non-scrollable) */}
+        <div className="orgp-tagline-section">
+          <div className="orgp-tagline-content">
+            <FaMapMarkerAlt className="orgp-tagline-icon" />
+            <h2>Complete Your Profile</h2>
             <p>
-              Complete information ensures smooth operations and reliable
-              connections
+              To complete the process, please provide all the required
+              information about your organization. This helps serve you better
+              and ensure secure transactions.
             </p>
+            <div className="orgp-tagline-features">
+              <div className="orgp-feature">
+                <FaCheckCircle className="orgp-feature-icon" />
+                <span>Secure & Verified</span>
+              </div>
+              <div className="orgp-feature">
+                <FaCheckCircle className="orgp-feature-icon" />
+                <span>Professional Setup</span>
+              </div>
+              <div className="orgp-feature">
+                <FaCheckCircle className="orgp-feature-icon" />
+                <span>Address Validated</span>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div className="up-decoration up-decoration-bottom" />
-        <div className="up-decoration up-decoration-top" />
       </div>
     </div>
   );
 };
-
-function AddressBlock({
-  address,
-  countries,
-  states,
-  onAddressChange,
-  onPincodeChange,
-  onCountrySelect,
-  onStateSelect,
-  isPrimary,
-}) {
-  return (
-    <div className="up-address-block">
-      {isPrimary && (
-        <div>
-          <label className="up-label">
-            Address Type <span className="up-required">*</span>
-          </label>
-          <div className="up-select-wrapper">
-            <select
-              value={address.type}
-              onChange={(e) =>
-                onAddressChange(address.id, "type", e.target.value)
-              }
-              className="up-select"
-            >
-              <option value="home">Home</option>
-              <option value="office">Office</option>
-              <option value="other">Other</option>
-            </select>
-            <ChevronDown className="up-select-icon" />
-          </div>
-
-          {address.type === "other" && (
-            <input
-              type="text"
-              placeholder="Please specify"
-              value={address.typeSpecify}
-              onChange={(e) =>
-                onAddressChange(address.id, "typeSpecify", e.target.value)
-              }
-              className="up-input up-input-specify"
-            />
-          )}
-        </div>
-      )}
-
-      <div>
-        <label className="up-label">
-          Address <span className="up-required">*</span>
-        </label>
-        <textarea
-          placeholder="Apartment name, lane, plot number, etc."
-          value={address.address}
-          onChange={(e) =>
-            onAddressChange(address.id, "address", e.target.value)
-          }
-          className="up-textarea"
-        />
-      </div>
-
-      <div>
-        <label className="up-label">
-          Country <span className="up-required">*</span>
-        </label>
-        <div className="up-select-wrapper">
-          <select
-            value={address.countryCode}
-            onChange={(e) => onCountrySelect(address.id, e.target.value)}
-            className="up-select"
-          >
-            <option value="">Select Country</option>
-            {countries.map((c) => (
-              <option key={c.isoCode} value={c.isoCode}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="up-select-icon" />
-        </div>
-      </div>
-
-      <div>
-        <label className="up-label">
-          Pin Code <span className="up-required">*</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Enter pin code"
-          value={address.pincode}
-          onChange={(e) => onPincodeChange(address.id, e.target.value)}
-          className="up-input"
-        />
-      </div>
-
-      {states.length > 0 && (
-        <div>
-          <label className="up-label">
-            State <span className="up-required">*</span>
-          </label>
-          <div className="up-select-wrapper">
-            <select
-              value={address.stateCode}
-              onChange={(e) => onStateSelect(address.id, e.target.value)}
-              className="up-select"
-            >
-              <option value="">Select State</option>
-              {states.map((state) => (
-                <option key={state.isoCode} value={state.isoCode}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="up-select-icon" />
-          </div>
-        </div>
-      )}
-
-      <div>
-        <label className="up-label">
-          City <span className="up-required">*</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Enter city"
-          value={address.city}
-          onChange={(e) =>
-            onAddressChange(address.id, "city", e.target.value)
-          }
-          className="up-input"
-        />
-      </div>
-    </div>
-  );
-}
-
-export default UserProfile;
+export default OrgProfile;
