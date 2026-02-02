@@ -59,7 +59,6 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/join-organisation" element={<JoinOrganisation />} />
-          <Route path="/oauth-success" element={<OAuthSuccess />} />
 
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
@@ -86,6 +85,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+<Route path="/oauth-success" element={<OAuthSuccess />} />
 
           <Route
             path="/view-assets"
@@ -113,15 +113,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-          <Route
-  path="/user/dashboard"
-  element={
-    <ProtectedRoute requiredRole="user">
-      <UserDashboard />
-    </ProtectedRoute>
-  }
-/>
 
           {/* ================= USER DASHBOARD ROUTES ================= */}
           <Route
