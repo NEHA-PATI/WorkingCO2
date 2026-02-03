@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import About from "./pages/about";
 import Blog from "./pages/blog";
+import BlogDetailPage from './pages/blog-detail';
 import Careers from "./pages/Careers";
 import Community from "./pages/community";
 import Contact from "./pages/contact";
@@ -45,7 +46,6 @@ import Upload from "./components/upload";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import JoinOrganisation from "./pages/JoinOrganisation";
-// import NotFoundAnimation from "./pages/NotFoundAnimation";
 
 import OAuthSuccess from "./pages/OAuthSuccess";
 
@@ -69,6 +69,7 @@ function App() {
 
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogDetailPage />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/community" element={<Community />} />
           <Route path="/contact" element={<Contact />} />

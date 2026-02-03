@@ -215,34 +215,35 @@ export default function Navbar() {
                       <NavLink
                         to="/profile"
                         className="user-profile-dropdown-item"
+                        style={{ "--profile-icon-color": "#3b82f6" }}
                         onClick={() => setProfileOpen(false)}
                       >
-                        <FaUserCircle style={{ color: "#3b82f6" }} />
+                        <FaUserCircle className="profile-icon profile-icon-blue" />
                         <span>My Profile</span>
                       </NavLink>
 
                       <div
                         className="user-profile-dropdown-item"
+                        style={{ "--profile-icon-color": "#10b981" }}
                         onClick={() => {
                           setProfileOpen(false);
                           navigate(getDashboardRoute());
                         }}
                       >
-                        <FaChartLine style={{ color: "#10b981" }} />
+                        <FaChartLine className="profile-icon profile-icon-green" />
                         <span>Dashboard</span>
                       </div>
 
                       {role !== "admin" && (
                         <div
                           className="user-profile-dropdown-item"
+                          style={{ "--profile-icon-color": "#f59e0b" }}
                           onClick={() => {
                             setProfileOpen(false);
                             openWalletModal();
                           }}
                         >
-                          <GiWallet
-                            style={{ color: "#f59e0b", fontSize: "1.8rem" }}
-                          />
+                          <GiWallet className="profile-icon profile-icon-amber" />
                           <span>My Wallet</span>
                         </div>
                       )}
@@ -250,17 +251,19 @@ export default function Navbar() {
                       <NavLink
                         to="/settings"
                         className="user-profile-dropdown-item"
+                        style={{ "--profile-icon-color": "#64748b" }}
                         onClick={() => setProfileOpen(false)}
                       >
-                        <FaCog style={{ color: "#64748b" }} />
+                        <FaCog className="profile-icon profile-icon-slate" />
                         <span>Settings</span>
                       </NavLink>
 
                       <div
                         className="user-profile-dropdown-item logout"
+                        style={{ "--profile-icon-color": "#ef4444" }}
                         onClick={handleLogout}
                       >
-                        <FaSignOutAlt />
+                        <FaSignOutAlt className="profile-icon profile-icon-red" />
                         <span>Logout</span>
                       </div>
                     </>
@@ -275,6 +278,7 @@ export default function Navbar() {
 
                       <div
                         className="user-profile-dropdown-item"
+                        style={{ "--profile-icon-color": "#3b82f6" }}
                         onClick={() => {
                           setProfileOpen(false);
                           openLogin();
@@ -286,6 +290,7 @@ export default function Navbar() {
 
                       <div
                         className="user-profile-dropdown-item"
+                        style={{ "--profile-icon-color": "#22c55e" }}
                         onClick={() => {
                           setProfileOpen(false);
                           openSignup();

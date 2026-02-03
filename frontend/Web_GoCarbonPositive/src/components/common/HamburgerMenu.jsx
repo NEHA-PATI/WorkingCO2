@@ -38,11 +38,12 @@ export default function HamburgerMenu({
           <div
             key={item.label}
             className="sidebar-item"
+            style={{ "--sidebar-icon-color": item.color || "#111" }}
             onClick={() => handleItemClick(item)}
           >
             <Icon
               className="sidebar-icon"
-              style={{ color: item.color, fontSize: "1.7rem" }}
+              style={{ fontSize: "1.7rem" }}
             />
             <span>{item.label}</span>
           </div>

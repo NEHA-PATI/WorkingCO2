@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Clock, Share2, Twitter, Linkedin, Facebook, Link as LinkIcon, User, TrendingUp, Loader2 } from "lucide-react";
 import { PortableText } from "@portabletext/react";
 import "../styles/user/blog-detail.css";
-// import blogService from "../services/api/blog.service.js";
+import blogService from "../services/blog/blogService.js";
 
 const CATEGORY_COLORS = {
   INSIGHTS: "#9b59b6",
