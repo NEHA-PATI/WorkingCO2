@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+/* Fix for React Icons not inheriting color */
+svg {
+  color: inherit;
+}

@@ -1,0 +1,98 @@
+.scoreboard-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin: 10px 0;
+    max-width: 100%;
+  }
+  
+  .glass-scoreboard {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  
+    padding: 8px 12px;
+    text-align: center;
+    color: #2d4f2d;
+    transition: transform 0.3s, box-shadow 0.3s;
+    min-height: 80px;
+  }
+  
+  .glass-scoreboard:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 25px rgba(31, 38, 135, 0.4);
+  }
+  
+  .glass-scoreboard h3 {
+    margin: 4px 0 8px 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #2e7d32;
+    text-shadow: 0 1px 3px rgba(46, 125, 50, 0.3);
+  }
+  
+  .score-grid {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .score-item {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 4px 6px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.18);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+    flex: 1;
+  }
+  
+  .score-item .label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #388e3c;
+    margin-bottom: 2px;
+  }
+  
+  .score-item .value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1b5e20;
+  }
+  
+  .score-item .points {
+    font-size: 1rem;
+    color: #d4af37;
+    text-shadow: 0 0 3px rgba(212, 175, 55, 0.4);
+  }
+  
+  @media (max-width: 600px) {
+    .scoreboard-container {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+    }
+  
+    .glass-scoreboard {
+      padding: 6px 8px;
+      min-height: 70px;
+    }
+  
+    .glass-scoreboard h3 {
+      font-size: 0.8rem;
+    }
+  
+    .score-item .label {
+      font-size: 0.6rem;
+    }
+  
+    .score-item .value {
+      font-size: 0.8rem;
+    }
+  }
+  

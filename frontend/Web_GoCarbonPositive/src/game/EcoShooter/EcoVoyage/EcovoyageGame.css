@@ -1,0 +1,889 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
+
+body {
+  /* background: linear-gradient(135deg, #cdeacd, #0a5f81); */
+  color: #2d4f2d;
+  font-family: "Poppins", sans-serif;
+  display: flex;
+  flex-direction: column;
+  /* overflow:hidden; */
+  align-items: center;
+  padding: 20px;
+  user-select: none;
+  min-height: 100vh;
+  background-image: url("/game/ecovoyage/background.png");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+#board{margin : 0px 300px;}
+
+body::before {
+ 
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+  z-index: -1;
+  backdrop-filter: blur(4px);
+}
+
+.ecovoyage-game-root {
+  width: 100%;
+  max-width: 1200px;
+  margin: -20px auto;
+  position: relative;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+h1 {
+  color: #2e7d32;
+  text-shadow: 1px 1px 2px #a5d6a7;
+  font-weight: 700;
+  font-size: 2.5rem;
+  text-align: center;
+  margin: 0;
+}
+
+#burgerMenu {
+  position: absolute;
+  right: 170%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(165, 214, 167, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  padding: 8px;
+  font-size: 24px;
+  color: #2e7d32;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#burgerMenu:hover {
+  background: rgb(110, 178, 112);
+  
+}
+
+#pauseBtn,
+#restartBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(165, 214, 167, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 24px;
+  color: #2e7d32;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#pauseBtn {
+  left:85%;
+  margin-top:-1px;
+}
+
+#restartBtn {
+  left:90%;
+   
+}
+
+#pauseBtn:hover,
+#restartBtn:hover {
+  background: rgba(165, 214, 167, 0.6);
+}
+
+#pauseBtn:focus,
+#restartBtn:focus {
+  outline: 2px solid #4caf50;
+  outline-offset: 2px;
+}
+
+#pauseBtn.paused {
+  animation: pulse 1.5s ease-in-out infinite;
+   margin-top:-25px;
+}
+
+#restartBtn.clicked {
+  animation: scaleClick 0.3s ease;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    transform: translateY(-50%) scale(1.1);
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@keyframes scaleClick {
+  0% {
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    transform: translateY(-50%) scale(1.2);
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+#rulesSidebar {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 280px;
+  height: 100%;
+  background: rgba(165, 214, 167, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 20px;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  z-index: 30;
+  transition: left 0.3s ease;
+  overflow-y: auto;
+}
+
+#rulesSidebar.active {
+  left: 0;
+}
+
+#rulesSidebar h2 {
+  color: #2e7d32;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+#rulesSidebar ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  color: #1b5e20;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#rulesSidebar ul li {
+  margin-bottom: 10px;
+}
+
+#closeRules {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #2e7d32;
+  cursor: pointer;
+}
+
+#closeRules:hover {
+  color: #4caf50;
+}
+
+#scoreBoard {
+  background: rgba(165, 214, 167, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 15px;
+  max-width: 90vmin;
+  width: 90%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+}
+.scoreboard-container{
+  margin:16px 201px;
+  margin-top:5px;
+  max-width:0%;
+  gap:10px;
+  display:grid; 
+  grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); 
+  
+  margin-left:250px;
+ /* transform: translateX(-100%); */
+
+   }
+   .glass-scoreboard{
+    padding:2px -3px;
+   }
+.player-score {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  color: #1b5e20;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.player-score span {
+  font-weight: 600;
+}
+
+.player-score .emoji {
+  font-size: 20px;
+  margin-right: 5px;
+}
+
+#playerSelection {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#playerSelection label {
+  font-size: 1.2rem;
+  color: #2e7d32;
+}
+
+#playerSelection select {
+  padding: 8px;
+  border-radius: 8px;
+  border: 2px solid #388e3c;
+  font-size: 1rem;
+}
+
+#startGame {
+  background: #2e7d32;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 1rem;
+  color: #a5d6a7;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#startGame:hover {
+  background: #4caf50;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  gap: 2px;
+  background: #1b5e20cc;
+  border-radius: 15px;
+  position: relative;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  margin: 10px 0;
+  width: 73vmin;
+  height: 60vmin;
+  user-select: none;
+}
+
+#board.question-active .cell {
+  filter: blur(5px);
+}
+
+.cell {
+  background: #a5d6a7dd;
+  border: 2px solid #388e3c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2vmin;
+  color: #1b5e20;
+  font-weight: 600;
+  position: relative;
+  box-shadow: inset 0 2px 4px #81c784;
+  border-radius: 8px;
+  cursor: default;
+}
+
+.cell:nth-child(20n + 1),
+.cell:nth-child(20n + 2),
+.cell:nth-child(20n + 3),
+.cell:nth-child(20n + 4),
+.cell:nth-child(20n + 5) {
+  background: #c8e6c9ee;
+}
+
+.carbon-loss-cell {
+  background-color: #f8d7da !important;
+  border-color: #c82333 !important;
+  color: #721c24 !important;
+  font-weight: 700;
+  position: relative;
+}
+
+.carbon-loss-cell[data-loss="Air Pollution"]::after {
+  content: "🏭";
+}
+.carbon-loss-cell[data-loss="Deforestation"]::after {
+  content: "🪓";
+}
+.carbon-loss-cell[data-loss="Melting Ice Caps"]::after {
+  content: "🧊";
+}
+.carbon-loss-cell[data-loss="Soil Degradation"]::after {
+  content: "🏜️";
+}
+.carbon-loss-cell[data-loss="Ocean Acidification"]::after {
+  content: "🌊";
+}
+.carbon-loss-cell::after {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 2.5vmin;
+  pointer-events: none;
+}
+
+.natural-resource-cell {
+  background-color: #d4edda !important;
+  border-color: #155724 !important;
+  color: #155724 !important;
+  font-weight: 700;
+  position: relative;
+}
+
+.natural-resource-cell[data-resource="Forests"]::after {
+  content: "🌳";
+}
+.natural-resource-cell[data-resource="Rivers"]::after {
+  content: "💧";
+}
+.natural-resource-cell[data-resource="Solar Energy"]::after {
+  content: "☀️";
+}
+.natural-resource-cell[data-resource="Wind Energy"]::after {
+  content: "🌬️";
+}
+.natural-resource-cell[data-resource="Biodiversity"]::after {
+  content: "🦋";
+}
+.natural-resource-cell[data-resource="Wetlands"]::after {
+  content: "🌾";
+}
+.natural-resource-cell[data-resource="Clean Air"]::after {
+  content: "💨";
+}
+.natural-resource-cell[data-resource="Coral Reefs"]::after {
+  content: "🐠";
+}
+.natural-resource-cell[data-resource="Soil Fertility"]::after {
+  content: "🌱";
+}
+.natural-resource-cell[data-resource="Geothermal Energy"]::after {
+  content: "🌋";
+}
+.natural-resource-cell[data-resource="Grasslands"]::after {
+  content: "🌿";
+}
+.natural-resource-cell::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 5;
+  animation: fadeOut 3s ease forwards;
+  background-image: var(--destination-image);
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.player {
+  width: 4vmin;
+  height: 4vmin;
+  border-radius: 50%;
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5vmin;
+  box-shadow: 0 2px 8px #388e3c88;
+  filter: drop-shadow(0 0 2px #2e7d32);
+  transition: left 0.4s ease, top 0.4s ease;
+}
+
+#message {
+  margin-top: -10px;
+  color: #2e7d32cc;
+  min-height: 28px;
+  font-weight: 600;
+  text-align: center;
+  font-size: 15px;
+}
+
+.flip-card {
+  background-color: transparent;
+  width: 54vmin;
+  max-width: 440px;
+  height: 60vmin;
+  max-height: 420px;
+  perspective: 1000px;
+}
+
+#questionArea,
+#winCard {
+  position: absolute;
+  top: 62%;
+  left: 48%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  display: none;
+  padding:10px;
+  margin-top:35px;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 104%;
+  height: 93%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back,
+#winFront,
+#winBack {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.flip-card-front {
+  background: rgba(165, 214, 167, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #1b5e20;
+}
+
+.flip-card-back {
+  background: rgba(46, 125, 50, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #a5d6a7;
+  transform: rotateY(180deg);
+}
+
+#questionArea .flip-card-front p {
+  font-size: 18px;
+  margin-bottom: 10px;
+  padding: 0 20px;
+}
+
+#questionArea .flip-card-front button {
+  margin: 5px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 2px solid #388e3c;
+  background-color: rgba(165, 214, 167, 0.7);
+  color: #1b5e20;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#questionArea .flip-card-front button:hover {
+  background-color: #4caf50;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+#winFront {
+  background: rgba(165, 214, 167, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #1b5e20;
+  animation: scaleIn 0.5s ease forwards;
+}
+
+#winBack {
+  background: rgba(255, 215, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #2e7d32;
+  transform: rotateY(180deg);
+}
+
+#winFront p {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 5px;
+  padding: 0 20px;
+}
+
+#winBack p {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 5px;
+}
+
+#winBack .coin {
+  font-size: 24px;
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes sparkle {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+#diceArea {
+  margin: 5px auto 0 auto;
+  text-align: center;
+  display: none;
+  position: relative;
+  left: 0;
+  right: 0;
+  width: 90%;
+  justify-content: center;
+  align-items: center;
+  z-index: 21;
+}
+
+#diceNumber {
+  margin: 0 auto;
+  font-size: 48px;
+  color: #2e7d32;
+  background-color: #fff;
+  border: 2px solid #388e3c;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.energy-icon {
+  display: block;
+  float: right;
+  margin-top: 20px;
+   height:80px;
+  width:80px;
+  
+}
+
+#energyIcons {
+  position: absolute;
+  top: 15%;
+  right: 0;
+   /* transform: translateY(200%);  */
+   transform: translateX(250%);
+    display: flex;
+  flex-direction: column;
+ 
+}
+
+
+.energy-icon:hover {
+  transform: scale(1.2);
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+ 
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 140px;
+  background-color: #2e7d32dd;
+  color: #a5d6a7;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 8px;
+  position: absolute;
+  z-index: 20;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -70px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 13px;
+  user-select: none;
+}
+
+.tooltip:hover .tooltiptext,
+.tooltip.active .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+.paused #questionArea button,
+.paused #startGame,
+.paused .energy-icon {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.paused .player {
+  transition: none;
+}
+
+@media (max-width: 480px) {
+  html, body {
+    font-size: 10px;
+  }
+  h1 {
+    font-size: 6vw;
+  }
+  .ecovoyage-game-root {
+    width: 100vw;
+    padding: 4px;
+  }
+  #board {
+    width: 96vw;
+    height: 96vw;
+  }
+  .flip-card {
+    width: 96vw;
+    height: 76vw;
+  }
+  #pauseBtn,
+  #restartBtn,
+  #burgerMenu {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+  header {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+  .ecovoyage-game-root {
+    max-width: 95%;
+  }
+  
+  .scoreboard-container {
+    max-width: 70%;
+  }
+  
+  #energyIcons {
+    transform: translateX(200%);
+  }
+}
+
+@media (max-width: 992px) {
+  header {
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+  }
+  
+  #burgerMenu, #pauseBtn, #restartBtn {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    transform: none;
+    margin: 0 5px;
+  }
+  
+  #energyIcons {
+    position: relative;
+    transform: none;
+    flex-direction: row;
+    justify-content: center;
+    margin: 15px 0;
+    order: 1;
+  }
+  
+  .scoreboard-container {
+    max-width: 100%;
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+  
+  #board {
+    width: 85vmin;
+    height: 85vmin;
+  }
+  
+  .flip-card {
+    width: 85vmin;
+    height: 70vmin;
+  }
+  
+  .player-score {
+    font-size: 12px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  body {
+    padding: 10px;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+  }
+  
+  #board {
+    width: 95vmin;
+    height: 95vmin;
+  }
+  
+  .flip-card {
+    width: 95vmin;
+    height: 75vmin;
+  }
+  
+  .player {
+    width: 5vmin;
+    height: 5vmin;
+  }
+  
+  #rulesSidebar {
+    width: 250px;
+  }
+  
+  .scoreboard-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Orientation-specific adjustments */
+@media (max-height: 600px) and (orientation: landscape) {
+  body {
+    padding: 5px;
+  }
+  
+  #board {
+    width: 70vmin;
+    height: 70vmin;
+  }
+  
+  .flip-card {
+    width: 70vmin;
+    height: 60vmin;
+  }
+  
+  header {
+    margin-bottom: 5px;
+  }
+  
+  .scoreboard-container {
+    max-width: 80%;
+    margin-top: 0;
+  }
+}
+
+/* Very small devices */
+@media (max-width: 360px) {
+  h1 {
+    font-size: 1.3rem;
+  }
+  
+  #board {
+    width: 100vmin;
+    height: 100vmin;
+  }
+  
+  .flip-card {
+    width: 100vmin;
+    height: 80vmin;
+  }
+  
+  #rulesSidebar {
+    width: 90%;
+  }
+}
+
+/* High DPI devices */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  body::before {
+    backdrop-filter: blur(8px);
+  }
+  
+  #rulesSidebar, #scoreBoard {
+    backdrop-filter: blur(20px);
+  }
+}

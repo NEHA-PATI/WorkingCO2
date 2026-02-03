@@ -19,43 +19,91 @@ const upload = multer({
   },
   fileFilter: (req, file, cb) => {
     // Accept only image files
-    if (file.mimetype.startsWith("image/")) {
+    // Be more lenient - accept if mimetype is image/* or if mimetype is missing (browser might not send it)
+    if (!file.mimetype || file.mimetype.startsWith("image/") || file.mimetype === "application/octet-stream") {
       cb(null, true);
     } else {
-      cb(new Error("Only image files are allowed"), false);
+      console.warn(`Rejected file: ${file.originalname}, mimetype: ${file.mimetype}`);
+      cb(new Error(`Only image files are allowed. Received: ${file.mimetype}`), false);
     }
   },
 });
 
-// Upload images
+// Upload images with proper error handling
 router.post(
   "/upload",
-  upload.array("images", 5), // Max 5 images
+  (req, res, next) => {
+    try {
+      console.log("Image upload request received", {
+        contentType: req.headers['content-type'],
+        hasBody: !!req.body,
+      });
+      
+      upload.array("images", 5)(req, res, (err) => {
+        if (err) {
+          console.error("Multer error:", err);
+          
+          // Handle multer errors
+          if (err instanceof multer.MulterError) {
+            if (err.code === "LIMIT_FILE_SIZE") {
+              return res.status(400).json({
+                status: "error",
+                message: "File size too large. Maximum 5MB per file.",
+              });
+            }
+            if (err.code === "LIMIT_FILE_COUNT") {
+              return res.status(400).json({
+                status: "error",
+                message: "Too many files. Maximum 5 files allowed.",
+              });
+            }
+            if (err.code === "LIMIT_UNEXPECTED_FILE") {
+              return res.status(400).json({
+                status: "error",
+                message: "Unexpected file field. Use 'images' as the field name.",
+              });
+            }
+            return res.status(400).json({
+              status: "error",
+              message: `File upload error: ${err.message}`,
+              code: err.code,
+            });
+          }
+          
+          // Handle other errors (like fileFilter rejection)
+          return res.status(400).json({
+            status: "error",
+            message: err.message || "File upload failed",
+          });
+        }
+        
+        console.log("Multer processed files:", req.files?.length || 0);
+        next();
+      });
+    } catch (error) {
+      console.error("Error in upload middleware:", error);
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error during file upload",
+        error: error.message,
+      });
+    }
+  },
   logUserAction("UPLOAD_IMAGES"),
-  ImageController.uploadImages
-);
-
-// Error handler for multer
-router.use((error, req, res, next) => {
-  if (error instanceof multer.MulterError) {
-    if (error.code === "LIMIT_FILE_SIZE") {
-      return res.status(400).json({
-        status: "error",
-        message: "File size too large. Maximum 5MB per file.",
-      });
-    }
-    if (error.code === "LIMIT_FILE_COUNT") {
-      return res.status(400).json({
-        status: "error",
-        message: "Too many files. Maximum 5 files allowed.",
-      });
-    }
+  (req, res, next) => {
+    // Wrap in async handler to catch any unhandled promise rejections
+    Promise.resolve(ImageController.uploadImages(req, res)).catch((error) => {
+      console.error("Unhandled error in uploadImages:", error);
+      if (!res.headersSent) {
+        return res.status(500).json({
+          status: "error",
+          message: "Failed to process image upload",
+          error: error.message,
+          stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        });
+      }
+    });
   }
-
-  res.status(400).json({
-    status: "error",
-    message: error.message || "File upload failed",
-  });
-});
+);
 
 module.exports = router;
