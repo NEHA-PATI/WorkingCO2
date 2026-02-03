@@ -594,7 +594,7 @@ const PopupForms = ({
                 height="24"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#4CAF50"
+                stroke="#FF9800"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -730,7 +730,7 @@ const PopupForms = ({
               >
                 Cancel
               </button>
-              <button type="submit" className="btn-primary btn-submit">
+              <button type="submit" className="btn-primary btn-submit-tree">
                 Save Details
               </button>
             </div>
@@ -755,7 +755,7 @@ const PopupForms = ({
                 height="24"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#FF9800"
+                stroke="#4CAF50"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -894,7 +894,7 @@ const PopupForms = ({
               >
                 Cancel
               </button>
-              <button type="submit" className="btn-primary btn-submit-tree">
+              <button type="submit" className="btn-primary btn-submit">
                 Save Details
               </button>
             </div>

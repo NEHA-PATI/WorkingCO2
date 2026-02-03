@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@portabletext/react": "^6.0.2"
+  }
+}

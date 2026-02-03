@@ -40,6 +40,7 @@ export default function HamburgerMenu({
           <div
             key={item.label}
             className="sidebar-item"
+            style={{ "--sidebar-icon-color": item.color || "#111" }}
             onClick={() => handleItemClick(item)}
           >
             {/* ✅ FIX 2 – COLOR FORCE */}
@@ -50,6 +51,7 @@ export default function HamburgerMenu({
                 fontSize: "1.7rem",
                 minWidth: "26px",
               }}
+            
             />
 
             <span>{item.label}</span>

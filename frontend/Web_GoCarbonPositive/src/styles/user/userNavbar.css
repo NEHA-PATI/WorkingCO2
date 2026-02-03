@@ -194,6 +194,8 @@
   font-size: 1.3rem;
   margin-right: 8px;
   transition: color 0.3s;
+  color: var(--sidebar-icon-color, #111);
+  fill: var(--sidebar-icon-color, #111);
 }
 
 .sidebar-logout {
@@ -400,7 +402,20 @@
 .user-profile-dropdown-item svg {
   font-size: 1.2rem;
   flex-shrink: 0;
+  color: var(--profile-icon-color, #0f172a) !important;
+  fill: var(--profile-icon-color, #0f172a) !important;
 }
+
+/* Profile dropdown icon colors */
+.profile-icon {
+  color: #0f172a;
+  fill: currentColor;
+}
+.profile-icon-blue { color: #3b82f6; }
+.profile-icon-green { color: #10b981; }
+.profile-icon-amber { color: #f59e0b; }
+.profile-icon-slate { color: #64748b; }
+.profile-icon-red { color: #ef4444; }
 
 .user-profile-dropdown-item.logout {
   color: #ef4444;

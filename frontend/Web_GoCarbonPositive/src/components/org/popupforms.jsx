@@ -1,6 +1,6 @@
 // PopupForms.js - React component file with all three popup forms
 import React, { useState, useEffect } from 'react';
-import '../styles/popupforms.css';
+import '../../styles/org/popupforms.css';
 import { assetAPI } from '../services/api';
 const PopupForms = ({
   activeEVPopup,
@@ -757,7 +757,7 @@ const PopupForms = ({
 
             <div className="form-actions">
               <button type="button" className="btn-primary btn-cancel" onClick={() => setActivePlantationPopup(false)}>Cancel</button>
-              <button type="submit" className="btn-primary btn-submit-tree">Save Details</button>
+              <button type="submit" className="btn-primary btn-submit">Save Details</button>
             </div>
           </form>
         </div>
@@ -770,7 +770,7 @@ const PopupForms = ({
         <div className={`popup ${activeSolarPopup ? 'active' : ''}`} onClick={e => e.stopPropagation()}>
           <div className="popup-header">
             <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF9800" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="7" width="18" height="12" rx="2" ry="2"></rect>
                 <line x1="3" y1="13" x2="21" y2="13"></line>
                 <line x1="9" y1="7" x2="9" y2="19"></line>
@@ -872,7 +872,7 @@ const PopupForms = ({
             </div>
             <div className="form-actions">
               <button type="button" className="btn-primary btn-cancel" onClick={() => setActiveSolarPopup(false)}>Cancel</button>
-              <button type="submit" className="btn-primary btn-submit">Save Details</button>
+              <button type="submit" className="btn-primary btn-submit-tree">Save Details</button>
             </div>
           </form>
         </div>

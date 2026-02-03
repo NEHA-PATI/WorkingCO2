@@ -275,15 +275,15 @@ console.log("🔍 UserProfile localStorage snapshot:", {
 
       if (data?.profile) {
         setFormData({
-          firstName: data.profile.first_name,
-          middleName: data.profile.middle_name || "",
-          lastName: data.profile.last_name,
-          email: data.profile.email || "",
-          phone: data.profile.mobile_number || "",
-          dob: data.profile.dob || "",
-          countryCode: "+91",
-          phoneCountryIso: "IN",
-        });
+  firstName: data.profile.first_name,
+  middleName: data.profile.middle_name || "",
+  lastName: data.profile.last_name,
+  email: data.profile.email || "",
+  phone: data.profile.mobile_number || "",
+  dob: data.profile.dob ? data.profile.dob.slice(0, 10) : "",
+  countryCode: "+91",
+  phoneCountryIso: "IN",
+});
 
         setAddresses(
           data.addresses.map((a) => ({
