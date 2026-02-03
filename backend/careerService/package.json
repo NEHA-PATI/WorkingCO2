@@ -8,6 +8,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "backend": "file:..",
     "co2-plus": "file:../..",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -21,9 +22,15 @@
     "nodemon": "^3.0.2"
   },
   "nodemonConfig": {
-  "quiet": true,
-  "ignore": ["node_modules"],
-  "watch": ["server.js", "src", "routes", "controllers"]
-}
-
+    "quiet": true,
+    "ignore": [
+      "node_modules"
+    ],
+    "watch": [
+      "server.js",
+      "src",
+      "routes",
+      "controllers"
+    ]
+  }
 }
