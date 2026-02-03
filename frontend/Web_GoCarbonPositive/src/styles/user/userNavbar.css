@@ -163,7 +163,7 @@
   top: 50px;
   left: 0;
   background-color: white;
-  color: #333;
+  color: inherit;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -606,4 +606,23 @@
   background: #2e7d32;
   color: white;
   transform: translateY(-1px);
+}
+/* ICON COLOR FORCE FIX */
+.sidebar-item .sidebar-icon {
+  color: inherit !important;      /* parent se na le */
+}
+
+/* JSX se aaya inline color jeetega */
+/* ===== FINAL ICON COLOR FIX ===== */
+.sidebar-item .sidebar-icon {
+  color: inherit !important;   /* parent ka nahi lega */
+}
+
+/* INLINE STYLE KO PRIORITY */
+.sidebar-item .sidebar-icon[style] {
+  color: attr(style color) !important;
+}
+.sidebar-item svg {
+  color: unset !important;
+  fill: unset !important;
 }
