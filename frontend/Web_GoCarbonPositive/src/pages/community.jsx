@@ -1,4 +1,3 @@
-"use client"
 
 import { useState } from "react"
 import { Heart, Eye, MessageCircle, Search, Flame, MessageSquare, HelpCircle, BookOpen, Trophy } from "lucide-react"

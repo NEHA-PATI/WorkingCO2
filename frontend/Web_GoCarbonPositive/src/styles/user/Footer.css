@@ -1,10 +1,10 @@
 /* Footer Styles */
 .footer {
-  background-color: #ffffff;
+  background-color: white !important;
   color: black;
   padding: 40px 20px;
-  font-family: "Poppins", sans-serif;
 }
+
 
 /* Container */
 .footer__container {
@@ -365,4 +365,12 @@
   }
 }
 
+.footer__bottom-bar {
+  background-color: white !important;
+}
+footer.footer,
+.footer,
+.footer__container {
+  background: white !important;
+}
 
