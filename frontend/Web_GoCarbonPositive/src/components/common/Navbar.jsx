@@ -138,10 +138,11 @@ export default function Navbar() {
               className="user-nav-item wallet-nav-item"
               onClick={openWalletModal}
             >
-              <GiWallet
+              {/* <GiWallet
                 className="wallet-icon"
                 style={{ color: "#f59e0b", fontSize: "2rem" }}
-              />
+              /> */}
+              
             </div>
           </div>
         )}
