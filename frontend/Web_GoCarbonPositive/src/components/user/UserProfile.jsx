@@ -183,8 +183,12 @@ const [loading, setLoading] = useState(true);
 
 
   const handleSubmit = async () => {
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-  const u_id = storedUser?.u_id || localStorage.getItem("userId");
+ const storedUserRaw = localStorage.getItem("authUser");
+const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
+const u_id = storedUser?.u_id ?? null;
+
+console.log("✅ handleSubmit resolved u_id:", u_id);
+
 
   if (!u_id) {
     alert("User not logged in ❌");
@@ -237,8 +241,16 @@ const [loading, setLoading] = useState(true);
 
 useEffect(() => {
   const fetchProfile = async () => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    const u_id = storedUser?.u_id || localStorage.getItem("userId");
+    const storedUserRaw = localStorage.getItem("authUser");
+const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
+const u_id = storedUser?.u_id ?? null;
+
+console.log("🔍 UserProfile localStorage snapshot:", {
+  authUser: localStorage.getItem("authUser"),
+  user: localStorage.getItem("user"),
+  userId: localStorage.getItem("userId"),
+});
+
 
     if (!u_id) {
       setLoading(false);

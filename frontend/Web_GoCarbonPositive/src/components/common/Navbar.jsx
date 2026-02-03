@@ -65,7 +65,8 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     toast.success("Logged out successfully!", { autoClose: 2000 });
-    localStorage.removeItem("user");
+    localStorage.removeItem("authUser");
+
 localStorage.removeItem("userId");
     navigate("/");
   };
