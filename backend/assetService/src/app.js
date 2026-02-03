@@ -3,6 +3,10 @@ const compression = require("compression");
 const morgan = require("morgan");
 const config = require("./config/env");
 const logger = require("./utils/logger");
+const assetRoutes = require("./routes/assetRoutes");
+ const orgAssetRoutes = require("./routes/orgAssetRoutes");
+
+
 
 // Security middleware
 const {
@@ -29,7 +33,8 @@ const app = express();
 app.use(configureHelmet());
 app.use(configureCORS());
 
-// Body parsing
+// Body parsing - express.json() automatically skips multipart/form-data
+// But we'll be explicit to avoid any issues
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
@@ -58,6 +63,10 @@ if (config.nodeEnv === "development") {
  * ========================================
  */
 
+//asset management route 
+app.use("/api/assets", assetRoutes);
+app.use("/api/org-assets", orgAssetRoutes);
+
 // Root
 app.get("/", (req, res) => {
   res.json({
@@ -67,6 +76,8 @@ app.get("/", (req, res) => {
     environment: config.nodeEnv,
   });
 });
+
+
 
 // Health check
 app.get("/api/v1/health", (req, res) => {
@@ -118,3 +129,4 @@ process.on("uncaughtException", (err) => {
 });
 
 module.exports = app;
+

@@ -7,20 +7,24 @@ const config = require("../config/env");
  */
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // allow non-browser tools (Thunder, Postman)
     if (!origin) return callback(null, true);
 
-    if (config.cors.origins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
+    // allow all localhost ports (3000, 3001, etc.)
+    if (
+      origin.startsWith("http://localhost") ||
+      origin.startsWith("http://127.0.0.1")
+    ) {
+      return callback(null, true);
     }
+
+    callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
-  optionsSuccessStatus: 200,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
+
 
 /**
  * Security headers configuration
@@ -47,6 +51,12 @@ const helmetConfig = helmet({
  * Request sanitization
  */
 const sanitizeRequest = (req, res, next) => {
+  // Skip sanitization for multipart/form-data (file uploads)
+  // Multer will handle these requests
+  if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+    return next();
+  }
+
   // Remove any null bytes from strings
   const sanitize = (obj) => {
     if (typeof obj === "string") {
@@ -60,7 +70,10 @@ const sanitizeRequest = (req, res, next) => {
     return obj;
   };
 
-  req.body = sanitize(req.body);
+  // Only sanitize if body exists and is not a file upload
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitize(req.body);
+  }
   req.params = sanitize(req.params);
   req.query = sanitize(req.query);
 

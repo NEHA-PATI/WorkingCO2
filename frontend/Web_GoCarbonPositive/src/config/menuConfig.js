@@ -70,13 +70,15 @@ export const USER_ORG_MENU = {
       icon: FaEnvelope,
       color: "#20c997",
     },
-    { label: "Logout", action: "logout", icon: FaSignOutAlt, color: "#e53935" },
+
     {
       label: "Industrial Solutions",
       path: "/industrial",
       icon: FaIndustry,
       color: "#0d6efd",
     },
+
+    { label: "Logout", action: "logout", icon: FaSignOutAlt, color: "#e53935" },
   ],
 
   organization: [

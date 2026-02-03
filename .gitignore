@@ -1,0 +1,43 @@
+# =========================
+# FRONTEND (React / Vite)
+# =========================
+frontend/**/node_modules/
+frontend/**/MIGRATION_PLAN.md
+frontend/**/ROUTING_PLAN.md
+frontend/**/dist/
+frontend/**/build/
+frontend/**/.env
+frontend/**/.env.local
+frontend/**/.env.production
+
+
+# =========================
+# BACKEND (React / Vite)
+# =========================
+backend/**/node_modules/
+backend/**/dist/
+backend/**/build/
+backend/**/.env
+backend/**/.env.local
+backend/**/.env.production
+
+# =========================
+# PHOTOS (ignore raw uploads if needed)
+# =========================
+photos/
+!photos/.gitkeep
+
+# =========================
+# LOGS
+# =========================
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# =========================
+# SYSTEM / IDE
+# =========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
