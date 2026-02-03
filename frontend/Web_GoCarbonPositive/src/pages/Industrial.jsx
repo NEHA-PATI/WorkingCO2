@@ -49,14 +49,36 @@ const IndustrialSolutions = () => {
     });
   };
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    console.log("[v0] Form submitted:", formData);
-    setToastMessage("Demo request submitted successfully!");
+  const handleFormSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const response = await fetch("http://localhost:5007/api/demo/book-demo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setToastMessage("Demo request submitted successfully!");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      closeDemoForm();
+    } else {
+      setToastMessage(data.message || "Submission failed");
+      setShowToast(true);
+    }
+  } catch (error) {
+    console.error("Error submitting demo request:", error);
+    setToastMessage("Server error. Please try again later.");
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-    closeDemoForm();
-  };
+  }
+};
+
 
   const industries = [
     {
