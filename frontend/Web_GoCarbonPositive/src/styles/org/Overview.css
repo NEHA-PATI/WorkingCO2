@@ -23,15 +23,15 @@
 
 .org-overview-header-content {
   flex: 1;
-  min-width: 300px;
+  min-width: 0px;
 }
 
 .org-overview-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   letter-spacing: -0.5px;
 }
 
@@ -83,7 +83,7 @@
 
 @media (max-width: 1400px) {
   .org-overview-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 

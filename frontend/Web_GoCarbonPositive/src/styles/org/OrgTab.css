@@ -1,0 +1,170 @@
+.org-tab-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 0 24px;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.org-tab-nav::-webkit-scrollbar {
+  height: 3px;
+}
+
+.org-tab-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.org-tab-nav::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 10px;
+}
+
+.org-tab-nav-content {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  width: 100%;
+}
+
+/* ========================================
+   Tab Items
+   ======================================== */
+
+.org-tab-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.org-tab-nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--tab-color);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 6px;
+  z-index: 0;
+}
+
+.org-tab-nav-item:hover {
+  color: var(--tab-color);
+  transform: translateY(-2px);
+}
+
+.org-tab-nav-item:hover::before {
+  opacity: 0.08;
+}
+
+.org-tab-nav-item.org-tab-nav-active {
+  color: white;
+  background: var(--tab-color);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.org-tab-nav-item.org-tab-nav-active:hover {
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+.org-tab-nav-icon {
+  font-size: 22px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.org-tab-nav-item:hover .org-tab-nav-icon {
+  transform: scale(1.15) rotate(-5deg);
+}
+
+.org-tab-nav-item.org-tab-nav-active:hover .org-tab-nav-icon {
+  transform: scale(1.25) rotate(5deg);
+}
+
+.org-tab-nav-label {
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+/* Animated underline */
+.org-tab-nav-underline {
+  position: absolute;
+  bottom: -1px;
+  height: 2px;
+  background: linear-gradient(90deg, #6366f1, #ec4899);
+  border-radius: 1px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: none;
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+
+@media (max-width: 768px) {
+  .org-tab-nav {
+    height: 48px;
+    padding: 0 12px;
+    gap: 4px;
+  }
+
+  .org-tab-nav-item {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .org-tab-nav-icon {
+    font-size: 18px;
+  }
+
+  .org-tab-nav-label {
+    display: none;
+  }
+
+  .org-tab-nav-item.org-tab-nav-active .org-tab-nav-label {
+    display: inline;
+  }
+}
+
+@media (max-width: 480px) {
+  .org-tab-nav {
+    height: 44px;
+    padding: 0 8px;
+  }
+
+  .org-tab-nav-item {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .org-tab-nav-icon {
+    font-size: 12px;
+  }
+
+  .org-tab-nav-label {
+    display: none !important;
+  }
+}

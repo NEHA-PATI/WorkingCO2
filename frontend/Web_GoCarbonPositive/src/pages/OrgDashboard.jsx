@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Tabs,
   TabsContent,
-  TabsList,
-  TabsTrigger,
   Button,
   Badge,
 } from "../components/org/basic-ui";
@@ -29,6 +27,7 @@ import CreditEarnings from "../components/org/CreditEarnings";
 import ComplianceReports from "../components/org/ComplianceReports";
 import TeamManagement from "../components/org/TeamManagement";
 import QuickActions from "../components/org/QuickActions";
+import OrgTab from "../components/org/OrgTab";
 import "../styles/org/Overview.css";
 import "../styles/org/TeamManagement.css";
 import "../styles/org/OrgDashboard.css";
@@ -169,6 +168,46 @@ const DASHBOARD_TABS = [
   },
 ];
 
+const LoadingSpinner = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "400px",
+      flexDirection: "column",
+      gap: "16px",
+    }}
+  >
+    <motion.div
+      animate={{ rotate: 360 }}
+      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+      style={{
+        width: "48px",
+        height: "48px",
+        border: "4px solid #e5e7eb",
+        borderTopColor: "#3b82f6",
+        borderRadius: "50%",
+      }}
+    />
+    <motion.span
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+      style={{
+        color: "#6b7280",
+        fontSize: "16px",
+        fontWeight: "500",
+      }}
+    >
+      Loading dashboard section...
+    </motion.span>
+  </motion.div>
+);
+
 const OrgDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   ///const [isDarkMode, setIsDarkMode] = useState(false);
@@ -184,12 +223,19 @@ const OrgDashboard = () => {
   // const ActiveComponent = DASHBOARD_TABS.find((tab) => tab.id === activeTab)?.component || Overview;
 
   const handleTabChange = (tabId) => {
+    if (tabId === activeTab) return;
+
     setIsLoading(true);
-    setActiveTab(tabId);
     setTimeout(() => {
-      setIsLoading(false);
+      setActiveTab(tabId);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 100);
     }, 300);
   };
+
+  const ActiveComponent =
+    DASHBOARD_TABS.find((tab) => tab.id === activeTab)?.component || Overview;
 
   // const toggleDarkMode = () => {
   //   setIsDarkMode(!isDarkMode);
@@ -202,6 +248,11 @@ const OrgDashboard = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
+      style={{
+        background: "linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%)",
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+      }}
     >
       {/* Top Bar */}
       {/*<div className="org-topbar">
@@ -229,56 +280,35 @@ const OrgDashboard = () => {
         </div>
       </div>*/}
 
-      <div className="p-6">
+      <div>
         <Tabs
           value={activeTab}
           onValueChange={handleTabChange}
           className="w-full"
         >
           {/* Tabs List */}
-          <TabsList className="newtab-header">
-            {DASHBOARD_TABS.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = tab.id === activeTab;
-              return (
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
-                  className={`newtab-button ${isActive ? "active" : ""}`}
-                >
-                  <Icon className={`icon ${tab.color}`} />
-                  <span>{tab.label}</span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+          <OrgTab
+            onTabChange={handleTabChange}
+          />
 
           {/* Tabs Content */}
-          {DASHBOARD_TABS.map((tab) => {
-            const TabComponent = tab.component;
-            return (
-              <TabsContent key={tab.id} value={tab.id}>
-                {isLoading ? (
-                  <div className="spinner">
-                    <div className="flex items-center space-x-2">
-                      <div className="spinner-circle" />
-                      <span className="text-gray-600">
-                        Loading dashboard section...
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <TabComponent />
-                  </motion.div>
-                )}
-              </TabsContent>
-            );
-          })}
+          <TabsContent value={activeTab}>
+            <AnimatePresence mode="wait">
+              {isLoading ? (
+                <LoadingSpinner key="loading" />
+              ) : (
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, x: -20, scale: 0.98 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: 20, scale: 0.98 }}
+                  transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                >
+                  <ActiveComponent />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </TabsContent>
         </Tabs>
       </div>
     </motion.div>
