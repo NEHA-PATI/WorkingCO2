@@ -52,6 +52,7 @@ export default function Navbar() {
     if (user?.email) return user.email.split("@")[0];
     return "User";
   };
+
   const getDashboardRoute = () => {
     if (!role) return "/user/dashboard";
     if (role === "admin") return "/admin/dashboard";
@@ -64,6 +65,9 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     toast.success("Logged out successfully!", { autoClose: 2000 });
+    localStorage.removeItem("authUser");
+
+localStorage.removeItem("userId");
     navigate("/");
   };
 
@@ -123,7 +127,6 @@ export default function Navbar() {
               <HamburgerMenu
                 role={isAuthenticated ? role : "guest"}
                 close={() => setSidebarOpen(false)}
-                // openSignupPopup={openSignupPopup}
                 openWalletModal={openWalletModal}
                 handleLogout={handleLogout}
               />
@@ -142,28 +145,46 @@ export default function Navbar() {
                 className="wallet-icon"
                 style={{ color: "#f59e0b", fontSize: "2rem" }}
               /> */}
-              
             </div>
           </div>
         )}
 
         {/* ================= RIGHT ================= */}
+
         <div className="user-right-section">
-          <div className="user-profile-container" ref={profileDropdownRef}>
-            <div
-              onClick={() => setProfileOpen((p) => !p)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                cursor: "pointer",
-              }}
-            >
-              {/* Avatar */}
-              <div style={{ position: "relative" }}>
-                <div className="user-profile-avatar">
-                  {isAuthenticated ? (
-                    user?.profilePic ? (
+
+          {/* ====== CHANGE STARTS HERE ONLY ====== */}
+
+          {!isAuthenticated ? (
+            <div className="auth-buttons">
+              <button className="signup-btn" onClick={openSignup}>
+                <FaUserPlus />
+                <span>Sign Up</span>
+              </button>
+
+              <button className="login-btn" onClick={openLogin}>
+                <FaUserCircle />
+                <span>Login</span>
+              </button>
+            </div>
+
+          ) : (
+
+            <div className="user-profile-container" ref={profileDropdownRef}>
+              <div
+                onClick={() => setProfileOpen((p) => !p)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  cursor: "pointer",
+                }}
+              >
+
+                {/* Avatar */}
+                <div style={{ position: "relative" }}>
+                  <div className="user-profile-avatar">
+                    {user?.profilePic ? (
                       <img
                         src={user.profilePic}
                         alt={getDisplayName()}
@@ -176,131 +197,98 @@ export default function Navbar() {
                       />
                     ) : (
                       getInitials(user?.username || user?.email)
-                    )
-                  ) : (
-                    <FaUserCircle
-                      style={{ fontSize: "2rem", color: "#ffffff" }}
-                    />
-                  )}
+                    )}
+                  </div>
+
+                  <div className="user-status-badge" />
                 </div>
-                {isAuthenticated && <div className="user-status-badge" />}
+
+                <div className="user-profile-info">
+                  <div className="user-profile-name">
+                    {getDisplayName()}
+                  </div>
+                </div>
+
+                <FaChevronDown className="user-profile-dropdown-icon" />
               </div>
 
-              {isAuthenticated && (
-                <div className="user-profile-info">
-                  <div className="user-profile-name">{getDisplayName()}</div>
-                </div>
+              {profileOpen && (
+                <>
+                  <div
+                    className="profile-dropdown-backdrop"
+                    onClick={() => setProfileOpen(false)}
+                  ></div>
+
+                  <div className="user-profile-dropdown">
+                    <div className="user-profile-dropdown-header">
+                      <div className="user-profile-dropdown-name">
+                        {getDisplayName()}
+                      </div>
+
+                      <div className="user-profile-dropdown-email">
+                        {user?.email || ""}
+                      </div>
+                    </div>
+
+                    <NavLink
+                      to="/profile"
+                      className="user-profile-dropdown-item"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      <FaUserCircle style={{ color: "#3b82f6" }} />
+                      <span>My Profile</span>
+                    </NavLink>
+
+                    <div
+                      className="user-profile-dropdown-item"
+                      onClick={() => {
+                        setProfileOpen(false);
+                        navigate(getDashboardRoute());
+                      }}
+                    >
+                      <FaChartLine style={{ color: "#10b981" }} />
+                      <span>Dashboard</span>
+                    </div>
+
+                    {role !== "admin" && (
+                      <div
+                        className="user-profile-dropdown-item"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          openWalletModal();
+                        }}
+                      >
+                        <GiWallet
+                          style={{ color: "#f59e0b", fontSize: "1.8rem" }}
+                        />
+                        <span>My Wallet</span>
+                      </div>
+                    )}
+
+                    <NavLink
+                      to="/settings"
+                      className="user-profile-dropdown-item"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      <FaCog style={{ color: "#64748b" }} />
+                      <span>Settings</span>
+                    </NavLink>
+
+                    <div
+                      className="user-profile-dropdown-item logout"
+                      onClick={handleLogout}
+                    >
+                      <FaSignOutAlt />
+                      <span>Logout</span>
+                    </div>
+                  </div>
+                </>
               )}
-
-              <FaChevronDown className="user-profile-dropdown-icon" />
             </div>
+          )}
 
-            {profileOpen && (
-              <>
-                <div
-                  className="profile-dropdown-backdrop"
-                  onClick={() => setProfileOpen(false)}
-                ></div>
-                <div className="user-profile-dropdown">
-                  {isAuthenticated ? (
-                    <>
-                      <div className="user-profile-dropdown-header">
-                        <div className="user-profile-dropdown-name">
-                          {getDisplayName()}
-                        </div>
-                        <div className="user-profile-dropdown-email">
-                          {user?.email || ""}
-                        </div>
-                      </div>
+          {/* ====== CHANGE ENDS HERE ONLY ====== */}
 
-                      <NavLink
-                        to="/profile"
-                        className="user-profile-dropdown-item"
-                        onClick={() => setProfileOpen(false)}
-                      >
-                        <FaUserCircle style={{ color: "#3b82f6" }} />
-                        <span>My Profile</span>
-                      </NavLink>
-
-                      <div
-                        className="user-profile-dropdown-item"
-                        onClick={() => {
-                          setProfileOpen(false);
-                          navigate(getDashboardRoute());
-                        }}
-                      >
-                        <FaChartLine style={{ color: "#10b981" }} />
-                        <span>Dashboard</span>
-                      </div>
-
-                      {role !== "admin" && (
-                        <div
-                          className="user-profile-dropdown-item"
-                          onClick={() => {
-                            setProfileOpen(false);
-                            openWalletModal();
-                          }}
-                        >
-                          <GiWallet
-                            style={{ color: "#f59e0b", fontSize: "1.8rem" }}
-                          />
-                          <span>My Wallet</span>
-                        </div>
-                      )}
-
-                      <NavLink
-                        to="/settings"
-                        className="user-profile-dropdown-item"
-                        onClick={() => setProfileOpen(false)}
-                      >
-                        <FaCog style={{ color: "#64748b" }} />
-                        <span>Settings</span>
-                      </NavLink>
-
-                      <div
-                        className="user-profile-dropdown-item logout"
-                        onClick={handleLogout}
-                      >
-                        <FaSignOutAlt />
-                        <span>Logout</span>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="user-profile-dropdown-header">
-                        <div className="user-profile-dropdown-name">Guest</div>
-                        <div className="user-profile-dropdown-email">
-                          Please login or sign up
-                        </div>
-                      </div>
-
-                      <div
-                        className="user-profile-dropdown-item"
-                        onClick={() => {
-                          setProfileOpen(false);
-                          openLogin();
-                        }}
-                      >
-                        <FaUserCircle />
-                        <span>Login</span>
-                      </div>
-
-                      <div
-                        className="user-profile-dropdown-item"
-                        onClick={() => {
-                          setProfileOpen(false);
-                          openSignup();
-                        }}
-                      >
-                        <FaUserPlus />
-                        <span>Sign Up</span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
         </div>
       </div>
 

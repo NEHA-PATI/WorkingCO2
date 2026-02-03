@@ -578,6 +578,7 @@
   resolved "https://registry.npmjs.org/@kurkle/color/-/color-0.3.4.tgz"
   integrity sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==
 
+<<<<<<< HEAD
 "@napi-rs/wasm-runtime@^0.2.12":
   version "0.2.12"
   dependencies:
@@ -585,6 +586,8 @@
     "@emnapi/runtime" "^1.4.3"
     "@tybys/wasm-util" "^0.10.0"
 
+=======
+>>>>>>> 48d6937e99498c08f1a882a2a4ee39426e26ae0d
 "@portabletext/react@^6.0.2":
   version "6.0.2"
   resolved "https://registry.npmjs.org/@portabletext/react/-/react-6.0.2.tgz"
