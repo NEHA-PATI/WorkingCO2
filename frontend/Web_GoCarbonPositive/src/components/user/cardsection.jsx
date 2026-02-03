@@ -4,7 +4,6 @@ import { GiRank3 } from "react-icons/gi";
 import { MdOutlineAttachMoney } from "react-icons/md";
 import "../../styles/user/cardsection.css";
 
-// ⚠️ Replace ONLY if your key is active
 const API_KEY = "60d7d1192f4e08aaa16e18f6a8551f69";
 
 const Cardsection = ({
@@ -27,11 +26,9 @@ const Cardsection = ({
   const growingTrees = treeList.length;
   const generatingSolar = solarList.length;
 
-  // 🌦 Weather state
   const [weather, setWeather] = useState(null);
   const [weatherError, setWeatherError] = useState(false);
   const [location, setLocation] = useState("");
-
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -49,17 +46,11 @@ const Cardsection = ({
           );
 
           if (!res.ok) {
-            console.error("Weather API error:", res.status);
             setWeatherError(true);
             return;
           }
 
           const data = await res.json();
-
-          if (!data?.main || !data?.weather) {
-            setWeatherError(true);
-            return;
-          }
 
           setWeather({
             temp: data.main.temp,
@@ -67,9 +58,7 @@ const Cardsection = ({
             clouds: data.clouds?.all ?? 0,
           });
           setLocation(`${data.name}, ${data.sys.country}`);
-
-        } catch (err) {
-          console.error("Weather fetch failed", err);
+        } catch {
           setWeatherError(true);
         }
       },
@@ -85,125 +74,86 @@ const Cardsection = ({
   };
 
   return (
-    <div className="dashboard-container">
-      {/* TOP SUMMARY CARDS */}
-      <div className="summary-cards">
-        <div className="card">
+    <div className="cs-dashboard-container">
+      <div className="cs-summary-cards">
+        <div className="cs-card">
           <h4>
-            Total Credits <FaLeaf className="icon green" />
+            Total Credits <FaLeaf className="cs-icon cs-green" />
           </h4>
-          <p className="value">
+          <p className="cs-value">
             {totalCredits != null ? totalCredits.toFixed(2) : "0.00"}
           </p>
-          <span className="change red">{percentChangeText}</span>
+          <span className="cs-change cs-red">{percentChangeText}</span>
         </div>
 
-        <div className="card">
+        <div className="cs-card">
           <h4>
-            CO₂ Offset <FaLeaf className="icon green" />
+            CO₂ Offset <FaLeaf className="cs-icon cs-green" />
           </h4>
-          <p className="value green">
+          <p className="cs-value cs-green">
             {totalCO2Tons != null ? `${totalCO2Tons} tons` : "0.0 tons"}
           </p>
-          <span className="change green">{co2ChangeText}</span>
+          <span className="cs-change cs-green">{co2ChangeText}</span>
         </div>
 
-        <div className="card">
+        <div className="cs-card">
           <h4>
-            Value Created <MdOutlineAttachMoney className="icon orange" />
+            Value Created <MdOutlineAttachMoney className="cs-icon cs-orange" />
           </h4>
-          <p className="value orange">
+          <p className="cs-value cs-orange">
             ₹{totalValue != null ? totalValue.toFixed(0) : "0"}
           </p>
-          <span className="change orange">{valueChangeText}</span>
+          <span className="cs-change cs-orange">{valueChangeText}</span>
         </div>
 
-        <div className="card">
+        <div className="cs-card">
           <h4>
-            Rank <GiRank3 className="icon blue" />
+            Rank <GiRank3 className="cs-icon cs-blue" />
           </h4>
-          <p className="value blue">#{rankNumber ?? 10000}</p>
-          <span className="change">{rankText || "Top 100.0% globally"}</span>
+          <p className="cs-value cs-blue">#{rankNumber ?? 10000}</p>
+          <span className="cs-change">{rankText || "Top 100.0% globally"}</span>
         </div>
       </div>
 
-      {/* FEATURE CARDS */}
-      <div className="feature-cards">
-        {/* EV */}
-        <div className="feature-card">
+      <div className="cs-feature-cards">
+        <div className="cs-feature-card">
           <h4>
-            <FaCar className="icon blue" /> Electric Vehicles
-            <span className="tag blue">Live EVs: {liveEVs}</span>
+            <FaCar className="cs-icon cs-blue" /> Electric Vehicles
+            <span className="cs-tag cs-blue">Live EVs: {liveEVs}</span>
           </h4>
-          <p>
-            Total Distance{" "}
-            <span>{evCO2 ? `${(evCO2 / 0.12).toFixed(0)} km` : "0 km"}</span>
-          </p>
-          <p>
-            CO₂ Saved <span>{evCO2 ? `${evCO2.toFixed(1)} kg` : "0 kg"}</span>
-          </p>
-          <p>
-            Credits Earned <span>{liveEVs}</span>
-          </p>
+          <p>Distance <span>{evCO2 ? `${(evCO2 / 0.12).toFixed(0)} km` : "0 km"}</span></p>
+          <p>CO₂ Saved <span>{evCO2 ? `${evCO2.toFixed(1)} kg` : "0 kg"}</span></p>
+          <p>Credits <span>{liveEVs}</span></p>
         </div>
 
-        {/* TREES */}
-        <div className="feature-card">
+        <div className="cs-feature-card">
           <h4>
-            <FaLeaf className="icon green" /> Tree Plantations
-            <span className="tag green">Growing: {growingTrees}</span>
+            <FaLeaf className="cs-icon cs-green" /> Tree Plantations
+            <span className="cs-tag cs-green">Growing: {growingTrees}</span>
           </h4>
-          <p>
-            Trees Planted <span>{growingTrees}</span>
-          </p>
-          <p>
-            CO₂ Absorbed{" "}
-            <span>{treeCO2 ? `${treeCO2.toFixed(1)} kg` : "0 kg"}</span>
-          </p>
-          <p>
-            Credits Earned <span>{growingTrees}</span>
-          </p>
+          <p>Trees <span>{growingTrees}</span></p>
+          <p>CO₂ Absorbed <span>{treeCO2 ? `${treeCO2.toFixed(1)} kg` : "0 kg"}</span></p>
+          <p>Credits <span>{growingTrees}</span></p>
         </div>
 
-        {/* ☀️ SOLAR + WEATHER */}
-        <div className="feature-card">
+        <div className="cs-feature-card">
           <h4>
-            <FaSun className="icon orange" /> Solar Energy
-            <span className="tag orange">
-              Generating: {generatingSolar}
-            </span>
+            <FaSun className="cs-icon cs-orange" /> Solar Energy
+            <span className="cs-tag cs-orange">Generating: {generatingSolar}</span>
           </h4>
 
-          <p>
-            Energy Generated{" "}
-            <span>
-              {solarCO2 ? `${(solarCO2 / 0.7).toFixed(1)} kWh` : "0 kWh"}
-            </span>
-          </p>
+          <p>Energy <span>{solarCO2 ? `${(solarCO2 / 0.7).toFixed(1)} kWh` : "0 kWh"}</span></p>
+          <p>Bill Saved <span>₹{generatingSolar ? (generatingSolar * 5000).toFixed(0) : "0"}</span></p>
+          <p>Credits <span>{generatingSolar}</span></p>
 
-          <p>
-            Bill Saved{" "}
-            <span>
-              ₹{generatingSolar ? (generatingSolar * 5000).toFixed(0) : "0"}
-            </span>
-          </p>
-
-          <p>
-            Credits Earned <span>{generatingSolar}</span>
-          </p>
-
-          {/* 🌤 WEATHER */}
-          <div className="weather-box">
+          <div className="cs-weather-box">
             {location && <p>📍 {location}</p>}
-
             <p>
-              🌤 Today’s Weather:{" "}
+              🌤Weather:{" "}
               <span>
                 {weather && !weatherError
-                  ? `${weather.condition}, ${Math.round(
-                      weather.temp
-                    )}°C – ${solarMessage()}`
-                  : "Weather unavailable"}
+                  ? `${weather.condition}, ${Math.round(weather.temp)}°C – ${solarMessage()}`
+                  : "Unavailable"}
               </span>
             </p>
           </div>

@@ -233,35 +233,34 @@ localStorage.removeItem("userId");
                     <NavLink
                       to="/profile"
                       className="user-profile-dropdown-item"
-                      style={{ "--profile-icon-color": "#3b82f6" }}
                       onClick={() => setProfileOpen(false)}
                     >
-                      <FaUserCircle className="profile-icon profile-icon-blue" />
+                      <FaUserCircle style={{ color: "#3b82f6" }} />
                       <span>My Profile</span>
                     </NavLink>
 
                     <div
                       className="user-profile-dropdown-item"
-                      style={{ "--profile-icon-color": "#10b981" }}
                       onClick={() => {
                         setProfileOpen(false);
                         navigate(getDashboardRoute());
                       }}
                     >
-                      <FaChartLine className="profile-icon profile-icon-green" />
+                      <FaChartLine style={{ color: "#10b981" }} />
                       <span>Dashboard</span>
                     </div>
 
                     {role !== "admin" && (
                       <div
                         className="user-profile-dropdown-item"
-                        style={{ "--profile-icon-color": "#f59e0b" }}
                         onClick={() => {
                           setProfileOpen(false);
                           openWalletModal();
                         }}
                       >
-                        <GiWallet className="profile-icon profile-icon-amber" />
+                        <GiWallet
+                          style={{ color: "#f59e0b", fontSize: "1.8rem" }}
+                        />
                         <span>My Wallet</span>
                       </div>
                     )}
@@ -269,19 +268,17 @@ localStorage.removeItem("userId");
                     <NavLink
                       to="/settings"
                       className="user-profile-dropdown-item"
-                      style={{ "--profile-icon-color": "#64748b" }}
                       onClick={() => setProfileOpen(false)}
                     >
-                      <FaCog className="profile-icon profile-icon-slate" />
+                      <FaCog style={{ color: "#64748b" }} />
                       <span>Settings</span>
                     </NavLink>
 
                     <div
                       className="user-profile-dropdown-item logout"
-                      style={{ "--profile-icon-color": "#ef4444" }}
                       onClick={handleLogout}
                     >
-                      <FaSignOutAlt className="profile-icon profile-icon-red" />
+                      <FaSignOutAlt />
                       <span>Logout</span>
                     </div>
                   </div>

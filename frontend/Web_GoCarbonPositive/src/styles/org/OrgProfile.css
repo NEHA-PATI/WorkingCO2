@@ -22,7 +22,6 @@
 /* Main layout */
 .orgp-profile-container {
   display: flex;
-  height: 100vh;
   background-color: #ffffff;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   max-width: 1120px;
@@ -38,6 +37,8 @@
   padding: 60px 50px;
   background-color: #ffffff;
   border-right: 1px solid var(--orgp-border-color);
+  position: relative;
+  z-index: 2; /* buttons + form upar, marker niche rahe */
 }
 
 .orgp-form {
@@ -307,7 +308,7 @@
   transform: translateY(1px);
 }
 
-/* NEW: Cancel button next to update */
+/* Cancel button next to update */
 .orgp-button-group {
   display: flex;
   gap: 12px;
@@ -322,7 +323,7 @@
 .orgp-cancel-btn {
   flex: 1;
   padding: 12px 24px;
-  min-height: 48px;                  /* 🔥 FORCE SAME HEIGHT */
+  min-height: 48px;
   background-color: var(--orgp-primary-blue);
   color: #ffffff;
   border: none;
@@ -348,6 +349,8 @@
   line-height: 1;
   box-sizing: border-box;
   border-radius: 8px;
+  position: relative;
+  z-index: 3; /* marker se upar */
 }
 
 /* OTP Section */
@@ -379,7 +382,7 @@
   margin-top: 6px;
 }
 
-/* Right Side - Tagline Section (fixed-style, non-scrollable) */
+/* Right Side - Tagline Section */
 .orgp-tagline-section {
   flex: 0 0 320px;
   padding: 60px 40px;
@@ -397,6 +400,8 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  z-index: 1; /* form (2) se niche */
+  overflow: hidden; /* marker bahar na nikle */
 }
 
 .orgp-tagline-content {
@@ -462,6 +467,19 @@
   color: var(--orgp-success-green);
 }
 
+/* Marker wrapper + pin (use your actual class names) */
+.orgp-marker-wrapper {
+  position: relative;
+}
+
+.orgp-marker-pin {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -12px;     /* tagline ke andar hi rahe */
+  z-index: 0;        /* buttons se niche */
+}
+
 /* Scrollbar for form */
 .orgp-form-section::-webkit-scrollbar {
   width: 8px;
@@ -480,7 +498,7 @@
   background: var(--orgp-primary-blue);
 }
 
-/* NEW: Summary card styles */
+/* Summary card styles */
 .orgp-summary-card {
   background: radial-gradient(circle at top left, #ffffff 0%, #f9fafb 45%, #e8f0f8 100%);
   border-radius: 12px;
@@ -492,6 +510,7 @@
     0 2px 6px rgba(15, 23, 42, 0.06);
   position: relative;
   overflow: hidden;
+  z-index: 2;
 }
 
 .orgp-summary-card::before {
@@ -623,7 +642,6 @@
 @media (max-width: 1024px) {
   .orgp-profile-container {
     flex-direction: column;
-    height: auto;
   }
 
   .orgp-form-section {
@@ -638,7 +656,7 @@
     position: relative;
     height: auto;
     top: auto;
-    min-height: 300px;
+    min-height: 280px;
     padding: 40px 30px;
   }
 
@@ -648,6 +666,7 @@
 
   .orgp-button-group {
     flex-direction: column;
+    align-items: stretch;
   }
 
   .orgp-button-group .orgp-update-btn,
@@ -658,12 +677,12 @@
 
 @media (max-width: 640px) {
   .orgp-form-section {
-    padding: 30px 20px;
+    padding: 24px 16px;
   }
 
   .orgp-tagline-section {
-    padding: 30px 20px;
-    min-height: 250px;
+    padding: 24px 16px;
+    min-height: 240px;
   }
 
   .orgp-tagline-content h2 {
