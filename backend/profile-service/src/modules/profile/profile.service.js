@@ -56,7 +56,6 @@ exports.createCompleteProfile = async (u_id, profile, addresses) => {
   }
 };
 exports.getCompleteProfile = async (u_id) => {
-  // 🔹 profile + email from users table
   const profileRes = await pool.query(
     `
     SELECT 
@@ -65,7 +64,7 @@ exports.getCompleteProfile = async (u_id) => {
       up.middle_name,
       up.last_name,
       up.mobile_number,
-      up.dob,
+      up.dob::TEXT AS dob,
       u.email
     FROM user_profile up
     JOIN users u ON u.u_id = up.u_id
@@ -78,7 +77,6 @@ exports.getCompleteProfile = async (u_id) => {
     return null;
   }
 
-  // 🔹 addresses
   const addressRes = await pool.query(
     `
     SELECT *
@@ -94,3 +92,4 @@ exports.getCompleteProfile = async (u_id) => {
     addresses: addressRes.rows,
   };
 };
+

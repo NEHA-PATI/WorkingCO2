@@ -577,3 +577,48 @@
     font-size: 2.2rem;
   }
 }
+/* ===== LOGIN & SIGNUP BUTTONS ===== */
+
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;                /* dono buttons ke beech space */
+}
+
+.login-btn,
+.signup-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 16px;
+  border-radius: 8px;       /* button jaisa look */
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+/* Signup Green Button */
+.signup-btn {
+  background: #54bd59;
+  color: white;
+}
+
+.signup-btn:hover {
+  background: #256429;
+  transform: translateY(-1px);
+}
+
+/* Login Light Button */
+.login-btn {
+  background: #f1f5f9;
+  color: #2e7d32;
+  border: 1px solid #2e7d32;
+}
+
+.login-btn:hover {
+  background: #2e7d32;
+  color: white;
+  transform: translateY(-1px);
+}
