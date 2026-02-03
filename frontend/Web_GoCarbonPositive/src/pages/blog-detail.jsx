@@ -2,13 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Clock, Share2, Twitter, Linkedin, Facebook, Link as LinkIcon, User, TrendingUp, Loader2 } from "lucide-react";
 import { PortableText } from "@portabletext/react";
-<<<<<<< HEAD:frontend/Web_GoCarbonPositive/src/pages/blog-detail.jsx
-import "../styles/blog-detail.css";
-import blogService from "../services/api/blog.service.js";
-=======
 import "../styles/user/blog-detail.css";
-// import blogService from "../services/api/blog.service.js";
->>>>>>> 8dc239288b09e0651101181c6d11f0fb60a5abcb:frontend/User/src/pages/blog-detail.jsx
+import blogService from "../services/blog/blogService.js";
 
 const CATEGORY_COLORS = {
   INSIGHTS: "#9b59b6",
@@ -52,11 +47,7 @@ export default function BlogDetailPage() {
     try {
       const response = await blogService.getPostBySlug(slug);
       setBlog(response.data);
-<<<<<<< HEAD:frontend/Web_GoCarbonPositive/src/pages/blog-detail.jsx
-
-=======
       
->>>>>>> 8dc239288b09e0651101181c6d11f0fb60a5abcb:frontend/User/src/pages/blog-detail.jsx
       if (response.data?._id) {
         const relatedRes = await blogService.getRelatedPosts(response.data._id);
         setRelatedPosts(relatedRes.data || []);
@@ -90,11 +81,7 @@ export default function BlogDetailPage() {
   const handleShare = (platform) => {
     const url = window.location.href;
     const text = blog?.title || "";
-<<<<<<< HEAD:frontend/Web_GoCarbonPositive/src/pages/blog-detail.jsx
-
-=======
     
->>>>>>> 8dc239288b09e0651101181c6d11f0fb60a5abcb:frontend/User/src/pages/blog-detail.jsx
     const shareUrls = {
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
@@ -225,13 +212,8 @@ export default function BlogDetailPage() {
       <main className="blog-detail-main">
         <article className="blog-article">
           <div className="blog-article-content">
-<<<<<<< HEAD:frontend/Web_GoCarbonPositive/src/pages/blog-detail.jsx
-            <PortableText
-              value={blog.content}
-=======
             <PortableText 
               value={blog.content} 
->>>>>>> 8dc239288b09e0651101181c6d11f0fb60a5abcb:frontend/User/src/pages/blog-detail.jsx
               components={portableTextComponents}
             />
           </div>
@@ -297,8 +279,4 @@ export default function BlogDetailPage() {
       </main>
     </div>
   );
-<<<<<<< HEAD:frontend/Web_GoCarbonPositive/src/pages/blog-detail.jsx
 }
-=======
-}
->>>>>>> 8dc239288b09e0651101181c6d11f0fb60a5abcb:frontend/User/src/pages/blog-detail.jsx

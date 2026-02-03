@@ -120,18 +120,23 @@
 .icon.blue {
   color: #4fc3f7;
 }
+
 .icon.purple {
   color: #ba68c8;
 }
+
 .icon.orange {
   color: #ffb74d;
 }
+
 .icon.teal {
   color: #4db6ac;
 }
+
 .icon.gold {
   color: #ffd54f;
 }
+
 .icon.gray {
   color: #cfd8dc;
 }
@@ -163,7 +168,7 @@
   top: 50px;
   left: 0;
   background-color: white;
-  color: #333;
+  color: inherit;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -175,8 +180,9 @@
 .sidebar-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
+  gap: 4px;
+  padding-bottom: 6px;
+  padding-top: 6px;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
@@ -189,6 +195,8 @@
   font-size: 1.3rem;
   margin-right: 8px;
   transition: color 0.3s;
+  color: var(--sidebar-icon-color, #111);
+  fill: var(--sidebar-icon-color, #111);
 }
 
 .sidebar-logout {
@@ -198,24 +206,31 @@
 .sidebar-blue {
   color: #3b82f6;
 }
+
 .sidebar-purple {
   color: #a855f7;
 }
+
 .sidebar-green {
   color: #22c55e;
 }
+
 .sidebar-yellow {
   color: #facc15;
 }
+
 .sidebar-orange {
   color: #f97316;
 }
+
 .sidebar-teal {
   color: #14b8a6;
 }
+
 .sidebar-gold {
   color: #fbbf24;
 }
+
 .sidebar-red {
   color: #ef4444;
 }
@@ -330,6 +345,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -341,6 +357,7 @@
     opacity: 0;
     transform: translateY(100%);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -386,7 +403,20 @@
 .user-profile-dropdown-item svg {
   font-size: 1.2rem;
   flex-shrink: 0;
+  color: var(--profile-icon-color, #0f172a) !important;
+  fill: var(--profile-icon-color, #0f172a) !important;
 }
+
+/* Profile dropdown icon colors */
+.profile-icon {
+  color: #0f172a;
+  fill: currentColor;
+}
+.profile-icon-blue { color: #3b82f6; }
+.profile-icon-green { color: #10b981; }
+.profile-icon-amber { color: #f59e0b; }
+.profile-icon-slate { color: #64748b; }
+.profile-icon-red { color: #ef4444; }
 
 .user-profile-dropdown-item.logout {
   color: #ef4444;
@@ -422,7 +452,8 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .user-profile-info {
-    display: none; /* Hide name on mobile */
+    display: none;
+    /* Hide name on mobile */
   }
 
   .user-profile-container {
@@ -441,7 +472,8 @@
   }
 
   .user-profile-dropdown-icon {
-    display: none; /* Hide chevron on mobile */
+    display: none;
+    /* Hide chevron on mobile */
   }
 
   /* Profile dropdown - same behavior as hamburger menu (absolute positioning) */
@@ -561,4 +593,65 @@
   .wallet-icon {
     font-size: 2.2rem;
   }
+}
+
+/* ===== LOGIN & SIGNUP BUTTONS ===== */
+
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* dono buttons ke beech space */
+}
+
+.login-btn,
+.signup-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 16px;
+  border-radius: 8px;
+  /* button jaisa look */
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+/* Signup Green Button */
+.signup-btn {
+  background: #f1f5f9;
+  color: white;
+}
+
+.signup-btn:hover {
+  background: #87c08b;
+  transform: translateY(-1px);
+}
+
+.login-btn {
+  background: #49be72;
+  color: #ffffff;        /* simple seedha white */
+  font-weight: 600;
+}
+
+.login-btn span,
+.login-btn svg {
+  color: #ffffff;        /* icon + text dono */
+  fill: #ffffff;
+}
+
+
+.login-btn:hover {
+  background: #87c08b;
+  color: white;
+  transform: translateY(-1px);
+}
+
+
+
+
+.sidebar-icon {
+  transition: color 0.2s ease;
 }

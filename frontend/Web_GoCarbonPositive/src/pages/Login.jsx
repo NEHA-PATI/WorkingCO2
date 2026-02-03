@@ -23,6 +23,15 @@ const Login = ({ onClose, onSwitchToSignup }) => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const handleClose = () => {
+  if (onClose) {
+    onClose();        // works when Login is used as a modal
+  } else {
+    navigate("/");   // works when Login is opened as a page
+  }
+};
+
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -394,11 +403,11 @@ const Login = ({ onClose, onSwitchToSignup }) => {
           }
         }
       `}</style>
-      <div style={styles.overlay} onClick={onClose}>
+      <div style={styles.overlay} onClick={handleClose}>
         <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
           <button
             style={styles.closeBtn}
-            onClick={onClose}
+            onClick={handleClose}
             disabled={loading}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = "#f5f5f5";

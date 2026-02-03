@@ -319,7 +319,7 @@ export default function JoinOrganisation() {
       <header className="join-org-header">
         <div className="join-org-header-content">
           <div>
-            <h1 className="join-org-header-title">Join as Organization</h1>
+            <h1 className="join-org-header-title">Register as Organization</h1>
             <p className="join-org-header-subtitle">Begin your verified carbon-positive journey</p>
           </div>
         </div>
@@ -630,9 +630,9 @@ export default function JoinOrganisation() {
                 </div>
 
                 <div className="join-org-stats-card">
-                  <p className="join-org-stat">✓ Over 500+ organizations registered</p>
-                  <p className="join-org-stat">✓ 10M+ tonnes of CO₂ offset</p>
-                  <p className="join-org-stat">✓ 25+ countries represented</p>
+                  <p className="join-org-stat">✓ Powering sustainability</p>
+                  <p className="join-org-stat">✓ Helping to offset tonnes of CO₂</p>
+                  <p className="join-org-stat">✓ Connecting impact makers</p>
                 </div>
               </div>
             </div>

@@ -32,10 +32,11 @@ body {
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  background: linear-gradient(135deg, #e6f9ec 0%, #c8f2d6 100%);
   padding: 2rem 1rem;
   border-bottom: 1px solid var(--border-color);
 }
+
 
 .hero-container {
   max-width: 1200px;
@@ -778,3 +779,4 @@ body {
   margin: 0 auto;       /* center horizontally */
   padding: 0 32px;      /* side spacing so it doesn’t stick to edges */
 }
+

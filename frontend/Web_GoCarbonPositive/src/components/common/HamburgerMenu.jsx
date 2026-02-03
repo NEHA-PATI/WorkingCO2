@@ -1,9 +1,8 @@
 //frontend/User/src/common/HamburgerMenu.jsx
 
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { USER_ORG_MENU } from "../../config/menuConfig";
-// import { toast } from "react-toastify";
 
 export default function HamburgerMenu({
   role,
@@ -17,11 +16,13 @@ export default function HamburgerMenu({
   const handleItemClick = (item) => {
     close();
 
-    if (item.action === "wallet") {
+    // ✅ FIX 1 – Wallet ko label se pakdo
+    if (item.label === "Wallet") {
       openWalletModal();
       return;
     }
 
+    // Logout same
     if (item.action === "logout") {
       handleLogout();
       return;
@@ -34,16 +35,20 @@ export default function HamburgerMenu({
     <div className="sidebar-dropdown">
       {menu.map((item) => {
         const Icon = item.icon;
+
         return (
           <div
             key={item.label}
             className="sidebar-item"
+            style={{ "--sidebar-icon-color": item.color || "#111" }}
             onClick={() => handleItemClick(item)}
           >
+            {/* ✅ FIX 2 – COLOR FORCE */}
             <Icon
               className="sidebar-icon"
-              style={{ color: item.color, fontSize: "1.7rem" }}
+              style={{ fontSize: "1.7rem" }}
             />
+
             <span>{item.label}</span>
           </div>
         );

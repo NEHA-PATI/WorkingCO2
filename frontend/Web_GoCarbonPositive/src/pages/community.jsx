@@ -1,446 +1,448 @@
-"use client"
 
 import { useState } from "react"
-import { Heart, Eye, MessageCircle, Search, Flame, MessageSquare, HelpCircle, BookOpen, Trophy } from "lucide-react"
-import "../styles/user/community.css"
-import Footer from "../components/common/Footer"
-
+import { 
+  FaFire, 
+  FaComments, 
+  FaQuestionCircle, 
+  FaBook, 
+  FaTrophy, 
+  FaSearch, 
+  FaEye, 
+  FaHeart, 
+  FaComment,
+  FaUserGraduate,
+  FaUser,
+  FaBuilding,
+  FaUsers,
+  FaBell,
+  FaRegLightbulb,
+  FaRocket,
+  FaChartLine,
+  FaStar,
+  FaCheckCircle,
+  FaClock
+} from "react-icons/fa"
 
 export default function CommunityPage() {
-  const [activeTab, setActiveTab] = useState("trending")
+  const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedGroup, setSelectedGroup] = useState("all")
 
-  // Sample data
+  // Community Groups
+  const communityGroups = [
+    {
+      id: "students",
+      name: "Student Community",
+      icon: <FaUserGraduate />,
+      description: "Connect with fellow students, share learning resources, and grow together",
+      members: 2847,
+      posts: 1523,
+      color: "#10b981"
+    },
+    {
+      id: "individuals",
+      name: "Individual Contributors",
+      icon: <FaUser />,
+      description: "For individual members making a difference in sustainability",
+      members: 1965,
+      posts: 892,
+      color: "#059669"
+    },
+    {
+      id: "industry",
+      name: "Industry Professionals",
+      icon: <FaBuilding />,
+      description: "Business leaders and industry experts sharing insights",
+      members: 1234,
+      posts: 687,
+      color: "#047857"
+    }
+  ]
+
+  // Trending Topics
   const trendingTopics = [
     {
       id: 1,
-      title: "How to Improve Website Load Speed?",
-      author: "AliceM",
-      level: "Level 5",
-      date: "2 days ago",
-      category: "PERFORMANCE",
-      tags: ["WEB", "SPEED", "OPTIMIZATION"],
-      views: 156,
-      likes: 24,
-      comments: 8,
-      status: "solved",
-      avatar: "👩‍💼",
-    },
-    {
-      id: 2,
-      title: "Best Practices for API Integration",
-      author: "TechGuru",
-      level: "Level 6",
-      date: "1 day ago",
-      category: "API",
-      tags: ["BACKEND", "INTEGRATION"],
-      views: 203,
-      likes: 45,
-      comments: 12,
-      status: "solved",
-      avatar: "👨‍💻",
-    },
-    {
-      id: 3,
-      title: "Database Optimization Strategies",
-      author: "CreativeSam",
-      level: "Level 4",
-      date: "3 hours ago",
-      category: "DATABASE",
-      tags: ["DATABASE", "SQL", "PERFORMANCE"],
-      views: 89,
-      likes: 15,
-      comments: 5,
-      status: "ongoing",
-      avatar: "👨‍🔬",
-    },
-  ]
-
-  const discussions = [
-    {
-      id: 1,
-      title: "Upcoming Webinar: Don't Miss Out!",
-      category: "ANNOUNCEMENT",
-      author: "Admin",
-      date: "3 days ago",
+      title: "Sustainable Energy Solutions for Small Businesses",
+      author: "Sarah Johnson",
+      authorAvatar: "👩‍💼",
+      level: "Industry Expert",
+      group: "industry",
+      date: "2 hours ago",
+      category: "SUSTAINABILITY",
+      tags: ["Energy", "Business", "Green Tech"],
       views: 342,
-      likes: 28,
-      comments: 15,
-      avatar: "📢",
+      likes: 67,
+      comments: 23,
+      status: "ongoing",
     },
     {
       id: 2,
-      title: "Need Advice on SEO Strategies",
-      category: "HELP",
-      author: "Admin",
-      date: "2 days ago",
-      views: 198,
-      likes: 13,
-      comments: 32,
-      avatar: "❓",
+      title: "Best Practices for Carbon Footprint Tracking",
+      author: "Michael Chen",
+      authorAvatar: "👨‍💻",
+      level: "Level 8",
+      group: "individuals",
+      date: "5 hours ago",
+      category: "CARBON TRACKING",
+      tags: ["Analytics", "Environment", "Tools"],
+      views: 289,
+      likes: 54,
+      comments: 18,
+      status: "solved",
     },
     {
       id: 3,
-      title: "My Latest Project Showcase",
-      category: "SHOWCASE",
-      author: "Admin",
+      title: "Research Paper: Climate Change Impact Study",
+      author: "Emma Rodriguez",
+      authorAvatar: "👩‍🎓",
+      level: "Student Researcher",
+      group: "students",
       date: "1 day ago",
-      views: 267,
-      likes: 36,
-      comments: 24,
-      avatar: "✨",
-    },
-  ]
-
-  const mostLikedQuestions = [
-    {
-      id: 1,
-      title: "Mac Download Issue: Video Stops at 90-95%",
-      author: "Marcelopuravidamedia",
-      level: "New member",
-      date: "1 day ago",
-      views: 24,
-      likes: 0,
-      comments: 2,
-      status: "solved",
-      avatar: "🟣",
-    },
-    {
-      id: 2,
-      title: "Contact Support Page Results in Error",
-      author: "GS_Sunatori",
-      level: "Level 5",
-      date: "1 day ago",
-      views: 22,
-      likes: 0,
-      comments: 6,
-      status: "solved",
-      avatar: "🟥",
-    },
-    {
-      id: 3,
-      title: "Unable to Move Dropbox Folder to USB Drive",
-      author: "Highside",
-      level: "Level 4",
-      date: "2 days ago",
-      views: 52,
-      likes: 0,
-      comments: 6,
-      status: "solved",
-      avatar: "🟣",
-    },
-  ]
-
-  const topContributors = [
-    {
-      id: 1,
-      name: "AliceM",
-      badge: "Expert",
-      score: 650,
-      avatar: "👩‍💼",
-      badgeColor: "badge-expert",
-    },
-    {
-      id: 2,
-      name: "TechGuru",
-      badge: "Senior",
-      score: 540,
-      avatar: "👨‍💻",
-      badgeColor: "badge-senior",
-    },
-    {
-      id: 3,
-      name: "CreativeSam",
-      badge: "Helper",
-      score: 410,
-      avatar: "👨‍🔬",
-      badgeColor: "badge-helper",
+      category: "RESEARCH",
+      tags: ["Climate", "Research", "Academic"],
+      views: 456,
+      likes: 89,
+      comments: 34,
+      status: "ongoing",
     },
     {
       id: 4,
-      name: "RichardPro",
-      badge: "Mentor",
-      score: 520,
-      avatar: "🧑‍🏫",
-      badgeColor: "badge-mentor",
+      title: "Implementing Green Policies in Manufacturing",
+      author: "David Kumar",
+      authorAvatar: "👨‍🏭",
+      level: "Industry Leader",
+      group: "industry",
+      date: "2 days ago",
+      category: "POLICY",
+      tags: ["Manufacturing", "Policy", "Compliance"],
+      views: 521,
+      likes: 95,
+      comments: 41,
+      status: "solved",
+    }
+  ]
+
+  // Discussion Categories
+  const discussionCategories = [
+    { id: "announcements", name: "Announcements", icon: <FaBell />, count: 24 },
+    { id: "help", name: "Help & Support", icon: <FaQuestionCircle />, count: 156 },
+    { id: "showcase", name: "Project Showcase", icon: <FaRocket />, count: 89 },
+    { id: "ideas", name: "Ideas & Innovation", icon: <FaRegLightbulb />, count: 203 },
+  ]
+
+  // Top Contributors
+  const topContributors = [
+    {
+      id: 1,
+      name: "Dr. Amanda Foster",
+      badge: "Expert",
+      group: "industry",
+      score: 2850,
+      avatar: "👩‍🔬",
+      contributions: 145,
+      badgeColor: "#10b981"
     },
+    {
+      id: 2,
+      name: "Alex Thompson",
+      badge: "Top Contributor",
+      group: "individuals",
+      score: 2340,
+      avatar: "👨‍💼",
+      contributions: 128,
+      badgeColor: "#059669"
+    },
+    {
+      id: 3,
+      name: "Lisa Wang",
+      badge: "Rising Star",
+      group: "students",
+      score: 1890,
+      avatar: "👩‍🎓",
+      contributions: 97,
+      badgeColor: "#047857"
+    },
+    {
+      id: 4,
+      name: "James Wilson",
+      badge: "Mentor",
+      group: "industry",
+      score: 1750,
+      avatar: "👨‍🏫",
+      contributions: 83,
+      badgeColor: "#10b981"
+    }
   ]
 
-  const popularTags = ["WEB", "SPEED", "API", "DATABASE", "BACKEND", "FRONTEND", "PERFORMANCE"]
-
-  const guidelines = [
-    "Be respectful and professional",
-    "Provide helpful and constructive feedback",
-    "Search for existing answers first",
-    "Share knowledge and best practices",
+  // Popular Tags
+  const popularTags = [
+    "Sustainability", "Carbon Neutral", "Green Energy", "Climate Action", 
+    "Renewable Energy", "Zero Waste", "ESG", "Conservation"
   ]
+
+  const filteredTopics = selectedGroup === "all" 
+    ? trendingTopics 
+    : trendingTopics.filter(topic => topic.group === selectedGroup)
 
   return (
-    <div className="community-page">
+    <div style={styles.container}>
       {/* Hero Section */}
-      <div className="hero-section">
-        <div className="hero-container">
-          <div className="hero-content">
-            <h1 className="hero-title">Carbon Positive Community</h1>
-            <p className="hero-description">
-              Join our thriving community to connect with like-minded members, get answers to your questions, and
-              discover sustainable solutions for a better tomorrow.
+      <div style={styles.heroSection}>
+        <div style={styles.heroContainer}>
+          <div style={styles.heroContent}>
+            <h1 style={styles.heroTitle}>Carbon Positive Community</h1>
+            <p style={styles.heroDescription}>
+              Join our thriving global community to connect with like-minded members, share knowledge, 
+              and discover sustainable solutions for a carbon-positive future.
             </p>
-           
+            <div style={styles.heroStats}>
+              <div style={styles.statItem}>
+                <FaUsers style={styles.statIcon} />
+                <div>
+                  <div style={styles.statNumber}>6,046</div>
+                  <div style={styles.statLabel}>Active Members</div>
+                </div>
+              </div>
+              <div style={styles.statItem}>
+                <FaComments style={styles.statIcon} />
+                <div>
+                  <div style={styles.statNumber}>3,102</div>
+                  <div style={styles.statLabel}>Discussions</div>
+                </div>
+              </div>
+              <div style={styles.statItem}>
+                <FaChartLine style={styles.statIcon} />
+                <div>
+                  <div style={styles.statNumber}>12,456</div>
+                  <div style={styles.statLabel}>Solutions Shared</div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="hero-icon">
-          <img src="/GoCarbonPositive_LOGO.svg" alt="" className="hero-logo" />
+          <div style={styles.heroImageContainer}>
+            <img 
+              src="/GoCarbonPositive_LOGO.svg" 
+              alt="Carbon Positive Logo" 
+              style={styles.heroLogo}
+            />
           </div>
         </div>
 
         {/* Search Bar */}
-        <div className="search-container">
-          <Search className="search-icon" size={20} />
+        <div style={styles.searchContainer}>
+          <FaSearch style={styles.searchIcon} />
           <input
             type="text"
-            placeholder="Search in English..."
+            placeholder="Search discussions, topics, or members..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
+            style={styles.searchInput}
           />
-          
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="tabs-navigation">
-        <div className="tabs-container">
-          {[
-            { id: "trending", label: "Trending", icon: Flame },
-            { id: "discussions", label: "Discussions", icon: MessageSquare },
-            { id: "questions", label: "Questions", icon: HelpCircle },
-            { id: "knowledge", label: "Knowledge Base", icon: BookOpen },
-            { id: "contributors", label: "Top Contributors", icon: Trophy },
-          ].map((tab) => {
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`tab-button ${activeTab === tab.id ? "tab-active" : ""}`}
-              >
-                <Icon size={18} />
-                <span>{tab.label}</span>
-              </button>
-            )
-          })}
+      {/* Community Groups Section */}
+      <div style={styles.groupsSection}>
+        <div style={styles.sectionHeader}>
+          <h2 style={styles.sectionTitle}>Community Groups</h2>
+          <p style={styles.sectionSubtitle}>Choose your community to connect with the right people</p>
+        </div>
+        <div style={styles.groupsGrid}>
+          {communityGroups.map((group) => (
+            <div 
+              key={group.id} 
+              style={{
+                ...styles.groupCard,
+                borderColor: selectedGroup === group.id ? group.color : '#e5e7eb',
+                backgroundColor: selectedGroup === group.id ? '#f0fdf4' : '#ffffff'
+              }}
+              onClick={() => setSelectedGroup(selectedGroup === group.id ? "all" : group.id)}
+            >
+              <div style={{...styles.groupIcon, backgroundColor: `${group.color}20`, color: group.color}}>
+                {group.icon}
+              </div>
+              <h3 style={styles.groupName}>{group.name}</h3>
+              <p style={styles.groupDescription}>{group.description}</p>
+              <div style={styles.groupStats}>
+                <div style={styles.groupStat}>
+                  <FaUsers style={{color: group.color, fontSize: '16px'}} />
+                  <span>{group.members.toLocaleString()} members</span>
+                </div>
+                <div style={styles.groupStat}>
+                  <FaComment style={{color: group.color, fontSize: '16px'}} />
+                  <span>{group.posts} posts</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="content-wrapper">
-        <div className="content-grid">
-          {/* Main Content */}
-          <div className="main-content">
-            {/* Trending Tab */}
-            {activeTab === "trending" && (
-              <div className="tab-content">
-                <h2 className="section-title">Trending Topics</h2>
-                <div className="topics-list">
-                  {trendingTopics.map((topic) => (
-                    <div key={topic.id} className="topic-card">
-                      <div className="topic-avatar">{topic.avatar}</div>
-                      <div className="topic-body">
-                        <div className="topic-header">
-                          <div>
-                            <h3 className="topic-title">{topic.title}</h3>
-                            <div className="topic-meta">
-                              <span className="meta-item">{topic.author}</span>
-                              <span className="meta-separator">•</span>
-                              <span className="meta-item">{topic.level}</span>
-                              <span className="meta-separator">•</span>
-                              <span className="meta-item">{topic.date}</span>
-                            </div>
-                            <div className="tags-list">
-                              {topic.tags.map((tag) => (
-                                <span key={tag} className="tag tag-default">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                          <span className={`status-badge ${topic.status}`}>
-                            {topic.status === "solved" ? "✓ Solved" : "○ Ongoing"}
-                          </span>
-                        </div>
-                        <div className="topic-stats">
-                          <div className="stat">
-                            <Eye size={16} />
-                            <span>{topic.views}</span>
-                          </div>
-                          <div className="stat">
-                            <Heart size={16} />
-                            <span>{topic.likes}</span>
-                          </div>
-                          <div className="stat">
-                            <MessageCircle size={16} />
-                            <span>{topic.comments}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+      {/* Main Content Area */}
+      <div style={styles.mainContent}>
+        <div style={styles.contentGrid}>
+          {/* Left Content */}
+          <div style={styles.leftContent}>
+            {/* Navigation Tabs */}
+            <div style={styles.tabsContainer}>
+              {[
+                { id: "all", label: "All Discussions", icon: <FaFire /> },
+                { id: "trending", label: "Trending", icon: <FaFire /> },
+                { id: "discussions", label: "Discussions", icon: <FaComments /> },
+                { id: "questions", label: "Q&A", icon: <FaQuestionCircle /> },
+                { id: "resources", label: "Resources", icon: <FaBook /> },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  style={{
+                    ...styles.tabButton,
+                    ...(activeTab === tab.id ? styles.tabButtonActive : {})
+                  }}
+                >
+                  {tab.icon}
+                  <span style={styles.tabLabel}>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Filter Info */}
+            {selectedGroup !== "all" && (
+              <div style={styles.filterInfo}>
+                <span>Showing posts from: </span>
+                <strong>{communityGroups.find(g => g.id === selectedGroup)?.name}</strong>
+                <button 
+                  onClick={() => setSelectedGroup("all")} 
+                  style={styles.clearFilter}
+                >
+                  Clear Filter
+                </button>
               </div>
             )}
 
-            {/* Discussions Tab */}
-            {activeTab === "discussions" && (
-              <div className="tab-content">
-                <div className="action-bar">
-                  <input type="text" placeholder="Search all discussions..." className="search-input-secondary" />
-                  <button className="btn btn-primary">Post</button>
-                </div>
+            {/* Topics List */}
+            <div style={styles.topicsSection}>
+              <div style={styles.topicsHeader}>
+                <h2 style={styles.topicsTitle}>
+                  {activeTab === "all" ? "Latest Discussions" : 
+                   activeTab === "trending" ? "Trending Topics" : 
+                   activeTab === "discussions" ? "Active Discussions" :
+                   activeTab === "questions" ? "Recent Questions" : "Knowledge Resources"}
+                </h2>
+                <button style={styles.newPostButton}>
+                  <FaRocket style={{marginRight: '8px'}} />
+                  Start Discussion
+                </button>
+              </div>
 
-                <h2 className="section-title">Recent Discussions</h2>
-                <div className="topics-list">
-                  {discussions.map((discussion) => (
-                    <div key={discussion.id} className="topic-card">
-                      <div className="topic-avatar">{discussion.avatar}</div>
-                      <div className="topic-body">
-                        <h3 className="topic-title">{discussion.title}</h3>
-                        <span className="category-badge">{discussion.category}</span>
-                        <div className="topic-meta" style={{ marginTop: "8px" }}>
-                          <span>Posted by {discussion.author}</span>
-                          <span className="meta-separator">•</span>
-                          <span>{discussion.date}</span>
+              <div style={styles.topicsList}>
+                {filteredTopics.map((topic) => (
+                  <div key={topic.id} style={styles.topicCard}>
+                    <div style={styles.topicAvatar}>{topic.authorAvatar}</div>
+                    <div style={styles.topicContent}>
+                      <div style={styles.topicHeader}>
+                        <div style={styles.topicHeaderLeft}>
+                          <h3 style={styles.topicTitle}>{topic.title}</h3>
+                          <div style={styles.topicMeta}>
+                            <span style={styles.topicAuthor}>{topic.author}</span>
+                            <span style={styles.metaSeparator}>•</span>
+                            <span style={styles.topicLevel}>{topic.level}</span>
+                            <span style={styles.metaSeparator}>•</span>
+                            <span style={styles.topicGroup}>
+                              {communityGroups.find(g => g.id === topic.group)?.name}
+                            </span>
+                            <span style={styles.metaSeparator}>•</span>
+                            <span style={styles.topicDate}>
+                              <FaClock style={{fontSize: '12px', marginRight: '4px'}} />
+                              {topic.date}
+                            </span>
+                          </div>
+                          <div style={styles.tagsContainer}>
+                            <span style={styles.categoryBadge}>{topic.category}</span>
+                            {topic.tags.map((tag, idx) => (
+                              <span key={idx} style={styles.tag}>{tag}</span>
+                            ))}
+                          </div>
                         </div>
-                        <div className="topic-stats">
-                          <div className="stat">
-                            <Eye size={16} />
-                            <span>{discussion.views}</span>
-                          </div>
-                          <div className="stat">
-                            <Heart size={16} />
-                            <span>{discussion.likes}</span>
-                          </div>
-                          <div className="stat">
-                            <MessageCircle size={16} />
-                            <span>{discussion.comments}</span>
-                          </div>
+                        <div style={styles.topicStatus}>
+                          {topic.status === "solved" ? (
+                            <span style={styles.statusSolved}>
+                              <FaCheckCircle style={{marginRight: '4px'}} />
+                              Solved
+                            </span>
+                          ) : (
+                            <span style={styles.statusOngoing}>
+                              <FaClock style={{marginRight: '4px'}} />
+                              Ongoing
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div style={styles.topicStats}>
+                        <div style={styles.stat}>
+                          <FaEye style={styles.statIconSmall} />
+                          <span>{topic.views}</span>
+                        </div>
+                        <div style={styles.stat}>
+                          <FaHeart style={styles.statIconSmall} />
+                          <span>{topic.likes}</span>
+                        </div>
+                        <div style={styles.stat}>
+                          <FaComment style={styles.statIconSmall} />
+                          <span>{topic.comments}</span>
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Questions Tab */}
-            {activeTab === "questions" && (
-              <div className="tab-content">
-                <div className="action-bar">
-                  <input type="text" placeholder="Search all questions..." className="search-input-secondary" />
-                  <div className="action-buttons">
-                    <select className="select-input">
-                      <option>This Week</option>
-                      <option>This Month</option>
-                      <option>All Time</option>
-                    </select>
-                    <button className="btn btn-primary">Ask Question</button>
                   </div>
-                </div>
-
-                <h2 className="section-title">Questions</h2>
-                <div className="topics-list">
-                  {mostLikedQuestions.map((question) => (
-                    <div key={question.id} className="topic-card">
-                      <div className="topic-avatar">{question.avatar}</div>
-                      <div className="topic-body">
-                        <div className="topic-header">
-                          <div className="flex-1">
-                            <h3 className="topic-title">{question.title}</h3>
-                            <div className="topic-meta">
-                              <span className="meta-item">{question.author}</span>
-                              <span className="meta-separator">•</span>
-                              <span className="meta-item">{question.level}</span>
-                              <span className="meta-separator">•</span>
-                              <span className="meta-item">{question.date}</span>
-                            </div>
-                          </div>
-                          <span className={`status-badge ${question.status}`}>
-                            {question.status === "solved" ? "✓ Solved" : "○ Ongoing"}
-                          </span>
-                        </div>
-                        <div className="topic-stats">
-                          <div className="stat">
-                            <Eye size={16} />
-                            <span>{question.views}</span>
-                          </div>
-                          <div className="stat">
-                            <Heart size={16} />
-                            <span>{question.likes}</span>
-                          </div>
-                          <div className="stat">
-                            <MessageCircle size={16} />
-                            <span>{question.comments}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                ))}
               </div>
-            )}
-
-            {/* Knowledge Base Tab */}
-            {activeTab === "knowledge" && (
-              <div className="tab-content knowledge-section">
-                <BookOpen className="knowledge-icon" size={48} />
-                <h2 className="section-title">Knowledge Base</h2>
-                <p className="knowledge-description">
-                  Explore comprehensive guides and documentation to help you get the most out of our platform.
-                </p>
-                <button className="btn btn-primary">Browse Articles</button>
-              </div>
-            )}
-
-            {/* Contributors Tab */}
-            {activeTab === "contributors" && (
-              <div className="tab-content">
-                <h2 className="section-title">All Contributors</h2>
-                <div className="topics-list">
-                  {topContributors.map((contributor) => (
-                    <div key={contributor.id} className="contributor-card">
-                      <div className="contributor-info">
-                        <div className="contributor-avatar">{contributor.avatar}</div>
-                        <div>
-                          <h3 className="contributor-name">{contributor.name}</h3>
-                          <span className={`badge ${contributor.badgeColor}`}>{contributor.badge}</span>
-                        </div>
-                      </div>
-                      <div className="contributor-score">
-                        <div className="score-value">{contributor.score}</div>
-                        <div className="score-label">Points</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            </div>
           </div>
 
-          {/* Sidebar */}
-          <aside className="sidebar">
-            {/* Most Liked */}
-            <div className="sidebar-card">
-              <h3 className="sidebar-title">Most Liked</h3>
-              <div className="sidebar-items">
-                {mostLikedQuestions.slice(0, 3).map((item) => (
-                  <div key={item.id} className="sidebar-item">
-                    <div className="item-avatar">{item.avatar}</div>
-                    <div className="item-content">
-                      <p className="item-title">{item.title}</p>
-                      <p className="item-author">{item.author}</p>
-                      <div className="item-views">
-                        <Eye size={12} />
-                        <span>{item.views}</span>
+          {/* Right Sidebar */}
+          <aside style={styles.sidebar}>
+            {/* Discussion Categories */}
+            <div style={styles.sidebarCard}>
+              <h3 style={styles.sidebarTitle}>Categories</h3>
+              <div style={styles.categoriesList}>
+                {discussionCategories.map((category) => (
+                  <button key={category.id} style={styles.categoryItem}>
+                    <div style={styles.categoryLeft}>
+                      <span style={styles.categoryIcon}>{category.icon}</span>
+                      <span style={styles.categoryName}>{category.name}</span>
+                    </div>
+                    <span style={styles.categoryCount}>{category.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Top Contributors */}
+            <div style={styles.sidebarCard}>
+              <div style={styles.sidebarHeader}>
+                <FaTrophy style={{color: '#10b981', fontSize: '20px'}} />
+                <h3 style={styles.sidebarTitle}>Top Contributors</h3>
+              </div>
+              <div style={styles.contributorsList}>
+                {topContributors.map((contributor, index) => (
+                  <div key={contributor.id} style={styles.contributorItem}>
+                    <div style={styles.contributorRank}>#{index + 1}</div>
+                    <div style={styles.contributorAvatar}>{contributor.avatar}</div>
+                    <div style={styles.contributorInfo}>
+                      <div style={styles.contributorName}>{contributor.name}</div>
+                      <div style={styles.contributorMeta}>
+                        <span style={{...styles.contributorBadge, backgroundColor: contributor.badgeColor}}>
+                          {contributor.badge}
+                        </span>
+                        <span style={styles.contributorGroup}>
+                          {communityGroups.find(g => g.id === contributor.group)?.name}
+                        </span>
                       </div>
+                    </div>
+                    <div style={styles.contributorScore}>
+                      <FaStar style={{color: '#fbbf24', fontSize: '14px'}} />
+                      <span>{contributor.score}</span>
                     </div>
                   </div>
                 ))}
@@ -448,49 +450,585 @@ export default function CommunityPage() {
             </div>
 
             {/* Popular Tags */}
-            <div className="sidebar-card">
-              <h3 className="sidebar-title">Popular Tags</h3>
-              <div className="tags-grid">
-                {popularTags.map((tag) => (
-                  <span key={tag} className="tag tag-popular">
-                    {tag}
-                  </span>
+            <div style={styles.sidebarCard}>
+              <h3 style={styles.sidebarTitle}>Popular Topics</h3>
+              <div style={styles.tagsGrid}>
+                {popularTags.map((tag, idx) => (
+                  <span key={idx} style={styles.popularTag}>{tag}</span>
                 ))}
               </div>
             </div>
 
             {/* Community Guidelines */}
-            <div className="sidebar-card">
-              <h3 className="sidebar-title">Community Guidelines</h3>
-              <ul className="guidelines-list">
-                {guidelines.map((guideline, idx) => (
-                  <li key={idx} className="guideline-item">
-                    ✓ {guideline}
-                  </li>
-                ))}
+            <div style={styles.sidebarCard}>
+              <h3 style={styles.sidebarTitle}>Community Guidelines</h3>
+              <ul style={styles.guidelinesList}>
+                <li style={styles.guidelineItem}>
+                  <FaCheckCircle style={styles.guidelineIcon} />
+                  Be respectful and inclusive
+                </li>
+                <li style={styles.guidelineItem}>
+                  <FaCheckCircle style={styles.guidelineIcon} />
+                  Share knowledge constructively
+                </li>
+                <li style={styles.guidelineItem}>
+                  <FaCheckCircle style={styles.guidelineIcon} />
+                  Verify information before posting
+                </li>
+                <li style={styles.guidelineItem}>
+                  <FaCheckCircle style={styles.guidelineIcon} />
+                  Support sustainable practices
+                </li>
               </ul>
-            </div>
-
-            {/* Top Contributors */}
-            <div className="sidebar-card">
-              <h3 className="sidebar-title">Top Contributors</h3>
-              <div className="top-contributors-list">
-                {topContributors.slice(0, 3).map((contributor) => (
-                  <div key={contributor.id} className="contributor-mini">
-                    <div className="contributor-mini-avatar">{contributor.avatar}</div>
-                    <div className="contributor-mini-info">
-                      <p className="contributor-mini-name">{contributor.name}</p>
-                      <span className={`badge-mini ${contributor.badgeColor}`}>{contributor.badge}</span>
-                    </div>
-                    <div className="contributor-mini-score">{contributor.score}</div>
-                  </div>
-                ))}
-              </div>
             </div>
           </aside>
         </div>
       </div>
-       
     </div>
   )
+}
+
+// Styles Object
+const styles = {
+  container: {
+    minHeight: '100vh',
+    backgroundColor: '#f9fafb',
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  },
+
+  // Hero Section
+  heroSection: {
+    background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 50%, #6ee7b7 100%)',
+    padding: '48px 24px',
+    borderBottom: '2px solid #10b981',
+  },
+  heroContainer: {
+    maxWidth: '1400px',
+    margin: '0 auto 32px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '48px',
+  },
+  heroContent: {
+    flex: '1',
+    maxWidth: '700px',
+  },
+  heroTitle: {
+    fontSize: '3rem',
+    fontWeight: '800',
+    color: '#065f46',
+    marginBottom: '16px',
+    lineHeight: '1.2',
+  },
+  heroDescription: {
+    fontSize: '1.125rem',
+    color: '#047857',
+    marginBottom: '32px',
+    lineHeight: '1.7',
+  },
+  heroStats: {
+    display: 'flex',
+    gap: '32px',
+    flexWrap: 'wrap',
+  },
+  statItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  statIcon: {
+    fontSize: '32px',
+    color: '#10b981',
+  },
+  statNumber: {
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    color: '#065f46',
+  },
+  statLabel: {
+    fontSize: '0.875rem',
+    color: '#047857',
+  },
+  heroImageContainer: {
+    flexShrink: '0',
+  },
+  heroLogo: {
+    width: '160px',
+    height: 'auto',
+  },
+  searchContainer: {
+    maxWidth: '1400px',
+    margin: '0 auto',
+    position: 'relative',
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: '16px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: '#6b7280',
+    fontSize: '18px',
+  },
+  searchInput: {
+    width: '100%',
+    padding: '14px 16px 14px 48px',
+    border: '2px solid #10b981',
+    borderRadius: '12px',
+    fontSize: '1rem',
+    outline: 'none',
+    backgroundColor: '#ffffff',
+    transition: 'all 0.3s ease',
+  },
+
+  // Community Groups Section
+  groupsSection: {
+    maxWidth: '1400px',
+    margin: '48px auto',
+    padding: '0 24px',
+  },
+  sectionHeader: {
+    textAlign: 'center',
+    marginBottom: '32px',
+  },
+  sectionTitle: {
+    fontSize: '2rem',
+    fontWeight: '700',
+    color: '#065f46',
+    marginBottom: '8px',
+  },
+  sectionSubtitle: {
+    fontSize: '1rem',
+    color: '#6b7280',
+  },
+  groupsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+    gap: '24px',
+  },
+  groupCard: {
+    backgroundColor: '#ffffff',
+    border: '2px solid #e5e7eb',
+    borderRadius: '16px',
+    padding: '32px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+  },
+  groupIcon: {
+    width: '56px',
+    height: '56px',
+    borderRadius: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '28px',
+    marginBottom: '16px',
+  },
+  groupName: {
+    fontSize: '1.25rem',
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: '8px',
+  },
+  groupDescription: {
+    fontSize: '0.875rem',
+    color: '#6b7280',
+    lineHeight: '1.6',
+    marginBottom: '20px',
+  },
+  groupStats: {
+    display: 'flex',
+    gap: '24px',
+  },
+  groupStat: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '0.875rem',
+    color: '#4b5563',
+  },
+
+  // Main Content
+  mainContent: {
+    maxWidth: '1400px',
+    margin: '0 auto 48px',
+    padding: '0 24px',
+  },
+  contentGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 360px',
+    gap: '32px',
+  },
+
+  // Left Content
+  leftContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
+  },
+  tabsContainer: {
+    display: 'flex',
+    gap: '8px',
+    backgroundColor: '#ffffff',
+    padding: '8px',
+    borderRadius: '12px',
+    border: '1px solid #e5e7eb',
+    overflowX: 'auto',
+  },
+  tabButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 20px',
+    border: 'none',
+    borderRadius: '8px',
+    backgroundColor: 'transparent',
+    color: '#6b7280',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    whiteSpace: 'nowrap',
+  },
+  tabButtonActive: {
+    backgroundColor: '#d1fae5',
+    color: '#065f46',
+  },
+  tabLabel: {
+    display: 'inline',
+  },
+  filterInfo: {
+    backgroundColor: '#ecfdf5',
+    border: '1px solid #10b981',
+    borderRadius: '8px',
+    padding: '12px 16px',
+    fontSize: '0.875rem',
+    color: '#065f46',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  clearFilter: {
+    marginLeft: 'auto',
+    padding: '4px 12px',
+    backgroundColor: '#10b981',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '0.75rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+  },
+
+  // Topics Section
+  topicsSection: {
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    border: '1px solid #e5e7eb',
+    padding: '24px',
+  },
+  topicsHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '24px',
+    flexWrap: 'wrap',
+    gap: '16px',
+  },
+  topicsTitle: {
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    color: '#111827',
+  },
+  newPostButton: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '10px 20px',
+    backgroundColor: '#10b981',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  topicsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  topicCard: {
+    display: 'flex',
+    gap: '16px',
+    padding: '20px',
+    backgroundColor: '#f9fafb',
+    border: '1px solid #e5e7eb',
+    borderRadius: '12px',
+    transition: 'all 0.2s ease',
+  },
+  topicAvatar: {
+    fontSize: '2.5rem',
+    flexShrink: '0',
+  },
+  topicContent: {
+    flex: '1',
+    minWidth: '0',
+  },
+  topicHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: '12px',
+    gap: '16px',
+  },
+  topicHeaderLeft: {
+    flex: '1',
+    minWidth: '0',
+  },
+  topicTitle: {
+    fontSize: '1.125rem',
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: '8px',
+    lineHeight: '1.4',
+  },
+  topicMeta: {
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '8px',
+    fontSize: '0.813rem',
+    color: '#6b7280',
+    marginBottom: '12px',
+  },
+  topicAuthor: {
+    fontWeight: '600',
+    color: '#374151',
+  },
+  metaSeparator: {
+    color: '#d1d5db',
+  },
+  topicLevel: {
+    color: '#10b981',
+    fontWeight: '500',
+  },
+  topicGroup: {
+    color: '#059669',
+    fontWeight: '500',
+  },
+  topicDate: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  tagsContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+  },
+  categoryBadge: {
+    padding: '4px 10px',
+    backgroundColor: '#fee2e2',
+    color: '#991b1b',
+    borderRadius: '6px',
+    fontSize: '0.688rem',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  tag: {
+    padding: '4px 10px',
+    backgroundColor: '#dbeafe',
+    color: '#1e40af',
+    borderRadius: '6px',
+    fontSize: '0.75rem',
+    fontWeight: '600',
+  },
+  topicStatus: {
+    flexShrink: '0',
+  },
+  statusSolved: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '6px 12px',
+    backgroundColor: '#d1fae5',
+    color: '#065f46',
+    borderRadius: '8px',
+    fontSize: '0.813rem',
+    fontWeight: '700',
+  },
+  statusOngoing: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '6px 12px',
+    backgroundColor: '#fed7aa',
+    color: '#9a3412',
+    borderRadius: '8px',
+    fontSize: '0.813rem',
+    fontWeight: '700',
+  },
+  topicStats: {
+    display: 'flex',
+    gap: '20px',
+  },
+  stat: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    color: '#6b7280',
+    fontSize: '0.875rem',
+  },
+  statIconSmall: {
+    fontSize: '14px',
+  },
+
+  // Sidebar
+  sidebar: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
+  },
+  sidebarCard: {
+    backgroundColor: '#ffffff',
+    border: '1px solid #e5e7eb',
+    borderRadius: '12px',
+    padding: '24px',
+  },
+  sidebarHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginBottom: '16px',
+  },
+  sidebarTitle: {
+    fontSize: '1.125rem',
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: '16px',
+  },
+  categoriesList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  categoryItem: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '12px',
+    backgroundColor: '#f9fafb',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  categoryLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  },
+  categoryIcon: {
+    color: '#10b981',
+    fontSize: '16px',
+  },
+  categoryName: {
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    color: '#374151',
+  },
+  categoryCount: {
+    fontSize: '0.75rem',
+    fontWeight: '700',
+    color: '#6b7280',
+    backgroundColor: '#e5e7eb',
+    padding: '2px 8px',
+    borderRadius: '12px',
+  },
+  contributorsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  contributorItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  contributorRank: {
+    fontSize: '0.875rem',
+    fontWeight: '700',
+    color: '#10b981',
+    minWidth: '24px',
+  },
+  contributorAvatar: {
+    fontSize: '1.75rem',
+  },
+  contributorInfo: {
+    flex: '1',
+    minWidth: '0',
+  },
+  contributorName: {
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: '4px',
+  },
+  contributorMeta: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    fontSize: '0.688rem',
+  },
+  contributorBadge: {
+    padding: '2px 8px',
+    color: '#ffffff',
+    borderRadius: '4px',
+    fontWeight: '600',
+  },
+  contributorGroup: {
+    color: '#6b7280',
+  },
+  contributorScore: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontSize: '0.875rem',
+    fontWeight: '700',
+    color: '#111827',
+  },
+  tagsGrid: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+  },
+  popularTag: {
+    padding: '6px 12px',
+    backgroundColor: '#d1fae5',
+    color: '#065f46',
+    borderRadius: '6px',
+    fontSize: '0.75rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
+  guidelinesList: {
+    listStyle: 'none',
+    margin: '0',
+    padding: '0',
+  },
+  guidelineItem: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '10px',
+    fontSize: '0.875rem',
+    color: '#4b5563',
+    marginBottom: '12px',
+    lineHeight: '1.5',
+  },
+  guidelineIcon: {
+    color: '#10b981',
+    fontSize: '16px',
+    marginTop: '2px',
+    flexShrink: '0',
+  },
 }

@@ -34,7 +34,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently --prefix-colors auto --prefix \"[{name}]\" --raw \"npm run dev --prefix notification-service\" \"npm run dev --prefix assetService\" \"npm run dev --prefix authentication\" \"npm run dev --prefix blogService\" \"npm run dev --prefix careerService\" \"npm run dev --prefix contactService\" \"npm run dev --prefix orgService\" \"npm run dev --prefix TicketService\"",
     "install:all": "npm install --prefix notification-service && npm install --prefix assetService && npm install --prefix authentication && npm install --prefix blogService && npm install --prefix careerService && npm install --prefix contactService && npm install --prefix orgService && npm install --prefix TicketService"
-
   },
   "keywords": [],
   "author": "",
