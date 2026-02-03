@@ -14,12 +14,13 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import About from "./pages/about";
 import Blog from "./pages/blog";
+import BlogDetailPage from './pages/blog-detail';
 import Careers from "./pages/Careers";
 import Community from "./pages/community";
 import Contact from "./pages/contact";
 import CaseStudy from "./pages/CaseStudy";
-import Faq from "./pages/FAQ";
-
+import Faq from "./pages/Faq";
+import IndustrialSolutions from "./pages/Industrial";
 
 // Dashboard pages
 import UserDashboard from "./pages/userDashboard";
@@ -45,12 +46,10 @@ import Upload from "./components/upload";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import JoinOrganisation from "./pages/JoinOrganisation";
-// import NotFoundAnimation from "./pages/NotFoundAnimation";
 
 import OAuthSuccess from "./pages/OAuthSuccess";
 
 import NotFoundAnimation from "./pages/NotFoundAnimation";
-
 
 function App() {
   return (
@@ -60,8 +59,8 @@ function App() {
           {/* ================= PUBLIC ROUTES ================= */}
           <Route path="/" element={<Home />} />
           {/* Login and Signup are handled by BaseLayout modals, not routes */}
-          <Route path="/login" element={<Navigate to="/" replace />} />
-          <Route path="/signup" element={<Navigate to="/" replace />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/join-organisation" element={<JoinOrganisation />} />
@@ -69,6 +68,7 @@ function App() {
 
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogDetailPage />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/community" element={<Community />} />
           <Route path="/contact" element={<Contact />} />
@@ -76,7 +76,8 @@ function App() {
           <Route path="/settings" element={<NotFoundAnimation />} />
           <Route path="/privacypolicy" element={<PrivacyPolicy />} />
           <Route path="/termsandconditions" element={<TermsAndConditions />} />
-
+           <Route path="/industrial" element={< IndustrialSolutions/>} />
+       
 
           <Route path="/faq" element={<Faq />} />
 

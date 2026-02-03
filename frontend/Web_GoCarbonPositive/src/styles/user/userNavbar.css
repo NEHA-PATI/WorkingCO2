@@ -175,8 +175,8 @@
 .sidebar-item {
   display: flex;
   align-items: center;
-  gap: 0px;
-  padding: 0px;
+  gap: 4px;
+  padding: 4px;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
@@ -189,6 +189,8 @@
   font-size: 1.3rem;
   margin-right: 8px;
   transition: color 0.3s;
+  color: var(--sidebar-icon-color, #111);
+  fill: var(--sidebar-icon-color, #111);
 }
 
 .sidebar-logout {
@@ -386,7 +388,20 @@
 .user-profile-dropdown-item svg {
   font-size: 1.2rem;
   flex-shrink: 0;
+  color: var(--profile-icon-color, #0f172a) !important;
+  fill: var(--profile-icon-color, #0f172a) !important;
 }
+
+/* Profile dropdown icon colors */
+.profile-icon {
+  color: #0f172a;
+  fill: currentColor;
+}
+.profile-icon-blue { color: #3b82f6; }
+.profile-icon-green { color: #10b981; }
+.profile-icon-amber { color: #f59e0b; }
+.profile-icon-slate { color: #64748b; }
+.profile-icon-red { color: #ef4444; }
 
 .user-profile-dropdown-item.logout {
   color: #ef4444;
@@ -561,4 +576,49 @@
   .wallet-icon {
     font-size: 2.2rem;
   }
+}
+/* ===== LOGIN & SIGNUP BUTTONS ===== */
+
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;                /* dono buttons ke beech space */
+}
+
+.login-btn,
+.signup-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 16px;
+  border-radius: 8px;       /* button jaisa look */
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+/* Signup Green Button */
+.signup-btn {
+  background: #54bd59;
+  color: white;
+}
+
+.signup-btn:hover {
+  background: #256429;
+  transform: translateY(-1px);
+}
+
+/* Login Light Button */
+.login-btn {
+  background: #f1f5f9;
+  color: #2e7d32;
+  border: 1px solid #2e7d32;
+}
+
+.login-btn:hover {
+  background: #2e7d32;
+  color: white;
+  transform: translateY(-1px);
 }

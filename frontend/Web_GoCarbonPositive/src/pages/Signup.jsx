@@ -5,7 +5,6 @@ import useAuth from "../auth/useAuth";
 import { useNavigate } from "react-router-dom";
 import LoadingPopup from "../components/user/LoadingPopup";
 
-
 const Signup = ({ onClose, onSwitchToLogin }) => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
 
@@ -24,10 +23,26 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
   const [otpDigits, setOtpDigits] = useState(Array(6).fill(""));
   const [otpTimer, setOtpTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
-const { login } = useAuth();
-const navigate = useNavigate();
-const [tempToken, setTempToken] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
+  const handleClose = () => {
+    if (onClose) {
+      onClose(); // works when Signup is used as modal
+    } else {
+      navigate("/"); // works when Signup is opened as a page
+    }
+  };
+
+  const handleSwitchToLogin = () => {
+    if (onSwitchToLogin) {
+      onSwitchToLogin(); // modal usage
+    } else {
+      navigate("/login"); // page usage
+    }
+  };
+
+  const [tempToken, setTempToken] = useState("");
 
   // Responsive breakpoint check
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -398,48 +413,44 @@ const [tempToken, setTempToken] = useState("");
     }
   };
 
-const handleVerifyOtp = async () => {
-  if (!otp.trim() || otp.trim().length !== 6) {
-    setError({ general: "Please enter a valid 6-digit OTP" });
-    return;
-  }
-
-  setLoading(true);
-  setError({});
-
-  try {
-    const response = await fetch(`${API_URL}/api/auth/verify`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        otp: otp.trim(),
-        tempToken, // 🔥 ONLY THESE TWO
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      setError({ general: data.message || "OTP verification failed" });
+  const handleVerifyOtp = async () => {
+    if (!otp.trim() || otp.trim().length !== 6) {
+      setError({ general: "Please enter a valid 6-digit OTP" });
       return;
     }
 
-    alert("✅ Email verified successfully!");
+    setLoading(true);
+    setError({});
 
-    // 👉 User ko login page pe bhejo (BEST PRACTICE)
-    if (onClose) onClose();
-    navigate("/login", { replace: true });
+    try {
+      const response = await fetch(`${API_URL}/api/auth/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          otp: otp.trim(),
+          tempToken, // 🔥 ONLY THESE TWO
+        }),
+      });
 
-  } catch (err) {
-    console.error("OTP Verification Error:", err);
-    setError({ general: "OTP verification failed. Please try again." });
-  } finally {
-    setLoading(false);
-  }
-};
+      const data = await response.json();
 
+      if (!response.ok) {
+        setError({ general: data.message || "OTP verification failed" });
+        return;
+      }
 
+      alert("✅ Email verified successfully!");
 
+      // 👉 User ko login page pe bhejo (BEST PRACTICE)
+      if (onClose) onClose();
+      navigate("/login", { replace: true });
+    } catch (err) {
+      console.error("OTP Verification Error:", err);
+      setError({ general: "OTP verification failed. Please try again." });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleOtpDigitChange = (index, value) => {
     if (!/^\d?$/.test(value)) return;
@@ -462,42 +473,40 @@ const handleVerifyOtp = async () => {
     }
   };
 
-
   const handleResendOtp = async () => {
-  setLoading(true);
-  setError({});
+    setLoading(true);
+    setError({});
 
-  try {
-    const response = await fetch(`${API_URL}/api/auth/resend-otp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        tempToken, // 🔥 ONLY THIS
-      }),
-    });
+    try {
+      const response = await fetch(`${API_URL}/api/auth/resend-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tempToken, // 🔥 ONLY THIS
+        }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      setError({ general: data.message || "Failed to resend OTP" });
-      return;
+      if (!response.ok) {
+        setError({ general: data.message || "Failed to resend OTP" });
+        return;
+      }
+
+      // 🔥 VERY IMPORTANT — replace old token
+      setTempToken(data.tempToken);
+
+      setError({ success: "OTP resent successfully! Check your email." });
+    } catch (err) {
+      console.error("Resend OTP Error:", err);
+      setError({ general: "Failed to resend OTP. Please try again." });
+    } finally {
+      setLoading(false);
     }
-
-    // 🔥 VERY IMPORTANT — replace old token
-    setTempToken(data.tempToken);
-
-    setError({ success: "OTP resent successfully! Check your email." });
-  } catch (err) {
-    console.error("Resend OTP Error:", err);
-    setError({ general: "Failed to resend OTP. Please try again." });
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleSocialLogin = (provider) => {
     window.location.href = `${API_URL}/api/auth/oauth/google/login`;
-
   };
 
   return (
@@ -518,11 +527,11 @@ const handleVerifyOtp = async () => {
           }
         }
       `}</style>
-      <div style={styles.overlay} onClick={!loading ? onClose : undefined}>
+      <div style={styles.overlay} onClick={!loading ? handleClose : undefined}>
         <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
           <button
             style={styles.closeBtn}
-            onClick={onClose}
+            onClick={handleClose}
             disabled={loading}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = "#f5f5f5";
@@ -759,16 +768,7 @@ const handleVerifyOtp = async () => {
 
                 <div style={styles.footer}>
                   Already have an account?{" "}
-                  <a
-                    style={styles.footerLink}
-                    onClick={onSwitchToLogin}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.textDecoration = "underline";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.textDecoration = "none";
-                    }}
-                  >
+                  <a style={styles.footerLink} onClick={handleSwitchToLogin}>
                     Log in
                   </a>
                 </div>
