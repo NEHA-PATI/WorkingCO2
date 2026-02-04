@@ -7,6 +7,7 @@ import AdminLayout from "./layouts/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PrivacyPolicy from "./components/common/Privacy";
 import TermsAndConditions from "./components/common/T&C";
+import { ORG_DEFAULT_TAB_ID, ORG_TAB_CONFIG } from "./config/orgTabConfig";
 
 // Public pages
 import Home from "./pages/Home";
@@ -149,8 +150,23 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route path="dashboard" element={<OrgDashboard />} />
-            {/* Add nested dashboard tabs here later */}
+            <Route path="dashboard" element={<OrgDashboard />}>
+              <Route
+                index
+                element={<Navigate to={ORG_DEFAULT_TAB_ID} replace />}
+              />
+              {ORG_TAB_CONFIG.map((tab) => (
+                <Route
+                  key={tab.id}
+                  path={tab.path ?? tab.id}
+                  element={<tab.component />}
+                />
+              ))}
+              <Route
+                path="*"
+                element={<Navigate to={ORG_DEFAULT_TAB_ID} replace />}
+              />
+            </Route>
             {/* Redirect /org to /org/dashboard */}
             <Route path="" element={<Navigate to="dashboard" replace />} />
           </Route>
