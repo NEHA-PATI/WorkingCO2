@@ -27,23 +27,75 @@ exports.createCompleteProfile = async (u_id, profile, addresses) => {
       ]
     );
 
+
+    const incomingIds = addresses
+  .map(a => a.address_id)
+  .filter(Boolean);
+
+if (incomingIds.length > 0) {
+  await client.query(
+    `
+    DELETE FROM user_address
+    WHERE u_id = $1
+    AND address_id NOT IN (${incomingIds
+      .map((_, i) => `$${i + 2}`)
+      .join(",")})
+    `,
+    [u_id, ...incomingIds]
+  );
+} else {
+  // No existing IDs → delete all previous addresses
+  await client.query(
+    `DELETE FROM user_address WHERE u_id = $1`,
+    [u_id]
+  );
+}
+
     // addresses
-    for (const addr of addresses) {
-      await client.query(
-        `INSERT INTO user_address
-         (address_id, u_id, address_type, address_line, country, pincode, is_default)
-         VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-        [
-          require("uuid").v4(),
-          u_id,
-          addr.address_type,
-          addr.address_line,
-          addr.country,
-          addr.pincode,
-          addr.is_default || false
-        ]
-      );
-    }
+   // addresses (UPSERT)
+for (const addr of addresses) {
+  const addressId = addr.address_id || require("uuid").v4();
+
+  // 🔥 NORMALIZE address type (FINAL SAFETY NET)
+  const allowedTypes = ["HOME", "WORK", "OTHER"];
+  const normalizedType = allowedTypes.includes(addr.address_type)
+    ? addr.address_type
+    : "WORK";
+
+  await client.query(
+    `
+    INSERT INTO user_address
+(address_id, u_id, address_type, address_line, country, country_code, state, city, pincode, is_default)
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+ON CONFLICT (address_id)
+DO UPDATE SET
+  address_type = EXCLUDED.address_type,
+  address_line = EXCLUDED.address_line,
+  country = EXCLUDED.country,
+  country_code = EXCLUDED.country_code,
+  state = EXCLUDED.state,
+  city = EXCLUDED.city,
+  pincode = EXCLUDED.pincode,
+  is_default = EXCLUDED.is_default
+
+    `,
+   [
+  addressId,
+  u_id,
+  normalizedType,   // 🔥 YAHI CHANGE
+  addr.address_line,
+  addr.country,
+  addr.country_code,
+  addr.state,
+  addr.city,
+  addr.pincode,
+  addr.is_default || false
+]
+
+  );
+}
+
+
 
     await client.query("COMMIT");
     return { message: "Profile & address saved successfully" };

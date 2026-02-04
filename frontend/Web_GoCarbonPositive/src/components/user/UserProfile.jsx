@@ -23,7 +23,7 @@ const [loading, setLoading] = useState(true);
 
   const [addresses, setAddresses] = useState([
     {
-      id: "1",
+      id: null,
       type: "home",
       typeSpecify: "",
       address: "",
@@ -62,17 +62,19 @@ const [loading, setLoading] = useState(true);
 
   // Optionally sync with primary address country
   useEffect(() => {
-    const addr = addresses[0];
-    if (!addr.countryCode) return;
-    const c = allCountries.find((c) => c.isoCode === addr.countryCode);
-    if (!c) return;
-    setFormData((prev) => ({
-      ...prev,
-      phoneCountryIso: addr.countryCode,
-      countryCode: `+${c.phonecode}`,
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addresses, allCountries]);
+  const addr = addresses?.[0];
+  if (!addr || !addr.countryCode) return;
+
+  const c = allCountries.find((c) => c.isoCode === addr.countryCode);
+  if (!c) return;
+
+  setFormData((prev) => ({
+    ...prev,
+    phoneCountryIso: addr.countryCode,
+    countryCode: `+${c.phonecode}`,
+  }));
+}, [addresses, allCountries]);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -134,21 +136,22 @@ const [loading, setLoading] = useState(true);
   };
 
   const handleAddNewAddress = () => {
-    const newAddress = {
-      id: Date.now().toString(),
-      type: "office",
-      typeSpecify: "",
-      address: "",
-      countryCode: "",
-      countryName: "",
-      pincode: "",
-      stateCode: "",
-      stateName: "",
-      city: "",
-    };
-    setAddresses((prev) => [...prev, newAddress]);
-    setShowAddNewAddress(false);
+  const newAddress = {
+    id: Date.now().toString(),
+    type: "work", // ✅ MUST match DB constraint
+    typeSpecify: "",
+    address: "",
+    countryCode: "",
+    countryName: "",
+    pincode: "",
+    stateCode: "",
+    stateName: "",
+    city: "",
   };
+  setAddresses((prev) => [...prev, newAddress]);
+  setShowAddNewAddress(false);
+};
+
 
   const handleRemoveAddress = (id) => {
     if (addresses.length > 1) {
@@ -157,9 +160,10 @@ const [loading, setLoading] = useState(true);
   };
 
   const primaryStates = useMemo(() => {
-    if (!addresses[0].countryCode) return [];
-    return getStatesForCountry(addresses[0].countryCode);
-  }, [addresses]);
+  if (!addresses?.length || !addresses[0]?.countryCode) return [];
+  return getStatesForCountry(addresses[0].countryCode);
+}, [addresses]);
+
 
   const handleSaveChanges = () => {
     if (!formData.firstName || !formData.lastName || !formData.email) {
@@ -203,13 +207,18 @@ console.log("✅ handleSubmit resolved u_id:", u_id);
       mobile_number: formData.phone,
       dob: formData.dob,
     },
-    addresses: addresses.map((addr, index) => ({
-      address_type: addr.type.toUpperCase(),
-      address_line: addr.address,
-      country: addr.countryName,
-      pincode: addr.pincode,
-      is_default: index === 0,
-    })),
+   addresses: addresses.map((addr, index) => ({
+  address_id: addr.id || null,
+  address_type: addr.type.toUpperCase(),
+  address_line: addr.address,
+  country: addr.countryName,
+  country_code: addr.countryCode,   // ✅ ISO
+  state: addr.stateName,             // ✅
+  city: addr.city,                   // ✅
+  pincode: addr.pincode,
+  is_default: index === 0,
+}))
+,
   };
 
   try {
@@ -285,19 +294,39 @@ console.log("🔍 UserProfile localStorage snapshot:", {
   phoneCountryIso: "IN",
 });
 
-        setAddresses(
-          data.addresses.map((a) => ({
-            id: a.address_id,
-            type: a.address_type.toLowerCase(),
-            address: a.address_line,
-            countryName: a.country,
-            pincode: a.pincode,
-            countryCode: "",
-            stateCode: "",
-            stateName: "",
-            city: "",
-          }))
-        );
+        if (data.addresses && data.addresses.length > 0) {
+  setAddresses(
+    data.addresses.map((a) => ({
+      id: a.address_id,
+      type: a.address_type.toLowerCase(),
+      address: a.address_line,
+      countryName: a.country,
+      countryCode: a.country_code,
+      stateName: a.state,
+      stateCode: "",
+      city: a.city,
+      pincode: a.pincode,
+    }))
+  );
+} else {
+  // 🔥 VERY IMPORTANT fallback for new user
+  setAddresses([
+    {
+      id: null,
+      type: "home",
+      typeSpecify: "",
+      address: "",
+      countryCode: "",
+      countryName: "",
+      pincode: "",
+      stateCode: "",
+      stateName: "",
+      city: "",
+    },
+  ]);
+}
+
+
 
         setIsEditing(false); // 🔥 CARD SHOW
       } else {
@@ -388,19 +417,7 @@ if (loading) {
                   Contact Information
                 </h2>
 
-                <div className="pf-form-group">
-                  <label className="pf-label">
-                    Email <span className="pf-required">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="john@example.com"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="pf-input"
-                  />
-                </div>
+               
 
                 <div className="pf-form-group">
                   <label className="pf-label">
@@ -681,39 +698,38 @@ function AddressBlock({
 }) {
   return (
     <div className="pf-address-block">
-      {isPrimary && (
-        <div>
-          <label className="pf-label">
-            Address Type <span className="pf-required">*</span>
-          </label>
-          <div className="pf-select-wrapper">
-            <select
-              value={address.type}
-              onChange={(e) =>
-                onAddressChange(address.id, "type", e.target.value)
-              }
-              className="pf-select"
-            >
-              <option value="home">Home</option>
-              <option value="office">Office</option>
-              <option value="other">Other</option>
-            </select>
-            <ChevronDown className="pf-select-icon" />
-          </div>
+      <div>
+  <label className="pf-label">
+    Address Type <span className="pf-required">*</span>
+  </label>
+  <div className="pf-select-wrapper">
+    <select
+      value={address.type}
+      onChange={(e) =>
+        onAddressChange(address.id, "type", e.target.value)
+      }
+      className="pf-select"
+    >
+      <option value="home">Home</option>
+      <option value="work">Work</option>
+      <option value="other">Other</option>
+    </select>
+    <ChevronDown className="pf-select-icon" />
+  </div>
 
-          {address.type === "other" && (
-            <input
-              type="text"
-              placeholder="Please specify"
-              value={address.typeSpecify}
-              onChange={(e) =>
-                onAddressChange(address.id, "typeSpecify", e.target.value)
-              }
-              className="pf-input pf-input-specify"
-            />
-          )}
-        </div>
-      )}
+  {address.type === "other" && (
+    <input
+      type="text"
+      placeholder="Please specify"
+      value={address.typeSpecify}
+      onChange={(e) =>
+        onAddressChange(address.id, "typeSpecify", e.target.value)
+      }
+      className="pf-input pf-input-specify"
+    />
+  )}
+</div>
+
 
       <div>
         <label className="pf-label">
