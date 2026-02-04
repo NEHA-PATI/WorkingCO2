@@ -69,16 +69,16 @@ const Footer = () => {
 
           {/* LEFT: Social Icons */}
           <div className="footer__socials footer__socials-left">
-            <a href="https://www.facebook.com/gocarbonpositive" target="_blank" rel="noopener noreferrer" className="footer__social-icon">
+            <a href="https://www.facebook.com/gocarbonpositive" target="_blank" rel="noopener noreferrer" className="footer__social-icon social-facebook">
               <FaFacebookF />
             </a>
-            <a href="https://x.com/gocarbonpositive" target="_blank" rel="noopener noreferrer" className="footer__social-icon">
+            <a href="https://x.com/gocarbonpositive" target="_blank" rel="noopener noreferrer" className="footer__social-icon social-x">
               <FaTwitter />
             </a>
-            <a href="https://www.linkedin.com/company/gocarbonpositive" target="_blank" rel="noopener noreferrer" className="footer__social-icon">
+            <a href="https://www.linkedin.com/company/gocarbonpositive" target="_blank" rel="noopener noreferrer" className="footer__social-icon social-linkedin">
               <FaLinkedinIn />
             </a>
-            <a href="https://www.instagram.com/gocarbonpositive" target="_blank" rel="noopener noreferrer" className="footer__social-icon">
+            <a href="https://www.instagram.com/gocarbonpositive" target="_blank" rel="noopener noreferrer" className="footer__social-icon social-instagram">
               <BsInstagram />
             </a>
           </div>
