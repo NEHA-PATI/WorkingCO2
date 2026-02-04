@@ -63,8 +63,10 @@ const AddAsset = () => {
 
       {/* EV */}
       <div className="card electric-vehicle">
-        <MdElectricCar className="card-icon" style={{ color: "#3b82f6" }} />
-        <h2>Electric Vehicle</h2>
+        <h2 className="card-title">
+          <MdElectricCar className="card-icon" style={{ color: "#3b82f6" }} />
+          Electric Vehicle
+        </h2>
         <p className="subtitle">Smart mobility tracking</p>
         <button className="add-button blue" onClick={() => setActiveEVPopup(true)}>
           + Add EV Details
@@ -73,8 +75,10 @@ const AddAsset = () => {
 
       {/* 🌱 Plantation */}
       <div className="card trees">
-        <LuTreePine className="card-icon" style={{ color: "#10b981" }} />
-        <h2>Plantation</h2>
+        <h2 className="card-title">
+          <LuTreePine className="card-icon" style={{ color: "#10b981" }} />
+          Plantation
+        </h2>
         <p className="subtitle">Afforestation & land restoration</p>
         <button className="add-button green" onClick={() => setActivePlantationPopup(true)}>
           + Add Plantation Details
@@ -83,8 +87,10 @@ const AddAsset = () => {
 
       {/* Solar */}
       <div className="card solar-panel">
-        <MdSolarPower className="card-icon" style={{ color: "#f59e0b" }} />
-        <h2>Solar Panel</h2>
+        <h2 className="card-title">
+          <MdSolarPower className="card-icon" style={{ color: "#f59e0b" }} />
+          Solar Panel
+        </h2>
         <p className="subtitle">Renewable energy</p>
         <button className="add-button orange" onClick={() => setActiveSolarPopup(true)}>
           + Add Solar Details
@@ -93,8 +99,10 @@ const AddAsset = () => {
 
       {/* Wind */}
       <div className="card solar-panel">
-        <GiWindmill className="card-icon" style={{ color: "#D3F3FF" }} />
-        <h2>Wind Mill</h2>
+        <h2 className="card-title">
+          <GiWindmill className="card-icon" style={{ color: "#D3F3FF" }} />
+          Wind Mill
+        </h2>
         <p className="subtitle">Renewable energy</p>
         <button className="add-button orange">
           + Add WindMill Details
@@ -103,8 +111,10 @@ const AddAsset = () => {
 
       {/* Hydro */}
       <div className="card solar-panel">
-        <GiWaterMill className="card-icon" style={{ color: "#8ed1e3" }} />
-        <h2>Hydro Power</h2>
+        <h2 className="card-title">
+          <GiWaterMill className="card-icon" style={{ color: "#8ed1e3" }} />
+          Hydro Power
+        </h2>
         <p className="subtitle">Renewable energy</p>
         <button className="add-button d4f1f9" style={{ color: "white" }}>
           + Add HydroPower Details
@@ -113,8 +123,10 @@ const AddAsset = () => {
 
       {/* Carbon Capture */}
       <div className="card solar-panel">
-        <GiPowder className="card-icon" style={{ color: "#32454D" }} />
-        <h2>Carbon Capture</h2>
+        <h2 className="card-title">
+          <GiPowder className="card-icon" style={{ color: "#32454D" }} />
+          Carbon Capture
+        </h2>
         <p className="subtitle">Negative emission tech</p>
         <button className="add-button" style={{ color: "white" }}>
           + Add CarbonCapture Details
@@ -123,8 +135,10 @@ const AddAsset = () => {
 
       {/* Thermal */}
       <div className="card solar-panel">
-        <FaFire className="card-icon" style={{ color: "#e25822" }} />
-        <h2>Thermal Power</h2>
+        <h2 className="card-title">
+          <FaFire className="card-icon" style={{ color: "#e25822" }} />
+          Thermal Power
+        </h2>
         <p className="subtitle">Energy production</p>
         <button className="add-button orange" style={{ color: "white" }}>
           + Add Thermal Details

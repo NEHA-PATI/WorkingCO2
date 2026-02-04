@@ -319,7 +319,7 @@ export default function JoinOrganisation() {
       <header className="join-org-header">
         <div className="join-org-header-content">
           <div>
-            <h1 className="join-org-header-title">Register as Organization</h1>
+            <h1 className="join-org-header-title">Apply as an Organization</h1>
             <p className="join-org-header-subtitle">Begin your verified carbon-positive journey</p>
           </div>
         </div>
