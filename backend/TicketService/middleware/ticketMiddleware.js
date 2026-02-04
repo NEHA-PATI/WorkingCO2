@@ -1,51 +1,38 @@
-const jwt = require("jsonwebtoken");
+const pool = require("../config/db");
 
-/**
- * Token verification middleware
- * - DEV: uses mock user (no token required)
- * - PROD: verifies JWT
- */
-const verifyToken = (req, res, next) => {
-
-  // =========================
-  // 🚨 DEVELOPMENT MODE (MOCK)
-  // =========================
-  if (process.env.MOCK_AUTH === "true") {
-    console.log("🔥 MOCK AUTH ACTIVE (Ticket Service)");
-
-    req.user = {
-      u_id: "USR0042",   // MUST exist in users table
-      role: "USER"
-    };
-
-    return next();
-  }
-
-  // =========================
-  // 🔐 PRODUCTION MODE (JWT)
-  // =========================
-  const authHeader = req.headers.authorization || "";
-
-  const token = authHeader.startsWith("Bearer ")
-    ? authHeader.slice(7)
-    : authHeader;
-
-  if (!token) {
-    return res.status(401).json({ message: "Token missing" });
-  }
-
+const verifyUser = async (req, res, next) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const u_id =
+      req.headers["x-user-id"] ||
+      req.body.u_id ||
+      req.query.u_id;
 
-    req.user = {
-      ...decoded,
-      role: (decoded.role || decoded.role_name || "USER").toUpperCase()
-    };
+    if (!u_id) {
+      return res.status(401).json({
+        message: "User not logged in"
+      });
+    }
+
+    const result = await pool.query(
+      "SELECT u_id FROM users WHERE u_id = $1",
+      [u_id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(403).json({
+        message: "User not registered"
+      });
+    }
+
+    req.user = { u_id };
 
     next();
   } catch (err) {
-    return res.status(401).json({ message: "Invalid or expired token" });
+    console.error("VERIFY USER ERROR:", err);
+    res.status(500).json({
+      message: "Internal server error"
+    });
   }
 };
 
-module.exports = { verifyToken };
+module.exports = { verifyUser };
