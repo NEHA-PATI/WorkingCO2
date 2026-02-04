@@ -437,18 +437,6 @@
   resolved "https://registry.npmjs.org/@kurkle/color/-/color-0.3.4.tgz"
   integrity sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-"@napi-rs/wasm-runtime@^0.2.12":
-  version "0.2.12"
-  dependencies:
-    "@emnapi/core" "^1.4.3"
-    "@emnapi/runtime" "^1.4.3"
-    "@tybys/wasm-util" "^0.10.0"
-
-=======
->>>>>>> 48d6937e99498c08f1a882a2a4ee39426e26ae0d
 "@portabletext/react@^6.0.2":
   version "6.0.2"
   resolved "https://registry.npmjs.org/@portabletext/react/-/react-6.0.2.tgz"
@@ -469,7 +457,6 @@
   resolved "https://registry.npmjs.org/@portabletext/types/-/types-4.0.1.tgz"
   integrity sha512-L8PZjVjmdKpW+82c1oNqGMqCOtQD2xORqJfr6Is7X5XXbz38eLYY79IM/1ok+Esf/iGOPtEYORdcf0ETmsWYew==
 
->>>>>>> 0efafe7054faf629cd5e83ade7d9f9824ce50edc
 "@radix-ui/primitive@1.1.3":
   version "1.1.3"
   resolved "https://registry.npmjs.org/@radix-ui/primitive/-/primitive-1.1.3.tgz"
