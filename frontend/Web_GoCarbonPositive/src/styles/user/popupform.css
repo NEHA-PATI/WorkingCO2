@@ -231,11 +231,11 @@ select.form-control {
 }
 
 .btn-submit {
-    background: var(--primary);
+    background: var(--tertiary);
 }
 
 .btn-submit:hover {
-    background: var(--primary-dark);
+    background: var(--tertiary-dark);
 }
 
 .btn-submit-ev {
@@ -247,11 +247,11 @@ select.form-control {
 }
 
 .btn-submit-tree {
-    background: var(--tertiary);
+    background: var(--primary);
 }
 
 .btn-submit-tree:hover {
-    background: var(--tertiary-dark);
+    background: var(--primary-dark);
 }
 
 /* File Upload Styles */

@@ -26,34 +26,49 @@
   }
   
   .dashboard-container .card-icon {
-    font-size: 3rem;
-    margin: 0 auto 0.5rem auto; /* center horizontally using auto margins */
-    display: block; /* ensure it behaves as a block element for auto margins */
+    font-size: 1.9rem;
     color: #2563eb; /* fallback */
     opacity: 1 !important;
     visibility: visible !important;
-    display: inline-block !important;
-    filter: none !important;
-    transform: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    position: static !important;
+    top: auto;
+    right: auto;
+    filter: none;
+    transform: none;
     z-index: 1;
   }
 
   .dashboard-container .card.electric-vehicle .card-icon {
-    color: #3b82f6;
+    color: #3b82f6 !important;
   }
 
   .dashboard-container .card.trees .card-icon {
-    color: #10b981;
+    color: #10b981 !important;
   }
 
   .dashboard-container .card.solar-panel .card-icon {
-    color: #f59e0b;
+    color: #f59e0b !important;
   }
   
   .dashboard-container h2 {
     margin: 0.5rem 0;
     font-size: 1.6rem;
     font-weight: 600;
+  }
+
+  .dashboard-container .card-title {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .dashboard-container .card-title .card-icon {
+    order: -1;
   }
   
   .dashboard-container .subtitle {
