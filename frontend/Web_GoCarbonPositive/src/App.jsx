@@ -49,6 +49,8 @@ import ResetPassword from "./pages/ResetPassword";
 import JoinOrganisation from "./pages/JoinOrganisation";
 
 import OAuthSuccess from "./pages/OAuthSuccess";
+import Arena from "./Arena/Arena";
+import ArenaStandalone from "./Arena/arenaStandalone";
 
 import NotFoundAnimation from "./pages/NotFoundAnimation";
 
@@ -56,6 +58,8 @@ function App() {
   return (
     <ModalProvider>
       <Routes>
+        <Route path="/arena" element={<Arena />} />
+        <Route path="/arena-standalone" element={<ArenaStandalone />} />
         <Route element={<BaseLayout />}>
           {/* ================= PUBLIC ROUTES ================= */}
           <Route path="/" element={<Home />} />
@@ -77,8 +81,8 @@ function App() {
           <Route path="/settings" element={<NotFoundAnimation />} />
           <Route path="/privacypolicy" element={<PrivacyPolicy />} />
           <Route path="/termsandconditions" element={<TermsAndConditions />} />
-           <Route path="/industrial" element={< IndustrialSolutions/>} />
-       
+          <Route path="/industrial" element={< IndustrialSolutions />} />
+
 
           <Route path="/faq" element={<Faq />} />
 

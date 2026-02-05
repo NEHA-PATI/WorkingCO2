@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from "@/components/ui/button";
+import { Button } from "../ui/button";
 import { 
   X, CheckCircle2, Gift, ScrollText, Sparkles,
   UserPlus, ClipboardList, Linkedin, Instagram, Users, 
@@ -165,3 +165,4 @@ export default function ContestModal({ contest, isOpen, onClose, onComplete, isC
     </AnimatePresence>
   );
 }
+

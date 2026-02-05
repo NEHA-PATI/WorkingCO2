@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import HamburgerMenu from "./HamburgerMenu";
 import WalletPopup from "../../pages/wallet";
 import useAuth from "../../auth/useAuth";
+import ArenaButton from "../user/ArenaButton";
 
 import "../../styles/user/userNavbar.css";
 
@@ -152,6 +153,7 @@ localStorage.removeItem("userId");
         {/* ================= RIGHT ================= */}
 
         <div className="user-right-section">
+          <ArenaButton />
 
           {/* ====== CHANGE STARTS HERE ONLY ====== */}
 

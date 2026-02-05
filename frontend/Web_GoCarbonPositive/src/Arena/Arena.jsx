@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import HeroSlider from '@/components/arena/HeroSlider';
-import MilestoneTracker from '@/components/arena/MilestoneTracker';
-import RewardsShowcase from '@/components/arena/RewardsShowcase';
-import ContestCard from '@/components/arena/ContestCard';
-import Leaderboard from '@/components/arena/Leaderboard';
-import ContestModal from '@/components/arena/ContestModal';
+
+import { useNavigate } from "react-router-dom";
+import HeroSlider from "./arenacomponents/HeroSlider";
+import MilestoneTracker from "./arenacomponents/MilestoneTracker";
+import RewardsShowcase from "./arenacomponents/RewardsShowcase";
+import ContestCard from "./arenacomponents/ContestCrad";
+import Leaderboard from "./arenacomponents/Leaderboard";
+import ContestModal from "./arenacomponents/ContestModal";
 import { motion } from 'framer-motion';
-import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import BackButton from '../components/BackButton';
+import "./arenaglobals.css";
 
 export default function Arena() {
+  const navigate = useNavigate();
   const [selectedContest, setSelectedContest] = useState(null);
   const queryClient = useQueryClient();
 
@@ -35,10 +39,10 @@ export default function Arena() {
   const calculateStreak = () => {
     const checkins = completions.filter(c => c.task_type === 'daily_checkin');
     if (checkins.length === 0) return 0;
-    
+
     const dates = checkins.map(c => new Date(c.completed_date)).sort((a, b) => b - a);
     let streak = 1;
-    
+
     for (let i = 0; i < dates.length - 1; i++) {
       const diff = Math.floor((dates[i] - dates[i + 1]) / (1000 * 60 * 60 * 24));
       if (diff === 1) {
@@ -47,11 +51,20 @@ export default function Arena() {
         break;
       }
     }
-    
+
     return streak;
   };
 
   const currentStreak = calculateStreak();
+
+  useEffect(() => {
+    const handlePopState = () => {
+      navigate("/", { replace: true });
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [navigate]);
 
   const handleTaskComplete = (contest) => {
     if (contest.isDailyTask && isTaskCompletedToday(contest.taskType)) {
@@ -222,7 +235,10 @@ export default function Arena() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="arena-scope min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        {/* <BackButton /> */}
+      </div>
       {/* Hero Section */}
       <HeroSlider />
 
@@ -235,7 +251,7 @@ export default function Arena() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Contest Cards - 70% */}
           <div className="lg:w-[70%]">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="mb-6"
@@ -243,7 +259,7 @@ export default function Arena() {
               <h2 className="text-2xl font-bold text-slate-800">Earn Points</h2>
               <p className="text-slate-500 mt-1">Complete challenges to climb the leaderboard</p>
             </motion.div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {contests
                 .sort((a, b) => {
@@ -256,7 +272,7 @@ export default function Arena() {
                   return 0;
                 })
                 .map((contest, index) => (
-                  <ContestCard 
+                  <ContestCard
                     key={contest.id}
                     contest={contest}
                     index={index}
@@ -278,7 +294,7 @@ export default function Arena() {
       </div>
 
       {/* Contest Modal */}
-      <ContestModal 
+      <ContestModal
         contest={selectedContest}
         isOpen={!!selectedContest}
         onClose={() => setSelectedContest(null)}
