@@ -25,7 +25,7 @@ exports.forgotPassword = async (email) => {
   await Reset.create({
     user_id: user.id,
     token: hashedToken,
-    expires_at: new Date(Date.now() + 15 * 60 * 1000),
+    expiresInMinutes: 15,
   });
 
   const resetLink = `${process.env.FRONTEND_URL}/reset-password/${rawToken}`;

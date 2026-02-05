@@ -4,47 +4,47 @@ import "../styles/user/Forgot.css";
 import { fireToast } from "../services/user/toastService.js";
 
 const ResetPassword = () => {
-  const { token } = useParams();
+  const { token } = useParams();   // 👈 ye missing tha!
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
   const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  // const [success, setSuccess] = useState(false);
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  // ❌ password mismatch
-  if (!password || password !== confirm) {
-    fireToast("RESET.MISMATCH", "error");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_URL}/api/auth/password/reset/${token}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-
-    if (!res.ok) {
-      fireToast("RESET.INVALID", "error");
+    // ❌ password mismatch
+    if (!password || password !== confirm) {
+      fireToast("RESET.MISMATCH", "error");
       return;
     }
 
-    // ✅ success
-    fireToast("RESET.SUCCESS", "success");
+    try {   // ✅ TRY START
 
-    setTimeout(() => {
-      navigate("/", { replace: true });
-    }, 1200);
+      const res = await fetch(`${API_URL}/api/auth/password/reset/${token}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword: password }),
+      });
 
-  } catch (err) {
-    fireToast("API.NETWORK", "error");
-  }
-};
+      if (!res.ok) {
+        fireToast("RESET.INVALID", "error");
+        return;
+      }
 
+      // ✅ success
+      fireToast("RESET.SUCCESS", "success");
+
+      setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 1200);
+
+    // eslint-disable-next-line no-unused-vars
+    } catch (err) {   // ✅ ab catch valid hai
+      fireToast("API.NETWORK", "error");
+    }
+  };
 
   return (
     <div className="auth-page">
@@ -69,8 +69,6 @@ const handleSubmit = async (e) => {
 
         <button type="submit">Enter</button>
       </form>
-
-     
     </div>
   );
 };

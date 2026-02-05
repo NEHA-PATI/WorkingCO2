@@ -343,7 +343,7 @@ const IndustrialSolutions = () => {
                   value={formData.contact_person_name}
                   onChange={handleFormChange}
                   className="form-input"
-                  placeholder="Enter your full name"
+                 
                   required
                 />
               </div>
@@ -359,7 +359,7 @@ const IndustrialSolutions = () => {
                   value={formData.contact_email}
                   onChange={handleFormChange}
                   className="form-input"
-                  placeholder="Enter your email"
+               
                   required
                 />
               </div>
@@ -373,7 +373,7 @@ const IndustrialSolutions = () => {
                   value={formData.contact_number}
                   onChange={handleFormChange}
                   className="form-input"
-                  placeholder="Enter your phone number"
+              
                 />
               </div>
 
