@@ -1,65 +1,62 @@
-/* ===== Dashboard Layout ===== */
-.dashboard-container {
+.cs-dashboard-container {
   width: 100%;
   padding: 20px;
   background: #f9fafa;
   color: #333;
 }
 
-/* ===== Top Summary Cards ===== */
-.summary-cards {
+/* Summary Cards */
+.cs-summary-cards {
   display: flex;
   gap: 16px;
   margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
-.card {
+.cs-card {
   border-radius: 12px;
   padding: 16px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   transition: transform 0.2s ease-in-out;
   flex: 1;
   min-width: 220px;
-  background: #271a71; /* Light greenish background */
+  background: white;
 }
 
-.card:hover {
+.cs-card:hover {
   transform: translateY(-3px);
 }
 
-.card h4 {
+.cs-card h4 {
   display: flex;
-  align-items: center;
   justify-content: space-between;
   font-size: 15px;
   font-weight: 600;
-  margin-bottom: 8px;
 }
 
-.card .value {
+.cs-value {
   font-size: 22px;
   font-weight: bold;
 }
 
-.card .change {
+.cs-change {
   font-size: 13px;
 }
 
-/* Color helpers */
-.green { color: #2d9d4d; }
-.orange { color: #e87c30; }
-.blue { color: #0078d7; }
-.red { color: #c43d3d; }
+/* Colors */
+.cs-green { color: #2d9d4d; }
+.cs-orange { color: #e87c30; }
+.cs-blue { color: #0078d7; }
+.cs-red { color: #c43d3d; }
 
-/* ===== Bottom Feature Cards ===== */
-.feature-cards {
+/* Feature Cards */
+.cs-feature-cards {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
 }
 
-.feature-card {
+.cs-feature-card {
   background: #f1fffa;
   border-radius: 12px;
   padding: 18px;
@@ -68,40 +65,28 @@
   min-width: 260px;
 }
 
-.feature-card h4 {
+.cs-feature-card h4 {
   display: flex;
-  align-items: center;
   justify-content: space-between;
   font-size: 16px;
   margin-bottom: 12px;
-  font-weight: 600;
 }
 
-.feature-card .tag {
+.cs-tag {
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 8px;
   font-weight: 500;
 }
 
-.tag.blue { background: #e6f3ff; color: #0078d7; }
-.tag.green { background: #eaf7ec; color: #2d9d4d; }
-.tag.orange { background: #fff1e5; color: #e87c30; }
-
-.feature-card p {
+.cs-feature-card p {
   display: flex;
   justify-content: space-between;
   font-size: 14px;
   margin: 6px 0;
-  gap: 8px;
 }
 
-.feature-card span {
-  font-weight: bold;
-}
-
-/* Weather Box */
-.weather-box {
+.cs-weather-box {
   margin-top: 12px;
   padding: 10px;
   background: #f9f9f9;
@@ -109,109 +94,3 @@
   border-radius: 8px;
   font-size: 13px;
 }
-
-/* ===== Responsive Media Queries ===== */
-
-/* Tablets (<=1024px) */
-@media (max-width: 1024px) {
-  .summary-cards,
-  .feature-cards {
-    gap: 16px;
-  }
-
-  .card,
-  .feature-card {
-    flex: 1 1 calc(50% - 16px);
-    min-width: unset;
-  }
-}
-
-/* Mobiles (<=768px) */
-@media (max-width: 768px) {
-  .summary-cards,
-  .feature-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .card,
-  .feature-card {
-    flex: 1 1 calc(50% - 12px); /* two per row */
-    margin-bottom: 0;
-    padding: 14px;
-  }
-
-  .card h4,
-  .feature-card h4 {
-    font-size: 14px;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .card .value {
-    font-size: 18px;
-  }
-
-  .card .change {
-    font-size: 12px;
-  }
-
-  .feature-card p {
-    font-size: 13px;
-    justify-content: space-between;
-    flex-wrap: wrap;
-  }
-
-  .weather-box {
-    font-size: 12px;
-    padding: 8px;
-  }
-}
-
-/* Small Mobiles (<=480px) */
-@media (max-width: 480px) {
-  .dashboard-container {
-    padding: 10px;
-  }
-
-  .card,
-  .feature-card {
-    flex: 1 1 100%; /* fallback single column for very small screens */
-    padding: 12px;
-  }
-
-  .card h4,
-  .feature-card h4 {
-    font-size: 13px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .card .value {
-    font-size: 16px;
-  }
-
-  .card .change {
-    font-size: 12px;
-  }
-
-  .feature-card p {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    font-size: 12px;
-  }
-
-  .feature-card span {
-    font-size: 12px;
-  }
-
-  .weather-box {
-    font-size: 11px;
-    padding: 6px;
-    text-align: left;
-  }
-}
- 
