@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/user/Forgot.css";
+import { fireToast } from "../services/user/toastService.js";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -9,32 +10,41 @@ const ResetPassword = () => {
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [success, setSuccess] = useState(false);
+  // const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!password || password !== confirm) return;
+  // ❌ password mismatch
+  if (!password || password !== confirm) {
+    fireToast("RESET.MISMATCH", "error");
+    return;
+  }
 
-   const res = await fetch(`${API_URL}/api/auth/password/reset/${token}`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ password }),
-});
+  try {
+    const res = await fetch(`${API_URL}/api/auth/password/reset/${token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
 
-if (!res.ok) {
-  alert("Reset link invalid or expired");
-  return;
-}
+    if (!res.ok) {
+      fireToast("RESET.INVALID", "error");
+      return;
+    }
 
+    // ✅ success
+    fireToast("RESET.SUCCESS", "success");
 
-    setSuccess(true);
-
-    // 🔥 1 second success message
     setTimeout(() => {
       navigate("/", { replace: true });
-    }, 1000);
-  };
+    }, 1200);
+
+  } catch (err) {
+    fireToast("API.NETWORK", "error");
+  }
+};
+
 
   return (
     <div className="auth-page">
@@ -60,11 +70,7 @@ if (!res.ok) {
         <button type="submit">Enter</button>
       </form>
 
-      {success && (
-        <p className="success-text">
-          New password created successfully
-        </p>
-      )}
+     
     </div>
   );
 };
