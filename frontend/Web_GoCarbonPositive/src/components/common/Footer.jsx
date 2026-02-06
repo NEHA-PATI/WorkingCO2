@@ -28,7 +28,7 @@ const Footer = () => {
           <ul className="footer__list">
             <li className="footer__item"><Link to="/engage">Engage</Link></li>
             <li className="footer__item"><Link to="/user/dashboard">Dashboard</Link></li>
-            <li className="footer__item"><Link to="/wallet">Marketplace</Link></li>
+            <li className="footer__item"><Link to="/settings">Marketplace</Link></li>
           </ul>
         </div>
 
