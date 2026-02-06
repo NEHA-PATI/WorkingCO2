@@ -9,13 +9,14 @@ const {
   deleteTicket
 } = require("../controllers/adminTicketController");
 
-const { verifyToken } = require("../middleware/ticketMiddleware");
+const { verifyUser } = require("../middleware/ticketMiddleware");
 
-// 🔐 All routes require login
-router.post("/", verifyToken, createTicket);
-router.get("/", verifyToken, getAllTickets);
-router.get("/:ticket_id", verifyToken, getTicketById);
-router.put("/:ticket_id", verifyToken, updateTicket);
-router.delete("/:ticket_id", verifyToken, deleteTicket);
+router.post("/", verifyUser, createTicket);
+router.get("/", verifyUser, getAllTickets);
+router.get("/:ticket_id", verifyUser, getTicketById);
+router.put("/:ticket_id", verifyUser, updateTicket);
+router.delete("/:ticket_id", verifyUser, deleteTicket);
+
+
 
 module.exports = router;

@@ -425,14 +425,15 @@ body {
 /* ===== MODAL HEADER ===== */
 .modal-header {
   text-align: center;
-  margin-bottom: 40px;
-  padding-bottom: 24px;
+  margin-bottom: 1px;
+  padding-bottom: 1px;
+  gap:1px;
   border-bottom: 1px solid var(--border-color);
 }
 
 .modal-logo {
-  font-size: 64px;
-  margin-bottom: 16px;
+  font-size: 50px;
+  margin-bottom: 0.2px;
   display: flex;
   justify-content: center;
 }
@@ -441,13 +442,14 @@ body {
   font-size: 32px;
   font-weight: 800;
   color: var(--text-dark);
-  margin-bottom: 12px;
+  margin-bottom: 0.2px;
 }
 
 .modal-timestamp {
   font-size: 13px;
   color: var(--text-light);
   font-weight: 500;
+  margin-bottom: 0.2;
 }
 
 /* ===== MODAL BODY ===== */
@@ -506,11 +508,11 @@ body {
 
 .btn-demo-full,
 .btn-contact-full {
-  flex: 1;
-  padding: 14px 24px;
+  flex: 0.5;
+  padding: 10px 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 5px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -828,21 +830,23 @@ body {
 
 /* ===== DEMO FORM STYLES ===== */
 .demo-modal {
-  max-width: 500px;
+  max-width: 520px;
+  max-height: 70vh;
+  padding: 10px 10px 10px;
 }
 
 .demo-modal-header {
   text-align: center;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
+  margin-bottom: 9px;
+  padding-bottom: 1px;
   border-bottom: 1px solid var(--border-color);
 }
 
 .demo-modal-title {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
   color: var(--text-dark);
-  margin-bottom: 8px;
+  margin-bottom: 1px;
 }
 
 .demo-modal-subtitle {
@@ -854,13 +858,13 @@ body {
 .demo-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0.2px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.2px;
 }
 
 .form-label {
@@ -882,7 +886,7 @@ body {
 
 .form-input,
 .form-select {
-  padding: 12px 14px;
+  padding: 9px 12px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 14px;
@@ -941,7 +945,7 @@ body {
 }
 
 .btn-form-submit {
-  padding: 14px 24px;
+  padding: 11px 20px;
   background: var(--primary-color);
   color: white;
   border: none;
@@ -952,7 +956,7 @@ body {
   font-family: 'Poppins', sans-serif;
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
-  margin-top: 12px;
+  margin-top: 4px;
 }
 
 .btn-form-submit:hover {

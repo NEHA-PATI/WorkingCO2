@@ -52,9 +52,10 @@ const Upload = () => {
   return (
     <div className="dashboard-container">
       <div className="card electric-vehicle">
-        <MdElectricCar className="card-icon" style={{ color: "#3b82f6" }} />
-
-        <h2>Electric Vehicle</h2>
+        <h2 className="card-title">
+          <MdElectricCar className="card-icon" style={{ color: "#3b82f6" }} />
+          Electric Vehicle
+        </h2>
         <p className="subtitle">Smart mobility tracking</p>
         <button
           className="add-button blue"
@@ -65,8 +66,10 @@ const Upload = () => {
       </div>
 
       <div className="card trees">
-        <LuTreePine className="card-icon" style={{ color: "#10b981" }} />
-        <h2>Trees</h2>
+        <h2 className="card-title">
+          <LuTreePine className="card-icon" style={{ color: "#10b981" }} />
+          Trees
+        </h2>
         <p className="subtitle">Nature conservation</p>
         <button
           className="add-button green"
@@ -77,8 +80,10 @@ const Upload = () => {
       </div>
 
       <div className="card solar-panel">
-        <MdSolarPower className="card-icon" style={{ color: "#f59e0b" }} />
-        <h2>Solar Panel</h2>
+        <h2 className="card-title">
+          <MdSolarPower className="card-icon" style={{ color: "#f59e0b" }} />
+          Solar Panel
+        </h2>
         <p className="subtitle">Renewable energy</p>
         <button
           className="add-button orange"
