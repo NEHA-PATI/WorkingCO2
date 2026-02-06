@@ -435,6 +435,32 @@ body {
 
 .ud-detail-icon {
   font-size: 1rem;
+  fill: rgb(39, 90, 201);
+  stroke:  rgb(39, 90, 201);
+}
+
+.ud-detail-icon * {
+  fill:  rgb(39, 90, 201);
+  stroke:  rgb(39, 90, 201);
+}
+
+/* Recent activity icon colors by type */
+.activity-item[data-type="EV"] .ud-detail-icon {
+  color: #2196f3 !important;
+  fill: rgb(20, 20, 148);
+  stroke: rgb(20, 20, 148);
+}
+
+.activity-item[data-type="Solar"] .ud-detail-icon {
+  color: #ff9800 !important;
+  fill: orange;
+  stroke: orange;
+}
+
+.activity-item[data-type="Tree"] .ud-detail-icon {
+  color: #4caf50 !important;
+  fill: green;
+  stroke: green;
 }
 
 /* ===== ACHIEVEMENTS SECTION ===== */

@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
 import { FaGoogle } from "react-icons/fa";
 import useAuth from "../auth/useAuth";
-import {  FaLinkedin, FaGithub } from "react-icons/fa";
+import { FaLinkedin, FaGithub } from "react-icons/fa";
 import LoadingPopup from "../components/user/LoadingPopup";
+import { fireToast } from "../services/user/toastService.js";
 
 const Login = ({ onClose, onSwitchToSignup }) => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
@@ -24,13 +25,12 @@ const Login = ({ onClose, onSwitchToSignup }) => {
   const navigate = useNavigate();
 
   const handleClose = () => {
-  if (onClose) {
-    onClose();        // works when Login is used as a modal
-  } else {
-    navigate("/");   // works when Login is opened as a page
-  }
-};
-
+    if (onClose) {
+      onClose(); // works when Login is used as a modal
+    } else {
+      navigate("/"); // works when Login is opened as a page
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -321,22 +321,22 @@ const Login = ({ onClose, onSwitchToSignup }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        setErrors({ general: data.message || "Login failed" });
+        fireToast("AUTH.LOGIN_ERROR", "error");
         return;
       }
 
       if (!data.user || !data.token) {
-        setErrors({ general: "Missing login data" });
+        fireToast("AUTH.LOGIN_ERROR", "error");
         return;
       }
 
       if (!data.user.verified) {
-        setErrors({ general: "Please verify your email first." });
+        fireToast("AUTH.NOT_VERIFIED", "warning");
         return;
       }
 
       if (data.user.status !== "active") {
-        setErrors({ general: `Account status: ${data.user.status}` });
+        fireToast("AUTH.INACTIVE", "error");
         return;
       }
 
@@ -346,6 +346,7 @@ const Login = ({ onClose, onSwitchToSignup }) => {
         token: data.token,
         user: data.user,
       });
+      fireToast("AUTH.LOGIN_SUCCESS");
 
       const role =
         data.user.role?.toLowerCase() || data.user.role_name?.toLowerCase();
@@ -365,7 +366,7 @@ const Login = ({ onClose, onSwitchToSignup }) => {
 
       // eslint-disable-next-line no-unused-vars
     } catch (err) {
-      setErrors({ general: "Login failed. Try again." });
+      fireToast("AUTH.LOGIN_ERROR", "error");
     } finally {
       setLoading(false);
     }

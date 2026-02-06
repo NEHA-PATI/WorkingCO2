@@ -238,7 +238,10 @@ const IndustrialSolutions = () => {
               <div className="card-actions">
                 <button
                   className="btn-read-more"
-                  onClick={() => setSelectedIndustry(industry)}
+                  onClick={() => {
+                    setSelectedIndustry(industry);
+                    setIsExpanded(true);
+                  }}
                 >
                   Read More
                 </button>
@@ -400,14 +403,6 @@ const IndustrialSolutions = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-top-actions">
-              {/* NEW EXPAND BUTTON */}
-              <button
-                className="expand-btn"
-                onClick={() => setIsExpanded(!isExpanded)}
-              >
-                ⛶
-              </button>
-
               {/* EXISTING CLOSE */}
               <button
                 className="close-btn"

@@ -1,39 +1,49 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/user/Forgot.css";
+import { fireToast } from "../services/user/toastService.js";
 
 const ResetPassword = () => {
-  const { token } = useParams();
+  const { token } = useParams();   // 👈 ye missing tha!
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
   const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!password || password !== confirm) return;
+    // ❌ password mismatch
+    if (!password || password !== confirm) {
+      fireToast("RESET.MISMATCH", "error");
+      return;
+    }
 
-    const res = await fetch(`${API_URL}/api/auth/password/reset/${token}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ newPassword: password }),
-    });
+    try {   // ✅ TRY START
 
-if (!res.ok) {
-  alert("Reset link invalid or expired");
-  return;
-}
+      const res = await fetch(`${API_URL}/api/auth/password/reset/${token}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword: password }),
+      });
 
+      if (!res.ok) {
+        fireToast("RESET.INVALID", "error");
+        return;
+      }
 
-    setSuccess(true);
+      // ✅ success
+      fireToast("RESET.SUCCESS", "success");
 
-    // 🔥 1 second success message
-    setTimeout(() => {
-      navigate("/", { replace: true });
-    }, 1000);
+      setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 1200);
+
+    // eslint-disable-next-line no-unused-vars
+    } catch (err) {   // ✅ ab catch valid hai
+      fireToast("API.NETWORK", "error");
+    }
   };
 
   return (
@@ -59,12 +69,6 @@ if (!res.ok) {
 
         <button type="submit">Enter</button>
       </form>
-
-      {success && (
-        <p className="success-text">
-          New password created successfully
-        </p>
-      )}
     </div>
   );
 };

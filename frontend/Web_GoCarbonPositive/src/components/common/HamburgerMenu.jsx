@@ -46,7 +46,12 @@ export default function HamburgerMenu({
             {/* ✅ FIX 2 – COLOR FORCE */}
             <Icon
               className="sidebar-icon"
-              style={{ fontSize: "1.7rem" }}
+              color={item.color}
+              style={{
+                fontSize: "1.7rem",
+                minWidth: "26px",
+              }}
+            
             />
 
             <span>{item.label}</span>

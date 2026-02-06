@@ -51,7 +51,7 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  background: rgba(76, 175, 80, 0.12);
+ 
   border-radius: 10px;
   flex-shrink: 0;
   transition: all 0.3s ease;
@@ -144,8 +144,45 @@
   flex-shrink: 0;
 }
 
+/* Ensure all recent-activity detail icons are colorful */
+.ud-detail-icon {
+  color: #6b7280;
+  fill: #6b7280;
+}
+
+.activity-item[data-type="EV"] .ud-detail-icon {
+  color: #2196f3 !important;
+}
+
+.activity-item[data-type="Solar"] .ud-detail-icon {
+  color: #ff9800 !important;
+}
+
+.activity-item[data-type="Tree"] .ud-detail-icon {
+  color: #4caf50 !important;
+}
+
 .activity-detail-item:hover .detail-icon {
   color: #4CAF50 !important;
+}
+
+/* Force colorful detail icons inside recent activity */
+.activity-item[data-type="EV"] .activity-detail-item svg {
+  color: #2196f3 ;
+  fill:  #2196f3 ;
+  stroke:  #2196f3 ;
+}
+
+.activity-item[data-type="Solar"] .activity-detail-item svg {
+  color: #ff9800 ;
+  fill:  #ff9800;
+  stroke: #ff9800;
+}
+
+.activity-item[data-type="Tree"] .activity-detail-item svg {
+  color: #4caf50 ;
+  fill:  #4caf50 ;
+  stroke: #4caf50 ;
 }
 
 /* Tree Image */

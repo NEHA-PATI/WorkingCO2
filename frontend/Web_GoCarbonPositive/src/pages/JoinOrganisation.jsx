@@ -397,7 +397,7 @@ export default function JoinOrganisation() {
       <header className="join-org-header">
         <div className="join-org-header-content">
           <div>
-            <h1 className="join-org-header-title">Register as Organization</h1>
+            <h1 className="join-org-header-title">Apply as an Organization</h1>
             <p className="join-org-header-subtitle">Begin your verified carbon-positive journey</p>
           </div>
         </div>
@@ -460,7 +460,7 @@ export default function JoinOrganisation() {
                 )}
 
                 <div className="join-org-form-group">
-                  <label className="join-org-form-label">SPOC Person Name</label>
+                  <label className="join-org-form-label">Person Name</label>
                   <input
                     type="text"
                     name="spocName"
@@ -478,7 +478,7 @@ export default function JoinOrganisation() {
                 </div>
 
                 <div className="join-org-form-group">
-                  <label className="join-org-form-label">SPOC Designation</label>
+                  <label className="join-org-form-label">Designation</label>
                   <input
                     type="text"
                     name="spocDesignation"
@@ -496,7 +496,7 @@ export default function JoinOrganisation() {
                 </div>
 
                 <div className="join-org-form-group">
-                  <label className="join-org-form-label">SPOC Phone Number</label>
+                  <label className="join-org-form-label">Phone Number</label>
                   <div className="join-org-phone-group">
                     <div className="join-org-phone-code-wrapper">
                       <CustomDropdown
@@ -527,7 +527,7 @@ export default function JoinOrganisation() {
                 </div>
 
                 <div className="join-org-form-group">
-                  <label className="join-org-form-label">SPOC Email</label>
+                  <label className="join-org-form-label">Email</label>
                   <div className="join-org-email-group">
                     <div className="join-org-email-input-wrapper">
                       <input
