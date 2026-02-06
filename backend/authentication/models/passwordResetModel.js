@@ -1,11 +1,11 @@
 const pool = require("../config/db");
 
-exports.create = async ({ user_id, token, expires_at }) => {
+exports.create = async ({ user_id, token, expiresInMinutes }) => {
   const res = await pool.query(`
-    INSERT INTO password_resets (user_id, token, type, expires_at)
-    VALUES ($1,$2,'email',$3)
+    INSERT INTO password_resets (user_id, token, type, expires_at, used)
+    VALUES ($1, $2, 'email', NOW() + make_interval(mins => $3), false)
     RETURNING *
-  `, [user_id, token, expires_at]);
+  `, [user_id, token, expiresInMinutes]);
 
   return res.rows[0];
 };

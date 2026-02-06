@@ -65,20 +65,34 @@ export default function Contact() {
     setQueryData({ ...queryData, [e.target.name]: e.target.value });
   };
 
+
+  const getAuthUser = () => {
+  try {
+    const raw = localStorage.getItem("authUser");
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error("Invalid authUser in localStorage:", err);
+    return null;
+  }
+};
+
+
 const handleQuerySubmit = async (e) => {
   e.preventDefault();
 
   try {
-    const token = localStorage.getItem("token");
+    const storedUser = getAuthUser();
+    const u_id = storedUser?.u_id ?? null;
 
-    if (!token) {
+    if (!u_id) {
       alert("Please login to raise a query");
       return;
     }
 
     const payload = {
       subject: queryData.subject,
-      message: queryData.issue, // 🔥 mapping
+      message: queryData.issue,
       category: queryData.category,
       priority: queryData.priority,
     };
@@ -87,7 +101,7 @@ const handleQuerySubmit = async (e) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // 🔐 REQUIRED
+        "x-user-id": u_id,
       },
       body: JSON.stringify(payload),
     });
@@ -111,6 +125,8 @@ const handleQuerySubmit = async (e) => {
     alert("Something went wrong");
   }
 };
+
+
 
   return (
     <main>

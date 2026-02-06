@@ -64,11 +64,19 @@
   padding: 8px;
   border: 1px solid #a0aec0;
   border-radius: 6px;
-  color: black;
+  color: #0f172a;
   transition: all 0.3s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Brand colors */
+.footer__social-icon.social-facebook { color: #1877f2; }
+.footer__social-icon.social-x { color: #0f172a; }
+.footer__social-icon.social-linkedin { color: #0a66c2; }
+.footer__social-icon.social-instagram {
+  color: #e1306c;
 }
 
 .footer__social-icon:hover {
