@@ -10,6 +10,17 @@ frontend/**/.env
 frontend/**/.env.local
 frontend/**/.env.production
 
+
+# =========================
+# BACKEND (React / Vite)
+# =========================
+backend/**/node_modules/
+backend/**/dist/
+backend/**/build/
+backend/**/.env
+backend/**/.env.local
+backend/**/.env.production
+
 # =========================
 # PHOTOS (ignore raw uploads if needed)
 # =========================

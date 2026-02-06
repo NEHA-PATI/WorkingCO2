@@ -19,5 +19,11 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
-  }
+  },
+  "nodemonConfig": {
+  "quiet": true,
+  "ignore": ["node_modules"],
+  "watch": ["server.js", "src", "routes", "controllers"]
+}
+
 }

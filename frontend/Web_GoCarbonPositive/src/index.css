@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+/* Global layout spacing for sticky navbar */
+:root {
+  --navbar-height: 72px;
+}
+
+.main-content {
+  padding-top: 0;
+  overflow: visible;
+}
+
+/* Fix for React Icons not inheriting color */
+svg {
+  color: inherit;
+}

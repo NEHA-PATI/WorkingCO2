@@ -1,0 +1,96 @@
+.cs-dashboard-container {
+  width: 100%;
+  padding: 20px;
+  background: #f9fafa;
+  color: #333;
+}
+
+/* Summary Cards */
+.cs-summary-cards {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.cs-card {
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease-in-out;
+  flex: 1;
+  min-width: 220px;
+  background: white;
+}
+
+.cs-card:hover {
+  transform: translateY(-3px);
+}
+
+.cs-card h4 {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cs-value {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.cs-change {
+  font-size: 13px;
+}
+
+/* Colors */
+.cs-green { color: #2d9d4d; }
+.cs-orange { color: #e87c30; }
+.cs-blue { color: #0078d7; }
+.cs-red { color: #c43d3d; }
+
+/* Feature Cards */
+.cs-feature-cards {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.cs-feature-card {
+  background: #f1fffa;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  flex: 1;
+  min-width: 260px;
+}
+
+.cs-feature-card h4 {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.cs-tag {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.cs-feature-card p {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin: 6px 0;
+}
+
+.cs-weather-box {
+  margin-top: 12px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-left: 4px solid #e87c30;
+  border-radius: 8px;
+  font-size: 13px;
+}
