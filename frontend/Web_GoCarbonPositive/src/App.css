@@ -1,0 +1,8 @@
+/* Navbar icon colors (used by components/user/unav.jsx) */
+.navbar-icon.navbar-blue { color: #4fc3f7; }
+.navbar-icon.navbar-green { color: #22c55e; }
+.navbar-icon.navbar-orange { color: #ffb74d; }
+.navbar-icon.navbar-purple { color: #ba68c8; }
+.navbar-icon.navbar-yellow { color: #facc15; }
+.navbar-icon.navbar-red { color: #ef4444; }
+.navbar-icon.navbar-gray { color: #94a3b8; }

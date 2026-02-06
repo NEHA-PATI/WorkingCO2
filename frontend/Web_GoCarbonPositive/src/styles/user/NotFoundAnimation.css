@@ -1,0 +1,211 @@
+/* ================= ROOT SCOPE ================= */
+.notfound-page {
+  position: relative;
+}
+
+/* Floating Elements Animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-20px) translateX(10px); }
+  50% { transform: translateY(-40px) translateX(-10px); }
+  75% { transform: translateY(-20px) translateX(15px); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-30px) translateX(-15px); }
+  50% { transform: translateY(-50px) translateX(20px); }
+  75% { transform: translateY(-25px) translateX(-10px); }
+}
+
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-35px); }
+}
+
+/* Floating Elements */
+.notfound-page .floating-element {
+  pointer-events: none;
+}
+
+.notfound-page .leaf-1 {
+  animation: float 8s ease-in-out infinite;
+  top: 10%;
+  left: 5%;
+}
+
+.notfound-page .leaf-2 {
+  animation: float-slow 12s ease-in-out infinite;
+  top: 60%;
+  right: 8%;
+}
+
+.notfound-page .circle-1 {
+  animation: float-medium 10s ease-in-out infinite;
+  bottom: 15%;
+  left: 10%;
+}
+
+.notfound-page .circle-2 {
+  animation: float-slow 14s ease-in-out infinite;
+  top: 20%;
+  right: 5%;
+}
+
+/* Orbit System */
+.notfound-page .orbit-container {
+  width: 384px;
+  height: 384px;
+}
+
+.notfound-page .orbit {
+  position: absolute;
+  border: 1px dashed rgba(16, 185, 129, 0.2);
+  border-radius: 50%;
+}
+
+.notfound-page .orbit-1 {
+  width: 300px;
+  height: 300px;
+  animation: rotate 20s linear infinite;
+}
+
+.notfound-page .orbit-2 {
+  width: 200px;
+  height: 200px;
+  animation: rotate 25s linear infinite reverse;
+}
+
+.notfound-page .orbit-3 {
+  width: 100px;
+  height: 100px;
+  animation: rotate 30s linear infinite;
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.notfound-page .particle {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.7);
+}
+
+/* Text Animations */
+@keyframes fade-in {
+  from { opacity: 0; filter: blur(10px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.notfound-page .animate-fade-in {
+  animation: fade-in 1s ease-out forwards;
+}
+
+.notfound-page .animate-slide-up {
+  animation: slide-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+/* Glow */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(16,185,129,.4); }
+  50% { box-shadow: 0 0 40px rgba(16,185,129,.7); }
+}
+
+.notfound-page .glow-effect {
+  animation: glow 3s infinite ease-in-out;
+}
+
+/* ================= BUTTON STYLING (SCOPED) ================= */
+
+.notfound-page button {
+  position: relative;
+  border-radius: 16px;
+  padding: 1rem 2.2rem;
+  font-weight: 600;
+  transition: all 0.35s ease;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+}
+
+/* Primary Button */
+.notfound-page button:first-of-type {
+  background: linear-gradient(135deg, #10b981, #22c55e);
+  color: white;
+}
+
+.notfound-page button:first-of-type:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(16,185,129,0.45);
+}
+
+/* Secondary Button */
+.notfound-page button:last-of-type {
+  background: #ffffff;
+  border: 2px solid #10b981;
+  color: #059669;
+}
+
+.notfound-page button:last-of-type:hover {
+  background: rgba(16,185,129,0.08);
+  transform: translateY(-3px);
+}
+
+/* Shine sweep */
+.notfound-page button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.4),
+    transparent
+  );
+  transform: translateX(-120%);
+  transition: 0.6s;
+  border-radius: inherit;
+}
+
+.notfound-page button:hover::before {
+  transform: translateX(120%);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .notfound-page .orbit-container {
+    width: 260px;
+    height: 260px;
+  }
+
+  .notfound-page button {
+    width: 100%;
+    padding: 0.9rem 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .notfound-page .leaf-1,
+  .notfound-page .leaf-2 {
+    width: 40px;
+    height: 40px;
+  }
+
+  .notfound-page .orbit-container {
+    width: 200px;
+    height: 200px;
+  }
+
+  .notfound-page button {
+    font-size: 0.95rem;
+  }
+}
