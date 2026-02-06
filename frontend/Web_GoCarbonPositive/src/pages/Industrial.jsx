@@ -199,9 +199,10 @@ const IndustrialSolutions = () => {
           <div className="hero-content">
             {/* <div className="hero-number">01</div> */}
             <h2 className="hero-title">
-              WE BUILD A SUSTAINABLE
+              WE BUILD A<br />
+              SUSTAINABLE
               <br />
-              <span className="hero-title-center">FUTURE</span>
+              FUTURE
             </h2>
             <p className="hero-subtitle">
               Industrial solutions that transform your business while protecting
@@ -237,7 +238,10 @@ const IndustrialSolutions = () => {
               <div className="card-actions">
                 <button
                   className="btn-read-more"
-                  onClick={() => setSelectedIndustry(industry)}
+                  onClick={() => {
+                    setSelectedIndustry(industry);
+                    setIsExpanded(true);
+                  }}
                 >
                   Read More
                 </button>
@@ -342,7 +346,7 @@ const IndustrialSolutions = () => {
                   value={formData.contact_person_name}
                   onChange={handleFormChange}
                   className="form-input"
-                 
+                  placeholder="Enter your full name"
                   required
                 />
               </div>
@@ -358,7 +362,7 @@ const IndustrialSolutions = () => {
                   value={formData.contact_email}
                   onChange={handleFormChange}
                   className="form-input"
-               
+                  placeholder="Enter your email"
                   required
                 />
               </div>
@@ -372,7 +376,7 @@ const IndustrialSolutions = () => {
                   value={formData.contact_number}
                   onChange={handleFormChange}
                   className="form-input"
-              
+                  placeholder="Enter your phone number"
                 />
               </div>
 
@@ -399,14 +403,6 @@ const IndustrialSolutions = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-top-actions">
-              {/* NEW EXPAND BUTTON */}
-              <button
-                className="expand-btn"
-                onClick={() => setIsExpanded(!isExpanded)}
-              >
-                ⛶
-              </button>
-
               {/* EXISTING CLOSE */}
               <button
                 className="close-btn"

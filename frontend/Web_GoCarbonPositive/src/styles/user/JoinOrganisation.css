@@ -87,7 +87,7 @@ body {
 
 /* Main Content */
 .join-org-main-content {
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
   padding: 1.5rem;
 }
@@ -273,6 +273,10 @@ body {
   align-items: flex-start;
 }
 
+.join-org-phone-group .join-org-form-group {
+  margin-bottom: 0;
+}
+
 .join-org-phone-code-wrapper {
   width: 160px;
   flex-shrink: 0;
@@ -425,7 +429,7 @@ body {
 .join-org-otp-submit-button {
   flex: 1;
   padding: 0.7rem;
-  background: #0066cc;
+  background: #38b000;
   color: white;
   border: none;
   border-radius: 9px;
@@ -437,7 +441,7 @@ body {
 }
 
 .join-org-otp-submit-button:hover:not(:disabled) {
-  background: #0052a3;
+  background: #38b000;
   box-shadow: 0 4px 14px rgba(0, 102, 204, 0.25);
   transform: translateY(-1px);
 }
@@ -448,7 +452,7 @@ body {
 }
 
 .join-org-otp-submit-button-verified {
-  background: #2e7d32;
+  background: #38b000;
 }
 
 .join-org-otp-resend {
@@ -458,7 +462,7 @@ body {
 .join-org-resend-button {
   background: none;
   border: none;
-  color: #0066cc;
+  color: #38b000;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
