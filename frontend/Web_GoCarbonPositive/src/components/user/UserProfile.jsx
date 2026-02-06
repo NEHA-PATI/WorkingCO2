@@ -3,6 +3,7 @@ import { ChevronDown, MapPin, Plus, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Country, State } from "country-state-city";
 import "../../styles/user/UserProfile.css";
+import { fireToast } from "../../services/user/toastService.js";
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -165,17 +166,20 @@ const [loading, setLoading] = useState(true);
 }, [addresses]);
 
 
-  const handleSaveChanges = () => {
-    if (!formData.firstName || !formData.lastName || !formData.email) {
-      alert("Please fill first name, last name and email.");
-      return;
-    }
-    if (!addresses[0].address || !addresses[0].countryCode) {
-      alert("Please fill your primary address and country.");
-      return;
-    }
-    setIsEditing(false);
-  };
+const handleSaveChanges = () => {
+  if (!formData.firstName || !formData.lastName || !formData.email) {
+    fireToast("PROFILE.REQUIRED", "warning");
+    return;
+  }
+
+  if (!addresses[0].address || !addresses[0].countryCode) {
+    fireToast("PROFILE.ADDRESS_REQUIRED", "warning");
+    return;
+  }
+
+  setIsEditing(false);
+};
+
 
   const handleCancel = () => {
     navigate(-1);
@@ -186,16 +190,13 @@ const [loading, setLoading] = useState(true);
   };
 
 
-  const handleSubmit = async () => {
- const storedUserRaw = localStorage.getItem("authUser");
-const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
-const u_id = storedUser?.u_id ?? null;
-
-console.log("✅ handleSubmit resolved u_id:", u_id);
-
+ const handleSubmit = async () => {
+  const storedUserRaw = localStorage.getItem("authUser");
+  const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
+  const u_id = storedUser?.u_id ?? null;
 
   if (!u_id) {
-    alert("User not logged in ❌");
+    fireToast("API.UNAUTHORIZED", "error");
     return;
   }
 
@@ -222,28 +223,30 @@ console.log("✅ handleSubmit resolved u_id:", u_id);
   };
 
   try {
-    const res = await fetch("http://localhost:5006/api/profiles/complete", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-user-id": u_id,
-      },
-      body: JSON.stringify(payload),
-    });
+    const res = await fetch(
+      "http://localhost:5006/api/profiles/complete",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": u_id,
+        },
+        body: JSON.stringify(payload),
+      }
+    );
 
     const data = await res.json();
 
     if (!res.ok) {
-      alert(data.message || "Failed to save profile ❌");
+      fireToast("PROFILE.SAVE_FAILED", "error");
       return;
     }
 
-    alert("Profile & addresses saved successfully ✅");
-    setIsEditing(false);   // 🔥 THIS FIXES IT
-    console.log(data);
+    fireToast("PROFILE.SAVE_SUCCESS", "success");
+    setIsEditing(false);
 
   } catch (err) {
-    alert("Server error ❌");
+    fireToast("API.NETWORK", "error");
   }
 };
 
@@ -333,9 +336,11 @@ console.log("🔍 UserProfile localStorage snapshot:", {
         setIsEditing(true);
       }
     } catch (err) {
-      console.error("Fetch profile failed", err);
-      setIsEditing(true);
-    } finally {
+  console.error("Fetch profile failed", err);
+  fireToast("PROFILE.FETCH_FAILED", "error");
+  setIsEditing(true);
+}
+finally {
       setLoading(false); // 🔥 VERY IMPORTANT
     }
   };

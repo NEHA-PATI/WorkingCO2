@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/user/Forgot.css";
+import { fireToast } from "../services/user/toastService.js";
 
 const ForgotPassword = () => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
@@ -8,18 +9,22 @@ const ForgotPassword = () => {
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || loading) return;
+
+    if (!email) {
+      fireToast("FORGOT.EMPTY_EMAIL", "warning");
+      return;
+    }
+
+    if (loading) return;
 
     setLoading(true);
-    setMessage("");
 
     try {
       const res = await fetch(
-        `http://localhost:5002/api/auth/password/forgot-password`,
+        `${API_URL}/api/auth/password/forgot-password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -27,20 +32,23 @@ const ForgotPassword = () => {
         }
       );
 
-      const data = await res.json();
+      await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Too many requests");
+        fireToast("FORGOT.FAILED", "error");
+        return;
       }
 
-      setMessage("Please check your mail");
+      fireToast("FORGOT.LINK_SENT", "success");
 
       setTimeout(() => {
         navigate("/", { replace: true });
       }, 2000);
+
     } catch (err) {
       console.error("Forgot password error:", err.message);
-      setMessage(err.message || "Too many requests. Try later.");
+      fireToast("API.NETWORK", "error");
+
     } finally {
       setLoading(false);
     }
@@ -58,19 +66,13 @@ const ForgotPassword = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          disabled={loading || message}
+          disabled={loading}
         />
 
-        <button type="submit" disabled={loading || message}>
+        <button type="submit" disabled={loading}>
           {loading ? "Sending..." : "Enter"}
         </button>
       </form>
-
-      {message && (
-        <p className="info-text" style={{ marginTop: "12px" }}>
-          {message}
-        </p>
-      )}
     </div>
   );
 };
