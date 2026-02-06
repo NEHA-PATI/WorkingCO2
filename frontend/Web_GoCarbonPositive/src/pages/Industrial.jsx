@@ -199,10 +199,9 @@ const IndustrialSolutions = () => {
           <div className="hero-content">
             {/* <div className="hero-number">01</div> */}
             <h2 className="hero-title">
-              WE BUILD A<br />
-              SUSTAINABLE
+              WE BUILD A SUSTAINABLE
               <br />
-              FUTURE
+              <span className="hero-title-center">FUTURE</span>
             </h2>
             <p className="hero-subtitle">
               Industrial solutions that transform your business while protecting
