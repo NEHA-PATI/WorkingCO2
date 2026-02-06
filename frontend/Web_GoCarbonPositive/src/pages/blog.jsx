@@ -13,7 +13,7 @@ const CATEGORY_COLORS = {
 };
 
 const getCategoryColor = (categoryName) => {
-  return CATEGORY_COLORS[categoryName?.toUpperCase()] || "#2ecc71";
+  return CATEGORY_COLORS[categoryName?.toUpperCase()] || "#49be72";
 };
 
 export default function BlogPage() {
