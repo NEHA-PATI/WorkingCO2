@@ -9,6 +9,7 @@ import {
   FaCog,
   FaSignOutAlt,
   FaUserPlus,
+  FaLeaf,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -262,6 +263,19 @@ localStorage.removeItem("userId");
                           style={{ color: "#f59e0b", fontSize: "1.8rem" }}
                         />
                         <span>My Wallet</span>
+                      </div>
+                    )}
+
+                    {role !== "admin" && (
+                      <div
+                        className="user-profile-dropdown-item"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          navigate("/community");
+                        }}
+                      >
+                        <FaLeaf style={{ color: "#16a34a" }} />
+                        <span>My Carbon Footprint</span>
                       </div>
                     )}
 
