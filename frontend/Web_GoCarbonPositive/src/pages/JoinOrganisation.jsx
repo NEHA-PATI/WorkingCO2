@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Country, State } from 'country-state-city';
 import "../styles/user/JoinOrganisation.css";
+import { fireToast } from "../services/user/toastService.js";
 
 const dropdownArrowSvg =
   `data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a5a3a' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e`;
@@ -123,7 +124,6 @@ export default function JoinOrganisation() {
   const [otpError, setOtpError] = useState('');
   const [otpSuccess, setOtpSuccess] = useState(false);
   const [errors, setErrors] = useState({});
-  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     const allCountries = Country.getAllCountries();
@@ -339,19 +339,17 @@ export default function JoinOrganisation() {
 
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const msg = data.message || "Failed to submit organization request";
-        window.alert(msg);
+        fireToast("ORG.REQUEST_FAILED", "error");
         return;
       }
 
       console.log('Form submitted:', payload);
-      setShowToast(true);
+      fireToast("ORG.REQUEST_SUBMITTED", "success");
       setTimeout(() => {
-        setShowToast(false);
         window.location.href = '/';
       }, 2000);
     } catch (err) {
-      window.alert("Unable to submit request. Please try again.");
+      fireToast("ORG.REQUEST_FAILED", "error");
     }
   };
 
@@ -386,14 +384,6 @@ export default function JoinOrganisation() {
 
   return (
     <div className="join-org-root">
-      {showToast && (
-        <div className="join-org-toast-overlay">
-          <div className="join-org-toast-box">
-            Registration form submitted successfully
-          </div>
-        </div>
-      )}
-
       <header className="join-org-header">
         <div className="join-org-header-content">
           <div>

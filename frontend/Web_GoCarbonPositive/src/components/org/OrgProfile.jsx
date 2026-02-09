@@ -8,6 +8,7 @@ import {
   FaMapMarkerAlt,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { fireToast } from "../../services/user/toastService.js";
 import "../../styles/org/OrgProfile.css";
 
 const OrgProfile = () => {
@@ -72,7 +73,7 @@ const OrgProfile = () => {
       setIsIdVerified(true);
       setShowIdOtp(false);
       setIdOtp("");
-      alert("ID verified successfully!");
+      fireToast("ORG.ID_VERIFIED", "success");
     }
   };
 
@@ -95,7 +96,7 @@ const OrgProfile = () => {
       setIsEmailVerified(true);
       setShowEmailOtp(false);
       setEmailOtp("");
-      alert("Email verified successfully!");
+      fireToast("ORG.EMAIL_VERIFIED", "success");
     }
   };
 
@@ -116,11 +117,11 @@ const OrgProfile = () => {
       !pinCode ||
       !fullAddress
     ) {
-      alert("Please fill all required fields");
+      fireToast("ORG.REQUIRED_FIELDS", "warning");
       return;
     }
     if (!isIdVerified || !isEmailVerified) {
-      alert("Please verify ID and Email");
+      fireToast("ORG.VERIFY_REQUIRED", "warning");
       return;
     }
     // Show summary card instead of form

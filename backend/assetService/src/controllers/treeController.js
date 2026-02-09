@@ -29,9 +29,10 @@ class TreeController {
       // Validate required fields
       if (!UID || !TreeName || !PlantingDate || !Height) {
         return res.status(400).json({
-          status: "error",
+          success: false,
           message:
             "Missing required fields: UID, TreeName, PlantingDate, Height",
+          data: null,
         });
       }
 
@@ -46,17 +47,19 @@ class TreeController {
       });
 
       res.status(201).json({
-        status: "success",
+        success: true,
         message: "Tree created successfully",
-        data: newTree,
-        treeCount: treeCount,
+        data: {
+          tree: newTree,
+          treeCount: treeCount,
+        },
       });
     } catch (error) {
       logger.error("Error creating Tree:", error);
       res.status(500).json({
-        status: "error",
+        success: false,
         message: "Failed to create Tree",
-        error: error.message,
+        data: { error: error.message },
       });
     }
   }
@@ -71,25 +74,25 @@ class TreeController {
 
       if (!userId) {
         return res.status(400).json({
-          status: "error",
+          success: false,
           message: "User ID is required",
+          data: null,
         });
       }
 
       const trees = await TreeModel.getByUserId(userId);
 
       res.status(200).json({
-        status: "success",
+        success: true,
         message: "Trees retrieved successfully",
-        count: trees.length,
         data: trees,
       });
     } catch (error) {
       logger.error("Error fetching Trees:", error);
       res.status(500).json({
-        status: "error",
+        success: false,
         message: "Failed to fetch Trees",
-        error: error.message,
+        data: { error: error.message },
       });
     }
   }
@@ -106,22 +109,23 @@ class TreeController {
 
       if (!tree) {
         return res.status(404).json({
-          status: "error",
+          success: false,
           message: "Tree not found",
+          data: null,
         });
       }
 
       res.status(200).json({
-        status: "success",
+        success: true,
         message: "Tree retrieved successfully",
         data: tree,
       });
     } catch (error) {
       logger.error("Error fetching Tree:", error);
       res.status(500).json({
-        status: "error",
+        success: false,
         message: "Failed to fetch Tree",
-        error: error.message,
+        data: { error: error.message },
       });
     }
   }
@@ -144,8 +148,9 @@ class TreeController {
 
       if (Object.keys(updateData).length === 0) {
         return res.status(400).json({
-          status: "error",
+          success: false,
           message: "No valid fields to update",
+          data: null,
         });
       }
 
@@ -153,8 +158,9 @@ class TreeController {
       const existingTree = await TreeModel.getById(tid);
       if (!existingTree) {
         return res.status(404).json({
-          status: "error",
+          success: false,
           message: "Tree not found",
+          data: null,
         });
       }
 
@@ -164,16 +170,16 @@ class TreeController {
       logger.info(`Tree updated successfully: ${tid}`);
 
       res.status(200).json({
-        status: "success",
+        success: true,
         message: "Tree updated successfully",
         data: updatedTree,
       });
     } catch (error) {
       logger.error("Error updating Tree:", error);
       res.status(500).json({
-        status: "error",
+        success: false,
         message: "Failed to update Tree",
-        error: error.message,
+        data: { error: error.message },
       });
     }
   }
@@ -190,24 +196,25 @@ class TreeController {
 
       if (!deletedTree) {
         return res.status(404).json({
-          status: "error",
+          success: false,
           message: "Tree not found",
+          data: null,
         });
       }
 
       logger.info(`Tree deleted successfully: ${tid}`);
 
       res.status(200).json({
-        status: "success",
+        success: true,
         message: "Tree deleted successfully",
         data: deletedTree,
       });
     } catch (error) {
       logger.error("Error deleting Tree:", error);
       res.status(500).json({
-        status: "error",
+        success: false,
         message: "Failed to delete Tree",
-        error: error.message,
+        data: { error: error.message },
       });
     }
   }
@@ -223,8 +230,9 @@ class TreeController {
 
       if (!image_url) {
         return res.status(400).json({
-          status: "error",
+          success: false,
           message: "Image URL is required",
+          data: null,
         });
       }
 
@@ -237,16 +245,16 @@ class TreeController {
       logger.info(`Image added to tree ${tid}`);
 
       res.status(201).json({
-        status: "success",
+        success: true,
         message: "Image added successfully",
         data: newImage,
       });
     } catch (error) {
       logger.error("Error adding tree image:", error);
       res.status(500).json({
-        status: "error",
+        success: false,
         message: "Failed to add image",
-        error: error.message,
+        data: { error: error.message },
       });
     }
   }
@@ -263,24 +271,25 @@ class TreeController {
 
       if (!deletedImage) {
         return res.status(404).json({
-          status: "error",
+          success: false,
           message: "Image not found",
+          data: null,
         });
       }
 
       logger.info(`Tree image deleted: ${imageId}`);
 
       res.status(200).json({
-        status: "success",
+        success: true,
         message: "Image deleted successfully",
         data: deletedImage,
       });
     } catch (error) {
       logger.error("Error deleting tree image:", error);
       res.status(500).json({
-        status: "error",
+        success: false,
         message: "Failed to delete image",
-        error: error.message,
+        data: { error: error.message },
       });
     }
   }
@@ -296,16 +305,18 @@ class TreeController {
 
       if (!status) {
         return res.status(400).json({
-          status: "error",
+          success: false,
           message: "Status is required",
+          data: null,
         });
       }
 
       const validStatuses = ["pending", "approved", "rejected"];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({
-          status: "error",
+          success: false,
           message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+          data: null,
         });
       }
 
@@ -318,24 +329,25 @@ class TreeController {
 
       if (!updatedTree) {
         return res.status(404).json({
-          status: "error",
+          success: false,
           message: "Tree not found",
+          data: null,
         });
       }
 
       logger.info(`Tree status updated: ${tid} -> ${status}`);
 
       res.status(200).json({
-        status: "success",
+        success: true,
         message: "Tree status updated successfully",
         data: updatedTree,
       });
     } catch (error) {
       logger.error("Error updating Tree status:", error);
       res.status(500).json({
-        status: "error",
+        success: false,
         message: "Failed to update Tree status",
-        error: error.message,
+        data: { error: error.message },
       });
     }
   }

@@ -14,6 +14,7 @@ import {
   fetchApplications,
 } from "../../services/admin/careerApi";
 import "../../styles/admin/CareerManagement.css";
+import { fireToast } from "../../services/user/toastService.js";
 
 export default function CareerManagement() {
   const [jobs, setJobs] = useState([]);
@@ -115,7 +116,7 @@ export default function CareerManagement() {
       await deleteJob(id);
       loadData();
     } catch (err) {
-      alert("Failed to delete job");
+      fireToast("CAREER.DELETE_FAILED", "error");
     }
   };
 
