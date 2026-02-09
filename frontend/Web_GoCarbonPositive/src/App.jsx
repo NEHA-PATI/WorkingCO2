@@ -43,11 +43,12 @@ import AdminReports from "./pages/admin/Reports";
 // Protected routes (in public layout)
 import ViewAssets from "./pages/ViewAssets";
 import Profile from "./components/common/Profile";
-import Wallet from "./pages/wallet";
+// import Wallet from "./pages/wallet";
 import Upload from "./components/upload";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import JoinOrganisation from "./pages/JoinOrganisation";
+import WalletUI from "./components/user/WalletUI";
 
 import OAuthSuccess from "./pages/OAuthSuccess";
 
@@ -68,7 +69,7 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/join-organisation" element={<JoinOrganisation />} />
           <Route path="/oauth-success" element={<OAuthSuccess />} />
-
+          <Route path="/walletui" element={<WalletUI />} />
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogDetailPage />} />
@@ -113,7 +114,7 @@ function App() {
             path="/wallet"
             element={
               <ProtectedRoute allowedRoles={["user", "organization"]}>
-                <Wallet />
+                <WalletUI />
               </ProtectedRoute>
             }
           />
@@ -215,3 +216,4 @@ function App() {
 }
 
 export default App;
+

@@ -53,7 +53,7 @@ export const USER_ORG_MENU = {
       color: "#2e7d32",
     },
     { label: "Add Asset", path: "/upload", icon: MdUpload, color: "#8e24aa" },
-    { label: "Wallet", action: "/wallet", icon: GiWallet, color: "#f59e0b" },
+    { label: "My Wallet", path: "/wallet", icon: GiWallet, color: "#f59e0b" },
     { label: "Community", path: "/community", icon: FaUsers, color: "#28a745" },
     { label: "Blog", path: "/blog", icon: FaBlog, color: "#ff5722" },
     {
@@ -94,7 +94,7 @@ export const USER_ORG_MENU = {
       icon: MdUpload,
       color: "#8e24aa",
     },
-    { label: "Wallet", action: "/wallet", icon: GiWallet, color: "#f59e0b" },
+    { label: "My Wallet", path: "/wallet", icon: GiWallet, color: "#f59e0b" },
     { label: "Community", path: "/community", icon: FaUsers, color: "#28a745" },
     { label: "Blog", path: "/blog", icon: FaBlog, color: "#ff5722" },
     {
@@ -141,3 +141,5 @@ export const ADMIN_MENU = [
   },
   { label: "Career Management", path: "/career-management", icon: FaBriefcase },
 ];
+
+
