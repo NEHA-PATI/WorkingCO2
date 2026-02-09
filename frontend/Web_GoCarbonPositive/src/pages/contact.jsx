@@ -214,29 +214,29 @@ export default function Contact() {
             <form onSubmit={handleSubmit} className="main-form">
               <div className="input-row">
                 <div className={`form-group ${formData.name ? "has-value" : ""}`}>
-                  <input className="form-input" type="text" name="name" placeholder=" " required value={formData.name} onChange={handleChange} onInput={handleChange} />
                   <label className="form-label">Full Name</label>
+                  <input className="form-input" type="text" name="name" placeholder="Enter your full name" required value={formData.name} onChange={handleChange} onInput={handleChange} />
                 </div>
                 <div className={`form-group ${formData.email ? "has-value" : ""}`}>
-                  <input className="form-input" type="email" name="email" placeholder=" " required value={formData.email} onChange={handleChange} onInput={handleChange} />
                   <label className="form-label">Email Address</label>
+                  <input className="form-input" type="email" name="email" placeholder="Enter your email address" required value={formData.email} onChange={handleChange} onInput={handleChange} />
                 </div>
               </div>
 
               <div className="input-row">
                 <div className={`form-group ${formData.phone ? "has-value" : ""}`}>
-                  <input className="form-input" type="tel" name="phone" placeholder=" " required value={formData.phone} onChange={handleChange} onInput={handleChange} />
                   <label className="form-label">Phone Number</label>
+                  <input className="form-input" type="tel" name="phone" placeholder="Enter your phone number" required value={formData.phone} onChange={handleChange} onInput={handleChange} />
                 </div>
                 <div className={`form-group ${formData.subject ? "has-value" : ""}`}>
-                  <input className="form-input" type="text" name="subject" placeholder=" " required value={formData.subject} onChange={handleChange} onInput={handleChange} />
                   <label className="form-label">Subject</label>
+                  <input className="form-input" type="text" name="subject" placeholder="Enter subject" required value={formData.subject} onChange={handleChange} onInput={handleChange} />
                 </div>
               </div>
 
               <div className={`form-group ${formData.message ? "has-value" : ""}`}>
-                <textarea className="form-input textarea" name="message" placeholder=" " required rows={4} value={formData.message} onChange={handleChange} onInput={handleChange}></textarea>
                 <label className="form-label">Type Feedback Message</label>
+                <textarea className="form-input textarea" name="message" placeholder="Type your feedback message" required rows={4} value={formData.message} onChange={handleChange} onInput={handleChange}></textarea>
               </div>
 
               <button type="submit" className="submit-btn" disabled={isSubmitting}>
@@ -265,13 +265,13 @@ export default function Contact() {
             </header>
             <form className="modal-form" onSubmit={handleQuerySubmit}>
               <div className={`form-group ${queryData.subject ? "has-value" : ""}`}>
-                <input className="form-input" type="text" name="subject" placeholder=" " required value={queryData.subject} onChange={handleQueryChange} onInput={handleQueryChange} />
                 <label className="form-label">Subject</label>
+                <input className="form-input" type="text" name="subject" placeholder="Enter query subject" required value={queryData.subject} onChange={handleQueryChange} onInput={handleQueryChange} />
               </div>
 
               <div className={`form-group ${queryData.issue ? "has-value" : ""}`}>
-                <textarea className="form-input textarea" name="issue" placeholder=" " required rows={3} value={queryData.issue} onChange={handleQueryChange} onInput={handleQueryChange}></textarea>
                 <label className="form-label">Type your issue here</label>
+                <textarea className="form-input textarea" name="issue" placeholder="Describe your issue in detail" required rows={3} value={queryData.issue} onChange={handleQueryChange} onInput={handleQueryChange}></textarea>
               </div>
 
               <div className="select-row">
