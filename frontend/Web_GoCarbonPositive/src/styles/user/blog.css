@@ -7,7 +7,7 @@
 
 /* Hero Section */
 .blog-hero {
-  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 50%, #1abc9c 100%);
+  background:#e1faec;
   padding: 80px 64px 60px;
   position: relative;
   overflow: hidden;
@@ -40,7 +40,7 @@
   backdrop-filter: blur(10px);
   padding: 8px 16px;
   border-radius: 50px;
-  color: white;
+  color: rgb(0, 0, 0);
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 24px;
@@ -50,13 +50,13 @@
 .blog-hero-title {
   font-size: 56px;
   font-weight: 800;
-  color: white;
+  color: rgb(0, 0, 0);
   margin-bottom: 16px;
   line-height: 1.2;
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+  background: #198a4a;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

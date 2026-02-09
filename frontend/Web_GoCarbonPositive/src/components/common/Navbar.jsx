@@ -68,7 +68,7 @@ export default function Navbar() {
     toast.success("Logged out successfully!", { autoClose: 2000 });
     localStorage.removeItem("authUser");
 
-localStorage.removeItem("userId");
+    localStorage.removeItem("userId");
     navigate("/");
   };
 
@@ -153,12 +153,29 @@ localStorage.removeItem("userId");
         {/* ================= RIGHT ================= */}
 
         <div className="user-right-section">
-          <ArenaButton />
+          {/* <ArenaButton /> */}
+          <button
+            class="iconic-arena-button"
+            onClick={() => navigate("/arena-standalone")}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 24">
+              <path d="m18 0 8 12 10-8-4 20H4L0 4l10 8 8-12z"></path>
+            </svg>
+            ICONIC ARENA
+          </button>
 
           {/* ====== CHANGE STARTS HERE ONLY ====== */}
 
           {!isAuthenticated ? (
             <div className="auth-buttons">
+
+              {/* <button class="iconic-arena-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 24">
+                  <path d="m18 0 8 12 10-8-4 20H4L0 4l10 8 8-12z"></path>
+                </svg>
+                ICONIC ARENA
+              </button> */}
+
               <button className="signup-btn" onClick={openSignup}>
                 <FaUserPlus />
                 <span>Sign Up</span>
@@ -169,9 +186,7 @@ localStorage.removeItem("userId");
                 <span>Login</span>
               </button>
             </div>
-
           ) : (
-
             <div className="user-profile-container" ref={profileDropdownRef}>
               <div
                 onClick={() => setProfileOpen((p) => !p)}
@@ -182,7 +197,6 @@ localStorage.removeItem("userId");
                   cursor: "pointer",
                 }}
               >
-
                 {/* Avatar */}
                 <div style={{ position: "relative" }}>
                   <div className="user-profile-avatar">
@@ -206,9 +220,7 @@ localStorage.removeItem("userId");
                 </div>
 
                 <div className="user-profile-info">
-                  <div className="user-profile-name">
-                    {getDisplayName()}
-                  </div>
+                  <div className="user-profile-name">{getDisplayName()}</div>
                 </div>
 
                 <FaChevronDown className="user-profile-dropdown-icon" />
@@ -257,15 +269,15 @@ localStorage.removeItem("userId");
                         className="user-profile-dropdown-item"
                         onClick={() => {
                           setProfileOpen(false);
-                        openWalletModal();
-                      }}
-                    >
-                      <GiWallet
-                        className="profile-icon profile-icon-amber"
-                        style={{ fontSize: "1.8rem" }}
-                      />
-                      <span>My Wallet</span>
-                    </div>
+                          openWalletModal();
+                        }}
+                      >
+                        <GiWallet
+                          className="profile-icon profile-icon-amber"
+                          style={{ fontSize: "1.8rem" }}
+                        />
+                        <span>My Wallet</span>
+                      </div>
                     )}
 
                     <NavLink
@@ -291,7 +303,6 @@ localStorage.removeItem("userId");
           )}
 
           {/* ====== CHANGE ENDS HERE ONLY ====== */}
-
         </div>
       </div>
 

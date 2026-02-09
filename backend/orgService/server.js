@@ -8,6 +8,7 @@ require("dotenv").config();
 // Routes
 const orgRequestRoutes = require("./routes/orgRequestRoutes");
 const organizationRoutes = require("./routes/organizationRoutes");
+const orgEmailOtpRoutes = require("./routes/orgEmailOtpRoutes");
 
 // App init
 const app = express();
@@ -57,6 +58,7 @@ app.use(globalLimiter);
 /* ===================== ROUTES ===================== */
 app.use("/api/org-requests", orgRequestRoutes);
 app.use("/api/organizations", organizationRoutes);
+app.use("/api/org-email-otp", orgEmailOtpRoutes);
 
 /* ===================== HEALTH CHECK ===================== */
 app.get("/health", (req, res) => {

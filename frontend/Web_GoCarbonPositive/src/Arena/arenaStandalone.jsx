@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import "./arenaglobals.css";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useAnimationFrame } from 'framer-motion';
 import {
     Trophy, Medal, Crown, Flame, Sparkles, TrendingUp, Award, Star,
     ChevronLeft, ChevronRight, Check, Zap, X, CheckCircle2, Gift, ScrollText,
     UserPlus, ClipboardList, Linkedin, Instagram, Users, CalendarCheck, Gamepad2, Brain
 } from 'lucide-react';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 // Inline Styles
 const styles = `
@@ -49,8 +50,8 @@ const styles = `
 .arena-standalone-modal {
   position: fixed;
   left: 50%;
-  top: 10%;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
   max-width: 32rem;
   width: calc(100% - 2rem);
   background: white;
@@ -317,80 +318,6 @@ const MilestoneTracker = ({ currentStreak }) => {
     );
 };
 
-// TopThreeCard Component
-const TopThreeCard = ({ user, index }) => {
-    const colors = [
-        { gradient: 'from-yellow-400 via-yellow-500 to-amber-600', bg: 'bg-yellow-50', border: 'border-yellow-300', icon: Crown, iconColor: 'text-yellow-600' },
-        { gradient: 'from-slate-300 via-slate-400 to-slate-500', bg: 'bg-slate-50', border: 'border-slate-300', icon: Award, iconColor: 'text-slate-600' },
-        { gradient: 'from-amber-600 via-orange-500 to-amber-700', bg: 'bg-orange-50', border: 'border-orange-300', icon: Medal, iconColor: 'text-orange-600' },
-    ];
-
-    const config = colors[index];
-    const Icon = config.icon;
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.15 }}
-            className="relative"
-        >
-            <motion.div
-                animate={{ rotate: [0, -10, 10, -10, 0], y: [0, -3, 0] }}
-                transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
-                className="absolute -top-2 -right-2 z-20"
-            >
-                <div className={`w-9 h-9 bg-gradient-to-br ${config.gradient} rounded-full flex items-center justify-center shadow-xl border-2 border-white`}>
-                    <Icon className="w-4 h-4 text-white" />
-                </div>
-            </motion.div>
-
-            <motion.div
-                whileHover={{ scale: 1.05, y: -5 }}
-                className={`${config.bg} ${config.border} border-2 rounded-xl p-2.5 relative overflow-hidden shadow-lg`}
-            >
-                <div className={`absolute inset-0 bg-gradient-to-r ${config.gradient} opacity-5`} />
-                <motion.div
-                    animate={{ x: ['-100%', '100%'] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                    className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 skew-x-12"
-                />
-
-                <div className="flex items-center gap-2 relative z-10">
-                    <motion.div
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.6 }}
-                        className={`w-10 h-10 bg-gradient-to-br ${config.gradient} rounded-full flex items-center justify-center shadow-md border-2 border-white flex-shrink-0`}
-                    >
-                        <span className="text-white font-bold text-xs">{user.avatar}</span>
-                    </motion.div>
-
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1">
-                            <span className="text-sm">{user.emoji}</span>
-                            <h4 className="font-bold text-slate-800 text-xs truncate">{user.name}</h4>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Sparkles className={`w-2.5 h-2.5 ${config.iconColor}`} />
-                            <span className="font-bold text-slate-700 text-xs">{user.points.toLocaleString()}</span>
-                        </div>
-                    </div>
-
-                    {user.trend === 'up' && (
-                        <motion.div
-                            animate={{ y: [0, -2, 0] }}
-                            transition={{ duration: 1, repeat: Infinity }}
-                            className="text-emerald-500 flex-shrink-0"
-                        >
-                            <TrendingUp className="w-3 h-3" />
-                        </motion.div>
-                    )}
-                </div>
-            </motion.div>
-        </motion.div>
-    );
-};
-
 // Leaderboard Component
 const Leaderboard = () => {
     const leaderboardData = [
@@ -406,102 +333,146 @@ const Leaderboard = () => {
         { rank: 10, name: "Nina Patel", points: 5500, emoji: "🌈", trend: "up", avatar: "NP" },
     ];
 
-    const topThree = leaderboardData.slice(0, 3);
-    const restOfList = leaderboardData.slice(3);
+    const maxVisible = 6;
+    const visibleList = leaderboardData.slice(0, maxVisible);
+    const hasMore = leaderboardData.length > maxVisible;
 
     return (
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-white rounded-2xl border border-slate-200 shadow-sm sticky top-4"
-        >
-            <div className="p-5 border-b border-slate-100 bg-gradient-to-r from-violet-50 to-purple-50">
-                <div className="flex items-center gap-3">
-                    <motion.div
-                        animate={{ rotate: [0, -10, 10, 0] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg"
-                    >
-                        <Trophy className="w-6 h-6 text-white" />
-                    </motion.div>
-                    <div>
-                        <h3 className="font-bold text-slate-800 text-lg">Leaderboard</h3>
-                        <p className="text-xs text-slate-500">Top performers this week</p>
+        <div>
+            <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full"
+            >
+                <div className="p-5 border-b border-slate-100 bg-gradient-to-r from-violet-50 to-purple-50">
+                    <div className="flex items-center gap-3">
+                        <motion.div
+                            animate={{ rotate: [0, -10, 10, 0] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg"
+                        >
+                            <Trophy className="w-6 h-6 text-white" />
+                        </motion.div>
+                        <div>
+                            <h3 className="font-bold text-slate-800 text-lg">Leaderboard</h3>
+                            <p className="text-xs text-slate-500">Top performers this week</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
             <div className="p-3">
-                <div className="bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-xl p-3 mb-3 border border-amber-200">
-                    <div className="space-y-2">
-                        {topThree.map((user, index) => (
-                            <TopThreeCard key={user.rank} user={user} index={index} />
-                        ))}
-                    </div>
-                </div>
+                {visibleList.map((user, index) => {
+                    const isTop = user.rank <= 3;
+
+                    return (
+                        <motion.div
+                            key={user.rank}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            whileHover={{ scale: 1.02, x: 4 }}
+                            className={`
+                                flex items-center gap-3 p-3 rounded-xl mb-2
+                                transition-all cursor-pointer
+                                border
+                                ${isTop
+                                    ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-300'
+                                    : 'bg-white hover:bg-slate-50 border-transparent hover:border-slate-200'
+                                }
+                            `}
+                        >
+                            <div
+                                className={`
+                                    w-8 h-8 rounded-lg flex items-center justify-center
+                                    font-bold text-sm
+                                    ${isTop ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-600'}
+                                `}
+                            >
+                                {user.rank}
+                            </div>
+                            <div
+                                className={`
+                                    w-9 h-9 rounded-full flex items-center justify-center
+                                    text-white text-sm font-semibold shadow
+                                    ${isTop
+                                        ? 'bg-gradient-to-br from-amber-500 to-orange-500'
+                                        : 'bg-gradient-to-br from-violet-400 to-purple-500'
+                                    }
+                                `}
+                            >
+                                {user.avatar}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="text-base">{user.emoji}</span>
+                                    <span className="font-medium text-slate-800 text-sm truncate">
+                                        {user.name}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-1 mt-0.5">
+                                    <Sparkles className={`w-3 h-3 ${isTop ? 'text-amber-500' : 'text-violet-400'}`} />
+                                    <span className="text-xs text-slate-500">
+                                        {user.points.toLocaleString()} pts
+                                    </span>
+                                </div>
+                            </div>
+                            <div
+                                className={
+                                    user.trend === 'up'
+                                        ? 'text-emerald-500'
+                                        : user.trend === 'down'
+                                            ? 'text-red-400'
+                                            : 'text-slate-400'
+                                }
+                            >
+                                {user.trend === 'up' && (
+                                    <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 1, repeat: Infinity }}>
+                                        <TrendingUp className="w-4 h-4" />
+                                    </motion.div>
+                                )}
+                                {user.trend === 'down' && <TrendingUp className="w-4 h-4 rotate-180" />}
+                                {user.trend === 'same' && <div className="w-4 h-0.5 bg-slate-300 rounded-full" />}
+                            </div>
+                        </motion.div>
+                    );
+                })}
             </div>
 
-            <div className="p-3 max-h-[300px] overflow-y-auto">
-                {restOfList.map((user, index) => (
-                    <motion.div
-                        key={user.rank}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 + index * 0.05 }}
-                        whileHover={{ scale: 1.02, x: 4 }}
-                        className="flex items-center gap-3 p-3 rounded-xl mb-2 transition-all cursor-pointer hover:bg-slate-50 border border-transparent hover:border-slate-200"
-                    >
-                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-sm text-slate-600">
-                            {user.rank}
-                        </div>
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center text-white text-sm font-semibold shadow">
-                            {user.avatar}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-base">{user.emoji}</span>
-                                <span className="font-medium text-slate-800 text-sm truncate">{user.name}</span>
+                <div className="p-4 border-t border-slate-100 bg-gradient-to-r from-violet-50 to-purple-50 rounded-b-2xl">
+                    {hasMore && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                window.location.href = "/leaderboard";
+                            }}
+                            className="mb-3 w-full arena-standalone-btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 h-10"
+                        >
+                            See More
+                        </button>
+                    )}
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center shadow">
+                                <Flame className="w-4 h-4 text-white" />
                             </div>
-                            <div className="flex items-center gap-1 mt-0.5">
-                                <Sparkles className="w-3 h-3 text-violet-400" />
-                                <span className="text-xs text-slate-500">{user.points.toLocaleString()} pts</span>
-                            </div>
+                            <span className="text-sm font-semibold text-slate-700">Your Rank</span>
                         </div>
-                        <div className={`${user.trend === 'up' ? 'text-emerald-500' : user.trend === 'down' ? 'text-red-400' : 'text-slate-400'
-                            }`}>
-                            {user.trend === 'up' && (
-                                <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 1, repeat: Infinity }}>
-                                    <TrendingUp className="w-4 h-4" />
-                                </motion.div>
-                            )}
-                            {user.trend === 'down' && <TrendingUp className="w-4 h-4 rotate-180" />}
-                            {user.trend === 'same' && <div className="w-4 h-0.5 bg-slate-300 rounded-full" />}
+                        <div className="flex items-center gap-2">
+                            <span className="font-bold text-violet-600 text-lg">#42</span>
+                            <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                         </div>
-                    </motion.div>
-                ))}
-            </div>
-
-            <div className="p-4 border-t border-slate-100 bg-gradient-to-r from-violet-50 to-purple-50 rounded-b-2xl">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center shadow">
-                            <Flame className="w-4 h-4 text-white" />
-                        </div>
-                        <span className="text-sm font-semibold text-slate-700">Your Rank</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="font-bold text-violet-600 text-lg">#42</span>
-                        <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                     </div>
                 </div>
-            </div>
-        </motion.div>
+            </motion.div>
+        </div>
     );
 };
 
 // ContestCard Component
 const ContestCard = ({ contest, index, onClick, isCompleted }) => {
     const Icon = iconMap[contest.icon] || Zap;
+
+
 
     return (
         <motion.div
@@ -514,15 +485,27 @@ const ContestCard = ({ contest, index, onClick, isCompleted }) => {
                 }`}
         >
             <div className={`absolute inset-0 bg-gradient-to-br ${contest.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
-            <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: index * 0.1 + 0.2, type: "spring" }}
-                className={`absolute top-4 right-4 bg-gradient-to-r ${contest.color} text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5`}
-            >
-                <Zap className="w-4 h-4" />
-                <span>{contest.points} pts</span>
-            </motion.div>
+            {!isCompleted ? (
+                <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: index * 0.1 + 0.2, type: "spring" }}
+                    className={`absolute top-4 right-4 bg-gradient-to-r ${contest.color} text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5`}
+                >
+                    <Zap className="w-4 h-4" />
+                    <span>{contest.points} pts</span>
+                </motion.div>
+            ) : (
+                <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: [0.9, 1.05, 1] }}
+                    transition={{ duration: 0.6, type: "spring" }}
+                    className="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-full shadow-lg flex items-center gap-1.5"
+                >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Already Done!</span>
+                </motion.div>
+            )}
             {isCompleted && (
                 <motion.div
                     initial={{ scale: 0 }}
@@ -661,7 +644,114 @@ const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => 
                                 disabled={isCompleted}
                                 className={`arena-standalone-btn w-full bg-gradient-to-r ${contest.color} hover:opacity-90 text-white border-0 shadow-lg h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
-                                {isCompleted ? 'Completed for Today' : contest.buttonText}
+                                {isCompleted ? (contest.isDailyTask ? 'Completed for Today' : 'Completed') : contest.buttonText}
+                            </button>
+                        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
+    );
+};
+
+const RedeemModal = ({ reward, isOpen, onClose }) => {
+    const [addressType, setAddressType] = useState("home");
+    const [address, setAddress] = useState("");
+
+    if (!reward) return null;
+
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                        className="arena-standalone-modal-backdrop"
+                    />
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="arena-standalone-modal"
+                    >
+                        <div className="relative bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); onClose(); }}
+                                className="absolute top-4 right-4 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all z-50"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                            <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+                            <div className="relative">
+                                <h3 className="text-2xl font-bold">Redeem Your Tokens</h3>
+                                <p className="text-white/80 mt-1 text-sm">Confirm reward delivery details</p>
+                            </div>
+                        </div>
+
+                        <div className="p-6 space-y-5">
+                            <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl p-4">
+                                <div>
+                                    <div className="text-sm text-slate-500">Reward</div>
+                                    <div className="text-lg font-semibold text-slate-800">{reward.name}</div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-sm text-slate-500">Points</div>
+                                    <div className="text-lg font-bold text-amber-600">{reward.points.toLocaleString()} pts</div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-slate-700">Select Address Type</label>
+                                <select
+                                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                                    value={addressType}
+                                    onChange={(e) => setAddressType(e.target.value)}
+                                >
+                                    <option value="home">Home</option>
+                                    <option value="office">Office</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-slate-700">Delivery Address</label>
+                                <textarea
+                                    rows={3}
+                                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                                    placeholder="Enter full delivery address"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                                <div className="flex items-center justify-between text-sm text-slate-600">
+                                    <span>Your Points</span>
+                                    <span className="font-semibold">12,450 pts</span>
+                                </div>
+                                <div className="flex items-center justify-between text-sm text-slate-600 mt-1">
+                                    <span>After Redeem</span>
+                                    <span className="font-semibold">7,450 pts</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-6 pt-0 flex items-center gap-3">
+                            <button
+                                onClick={onClose}
+                                className="arena-standalone-btn w-full bg-slate-100 text-slate-700 hover:bg-slate-200"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={onClose}
+                                className="arena-standalone-btn w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90"
+                            >
+                                Confirm Redeem
                             </button>
                         </div>
                     </motion.div>
@@ -672,7 +762,7 @@ const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => 
 };
 
 // RewardsShowcase Component
-const RewardsShowcase = () => {
+const RewardsShowcase = ({ onRedeem }) => {
     const rewards = [
         { name: "Premium T-Shirt", points: 5000 },
         { name: "Steel Bottle", points: 3500 },
@@ -685,9 +775,9 @@ const RewardsShowcase = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-16 mb-8"
+            className="h-full"
         >
-            <div className="bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-3xl border-2 border-amber-200 p-8 sm:p-12 shadow-xl overflow-hidden relative">
+            <div className="bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-3xl border-2 border-amber-200 p-8 sm:p-12 shadow-xl overflow-hidden relative w-full">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-200/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-200/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
                 <div className="relative z-10 text-center">
@@ -701,14 +791,32 @@ const RewardsShowcase = () => {
                             Exclusive Rewards
                             <Sparkles className="w-8 h-8 text-amber-500" />
                         </h2>
+
                     </motion.div>
-                    <motion.div
+
+
+                    {/* <DotLottieReact
+                        src="https://lottie.host/4cc49515-4bd8-4edf-9221-487bbb7f73bb/8ozMNPihpe.lottie"
+                        loop
+                        autoplay
+                    /> */}
+
+                    <DotLottieReact
+                        src="https://lottie.host/773bdabd-bd62-4e05-b664-c1cf62a11094/Kue8cbS72H.lottie"
+                        loop
+                        autoplay
+                    />
+
+
+
+
+                    {/* <motion.div
                         initial={{ scale: 0, rotate: -180 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ delay: 0.5, type: "spring", stiffness: 150 }}
                         className="relative mx-auto w-48 h-48 mb-8"
-                    >
-                        <motion.div
+                    > */}
+                    {/* <motion.div
                             animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
                             transition={{ duration: 2, repeat: Infinity }}
                             className="absolute inset-0 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full blur-2xl"
@@ -730,8 +838,7 @@ const RewardsShowcase = () => {
                                     <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                                 </motion.div>
                             ))}
-                        </div>
-                    </motion.div>
+                        </div> */}
                     <div className="max-w-2xl mx-auto">
                         <p className="text-slate-600 mb-4 text-sm">Redeem your points for amazing prizes:</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -748,8 +855,17 @@ const RewardsShowcase = () => {
                                         <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500" />
                                         <span className="font-semibold text-slate-700">{reward.name}</span>
                                     </div>
-                                    <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                                        {reward.points.toLocaleString()} pts
+                                    <div className="flex items-center gap-2">
+                                        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                            {reward.points.toLocaleString()} pts
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => onRedeem?.(reward)}
+                                            className="arena-standalone-btn h-8 px-3 text-xs bg-white border border-amber-200 text-amber-700 hover:bg-amber-50"
+                                        >
+                                            Redeem
+                                        </button>
                                     </div>
                                 </motion.div>
                             ))}
@@ -764,13 +880,14 @@ const RewardsShowcase = () => {
                     </motion.p>
                 </div>
             </div>
-        </motion.div>
+        </motion.div >
     );
 };
 
 // Main Arena Component
 export default function ArenaStandalone() {
     const [selectedContest, setSelectedContest] = useState(null);
+    const [selectedReward, setSelectedReward] = useState(null);
     const queryClient = useQueryClient();
 
     const { data: completions = [] } = useQuery({
@@ -789,6 +906,28 @@ export default function ArenaStandalone() {
     const isTaskCompletedToday = (taskType) => {
         const today = new Date().toISOString().split('T')[0];
         return completions.some(c => c.task_type === taskType && c.completed_date === today);
+    };
+
+    const getLocalCompleted = () => {
+        try {
+            const raw = localStorage.getItem("arenaStandaloneCompleted");
+            return raw ? JSON.parse(raw) : {};
+        } catch {
+            return {};
+        }
+    };
+
+    const setLocalCompleted = (taskType) => {
+        const current = getLocalCompleted();
+        current[taskType] = new Date().toISOString();
+        localStorage.setItem("arenaStandaloneCompleted", JSON.stringify(current));
+    };
+
+    const isTaskCompleted = (contest) => {
+        if (!contest?.taskType) return false;
+        if (contest.isDailyTask) return isTaskCompletedToday(contest.taskType);
+        const local = getLocalCompleted();
+        return Boolean(local[contest.taskType]);
     };
 
     const calculateStreak = () => {
@@ -818,25 +957,56 @@ export default function ArenaStandalone() {
             return;
         }
 
-        createCompletionMutation.mutate({
-            task_type: contest.taskType,
-            completed_date: new Date().toISOString().split('T')[0],
-            points_earned: contest.points
-        });
+        if (contest.isDailyTask) {
+            createCompletionMutation.mutate({
+                task_type: contest.taskType,
+                completed_date: new Date().toISOString().split('T')[0],
+                points_earned: contest.points
+            });
+        } else {
+            setLocalCompleted(contest.taskType);
+            toast.success('Task completed! Points added.');
+        }
 
         setSelectedContest(null);
     };
 
     const contests = [
-        { id: 1, title: "Sign Up Bonus", description: "Complete your profile setup", points: 500, icon: "UserPlus", color: "from-violet-500 to-purple-600", bgColor: "bg-violet-50", borderColor: "border-violet-200", buttonText: "Complete Profile", rules: ["Fill in all required profile fields", "Upload a profile picture", "Verify your email address", "Add your bio (minimum 50 characters)"], rewards: ["500 Arena Points", "Exclusive 'Pioneer' Badge", "Early access to new features"] },
-        { id: 2, title: "Take a Survey", description: "Share your valuable feedback", points: 150, icon: "ClipboardList", color: "from-emerald-500 to-teal-600", bgColor: "bg-emerald-50", borderColor: "border-emerald-200", buttonText: "Start Survey", rules: ["Answer all questions honestly", "Complete survey within 10 minutes", "One survey per day limit", "Thoughtful responses earn bonus points"], rewards: ["150 Arena Points", "Chance for bonus 50 points", "Entry into weekly raffle"] },
-        { id: 3, title: "Connect on LinkedIn", description: "Follow us on LinkedIn", points: 100, icon: "Linkedin", color: "from-blue-500 to-indigo-600", bgColor: "bg-blue-50", borderColor: "border-blue-200", buttonText: "Connect Now", rules: ["Follow our official LinkedIn page", "Like our latest post", "Share with your network for bonus", "Comment on any post for extra points"], rewards: ["100 Arena Points", "Professional network badge", "LinkedIn exclusive updates"] },
-        { id: 4, title: "Follow on Instagram", description: "Join our Instagram community", points: 100, icon: "Instagram", color: "from-pink-500 to-rose-600", bgColor: "bg-pink-50", borderColor: "border-pink-200", buttonText: "Follow Us", rules: ["Follow our Instagram account", "Like our latest 3 posts", "Tag us in your story for bonus", "Use our hashtag in your posts"], rewards: ["100 Arena Points", "Social butterfly badge", "Featured in our stories"] },
-        { id: 5, title: "Join Community", description: "Be part of our Discord family", points: 200, icon: "Users", color: "from-indigo-500 to-violet-600", bgColor: "bg-indigo-50", borderColor: "border-indigo-200", buttonText: "Join Discord", rules: ["Join our official Discord server", "Introduce yourself in #introductions", "Read and accept community guidelines", "Stay active for weekly bonuses"], rewards: ["200 Arena Points", "Community member role", "Access to exclusive channels"] },
+        { id: 1, title: "Sign Up Bonus", description: "Complete your profile setup", points: 500, icon: "UserPlus", color: "from-violet-500 to-purple-600", bgColor: "bg-violet-50", borderColor: "border-violet-200", buttonText: "Complete Profile", taskType: "signup_bonus", rules: ["Fill in all required profile fields", "Upload a profile picture", "Verify your email address", "Add your bio (minimum 50 characters)"], rewards: ["500 Arena Points", "Exclusive 'Pioneer' Badge", "Early access to new features"] },
+        { id: 2, title: "Take a Survey", description: "Share your valuable feedback", points: 150, icon: "ClipboardList", color: "from-emerald-500 to-teal-600", bgColor: "bg-emerald-50", borderColor: "border-emerald-200", buttonText: "Start Survey", taskType: "survey", rules: ["Answer all questions honestly", "Complete survey within 10 minutes", "One survey per day limit", "Thoughtful responses earn bonus points"], rewards: ["150 Arena Points", "Chance for bonus 50 points", "Entry into weekly raffle"] },
+        { id: 3, title: "Connect on LinkedIn", description: "Follow us on LinkedIn", points: 100, icon: "Linkedin", color: "from-blue-500 to-indigo-600", bgColor: "bg-blue-50", borderColor: "border-blue-200", buttonText: "Connect Now", taskType: "linkedin_follow", rules: ["Follow our official LinkedIn page", "Like our latest post", "Share with your network for bonus", "Comment on any post for extra points"], rewards: ["100 Arena Points", "Professional network badge", "LinkedIn exclusive updates"] },
+        { id: 4, title: "Follow on Instagram", description: "Join our Instagram community", points: 100, icon: "Instagram", color: "from-pink-500 to-rose-600", bgColor: "bg-pink-50", borderColor: "border-pink-200", buttonText: "Follow Us", taskType: "instagram_follow", rules: ["Follow our Instagram account", "Like our latest 3 posts", "Tag us in your story for bonus", "Use our hashtag in your posts"], rewards: ["100 Arena Points", "Social butterfly badge", "Featured in our stories"] },
+        { id: 5, title: "Join Community", description: "Be part of our Discord family", points: 200, icon: "Users", color: "from-indigo-500 to-violet-600", bgColor: "bg-indigo-50", borderColor: "border-indigo-200", buttonText: "Join Discord", taskType: "community_join", rules: ["Join our official Discord server", "Introduce yourself in #introductions", "Read and accept community guidelines", "Stay active for weekly bonuses"], rewards: ["200 Arena Points", "Community member role", "Access to exclusive channels"] },
         { id: 6, title: "Daily Check-in", description: "Claim your daily reward", points: 50, icon: "CalendarCheck", color: "from-amber-500 to-orange-600", bgColor: "bg-amber-50", borderColor: "border-amber-200", buttonText: "Check In", isDailyTask: true, taskType: "daily_checkin", rules: ["Check in once every 24 hours", "Maintain streak for multipliers", "7-day streak = 2x points", "30-day streak = 5x points"], rewards: ["50 Base Points", "Streak multiplier bonus", "Monthly streak badge"] },
         { id: 7, title: "Play Games", description: "Win points through mini-games", points: 75, icon: "Gamepad2", color: "from-cyan-500 to-blue-600", bgColor: "bg-cyan-50", borderColor: "border-cyan-200", buttonText: "Play Now", isDailyTask: true, taskType: "play_games", rules: ["Complete any available game", "Higher scores = more points", "3 attempts per game daily", "Weekly tournaments available"], rewards: ["Up to 75 Points per game", "Gamer badge", "Tournament eligibility"] },
         { id: 8, title: "Quiz Challenge", description: "Test your knowledge", points: 120, icon: "Brain", color: "from-fuchsia-500 to-pink-600", bgColor: "bg-fuchsia-50", borderColor: "border-fuchsia-200", buttonText: "Take Quiz", isDailyTask: true, taskType: "quiz", rules: ["Answer 10 questions correctly", "Time limit: 2 minutes", "Each correct answer = 12 points", "Perfect score = bonus 30 points"], rewards: ["Up to 150 Points", "Genius badge", "Leaderboard ranking boost"] }
     ];
+
+    // ===== Infinite Carousel Logic =====
+    const carouselRef = useRef(null);
+    const x = useMotionValue(0);
+    const isPausedRef = useRef(false);
+
+    // duplicate contests for circular behavior
+    const carouselItems = [...contests, ...contests];
+
+    // auto scroll speed (px/sec)
+    const AUTO_SCROLL_SPEED = 150;
+
+
+    useAnimationFrame((t, delta) => {
+        if (!carouselRef.current || isPausedRef.current) return;
+
+        const moveBy = (delta / 1000) * AUTO_SCROLL_SPEED;
+        x.set(x.get() - moveBy);
+
+        const halfWidth = carouselRef.current.scrollWidth / 2;
+
+        // circular wrap (ring buffer behavior)
+        if (x.get() <= -halfWidth) {
+            x.set(0);
+        }
+    });
 
     return (
         <>
@@ -845,14 +1015,24 @@ export default function ArenaStandalone() {
                 <HeroSlider />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <MilestoneTracker currentStreak={currentStreak} />
-                    <div className="flex flex-col lg:flex-row gap-8">
-                        <div className="lg:w-[70%]">
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-                                <h2 className="text-2xl font-bold text-slate-800">Earn Points</h2>
-                                <p className="text-slate-500 mt-1">Complete challenges to climb the leaderboard</p>
-                            </motion.div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {contests
+                    <div>
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+                            <h2 className="text-2xl font-bold text-slate-800">Earn Points</h2>
+                            <p className="text-slate-500 mt-1">Complete challenges to climb the leaderboard</p>
+                        </motion.div>
+                        <div className="relative overflow-hidden w-full mt-6">
+                            <motion.div
+                                ref={carouselRef}
+                                onMouseEnter={() => (isPausedRef.current = true)}
+                                onMouseLeave={() => (isPausedRef.current = false)}
+                                className="flex gap-4 cursor-grab active:cursor-grabbing"
+                                style={{ x }}
+                                drag="x"
+                                dragConstraints={{ left: -Infinity, right: Infinity }}
+                                dragMomentum={true}
+                                dragElastic={0.08}
+                            >
+                                {carouselItems
                                     .sort((a, b) => {
                                         if (a.isDailyTask && b.isDailyTask) {
                                             const aCompleted = isTaskCompletedToday(a.taskType);
@@ -863,28 +1043,52 @@ export default function ArenaStandalone() {
                                         return 0;
                                     })
                                     .map((contest, index) => (
-                                        <ContestCard
-                                            key={contest.id}
-                                            contest={contest}
-                                            index={index}
-                                            isCompleted={contest.isDailyTask && isTaskCompletedToday(contest.taskType)}
+                                        <div
+                                            key={`${contest.id}-${index}`}
+                                            className="min-w-[280px] sm:min-w-[320px]"
+                                        >
+                                            <ContestCard
+                                                contest={contest}
+                                                index={index}
+                                            isCompleted={isTaskCompleted(contest)}
                                             onClick={() => setSelectedContest(contest)}
                                         />
+                                    </div>
                                     ))}
-                            </div>
+                            </motion.div>
                         </div>
-                        <div className="lg:w-[30%]">
+                    </div>
+                    {/* ================= ROW 2: REWARDS + LEADERBOARD ================= */}
+                    <div
+                        className="
+                            mt-12
+                            grid
+                            grid-cols-1
+                            lg:grid-cols-[7fr_3fr]
+                            gap-8
+                            items-stretch
+                        "
+                    >
+                        <div className="h-full">
+                            <RewardsShowcase onRedeem={setSelectedReward} />
+                        </div>
+                        <div className="h-full flex">
                             <Leaderboard />
                         </div>
                     </div>
-                    <RewardsShowcase />
+
                 </div>
                 <ContestModal
                     contest={selectedContest}
                     isOpen={!!selectedContest}
                     onClose={() => setSelectedContest(null)}
                     onComplete={handleTaskComplete}
-                    isCompleted={selectedContest?.isDailyTask && isTaskCompletedToday(selectedContest.taskType)}
+                    isCompleted={isTaskCompleted(selectedContest)}
+                />
+                <RedeemModal
+                    reward={selectedReward}
+                    isOpen={!!selectedReward}
+                    onClose={() => setSelectedReward(null)}
                 />
             </div>
         </>

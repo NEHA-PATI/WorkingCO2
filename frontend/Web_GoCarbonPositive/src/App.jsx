@@ -7,7 +7,8 @@ import AdminLayout from "./layouts/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PrivacyPolicy from "./components/common/Privacy";
 import TermsAndConditions from "./components/common/T&C";
-import { ORG_DEFAULT_TAB_ID, ORG_TAB_CONFIG } from "./config/orgTabConfig";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Public pages
 import Home from "./pages/Home";
@@ -15,7 +16,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import About from "./pages/about";
 import Blog from "./pages/blog";
-import BlogDetailPage from './pages/blog-detail';
+import BlogDetailPage from "./pages/blog-detail";
 import Careers from "./pages/Careers";
 import Community from "./pages/community";
 import Contact from "./pages/contact";
@@ -53,10 +54,12 @@ import Arena from "./Arena/Arena";
 import ArenaStandalone from "./Arena/arenaStandalone";
 
 import NotFoundAnimation from "./pages/NotFoundAnimation";
+import { ORG_DEFAULT_TAB_ID, ORG_TAB_CONFIG } from "./config/orgTabConfig";
 
 function App() {
   return (
     <ModalProvider>
+      <ToastContainer />
       <Routes>
         <Route path="/arena" element={<Arena />} />
         <Route path="/arena-standalone" element={<ArenaStandalone />} />
@@ -81,8 +84,7 @@ function App() {
           <Route path="/settings" element={<NotFoundAnimation />} />
           <Route path="/privacypolicy" element={<PrivacyPolicy />} />
           <Route path="/termsandconditions" element={<TermsAndConditions />} />
-          <Route path="/industrial" element={< IndustrialSolutions />} />
-
+          <Route path="/industrial" element={<IndustrialSolutions />} />
 
           <Route path="/faq" element={<Faq />} />
 
@@ -221,6 +223,8 @@ function App() {
             path="/adminDashboard"
             element={<Navigate to="/admin/dashboard" replace />}
           />
+
+
 
           {/* ================= CATCH ALL ================= */}
           <Route path="*" element={<Navigate to="/" replace />} />

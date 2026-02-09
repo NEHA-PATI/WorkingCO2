@@ -9,7 +9,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 1000;
 }
 
 .user-left-section {
@@ -655,4 +655,61 @@
 
 .sidebar-icon {
   transition: color 0.2s ease;
+}
+
+
+/* From Uiverse.io by Yaya12085 */ 
+.iconic-arena-button {
+  width: fit-content;
+  display: flex;
+  align-items: center;
+
+  /* 🔽 SIZE CONTROL */
+  padding: 0.6em 0.8rem;   /* pehle: 1.2em 1rem */
+  font-size: 0.85rem;     /* NEW */
+  gap: 0.3rem;            /* pehle: 0.4rem */
+
+  cursor: pointer;
+  font-weight: 600;       /* thoda lighter */
+  border-radius: 22px;    /* pehle: 30px */
+
+  text-shadow: 1px 1px 2px rgb(136 0 136 / 40%);
+  background: linear-gradient(
+   15deg,
+  #0b0b0b,   /* deep black */
+  #2b0000,   /* dark red */
+  #6e0f0f,   /* crimson */
+  #b22222,   /* fire red */
+  #ff7a18,   /* bright orange */
+  #ff9f43,   /* soft orange glow */
+  #ff7a18,
+  #b22222,
+  #6e0f0f,
+  #2b0000,
+  #0b0b0b
+)
+no-repeat;
+  background-size: 200%;
+  color: #fff;
+  border: none;
+  background-position: left center;
+  box-shadow: 0 20px 8px -15px rgba(0,0,0,.2);
+  transition: background .3s ease;
+}
+
+
+
+.iconic-arena-button:hover {
+  background-size: 320%;
+  background-position: right center;
+}
+
+.iconic-arena-button:hover svg {
+  fill: #fff;
+}
+
+.iconic-arena-button svg {
+  width: 23px;
+  fill: #f09f33;
+  transition: .3s ease;
 }
