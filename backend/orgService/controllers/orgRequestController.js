@@ -41,18 +41,26 @@ exports.createOrgRequest = async (req, res) => {
             org_city
         } = req.body;
 
-        if (
-            !org_name ||
-            !org_type ||
-            !org_mail ||
-            !org_contact_number ||
-            !org_contact_person ||
-            !org_designation ||
-            !org_country ||
-            !org_state ||
-            !org_city
-        ) {
-            return res.status(400).json({ message: "All fields are required" });
+        const fields = {
+            org_name,
+            org_type,
+            org_mail,
+            org_contact_number,
+            org_contact_person,
+            org_designation,
+            org_country,
+            org_state,
+            org_city
+        };
+
+        const missing = Object.entries(fields)
+            .filter(([_, value]) => !value || String(value).trim() === "")
+            .map(([key]) => key);
+
+        if (missing.length > 0) {
+            return res.status(400).json({
+                message: `Missing required fields: ${missing.join(", ")}`
+            });
         }
 
         const org_request_id = await generateRequestId();
@@ -83,6 +91,8 @@ exports.createOrgRequest = async (req, res) => {
                 org_city
             ]
         );
+
+        console.log("ORG REQUEST INSERTED:", org_request_id);
 
         res.status(201).json({
             message: "Organization request submitted successfully",
@@ -141,17 +151,18 @@ exports.getOrgRequestById = async (req, res) => {
  * PUT /api/org-requests/:id/approve
  */
 exports.approveOrgRequest = async (req, res) => {
-    const client = await pool.connect();
+    const { id } = req.params; // org_request_id
+    const { password } = req.body;
 
+    if (!password) {
+        return res.status(400).json({
+            message: "Password is required to approve organization"
+        });
+    }
+
+    let client;
     try {
-        const { id } = req.params; // org_request_id
-        const { password } = req.body;
-
-        if (!password) {
-            return res.status(400).json({
-                message: "Password is required to approve organization"
-            });
-        }
+        client = await pool.connect();
 
         await client.query("BEGIN");
 
@@ -214,11 +225,15 @@ exports.approveOrgRequest = async (req, res) => {
         });
 
     } catch (error) {
-        await client.query("ROLLBACK");
+        if (client) {
+            await client.query("ROLLBACK");
+        }
         console.error("APPROVE ORG ERROR:", error);
         res.status(500).json({ message: "Internal server error" });
     } finally {
-        client.release();
+        if (client) {
+            client.release();
+        }
     }
 };
 

@@ -4,6 +4,8 @@ import { FaGoogle, FaLinkedin, FaGithub, FaEye, FaEyeSlash } from "react-icons/f
 import useAuth from "../auth/useAuth";
 import { useNavigate } from "react-router-dom";
 import LoadingPopup from "../components/user/LoadingPopup";
+import { fireToast } from "../services/user/toastService.js";
+
 
 const Signup = ({ onClose, onSwitchToLogin }) => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
@@ -24,7 +26,9 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
   const [otpDigits, setOtpDigits] = useState(Array(6).fill(""));
   const [otpTimer, setOtpTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
-  const { login } = useAuth();
+  // eslint-disable-next-line no-unused-vars
+const { login } = useAuth();
+
   const navigate = useNavigate();
 
   const handleClose = () => {
@@ -382,59 +386,57 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
+ const handleSignup = async (e) => {
+  e.preventDefault();
 
-    if (!validateForm()) {
+  if (!validateForm()) return;
+
+  setLoading(true);
+  setError({});
+
+  try {
+    const response = await fetch(`${API_URL}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: formData.fullName.trim(),
+        email: formData.email.toLowerCase().trim(),
+        password: formData.password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        fireToast("REGISTER.TOO_MANY", "error");
+      } else {
+        fireToast("REGISTER.FAILED", "error");
+      }
       return;
     }
 
-    setLoading(true);
-    setError({});
+    // ✅ SUCCESS CASE
+    setTempEmail(formData.email.toLowerCase().trim());
+    setTempToken(data.tempToken);
+    setShowOTP(true);
 
-    try {
-      const response = await fetch(`${API_URL}/api/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.fullName.trim(),
-          email: formData.email.toLowerCase().trim(),
-          password: formData.password,
-        }),
-      });
+    fireToast("REGISTER.OTP_SENT", "success");
 
-      const data = await response.json();
+  } catch (err) {
+    console.error("Signup Error:", err);
+    fireToast("API.NETWORK", "error");
 
-      if (!response.ok) {
-        if (response.status === 429) {
-          setError({
-            general: "Too many signup attempts. Please try again later.",
-          });
-        } else {
-          setError({ general: data.message || data.error || "Signup failed" });
-        }
-        return;
-      }
+  } finally {
+    setLoading(false);
+  }
+};
 
-      setTempEmail(formData.email.toLowerCase().trim());
-      setTempToken(data.tempToken);
-      setShowOTP(true);
-      setError({
-        success: "OTP sent! Check your email.",
-      });
-    } catch (err) {
-      console.error("Signup Error:", err);
-      setError({
-        general: "Cannot connect to server. Please try again.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleVerifyOtp = async () => {
     if (!otp.trim() || otp.trim().length !== 6) {
-      setError({ general: "Please enter a valid 6-digit OTP" });
+      fireToast("OTP.INVALID", "error");
+
       return;
     }
 
@@ -451,21 +453,23 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
         }),
       });
 
-      const data = await response.json();
 
       if (!response.ok) {
-        setError({ general: data.message || "OTP verification failed" });
+       fireToast("OTP.FAILED", "error");
+
         return;
       }
 
-      alert("✅ Email verified successfully!");
+      fireToast("OTP.VERIFIED", "success");
+
 
       // 👉 User ko login page pe bhejo (BEST PRACTICE)
       if (onClose) onClose();
       navigate("/login", { replace: true });
     } catch (err) {
       console.error("OTP Verification Error:", err);
-      setError({ general: "OTP verification failed. Please try again." });
+      fireToast("OTP.FAILED", "error");
+
     } finally {
       setLoading(false);
     }
@@ -508,17 +512,20 @@ const Signup = ({ onClose, onSwitchToLogin }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        setError({ general: data.message || "Failed to resend OTP" });
+       fireToast("OTP.RESEND_FAILED", "error");
+
         return;
       }
 
       // 🔥 VERY IMPORTANT — replace old token
       setTempToken(data.tempToken);
 
-      setError({ success: "OTP resent successfully! Check your email." });
+      fireToast("OTP.RESENT", "success");
+
     } catch (err) {
       console.error("Resend OTP Error:", err);
-      setError({ general: "Failed to resend OTP. Please try again." });
+      fireToast("OTP.RESEND_FAILED", "error");
+
     } finally {
       setLoading(false);
     }

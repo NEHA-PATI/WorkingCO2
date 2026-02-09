@@ -7,6 +7,8 @@ import "../styles/user/JoinOrganisation.css";
 const dropdownArrowSvg =
   `data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a5a3a' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e`;
 
+const ORG_API_URL = import.meta.env.VITE_ORG_SERVICE_URL || "http://localhost:5003";
+
 function useOutsideClick(ref, handler) {
   useEffect(() => {
     const listener = (e) => {
@@ -203,7 +205,7 @@ export default function JoinOrganisation() {
     }
   };
 
-  const handleVerifyEmail = () => {
+  const handleVerifyEmail = async () => {
     if (!formData.email) {
       setErrors(prev => ({ ...prev, email: 'Email is required' }));
       return;
@@ -213,37 +215,82 @@ export default function JoinOrganisation() {
       setErrors(prev => ({ ...prev, email: 'Please enter a valid email' }));
       return;
     }
-    setShowOTP(true);
-    setOtpError('');
-    setOtpSuccess(false);
-    setTimer(30);
-    setCanResend(false);
+    try {
+      const response = await fetch(`${ORG_API_URL}/api/org-email-otp/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email })
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setErrors(prev => ({ ...prev, email: data.message || "Failed to send OTP" }));
+        return;
+      }
+
+      setShowOTP(true);
+      setOtp(['', '', '', '', '', '']);
+      setOtpError('');
+      setOtpSuccess(false);
+      setTimer(30);
+      setCanResend(false);
+    } catch (err) {
+      setErrors(prev => ({ ...prev, email: "Unable to send OTP. Please try again." }));
+    }
   };
 
-  const handleResendOtp = () => {
-    setOtp(['', '', '', '', '', '']);
-    setTimer(30);
-    setCanResend(false);
-    setOtpError('');
-    setOtpSuccess(false);
+  const handleResendOtp = async () => {
+    try {
+      const response = await fetch(`${ORG_API_URL}/api/org-email-otp/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email })
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setOtpError(data.message || "Failed to resend OTP");
+        return;
+      }
+
+      setOtp(['', '', '', '', '', '']);
+      setTimer(30);
+      setCanResend(false);
+      setOtpError('');
+      setOtpSuccess(false);
+    } catch (err) {
+      setOtpError("Unable to resend OTP. Please try again.");
+    }
   };
 
-  const handleSubmitOtp = () => {
+  const handleSubmitOtp = async () => {
     const otpValue = otp.join('');
     if (otpValue.length !== 6) {
       setOtpError('Please enter all 6 digits');
       return;
     }
-    if (otpValue === '123456') {
+    try {
+      const response = await fetch(`${ORG_API_URL}/api/org-email-otp/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email, otp: otpValue })
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setOtpError(data.message || "Invalid OTP. Please try again.");
+        setOtp(['', '', '', '', '', '']);
+        return;
+      }
+
       setOtpSuccess(true);
       setOtpError('');
       setTimeout(() => {
         setEmailVerified(true);
         setShowOTP(false);
       }, 1500);
-    } else {
-      setOtpError('Invalid OTP. Please try again.');
-      setOtp(['', '', '', '', '', '']);
+    } catch (err) {
+      setOtpError("Unable to verify OTP. Please try again.");
     }
   };
 
@@ -265,15 +312,46 @@ export default function JoinOrganisation() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log('Form submitted:', formData);
+    if (!validateForm()) return;
+
+    const payload = {
+      org_name: formData.organizationName,
+      org_type: formData.organizationType === 'others'
+        ? formData.organizationTypeOther
+        : formData.organizationType,
+      org_mail: formData.email,
+      org_contact_number: formData.phoneNumber,
+      org_contact_person: formData.spocName,
+      org_designation: formData.spocDesignation,
+      org_country: formData.countryName,
+      org_state: formData.stateName,
+      org_city: formData.city
+    };
+
+    try {
+      const response = await fetch(`${ORG_API_URL}/api/org-requests`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const msg = data.message || "Failed to submit organization request";
+        window.alert(msg);
+        return;
+      }
+
+      console.log('Form submitted:', payload);
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
         window.location.href = '/';
       }, 2000);
+    } catch (err) {
+      window.alert("Unable to submit request. Please try again.");
     }
   };
 
@@ -382,7 +460,7 @@ export default function JoinOrganisation() {
                 )}
 
                 <div className="join-org-form-group">
-                  <label className="join-org-form-label">SPOC Person Name</label>
+                  <label className="join-org-form-label">Person Name</label>
                   <input
                     type="text"
                     name="spocName"
@@ -400,7 +478,7 @@ export default function JoinOrganisation() {
                 </div>
 
                 <div className="join-org-form-group">
-                  <label className="join-org-form-label">SPOC Designation</label>
+                  <label className="join-org-form-label">Designation</label>
                   <input
                     type="text"
                     name="spocDesignation"
@@ -418,7 +496,7 @@ export default function JoinOrganisation() {
                 </div>
 
                 <div className="join-org-form-group">
-                  <label className="join-org-form-label">SPOC Phone Number</label>
+                  <label className="join-org-form-label">Phone Number</label>
                   <div className="join-org-phone-group">
                     <div className="join-org-phone-code-wrapper">
                       <CustomDropdown
@@ -449,7 +527,7 @@ export default function JoinOrganisation() {
                 </div>
 
                 <div className="join-org-form-group">
-                  <label className="join-org-form-label">SPOC Email</label>
+                  <label className="join-org-form-label">Email</label>
                   <div className="join-org-email-group">
                     <div className="join-org-email-input-wrapper">
                       <input
