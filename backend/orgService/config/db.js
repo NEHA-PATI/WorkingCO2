@@ -25,8 +25,14 @@ pool.on("connect", () => {
   console.log("✅ Connected to PostgreSQL");
 });
 
+pool.on("error", (err) => {
+  console.error("❌ PostgreSQL pool error:", err.message);
+});
+
 pool.query("SELECT NOW()")
   .then((res) => console.log("🕐 DB time:", res.rows[0].now))
   .catch((err) => console.error("❌ PostgreSQL connection error:", err.message));
 
 module.exports = pool;
+
+

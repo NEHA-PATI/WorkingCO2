@@ -6,7 +6,7 @@ import { authApiClient, assetApiClient, notificationApiClient } from './apiClien
 export const authService = {
   login: async (email, password) => {
     try {
-      const response = await authApiClient.post('/api/auth/login', {
+      const response = await authApiClient.post('/api/v1/auth/login', {
         email,
         password
       });
@@ -20,7 +20,7 @@ export const authService = {
 
   register: async (email, password, name) => {
     try {
-      const response = await authApiClient.post('/api/auth/register', {
+      const response = await authApiClient.post('/api/v1/auth/register', {
         email,
         password,
         name
@@ -34,7 +34,7 @@ export const authService = {
 
   logout: async () => {
     try {
-      const response = await authApiClient.post('/api/auth/logout');
+      const response = await authApiClient.post('/api/v1/auth/logout');
       localStorage.removeItem('authToken');
       return response.data;
     } catch (error) {
@@ -47,7 +47,7 @@ export const authService = {
 
   refreshToken: async () => {
     try {
-      const response = await authApiClient.post('/api/auth/refresh');
+      const response = await authApiClient.post('/api/v1/auth/refresh');
       if (response.data.token) {
         localStorage.setItem('authToken', response.data.token);
       }
@@ -110,7 +110,7 @@ export const assetService = {
 export const notificationService = {
   getNotifications: async (filters = {}) => {
     try {
-      const response = await notificationApiClient.get('/api/notifications', {
+      const response = await notificationApiClient.get('/api/v1/notifications', {
         params: filters
       });
       return response.data;
@@ -122,7 +122,7 @@ export const notificationService = {
 
   getUnreadCount: async () => {
     try {
-      const response = await notificationApiClient.get('/api/notifications/unread');
+      const response = await notificationApiClient.get('/api/v1/notifications/unread');
       return response.data;
     } catch (error) {
       console.error('❌ Get Unread Count Error:', error);
@@ -132,7 +132,7 @@ export const notificationService = {
 
   markAsRead: async (notificationId) => {
     try {
-      const response = await notificationApiClient.patch(`/api/notifications/${notificationId}/read`);
+      const response = await notificationApiClient.patch(`/api/v1/notifications/${notificationId}/read`);
       return response.data;
     } catch (error) {
       console.error('❌ Mark As Read Error:', error);
@@ -142,7 +142,7 @@ export const notificationService = {
 
   markAllAsRead: async () => {
     try {
-      const response = await notificationApiClient.patch('/api/notifications/read/all');
+      const response = await notificationApiClient.patch('/api/v1/notifications/read/all');
       return response.data;
     } catch (error) {
       console.error('❌ Mark All As Read Error:', error);
