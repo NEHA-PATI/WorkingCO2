@@ -181,7 +181,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 7px;
+  padding-bottom: 6px;
+  padding-top: 6px;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
@@ -402,20 +403,21 @@
 .user-profile-dropdown-item svg {
   font-size: 1.2rem;
   flex-shrink: 0;
-  color: var(--profile-icon-color, #0f172a) !important;
-  fill: var(--profile-icon-color, #0f172a) !important;
+  color: var(--profile-icon-color, #0f172a);
+  fill: var(--profile-icon-color, #0f172a);
 }
 
 /* Profile dropdown icon colors */
 .profile-icon {
-  color: #0f172a;
+  --profile-icon-color: #0f172a;
+  color: var(--profile-icon-color);
   fill: currentColor;
 }
-.profile-icon-blue { color: #3b82f6; }
-.profile-icon-green { color: #10b981; }
-.profile-icon-amber { color: #f59e0b; }
-.profile-icon-slate { color: #64748b; }
-.profile-icon-red { color: #ef4444; }
+.profile-icon-blue { --profile-icon-color: #3b82f6; }
+.profile-icon-green { --profile-icon-color: #10b981; }
+.profile-icon-amber { --profile-icon-color: #f59e0b; }
+.profile-icon-slate { --profile-icon-color: #64748b; }
+.profile-icon-red { --profile-icon-color: #ef4444; }
 
 .user-profile-dropdown-item.logout {
   color: #ef4444;

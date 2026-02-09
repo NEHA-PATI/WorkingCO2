@@ -235,7 +235,7 @@ localStorage.removeItem("userId");
                       className="user-profile-dropdown-item"
                       onClick={() => setProfileOpen(false)}
                     >
-                      <FaUserCircle style={{ color: "#3b82f6" }} />
+                      <FaUserCircle className="profile-icon profile-icon-blue" />
                       <span>My Profile</span>
                     </NavLink>
 
@@ -246,7 +246,7 @@ localStorage.removeItem("userId");
                         navigate(getDashboardRoute());
                       }}
                     >
-                      <FaChartLine style={{ color: "#10b981" }} />
+                      <FaChartLine className="profile-icon profile-icon-green" />
                       <span>Dashboard</span>
                     </div>
 
@@ -255,14 +255,15 @@ localStorage.removeItem("userId");
                         className="user-profile-dropdown-item"
                         onClick={() => {
                           setProfileOpen(false);
-                          openWalletModal();
-                        }}
-                      >
-                        <GiWallet
-                          style={{ color: "#f59e0b", fontSize: "1.8rem" }}
-                        />
-                        <span>My Wallet</span>
-                      </div>
+                        openWalletModal();
+                      }}
+                    >
+                      <GiWallet
+                        className="profile-icon profile-icon-amber"
+                        style={{ fontSize: "1.8rem" }}
+                      />
+                      <span>My Wallet</span>
+                    </div>
                     )}
 
                     <NavLink
@@ -270,7 +271,7 @@ localStorage.removeItem("userId");
                       className="user-profile-dropdown-item"
                       onClick={() => setProfileOpen(false)}
                     >
-                      <FaCog style={{ color: "#64748b" }} />
+                      <FaCog className="profile-icon profile-icon-slate" />
                       <span>Settings</span>
                     </NavLink>
 
@@ -278,7 +279,7 @@ localStorage.removeItem("userId");
                       className="user-profile-dropdown-item logout"
                       onClick={handleLogout}
                     >
-                      <FaSignOutAlt />
+                      <FaSignOutAlt className="profile-icon profile-icon-red" />
                       <span>Logout</span>
                     </div>
                   </div>

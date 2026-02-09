@@ -63,7 +63,7 @@ const Home = () => {
                   className="org-btn"
                   onClick={() => navigate("/join-organisation")}
                 >
-                  REGISTER AS ORGANISATION
+                  APPLY AS AN ORGANISATION
                 </button>
               </div>
             </div>

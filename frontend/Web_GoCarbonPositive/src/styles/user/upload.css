@@ -25,35 +25,56 @@
   filter: brightness(1.03);
 }
 
-.card-icon {
-  font-size: 3rem;
-  margin: 0 auto 0.5rem auto; /* center horizontally using auto margins */
-  display: block; /* ensure it behaves as a block element for auto margins */
-  color: #2563eb; /* fallback */
+.dashboard-container .card-icon {
+  font-size: 1.9rem;
+  color: #2563eb !important; /* fallback */
   opacity: 1 !important;
   visibility: visible !important;
-  display: inline-block !important;
-  filter: none !important;
-  transform: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  position: static !important;
+  top: auto;
+  right: auto;
+  filter: none;
+  transform: none;
   z-index: 1;
 }
 
 .card.electric-vehicle .card-icon {
-  color: #3b82f6;
+  color: #3b82f6 !important;
+  fill: rgb(26, 26, 198);
+  stroke: rgb(26, 26, 198);
 }
 
 .card.trees .card-icon {
-  color: #10b981;
+  color: #10b981 !important;
+  fill: rgb(15, 150, 15);
+  stroke: rgb(15, 150, 15);
 }
 
 .card.solar-panel .card-icon {
-  color: #f59e0b;
+  color: #f59e0b !important;
+  fill: orange;
+  stroke: orange;
 }
 
 h2 {
   margin: 0.5rem 0;
   font-size: 1.6rem;
   font-weight: 600;
+}
+
+.card-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.card-title .card-icon {
+  order: -1;
 }
 
 .subtitle {
