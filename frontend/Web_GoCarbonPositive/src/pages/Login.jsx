@@ -328,7 +328,7 @@ const Login = ({ onClose, onSwitchToSignup }) => {
     setErrors({});
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -344,17 +344,17 @@ const Login = ({ onClose, onSwitchToSignup }) => {
         return;
       }
 
-      if (!data.user || !data.token) {
+      if (!data.data?.user || !data.data?.token) {
         fireToast("AUTH.LOGIN_ERROR", "error");
         return;
       }
 
-      if (!data.user.verified) {
+      if (!data.data.user.verified) {
         fireToast("AUTH.NOT_VERIFIED", "warning");
         return;
       }
 
-      if (data.user.status !== "active") {
+      if (data.data.user.status !== "active") {
         fireToast("AUTH.INACTIVE", "error");
         return;
       }
@@ -362,8 +362,8 @@ const Login = ({ onClose, onSwitchToSignup }) => {
       // ✅ SINGLE SOURCE OF TRUTH
       // ✅ SINGLE SOURCE OF TRUTH
       login({
-        token: data.token,
-        user: data.user,
+        token: data.data.token,
+        user: data.data.user,
       });
       fireToast("AUTH.LOGIN_SUCCESS");
 
@@ -393,7 +393,7 @@ const Login = ({ onClose, onSwitchToSignup }) => {
 
   const handleSocialLogin = (provider) => {
     if (provider === "Google") {
-      window.location.href = `${API_URL}/api/auth/oauth/google/login`;
+      window.location.href = `${API_URL}/api/v1/auth/oauth/google/login`;
     }
   };
 

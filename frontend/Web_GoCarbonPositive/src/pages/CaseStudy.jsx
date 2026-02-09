@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../styles/user/CaseStudy.css";
+import { fireToast } from "../services/user/toastService.js";
 
 /**
  * CaseStudy.jsx
@@ -96,21 +97,21 @@ export default function CaseStudy() {
       try {
         await navigator.share(shareData);
       } catch (e) {
-        alert("Share canceled.");
+        fireToast("SHARE.CANCELED", "info");
       }
     } else {
       // fallback: copy link
       try {
         await navigator.clipboard.writeText(window.location.href);
-        alert("Link copied to clipboard!");
+        fireToast("SHARE.COPIED", "success");
       } catch {
-        alert("Unable to copy link. URL: " + window.location.href);
+        fireToast("SHARE.COPY_FAILED", "error");
       }
     }
   };
 
   const handlePlayVideo = () => {
-    alert("Play video — replace with modal or video player.");
+    fireToast("INFO.FEATURE_TBD", "info");
   };
 
   const openCase = (id) => {

@@ -1,6 +1,6 @@
 import notificationClient from '../api/notificationClient';
 
-const BASE = '/api/notifications';
+const BASE = '/api/v1/notifications';
 
 export const fetchNotifications = (filters = {}) =>
   notificationClient.get(BASE, { params: filters }).then(res => res.data);

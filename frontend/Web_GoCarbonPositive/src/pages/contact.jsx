@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/user/contact.css';
+import { fireToast } from '../services/user/toastService.js';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -51,7 +52,9 @@ export default function Contact() {
       const data = await res.json();
 
       if (res.ok) {
-        alert(`Message sent successfully! Contact ID: ${data.contact_id}`);
+        fireToast("CONTACT.MESSAGE_SENT", "success", {
+          id: data.contact_id,
+        });
         setFormData({
           name: "",
           email: "",
@@ -60,11 +63,11 @@ export default function Contact() {
           message: "",
         });
       } else {
-        alert(data.message || "Failed to send message");
+        fireToast("CONTACT.MESSAGE_FAILED", "error");
       }
     } catch (error) {
       console.error("CONTACT ERROR:", error);
-      alert("Something went wrong!");
+      fireToast("API.NETWORK", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -90,7 +93,7 @@ export default function Contact() {
       const u_id = storedUser?.u_id ?? null;
 
       if (!u_id) {
-        alert("Please login to raise a query");
+        fireToast("CONTACT.LOGIN_REQUIRED", "warning");
         return;
       }
 
@@ -113,7 +116,9 @@ export default function Contact() {
       const data = await res.json();
 
       if (res.ok) {
-        alert(`Query submitted! Ticket ID: ${data.ticket_id}`);
+        fireToast("TICKET.SUBMITTED", "success", {
+          id: data.ticket_id,
+        });
         setShowQueryModal(false);
         setQueryData({
           subject: "",
@@ -122,11 +127,11 @@ export default function Contact() {
           priority: "",
         });
       } else {
-        alert(data.message || "Failed to submit query");
+        fireToast("TICKET.SUBMIT_FAILED", "error");
       }
     } catch (error) {
       console.error("RAISE QUERY ERROR:", error);
-      alert("Something went wrong");
+      fireToast("API.NETWORK", "error");
     } finally {
       setIsSubmitting(false);
     }
