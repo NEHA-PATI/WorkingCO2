@@ -139,6 +139,7 @@ class BlogController {
         return res.status(400).json({
           success: false,
           message: 'Search query is required',
+          data: null,
         });
       }
 

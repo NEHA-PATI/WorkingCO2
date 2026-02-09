@@ -13,6 +13,18 @@ const { MESSAGES, ROLES } = require('../config/constants');
  */
 router.post('/event', async (req, res) => {
   try {
+    const internalSecret =
+      req.headers['x-internal-secret'] || req.headers['x_internal_secret'];
+    if (
+      !process.env.INTERNAL_SECRET ||
+      internalSecret !== process.env.INTERNAL_SECRET
+    ) {
+      return res.status(403).json({
+        status: 'error',
+        message: MESSAGES.UNAUTHORIZED
+      });
+    }
+
     const eventData = req.body;
     await EventService.processEvent(eventData);
     res.status(200).json({

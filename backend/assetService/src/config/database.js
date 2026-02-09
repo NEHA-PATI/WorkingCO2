@@ -23,8 +23,12 @@ const pool = new Pool({
   connectionTimeoutMillis: 10000,
 });
 
+pool.on('connect', () => {
+  console.log('✅ Database connected successfully');
+});
+
 pool.on('error', (err, client) => {
-  console.error('Unexpected error on idle client', err);
+  console.error('❌ Database pool error:', err.message);
 });
 
 const testConnection = async () => {
