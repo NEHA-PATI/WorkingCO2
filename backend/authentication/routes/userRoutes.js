@@ -1,12 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
+const verifyToken = require('../middlewares/verifyToken');
+const allowRoles = require('../middlewares/allowRoles');
+
+// Apply auth middleware to all routes in this router
+router.use(verifyToken);
 
 /**
  * Approve user - Set status to 'active'
  * PATCH /api/users/:userId/approve
  */
-router.patch('/:userId/approve', async (req, res) => {
+router.patch('/:userId/approve', allowRoles('admin'), async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -45,7 +50,7 @@ router.patch('/:userId/approve', async (req, res) => {
  * Reject user - Set status to 'rejected'
  * PATCH /api/users/:userId/reject
  */
-router.patch('/:userId/reject', async (req, res) => {
+router.patch('/:userId/reject', allowRoles('admin'), async (req, res) => {
   const { userId } = req.params;
   const { reason } = req.body;
 
@@ -119,10 +124,34 @@ router.get('/email/:email', async (req, res) => {
 });
 
 /**
+ * Get all users (Admin only)
+ * GET /api/users
+ */
+router.get('/', allowRoles('admin'), async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, username, email, status, role_id, created_at FROM users ORDER BY created_at DESC'
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: result.rows
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch users',
+      error: error.message
+    });
+  }
+});
+
+/**
  * Update user status
  * PATCH /api/users/:userId/status
  */
-router.patch('/:userId/status', async (req, res) => {
+router.patch('/:userId/status', allowRoles('admin'), async (req, res) => {
   const { userId } = req.params;
   const { status } = req.body;
 
