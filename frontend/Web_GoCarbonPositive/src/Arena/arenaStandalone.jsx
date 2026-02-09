@@ -48,10 +48,7 @@ const styles = `
 }
 
 .arena-standalone-modal {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
   max-width: 32rem;
   width: calc(100% - 2rem);
   background: white;
@@ -60,6 +57,21 @@ const styles = `
   z-index: 51;
   max-height: 80vh;
   overflow-y: auto;
+}
+
+.arena-standalone-modal-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 51;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  padding: 1rem;
+}
+
+.arena-standalone-modal-wrap > .arena-standalone-modal {
+  pointer-events: auto;
 }
 `;
 
@@ -333,7 +345,7 @@ const Leaderboard = () => {
         { rank: 10, name: "Nina Patel", points: 5500, emoji: "🌈", trend: "up", avatar: "NP" },
     ];
 
-    const maxVisible = 6;
+    const maxVisible = 7;
     const visibleList = leaderboardData.slice(0, maxVisible);
     const hasMore = leaderboardData.length > maxVisible;
 
@@ -360,83 +372,83 @@ const Leaderboard = () => {
                     </div>
                 </div>
 
-            <div className="p-3">
-                {visibleList.map((user, index) => {
-                    const isTop = user.rank <= 3;
+                <div className="p-3">
+                    {visibleList.map((user, index) => {
+                        const isTop = user.rank <= 3;
 
-                    return (
-                        <motion.div
-                            key={user.rank}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            whileHover={{ scale: 1.02, x: 4 }}
-                            className={`
+                        return (
+                            <motion.div
+                                key={user.rank}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                whileHover={{ scale: 1.02, x: 4 }}
+                                className={`
                                 flex items-center gap-3 p-3 rounded-xl mb-2
                                 transition-all cursor-pointer
                                 border
                                 ${isTop
-                                    ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-300'
-                                    : 'bg-white hover:bg-slate-50 border-transparent hover:border-slate-200'
-                                }
+                                        ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-300'
+                                        : 'bg-white hover:bg-slate-50 border-transparent hover:border-slate-200'
+                                    }
                             `}
-                        >
-                            <div
-                                className={`
+                            >
+                                <div
+                                    className={`
                                     w-8 h-8 rounded-lg flex items-center justify-center
                                     font-bold text-sm
                                     ${isTop ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-600'}
                                 `}
-                            >
-                                {user.rank}
-                            </div>
-                            <div
-                                className={`
+                                >
+                                    {user.rank}
+                                </div>
+                                <div
+                                    className={`
                                     w-9 h-9 rounded-full flex items-center justify-center
                                     text-white text-sm font-semibold shadow
                                     ${isTop
-                                        ? 'bg-gradient-to-br from-amber-500 to-orange-500'
-                                        : 'bg-gradient-to-br from-violet-400 to-purple-500'
-                                    }
+                                            ? 'bg-gradient-to-br from-amber-500 to-orange-500'
+                                            : 'bg-gradient-to-br from-violet-400 to-purple-500'
+                                        }
                                 `}
-                            >
-                                {user.avatar}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-base">{user.emoji}</span>
-                                    <span className="font-medium text-slate-800 text-sm truncate">
-                                        {user.name}
-                                    </span>
+                                >
+                                    {user.avatar}
                                 </div>
-                                <div className="flex items-center gap-1 mt-0.5">
-                                    <Sparkles className={`w-3 h-3 ${isTop ? 'text-amber-500' : 'text-violet-400'}`} />
-                                    <span className="text-xs text-slate-500">
-                                        {user.points.toLocaleString()} pts
-                                    </span>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-base">{user.emoji}</span>
+                                        <span className="font-medium text-slate-800 text-sm truncate">
+                                            {user.name}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-1 mt-0.5">
+                                        <Sparkles className={`w-3 h-3 ${isTop ? 'text-amber-500' : 'text-violet-400'}`} />
+                                        <span className="text-xs text-slate-500">
+                                            {user.points.toLocaleString()} pts
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div
-                                className={
-                                    user.trend === 'up'
-                                        ? 'text-emerald-500'
-                                        : user.trend === 'down'
-                                            ? 'text-red-400'
-                                            : 'text-slate-400'
-                                }
-                            >
-                                {user.trend === 'up' && (
-                                    <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 1, repeat: Infinity }}>
-                                        <TrendingUp className="w-4 h-4" />
-                                    </motion.div>
-                                )}
-                                {user.trend === 'down' && <TrendingUp className="w-4 h-4 rotate-180" />}
-                                {user.trend === 'same' && <div className="w-4 h-0.5 bg-slate-300 rounded-full" />}
-                            </div>
-                        </motion.div>
-                    );
-                })}
-            </div>
+                                <div
+                                    className={
+                                        user.trend === 'up'
+                                            ? 'text-emerald-500'
+                                            : user.trend === 'down'
+                                                ? 'text-red-400'
+                                                : 'text-slate-400'
+                                    }
+                                >
+                                    {user.trend === 'up' && (
+                                        <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 1, repeat: Infinity }}>
+                                            <TrendingUp className="w-4 h-4" />
+                                        </motion.div>
+                                    )}
+                                    {user.trend === 'down' && <TrendingUp className="w-4 h-4 rotate-180" />}
+                                    {user.trend === 'same' && <div className="w-4 h-0.5 bg-slate-300 rounded-full" />}
+                                </div>
+                            </motion.div>
+                        );
+                    })}
+                </div>
 
                 <div className="p-4 border-t border-slate-100 bg-gradient-to-r from-violet-50 to-purple-50 rounded-b-2xl">
                     {hasMore && (
@@ -485,27 +497,15 @@ const ContestCard = ({ contest, index, onClick, isCompleted }) => {
                 }`}
         >
             <div className={`absolute inset-0 bg-gradient-to-br ${contest.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
-            {!isCompleted ? (
-                <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: index * 0.1 + 0.2, type: "spring" }}
-                    className={`absolute top-4 right-4 bg-gradient-to-r ${contest.color} text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5`}
-                >
-                    <Zap className="w-4 h-4" />
-                    <span>{contest.points} pts</span>
-                </motion.div>
-            ) : (
-                <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: [0.9, 1.05, 1] }}
-                    transition={{ duration: 0.6, type: "spring" }}
-                    className="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-full shadow-lg flex items-center gap-1.5"
-                >
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Already Done!</span>
-                </motion.div>
-            )}
+            <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: index * 0.1 + 0.2, type: "spring" }}
+                className={`absolute top-4 right-4 bg-gradient-to-r ${contest.color} text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5`}
+            >
+                <Zap className="w-4 h-4" />
+                <span>{contest.points} pts</span>
+            </motion.div>
             {isCompleted && (
                 <motion.div
                     initial={{ scale: 0 }}
@@ -535,11 +535,7 @@ const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => 
     const Icon = iconMap[contest.icon] || Zap;
 
     const handleAction = () => {
-        if (contest.isDailyTask) {
-            onComplete(contest);
-        } else {
-            onClose();
-        }
+        onComplete(contest);
     };
 
     return (
@@ -553,12 +549,13 @@ const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => 
                         onClick={onClose}
                         className="arena-standalone-modal-backdrop"
                     />
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="arena-standalone-modal"
-                    >
+                    <div className="arena-standalone-modal-wrap">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="arena-standalone-modal"
+                        >
                         <div className={`relative bg-gradient-to-r ${contest.color} p-6 text-white`}>
                             <button
                                 onClick={(e) => { e.stopPropagation(); onClose(); }}
@@ -644,10 +641,11 @@ const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => 
                                 disabled={isCompleted}
                                 className={`arena-standalone-btn w-full bg-gradient-to-r ${contest.color} hover:opacity-90 text-white border-0 shadow-lg h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
-                                {isCompleted ? (contest.isDailyTask ? 'Completed for Today' : 'Completed') : contest.buttonText}
+                                {isCompleted ? 'Completed for Today' : contest.buttonText}
                             </button>
                         </div>
-                    </motion.div>
+                        </motion.div>
+                    </div>
                 </>
             )}
         </AnimatePresence>
@@ -671,90 +669,92 @@ const RedeemModal = ({ reward, isOpen, onClose }) => {
                         onClick={onClose}
                         className="arena-standalone-modal-backdrop"
                     />
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="arena-standalone-modal"
-                    >
-                        <div className="relative bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onClose(); }}
-                                className="absolute top-4 right-4 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all z-50"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                            <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-                            <div className="relative">
-                                <h3 className="text-2xl font-bold">Redeem Your Tokens</h3>
-                                <p className="text-white/80 mt-1 text-sm">Confirm reward delivery details</p>
-                            </div>
-                        </div>
-
-                        <div className="p-6 space-y-5">
-                            <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl p-4">
-                                <div>
-                                    <div className="text-sm text-slate-500">Reward</div>
-                                    <div className="text-lg font-semibold text-slate-800">{reward.name}</div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-sm text-slate-500">Points</div>
-                                    <div className="text-lg font-bold text-amber-600">{reward.points.toLocaleString()} pts</div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-slate-700">Select Address Type</label>
-                                <select
-                                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
-                                    value={addressType}
-                                    onChange={(e) => setAddressType(e.target.value)}
+                    <div className="arena-standalone-modal-wrap">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="arena-standalone-modal"
+                        >
+                            <div className="relative bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onClose(); }}
+                                    className="absolute top-4 right-4 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all z-50"
                                 >
-                                    <option value="home">Home</option>
-                                    <option value="office">Office</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-slate-700">Delivery Address</label>
-                                <textarea
-                                    rows={3}
-                                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
-                                    placeholder="Enter full delivery address"
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                                <div className="flex items-center justify-between text-sm text-slate-600">
-                                    <span>Your Points</span>
-                                    <span className="font-semibold">12,450 pts</span>
-                                </div>
-                                <div className="flex items-center justify-between text-sm text-slate-600 mt-1">
-                                    <span>After Redeem</span>
-                                    <span className="font-semibold">7,450 pts</span>
+                                    <X className="w-4 h-4" />
+                                </button>
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                                <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+                                <div className="relative">
+                                    <h3 className="text-2xl font-bold">Redeem Your Tokens</h3>
+                                    <p className="text-white/80 mt-1 text-sm">Confirm reward delivery details</p>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="p-6 pt-0 flex items-center gap-3">
-                            <button
-                                onClick={onClose}
-                                className="arena-standalone-btn w-full bg-slate-100 text-slate-700 hover:bg-slate-200"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={onClose}
-                                className="arena-standalone-btn w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90"
-                            >
-                                Confirm Redeem
-                            </button>
-                        </div>
-                    </motion.div>
+                            <div className="p-6 space-y-5">
+                                <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl p-4">
+                                    <div>
+                                        <div className="text-sm text-slate-500">Reward</div>
+                                        <div className="text-lg font-semibold text-slate-800">{reward.name}</div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-sm text-slate-500">Points</div>
+                                        <div className="text-lg font-bold text-amber-600">{reward.points.toLocaleString()} pts</div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-slate-700">Select Address Type</label>
+                                    <select
+                                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                                        value={addressType}
+                                        onChange={(e) => setAddressType(e.target.value)}
+                                    >
+                                        <option value="home">Home</option>
+                                        <option value="office">Office</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-slate-700">Delivery Address</label>
+                                    <textarea
+                                        rows={3}
+                                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                                        placeholder="Enter full delivery address"
+                                        value={address}
+                                        onChange={(e) => setAddress(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                                    <div className="flex items-center justify-between text-sm text-slate-600">
+                                        <span>Your Points</span>
+                                        <span className="font-semibold">12,450 pts</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm text-slate-600 mt-1">
+                                        <span>After Redeem</span>
+                                        <span className="font-semibold">7,450 pts</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-6 pt-0 flex items-center gap-3">
+                                <button
+                                    onClick={onClose}
+                                    className="arena-standalone-btn w-full bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={onClose}
+                                    className="arena-standalone-btn w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90"
+                                >
+                                    Confirm Redeem
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
                 </>
             )}
         </AnimatePresence>
@@ -791,15 +791,7 @@ const RewardsShowcase = ({ onRedeem }) => {
                             Exclusive Rewards
                             <Sparkles className="w-8 h-8 text-amber-500" />
                         </h2>
-
                     </motion.div>
-
-
-                    {/* <DotLottieReact
-                        src="https://lottie.host/4cc49515-4bd8-4edf-9221-487bbb7f73bb/8ozMNPihpe.lottie"
-                        loop
-                        autoplay
-                    /> */}
 
                     <DotLottieReact
                         src="https://lottie.host/773bdabd-bd62-4e05-b664-c1cf62a11094/Kue8cbS72H.lottie"
@@ -807,38 +799,6 @@ const RewardsShowcase = ({ onRedeem }) => {
                         autoplay
                     />
 
-
-
-
-                    {/* <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{ delay: 0.5, type: "spring", stiffness: 150 }}
-                        className="relative mx-auto w-48 h-48 mb-8"
-                    > */}
-                    {/* <motion.div
-                            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            className="absolute inset-0 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-full blur-2xl"
-                        />
-                        <div className="relative w-full h-full bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 rounded-full flex items-center justify-center shadow-2xl">
-                            <Trophy className="w-24 h-24 text-white drop-shadow-lg" />
-                            {[...Array(6)].map((_, i) => (
-                                <motion.div
-                                    key={i}
-                                    animate={{
-                                        scale: [0, 1, 0],
-                                        rotate: [0, 180, 360],
-                                        x: [0, Math.cos((i * 60 * Math.PI) / 180) * 80, 0],
-                                        y: [0, Math.sin((i * 60 * Math.PI) / 180) * 80, 0]
-                                    }}
-                                    transition={{ duration: 2, repeat: Infinity, delay: i * 0.3, repeatDelay: 1 }}
-                                    className="absolute top-1/2 left-1/2"
-                                >
-                                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                </motion.div>
-                            ))}
-                        </div> */}
                     <div className="max-w-2xl mx-auto">
                         <p className="text-slate-600 mb-4 text-sm">Redeem your points for amazing prizes:</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -849,23 +809,15 @@ const RewardsShowcase = ({ onRedeem }) => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.7 + index * 0.1 }}
                                     whileHover={{ scale: 1.05, x: 5 }}
-                                    className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border-2 border-amber-200 shadow-md flex items-center justify-between"
+                                    onClick={() => onRedeem?.(reward)}
+                                    className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border-2 border-amber-200 shadow-md flex items-center justify-between cursor-pointer hover:border-amber-300"
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500" />
                                         <span className="font-semibold text-slate-700">{reward.name}</span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                                            {reward.points.toLocaleString()} pts
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => onRedeem?.(reward)}
-                                            className="arena-standalone-btn h-8 px-3 text-xs bg-white border border-amber-200 text-amber-700 hover:bg-amber-50"
-                                        >
-                                            Redeem
-                                        </button>
+                                    <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                        {reward.points.toLocaleString()} pts
                                     </div>
                                 </motion.div>
                             ))}
@@ -876,15 +828,15 @@ const RewardsShowcase = ({ onRedeem }) => {
                         transition={{ duration: 2, repeat: Infinity }}
                         className="mt-6 text-slate-600 font-medium"
                     >
-                        Complete challenges to earn points and unlock rewards! 🎁
+                        Complete challenges to earn points and unlock rewards!
                     </motion.p>
                 </div>
             </div>
-        </motion.div >
+        </motion.div>
     );
 };
 
-// Main Arena Component
+// Main Arena Component// Main Arena Component
 export default function ArenaStandalone() {
     const [selectedContest, setSelectedContest] = useState(null);
     const [selectedReward, setSelectedReward] = useState(null);
@@ -1094,3 +1046,4 @@ export default function ArenaStandalone() {
         </>
     );
 }
+
