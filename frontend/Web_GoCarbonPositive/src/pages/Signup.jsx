@@ -8,7 +8,7 @@ import { fireToast } from "../services/user/toastService.js";
 
 
 const Signup = ({ onClose, onSwitchToLogin }) => {
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
+  const API_URL = import.meta.env.VITE_AUTH_API || "http://15.206.213.50:5002";
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -376,7 +376,7 @@ const { login } = useAuth();
   setError({});
 
   try {
-    const response = await fetch(`${API_URL}/api/auth/register`, {
+    const response = await fetch("http://15.206.213.50:5002/api/v1/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -425,7 +425,7 @@ const { login } = useAuth();
     setError({});
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/verify`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -482,7 +482,7 @@ const { login } = useAuth();
     setError({});
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/resend-otp`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/resend-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -513,7 +513,7 @@ const { login } = useAuth();
   };
 
   const handleSocialLogin = (provider) => {
-    window.location.href = `${API_URL}/api/auth/oauth/google/login`;
+    window.location.href = `${API_URL}/api/v1/auth/oauth/google/login`;
   };
 
   return (
