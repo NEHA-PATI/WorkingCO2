@@ -8,7 +8,7 @@ import LoadingPopup from "../components/user/LoadingPopup";
 import { fireToast } from "../services/user/toastService.js";
 
 const Login = ({ onClose, onSwitchToSignup }) => {
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5002";
+  const API_URL =  import.meta.env.VITE_AUTH_API || "http://15.206.213.50:5002";
 
   const [formData, setFormData] = useState({
     email: "",
@@ -309,7 +309,7 @@ const Login = ({ onClose, onSwitchToSignup }) => {
     setErrors({});
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -374,7 +374,7 @@ const Login = ({ onClose, onSwitchToSignup }) => {
 
   const handleSocialLogin = (provider) => {
     if (provider === "Google") {
-      window.location.href = `${API_URL}/api/auth/oauth/google/login`;
+      window.location.href = `${API_URL}/api/v1/auth/oauth/google/login`;
     }
   };
 

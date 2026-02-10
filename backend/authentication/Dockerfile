@@ -1,20 +1,20 @@
-# Use Node.js LTS (Long Term Support) version
-FROM node:18-alpine
+# 1️⃣ Base image
+FROM node:20-alpine
 
-# Set working directory
+# 2️⃣ App directory
 WORKDIR /app
 
-# Copy package files first to leverage Docker layer caching
+# 3️⃣ Copy package files first (cache benefit)
 COPY package*.json ./
 
-# Install production dependencies
-RUN npm ci --only=production
+# 4️⃣ Install dependencies
+RUN npm install --production
 
-# Copy source code
+# 5️⃣ Copy rest of code
 COPY . .
 
-# Expose the port (Note: actual port depends on environment variable PORT)
+# 6️⃣ Expose port
 EXPOSE 5002
 
-# Start the application
-CMD ["npm", "start"]
+# 7️⃣ Start app
+CMD ["node", "server.js"]
