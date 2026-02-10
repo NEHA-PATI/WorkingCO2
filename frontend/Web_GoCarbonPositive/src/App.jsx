@@ -7,8 +7,6 @@ import AdminLayout from "./layouts/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PrivacyPolicy from "./components/common/Privacy";
 import TermsAndConditions from "./components/common/T&C";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 // Public pages
 import Home from "./pages/Home";
@@ -39,6 +37,8 @@ import AdminAnalytics from "./pages/admin/Analytics";
 import AdminCareerManagement from "./pages/admin/CareerManagement";
 import AdminCaseStudyManagement from "./pages/admin/CaseStudyManagement";
 import AdminReports from "./pages/admin/Reports";
+import AdminAssetManagement from "./pages/admin/AssetManagement";
+import AdminProfile from "./components/admin/AdminProfile";
 
 // Protected routes (in public layout)
 import ViewAssets from "./pages/ViewAssets";
@@ -56,7 +56,6 @@ import NotFoundAnimation from "./pages/NotFoundAnimation";
 function App() {
   return (
     <ModalProvider>
-      <ToastContainer />
       <Routes>
         <Route element={<BaseLayout />}>
           {/* ================= PUBLIC ROUTES ================= */}
@@ -176,6 +175,7 @@ function App() {
             <Route path="security" element={<AdminSecurity />} />
             <Route path="configuration" element={<AdminConfiguration />} />
             <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="asset-management" element={<AdminAssetManagement />} />
             <Route
               path="career-management"
               element={<AdminCareerManagement />}
@@ -185,6 +185,7 @@ function App() {
               element={<AdminCaseStudyManagement />}
             />
             <Route path="reports" element={<AdminReports />} />
+            <Route path="profile" element={<AdminProfile />} />
             {/* Redirect /admin to /admin/overview */}
             <Route path="" element={<Navigate to="overview" replace />} />
           </Route>

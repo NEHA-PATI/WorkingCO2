@@ -31,7 +31,9 @@ exports.createContactMessage = async (req, res) => {
 
     if (!name || !email || !message) {
       return res.status(400).json({
-        message: "Name, email and message are required"
+        success: false,
+        message: "Name, email and message are required",
+        data: null
       });
     }
 
@@ -45,14 +47,17 @@ exports.createContactMessage = async (req, res) => {
     );
 
     res.status(201).json({
+      success: true,
       message: "Message sent successfully",
-      contact_id
+      data: { contact_id }
     });
 
   } catch (error) {
     console.error("CREATE CONTACT ERROR:", error);
     res.status(500).json({
-      message: "Internal server error"
+      success: false,
+      message: "Internal server error",
+      data: null
     });
   }
 };
@@ -69,12 +74,18 @@ exports.getAllContactMessages = async (req, res) => {
        ORDER BY created_at DESC`
     );
 
-    res.json(result.rows);
+    res.json({
+      success: true,
+      message: "Contact messages fetched successfully",
+      data: result.rows
+    });
 
   } catch (error) {
     console.error("GET CONTACTS ERROR:", error);
     res.status(500).json({
-      message: "Internal server error"
+      success: false,
+      message: "Internal server error",
+      data: null
     });
   }
 };
@@ -96,16 +107,24 @@ exports.getContactById = async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({
-        message: "Message not found"
+        success: false,
+        message: "Message not found",
+        data: null
       });
     }
 
-    res.json(result.rows[0]);
+    res.json({
+      success: true,
+      message: "Contact message fetched successfully",
+      data: result.rows[0]
+    });
 
   } catch (error) {
     console.error("GET CONTACT ERROR:", error);
     res.status(500).json({
-      message: "Internal server error"
+      success: false,
+      message: "Internal server error",
+      data: null
     });
   }
 };

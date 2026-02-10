@@ -8,8 +8,7 @@ import {
   transactionService,
 } from "../services";
 import "../styles/user/ViewAssets.css";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import { GiTreeGrowth } from "react-icons/gi";
 import { PiSolarPanelLight } from "react-icons/pi";
 import { MdElectricBolt } from "react-icons/md";
@@ -583,7 +582,6 @@ const ViewAssets = () => {
 
   return (
     <div className="view-assets-container">
-      <ToastContainer position="top-right" autoClose={3000} />
 
       <div className="view-assets-header">
         <h1 className="main-heading">My Sustainable Assets</h1>
