@@ -1,5 +1,6 @@
 const pool = require("../config/db");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 
 /**
@@ -12,12 +13,14 @@ exports.organizationLogin = async (req, res) => {
 
         if (!org_id || !password) {
             return res.status(400).json({
-                message: "org_id and password are required"
+                success: false,
+                message: "org_id and password are required",
+                data: null
             });
         }
 
         const result = await pool.query(
-            `SELECT password_hash
+            `SELECT org_id, password_hash
              FROM organizations
              WHERE org_id = $1`,
             [org_id]
@@ -25,7 +28,9 @@ exports.organizationLogin = async (req, res) => {
 
         if (result.rows.length === 0) {
             return res.status(401).json({
-                message: "Invalid credentials"
+                success: false,
+                message: "Invalid credentials",
+                data: null
             });
         }
 
@@ -36,19 +41,42 @@ exports.organizationLogin = async (req, res) => {
 
         if (!isMatch) {
             return res.status(401).json({
-                message: "Invalid credentials"
+                success: false,
+                message: "Invalid credentials",
+                data: null
             });
         }
 
+        const token = jwt.sign(
+            {
+                id: result.rows[0].org_id,
+                u_id: result.rows[0].org_id,
+                role: "organization",
+                status: "active"
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+        );
+
         res.json({
+            success: true,
             message: "Login successful",
-            org_id
+            data: {
+                token,
+                org: {
+                    org_id: result.rows[0].org_id,
+                    role: "organization",
+                    status: "active"
+                }
+            }
         });
 
     } catch (error) {
         console.error("ORG LOGIN ERROR:", error);
         res.status(500).json({
-            message: "Internal server error"
+            success: false,
+            message: "Internal server error",
+            data: null
         });
     }
 };
@@ -73,12 +101,18 @@ exports.getAllOrganizations = async (req, res) => {
              ORDER BY o.created_at DESC`
         );
 
-        res.json(result.rows);
+        res.json({
+            success: true,
+            message: "Organizations fetched successfully",
+            data: result.rows
+        });
 
     } catch (error) {
         console.error("GET ORGANIZATIONS ERROR:", error);
         res.status(500).json({
-            message: "Internal server error"
+            success: false,
+            message: "Internal server error",
+            data: null
         });
     }
 };
@@ -117,16 +151,24 @@ exports.getOrganizationByOrgId = async (req, res) => {
 
         if (result.rows.length === 0) {
             return res.status(404).json({
-                message: "Organization not found"
+                success: false,
+                message: "Organization not found",
+                data: null
             });
         }
 
-        return res.json(result.rows[0]);
+        return res.json({
+            success: true,
+            message: "Organization fetched successfully",
+            data: result.rows[0]
+        });
 
     } catch (error) {
         console.error("GET ORG BY ORG ID ERROR:", error);
         return res.status(500).json({
-            message: "Internal server error"
+            success: false,
+            message: "Internal server error",
+            data: null
         });
     }
 };

@@ -20,16 +20,18 @@ class TransactionController {
       // Validate required fields
       if (!ev_id || !active_distance) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Missing required fields: ev_id, active_distance'
+          success: false,
+          message: 'Missing required fields: ev_id, active_distance',
+          data: null
         });
       }
 
       // Validate active_distance is positive
       if (active_distance <= 0) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Active distance must be greater than 0'
+          success: false,
+          message: 'Active distance must be greater than 0',
+          data: null
         });
       }
 
@@ -37,8 +39,9 @@ class TransactionController {
       const ev = await EVModel.getById(ev_id);
       if (!ev) {
         return res.status(404).json({
-          status: 'error',
-          message: 'EV not found'
+          success: false,
+          message: 'EV not found',
+          data: null
         });
       }
 
@@ -51,16 +54,16 @@ class TransactionController {
       });
 
       res.status(201).json({
-        status: 'success',
+        success: true,
         message: 'Transaction created successfully',
         data: newTransaction
       });
     } catch (error) {
       logger.error('Error creating transaction:', error);
       res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to create transaction',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
@@ -75,8 +78,9 @@ class TransactionController {
 
       if (!evId) {
         return res.status(400).json({
-          status: 'error',
-          message: 'EV ID is required'
+          success: false,
+          message: 'EV ID is required',
+          data: null
         });
       }
 
@@ -84,8 +88,9 @@ class TransactionController {
       const ev = await EVModel.getById(evId);
       if (!ev) {
         return res.status(404).json({
-          status: 'error',
-          message: 'EV not found'
+          success: false,
+          message: 'EV not found',
+          data: null
         });
       }
 
@@ -93,18 +98,19 @@ class TransactionController {
       const totalDistance = await TransactionModel.getTotalDistance(evId);
 
       res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'Transactions retrieved successfully',
-        count: transactions.length,
-        totalDistance: totalDistance,
-        data: transactions
+        data: {
+          transactions,
+          totalDistance
+        }
       });
     } catch (error) {
       logger.error('Error fetching transactions:', error);
       res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to fetch transactions',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
@@ -121,22 +127,23 @@ class TransactionController {
 
       if (!transaction) {
         return res.status(404).json({
-          status: 'error',
-          message: 'Transaction not found'
+          success: false,
+          message: 'Transaction not found',
+          data: null
         });
       }
 
       res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'Transaction retrieved successfully',
         data: transaction
       });
     } catch (error) {
       logger.error('Error fetching transaction:', error);
       res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to fetch transaction',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
@@ -153,24 +160,25 @@ class TransactionController {
 
       if (!deletedTransaction) {
         return res.status(404).json({
-          status: 'error',
-          message: 'Transaction not found'
+          success: false,
+          message: 'Transaction not found',
+          data: null
         });
       }
 
       logger.info(`Transaction deleted: ${tranId}`);
 
       res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'Transaction deleted successfully',
         data: deletedTransaction
       });
     } catch (error) {
       logger.error('Error deleting transaction:', error);
       res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to delete transaction',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }

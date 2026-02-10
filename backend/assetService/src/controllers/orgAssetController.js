@@ -31,7 +31,11 @@ export const createOrgAsset = async (req, res) => {
       [u_id]
     );
     if (userCheck.rows.length === 0) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+        data: null
+      });
     }
 
     // validate image (optional)
@@ -43,7 +47,11 @@ if (ImageId) {
   );
 
   if (imageCheck.rows.length === 0) {
-    return res.status(404).json({ error: "Image not found" });
+    return res.status(404).json({
+      success: false,
+      message: "Image not found",
+      data: null
+    });
   }
 }
 
@@ -97,7 +105,11 @@ if (ImageId) {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to create org asset" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to create org asset",
+      data: null
+    });
   }
 };
 
@@ -131,10 +143,18 @@ export const getAllOrgAssets = async (req, res) => {
     `;
 
     const { rows } = await query(sql);
-    res.json(rows);
+    res.json({
+      success: true,
+      message: "Org assets fetched successfully",
+      data: rows
+    });
   } catch (err) {
     console.error("GET ALL ORG ASSETS ERROR:", err);
-    res.status(500).json({ error: "Failed to fetch org assets" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch org assets",
+      data: null
+    });
   }
 };
 
@@ -157,13 +177,15 @@ export const getOrgAssetsByUser = async (req, res) => {
 
     res.json({
       success: true,
+      message: "Org assets fetched successfully",
       data: rows,
     });
   } catch (err) {
     console.error("ORG ASSET FETCH ERROR:", err);
     res.status(500).json({
       success: false,
-      error: "Failed to fetch org assets",
+      message: "Failed to fetch org assets",
+      data: null
     });
   }
 };
@@ -183,9 +205,17 @@ export const getOrgAssetsByStatus = async (req, res) => {
     `;
 
     const { rows } = await query(sql, [status]);
-    res.json(rows);
+    res.json({
+      success: true,
+      message: "Org assets fetched successfully",
+      data: rows
+    });
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch org assets by status" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch org assets by status",
+      data: null
+    });
   }
 };
 
@@ -205,10 +235,18 @@ export const updateOrgAssetStatus = async (req, res) => {
 
     await query(sql, [status, id]);
 
-    return res.json({ success: true });
+    return res.json({
+      success: true,
+      message: "Org asset status updated successfully",
+      data: null
+    });
   } catch (err) {
     console.error("ORG STATUS UPDATE ERROR:", err);
-    return res.status(500).json({ error: "Failed to update status" });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update status",
+      data: null
+    });
   }
 };
 
@@ -223,9 +261,17 @@ export const deleteOrgAsset = async (req, res) => {
     const sql = `DELETE FROM org_assets WHERE plantation_id = $1`;
     await query(sql, [id]);
 
-    res.json({ success: true, message: "Org asset deleted" });
+    res.json({
+      success: true,
+      message: "Org asset deleted",
+      data: null
+    });
   } catch (err) {
-    res.status(500).json({ error: "Delete failed" });
+    res.status(500).json({
+      success: false,
+      message: "Delete failed",
+      data: null
+    });
   }
 };
 
@@ -249,10 +295,18 @@ export const getOrgAssetsForWorkflow = async (req, res) => {
     `;
 
     const { rows } = await query(sql);
-    res.json(rows);
+    res.json({
+      success: true,
+      message: "Org workflow assets fetched successfully",
+      data: rows
+    });
   } catch (err) {
     console.error("ORG WORKFLOW ERROR:", err);
-    res.status(500).json({ error: "Failed to load org workflow assets" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to load org workflow assets",
+      data: null
+    });
   }
 };
 export const getApprovedOrgAssets = async (req, res) => {
@@ -282,10 +336,18 @@ export const getApprovedOrgAssets = async (req, res) => {
     sql += ` ORDER BY oa.created_at DESC`;
 
     const { rows } = await query(sql, params);
-    res.json(rows);
+    res.json({
+      success: true,
+      message: "Org assets fetched successfully",
+      data: rows
+    });
   } catch (err) {
     console.error("ORG APPROVED ASSETS ERROR:", err);
-    res.status(500).json({ error: "Failed to fetch org assets" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch org assets",
+      data: null
+    });
   }
 };
 

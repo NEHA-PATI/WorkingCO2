@@ -18,8 +18,9 @@ class StatusController {
 
       if (!userId) {
         return res.status(400).json({
-          status: "error",
+          success: false,
           message: "User ID is required",
+          data: null,
         });
       }
 
@@ -55,13 +56,17 @@ class StatusController {
         statusMap[row.asset_id] = row.status;
       });
 
-      res.status(200).json(statusMap);
+      res.status(200).json({
+        success: true,
+        message: "Asset statuses fetched successfully",
+        data: statusMap,
+      });
     } catch (error) {
       logger.error("Error fetching asset statuses:", error);
       res.status(500).json({
-        status: "error",
+        success: false,
         message: "Failed to fetch asset statuses",
-        error: error.message,
+        data: { error: error.message },
       });
     }
   }

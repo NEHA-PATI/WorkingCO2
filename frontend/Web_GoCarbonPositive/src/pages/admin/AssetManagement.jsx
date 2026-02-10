@@ -11,7 +11,7 @@ import {
   FaClockRotateLeft,
 } from "react-icons/fa6";
 
-import "../styles/AssetManagement.css";
+import "../../styles/admin/AssetManagement.css";
 
 const ITEMS_PER_PAGE = 10;
 

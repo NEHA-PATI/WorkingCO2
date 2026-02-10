@@ -8,6 +8,7 @@ import {
   FiDownloadCloud,
 } from "react-icons/fi";
 import "../styles/CareerManagement.css";
+import { fireToast } from "../services/toastService";
 
 const jobs = [
   {
@@ -85,7 +86,7 @@ export default function CareerManagement() {
   const handleExportPDF = () => {
     // placeholder: implement PDF generation (jsPDF) later
     console.log("Export PDF clicked - implement server or jsPDF later");
-    alert("Export PDF — placeholder. Implement jsPDF/server-side export.");
+    fireToast("CAREER.EXPORT_PLACEHOLDER", "info");
   };
 
   const handleEdit = (id) => {
@@ -100,7 +101,7 @@ export default function CareerManagement() {
     if (!confirm("Delete this job? This action cannot be undone.")) return;
     console.log("Delete job", id);
     // hook to delete API later
-    alert(`(Placeholder) Deleted job id ${id}`);
+    fireToast("CAREER.DELETE_PLACEHOLDER", "info", { id });
   };
 
   return (
