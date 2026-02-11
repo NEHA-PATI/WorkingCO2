@@ -627,12 +627,12 @@
 }
 
 .signup-btn:hover {
-  background: #87c08b;
+  background: #38b000;
   transform: translateY(-1px);
 }
 
 .login-btn {
-  background: #49be72;
+  background: #38b000;
   color: #ffffff;        /* simple seedha white */
   font-weight: 600;
 }
