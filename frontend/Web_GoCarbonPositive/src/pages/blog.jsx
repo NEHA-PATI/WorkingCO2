@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Search, Clock, User, TrendingUp, Loader2 } from "lucide-react";
 import "../styles/user/blog.css";
 import blogService from "../services/blog/blogService.js";
+import LoadingPopup from "../components/user/LoadingPopup.jsx";
 
 const CATEGORY_COLORS = {
   INSIGHTS: "#9b59b6",
@@ -17,12 +18,21 @@ const getCategoryColor = (categoryName) => {
 };
 
 export default function BlogPage() {
+  const [showInitialPopup, setShowInitialPopup] = useState(true);
   const [activeTab, setActiveTab] = useState("for-you");
   const [searchQuery, setSearchQuery] = useState("");
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({ total: 0, page: 1, totalPages: 0 });
+
+  useEffect(() => {
+    const popupTimer = setTimeout(() => {
+      setShowInitialPopup(false);
+    }, 3500);
+
+    return () => clearTimeout(popupTimer);
+  }, []);
 
   const fetchBlogs = useCallback(async (query = "", page = 1) => {
     setLoading(true);
@@ -62,6 +72,10 @@ export default function BlogPage() {
     if (activeTab === "trending") return true;
     return true;
   });
+
+  if (showInitialPopup) {
+    return <LoadingPopup isVisible={true} />;
+  }
 
   return (
     <div className="blog-page">
