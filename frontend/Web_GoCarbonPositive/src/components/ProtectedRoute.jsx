@@ -68,7 +68,7 @@ const ProtectedRoute = ({
 
   // All protected routes require authentication
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   // Account must be active

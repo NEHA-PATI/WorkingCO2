@@ -22,7 +22,7 @@
 .user-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .user-logo-icon {
@@ -32,9 +32,10 @@
 }
 
 .user-logo-text {
-  font-size: 1.4rem;
-  font-weight: bold;
-  letter-spacing: 1px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  line-height: 1;
   color: #050505;
 }
 
@@ -602,7 +603,6 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  /* dono buttons ke beech space */
 }
 
 .login-btn,
@@ -610,44 +610,45 @@
   display: flex;
   align-items: center;
   gap: 6px;
-
-  padding: 8px 16px;
-  border-radius: 8px;
-  /* button jaisa look */
+  padding: 0;
+  border-radius: 0;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease;
   border: none;
+  background: transparent;
+  box-shadow: none;
 }
 
-/* Signup Green Button */
 .signup-btn {
-  background: #f1f5f9;
-  color: white;
+  color: #111111;
 }
 
 .signup-btn:hover {
-  background: #38b000;
-  transform: translateY(-1px);
+  color: #2563eb;
 }
 
 .login-btn {
-  background: #38b000;
-  color: #ffffff;        /* simple seedha white */
-  font-weight: 600;
+  color: #16a34a;
 }
 
 .login-btn span,
 .login-btn svg {
-  color: #ffffff;        /* icon + text dono */
-  fill: #ffffff;
+  color: #16a34a;
+  fill: #16a34a;
 }
 
 
 .login-btn:hover {
-  background: #87c08b;
-  color: white;
-  transform: translateY(-1px);
+  color: #2563eb;
+}
+
+.login-btn:hover span,
+.login-btn:hover svg,
+.signup-btn:hover span,
+.signup-btn:hover svg {
+  color: #2563eb;
+  fill: #2563eb;
 }
 
 
@@ -660,56 +661,52 @@
 
 /* From Uiverse.io by Yaya12085 */ 
 .iconic-arena-button {
-  width: fit-content;
   display: flex;
   align-items: center;
-
-  /* 🔽 SIZE CONTROL */
-  padding: 0.6em 0.8rem;   /* pehle: 1.2em 1rem */
-  font-size: 0.85rem;     /* NEW */
-  gap: 0.3rem;            /* pehle: 0.4rem */
-
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 0.92rem;
   cursor: pointer;
-  font-weight: 600;       /* thoda lighter */
-  border-radius: 22px;    /* pehle: 30px */
-
-  text-shadow: 1px 1px 2px rgb(136 0 136 / 40%);
-  background: linear-gradient(
-   15deg,
-  #0b0b0b,   /* deep black */
-  #2b0000,   /* dark red */
-  #6e0f0f,   /* crimson */
-  #b22222,   /* fire red */
-  #ff7a18,   /* bright orange */
-  #ff9f43,   /* soft orange glow */
-  #ff7a18,
-  #b22222,
-  #6e0f0f,
-  #2b0000,
-  #0b0b0b
-)
-no-repeat;
-  background-size: 200%;
-  color: #fff;
-  border: none;
-  background-position: left center;
-  box-shadow: 0 20px 8px -15px rgba(0,0,0,.2);
-  transition: background .3s ease;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  border-radius: 10px;
+  text-shadow: none;
+  background: linear-gradient(120deg, #ecfdf3 0%, #d9f99d 45%, #bbf7d0 100%);
+  color: #14532d;
+  border: 1px solid #86efac;
+  box-shadow: 0 8px 14px -12px rgba(20, 83, 45, 0.55),
+    0 0 0 2px rgba(134, 239, 172, 0.22);
+  transition: background 0.25s ease, box-shadow 0.25s ease,
+    transform 0.2s ease;
 }
 
 
 
 .iconic-arena-button:hover {
-  background-size: 320%;
-  background-position: right center;
+  background: linear-gradient(120deg, #dcfce7 0%, #bef264 45%, #86efac 100%);
+  box-shadow: 0 12px 18px -14px rgba(20, 83, 45, 0.7),
+    0 0 0 2px rgba(74, 222, 128, 0.3);
+  transform: translateY(-1px);
 }
 
 .iconic-arena-button:hover svg {
-  fill: #fff;
+  fill: #15803d;
+  transform: none;
 }
 
 .iconic-arena-button svg {
-  width: 23px;
-  fill: #f09f33;
-  transition: .3s ease;
+  width: 18px;
+  fill: #16a34a;
+  transition: fill 0.2s ease;
 }
+
+.iconic-arena-video {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+
+
+
