@@ -609,10 +609,10 @@
 .signup-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   padding: 0;
   border-radius: 0;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   transition: color 0.2s ease;
   border: none;
@@ -625,7 +625,7 @@
 }
 
 .signup-btn:hover {
-  color: #2563eb;
+  color: #67df73;
 }
 
 .login-btn {
@@ -640,18 +640,16 @@
 
 
 .login-btn:hover {
-  color: #2563eb;
+  color: #67df73;
 }
 
 .login-btn:hover span,
 .login-btn:hover svg,
 .signup-btn:hover span,
 .signup-btn:hover svg {
-  color: #2563eb;
-  fill: #2563eb;
+  color: #67df73;
+  fill: #67df73;
 }
-
-
 
 
 .sidebar-icon {
