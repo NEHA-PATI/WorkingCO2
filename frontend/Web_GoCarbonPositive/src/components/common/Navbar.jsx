@@ -263,7 +263,7 @@ export default function Navbar() {
                         className="user-profile-dropdown-item"
                         onClick={() => {
                           setProfileOpen(false);
-                          openWalletModal();
+                          navigate("/wallet");
                         }}
                       >
                         <GiWallet
