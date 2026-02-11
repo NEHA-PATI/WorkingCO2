@@ -4,25 +4,13 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { USER_ORG_MENU } from "../../config/menuConfig";
 
-export default function HamburgerMenu({
-  role,
-  close,
-  openWalletModal,
-  handleLogout,
-}) {
+export default function HamburgerMenu({ role, close, handleLogout }) {
   const navigate = useNavigate();
   const menu = USER_ORG_MENU[role] || [];
 
   const handleItemClick = (item) => {
     close();
 
-    // ✅ FIX 1 – Wallet ko label se pakdo
-    if (item.label === "Wallet") {
-      openWalletModal();
-      return;
-    }
-
-    // Logout same
     if (item.action === "logout") {
       handleLogout();
       return;
@@ -43,7 +31,6 @@ export default function HamburgerMenu({
             style={{ "--sidebar-icon-color": item.color || "#111" }}
             onClick={() => handleItemClick(item)}
           >
-            {/* ✅ FIX 2 – COLOR FORCE */}
             <Icon
               className="sidebar-icon"
               color={item.color}
@@ -51,7 +38,6 @@ export default function HamburgerMenu({
                 fontSize: "1.7rem",
                 minWidth: "26px",
               }}
-            
             />
 
             <span>{item.label}</span>

@@ -14,7 +14,6 @@ import {
 import { fireToast } from "../../services/user/toastService.js";
 
 import HamburgerMenu from "./HamburgerMenu";
-import WalletPopup from "../../pages/wallet";
 import useAuth from "../../auth/useAuth";
 import ArenaButton from "../user/ArenaButton";
 
@@ -30,11 +29,10 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { user, role, isAuthenticated, authLoading, logout } = useAuth();
 
-  const { openLogin, openSignup } = useModal();
+  const { openLogin, openSignup, showLogin, showSignup } = useModal();
 
   /* ================= STATE ================= */
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [walletOpen, setWalletOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
   const sidebarRef = useRef(null);
@@ -73,12 +71,6 @@ export default function Navbar() {
     navigate("/");
   };
 
-  const openWalletModal = () => {
-    setWalletOpen(true);
-    setSidebarOpen(false);
-    setProfileOpen(false);
-  };
-
   /* ================= CLICK OUTSIDE ================= */
 
   useEffect(() => {
@@ -100,6 +92,7 @@ export default function Navbar() {
 
   /* ================= RENDER ================= */
   if (authLoading) return null;
+  if (showLogin || showSignup) return null;
 
   return (
     <>
@@ -129,7 +122,6 @@ export default function Navbar() {
               <HamburgerMenu
                 role={isAuthenticated ? role : "guest"}
                 close={() => setSidebarOpen(false)}
-                openWalletModal={openWalletModal}
                 handleLogout={handleLogout}
               />
             </div>
@@ -141,7 +133,7 @@ export default function Navbar() {
           <div className="user-nav-links user-nav-links-center">
             <div
               className="user-nav-item wallet-nav-item"
-              onClick={openWalletModal}
+              onClick={() => navigate("/wallet")}
             >
               {/* <GiWallet
                 className="wallet-icon"
@@ -159,9 +151,14 @@ export default function Navbar() {
             class="iconic-arena-button"
             onClick={() => navigate("/arena-standalone")}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 24">
-              <path d="m18 0 8 12 10-8-4 20H4L0 4l10 8 8-12z"></path>
-            </svg>
+            <video
+              src="/arena-animation.mp4.webm"
+              className="iconic-arena-video"
+              autoPlay
+              loop
+              muted
+              playsInline
+            />
             ICONIC ARENA
           </button>
 
@@ -169,14 +166,6 @@ export default function Navbar() {
 
           {!isAuthenticated ? (
             <div className="auth-buttons">
-
-              {/* <button class="iconic-arena-button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 24">
-                  <path d="m18 0 8 12 10-8-4 20H4L0 4l10 8 8-12z"></path>
-                </svg>
-                ICONIC ARENA
-              </button> */}
-
               <button className="signup-btn" onClick={openSignup}>
                 <FaUserPlus />
                 <span>Sign Up</span>
@@ -270,7 +259,7 @@ export default function Navbar() {
                         className="user-profile-dropdown-item"
                         onClick={() => {
                           setProfileOpen(false);
-                          openWalletModal();
+                          navigate("/wallet");
                         }}
                       >
                         <GiWallet
@@ -320,20 +309,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* ================= WALLET MODAL ================= */}
-      {walletOpen && (
-        <div
-          className="wallet-modal-overlay"
-          onClick={() => setWalletOpen(false)}
-        >
-          <div
-            className="wallet-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <WalletPopup onClose={() => setWalletOpen(false)} />
-          </div>
-        </div>
-      )}
     </>
   );
 }
