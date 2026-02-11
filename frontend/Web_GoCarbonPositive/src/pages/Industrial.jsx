@@ -50,34 +50,34 @@ const IndustrialSolutions = () => {
   };
 
   const handleFormSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const response = await fetch("http://localhost:5007/api/demo/book-demo", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const response = await fetch("http://localhost:5007/api/demo/book-demo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      setToastMessage("Demo request submitted successfully!");
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-      closeDemoForm();
-    } else {
-      setToastMessage(data.message || "Submission failed");
+      if (response.ok) {
+        setToastMessage("Demo request submitted successfully!");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+        closeDemoForm();
+      } else {
+        setToastMessage(data.message || "Submission failed");
+        setShowToast(true);
+      }
+    } catch (error) {
+      console.error("Error submitting demo request:", error);
+      setToastMessage("Server error. Please try again later.");
       setShowToast(true);
     }
-  } catch (error) {
-    console.error("Error submitting demo request:", error);
-    setToastMessage("Server error. Please try again later.");
-    setShowToast(true);
-  }
-};
+  };
 
 
   const industries = [
@@ -338,7 +338,7 @@ const IndustrialSolutions = () => {
               {/* Contact Person Name */}
               <div className="form-group">
                 <label className="form-label">
-                Contact Person <span className="required">*</span>
+                  Contact Person <span className="required">*</span>
                 </label>
                 <input
                   type="text"
@@ -354,7 +354,7 @@ const IndustrialSolutions = () => {
               {/* Contact Email */}
               <div className="form-group">
                 <label className="form-label">
-                 Contact Email <span className="required">*</span>
+                  Contact Email <span className="required">*</span>
                 </label>
                 <input
                   type="email"
@@ -462,3 +462,4 @@ const IndustrialSolutions = () => {
 };
 
 export default IndustrialSolutions;
+

@@ -577,6 +577,7 @@ const PopupForms = ({
         </div>
       </div>
 
+
       {/* Solar Panel Popup */}
       <div
         className={`popup-overlay ${activeSolarPopup ? "active" : ""}`}

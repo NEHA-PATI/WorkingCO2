@@ -27,7 +27,7 @@
   
   .dashboard-container .card-icon {
     font-size: 1.9rem;
-    color: #2563eb; /* fallback */
+    color: #2563eb !important; /* fallback */
     opacity: 1 !important;
     visibility: visible !important;
     display: inline-flex;
@@ -44,14 +44,20 @@
 
   .dashboard-container .card.electric-vehicle .card-icon {
     color: #3b82f6 !important;
+    fill: currentColor;
+    stroke: currentColor;
   }
 
   .dashboard-container .card.trees .card-icon {
     color: #10b981 !important;
+    fill: currentColor;
+    stroke: currentColor;
   }
 
   .dashboard-container .card.solar-panel .card-icon {
     color: #f59e0b !important;
+    fill: currentColor;
+    stroke: currentColor;
   }
   
   .dashboard-container h2 {

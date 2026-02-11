@@ -36,6 +36,37 @@
   cursor: pointer;
 }
 
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  padding-right: 40px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: auto;
+  height: auto;
+  color: #666;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .success-text {
   margin-top: 12px;
   color: green;

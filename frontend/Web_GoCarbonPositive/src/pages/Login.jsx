@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { RxCross1 } from "react-icons/rx";
-import { FaGoogle } from "react-icons/fa";
+import { FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
 import useAuth from "../auth/useAuth";
 import { FaLinkedin, FaGithub } from "react-icons/fa";
 import LoadingPopup from "../components/user/LoadingPopup";
@@ -18,6 +18,7 @@ const Login = ({ onClose, onSwitchToSignup }) => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Responsive breakpoint
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -256,6 +257,24 @@ const Login = ({ onClose, onSwitchToSignup }) => {
       marginTop: "8px",
       marginBottom: "8px",
     },
+    passwordField: {
+      position: "relative",
+      width: "100%",
+    },
+    passwordToggle: {
+      position: "absolute",
+      right: "12px",
+      top: "50%",
+      transform: "translateY(-50%)",
+      background: "transparent",
+      border: "none",
+      padding: "4px",
+      cursor: "pointer",
+      color: "#6b7280",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
   };
 
   const handleChange = (e) => {
@@ -457,9 +476,9 @@ const Login = ({ onClose, onSwitchToSignup }) => {
                 )}
               </div>
 
-              <div>
+              <div style={styles.passwordField}>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   placeholder="Your password"
                   value={formData.password}
@@ -467,6 +486,7 @@ const Login = ({ onClose, onSwitchToSignup }) => {
                   style={{
                     ...styles.input,
                     ...(errors.password ? styles.inputError : {}),
+                    paddingRight: "44px",
                   }}
                   disabled={loading}
                   autoComplete="current-password"
@@ -478,6 +498,16 @@ const Login = ({ onClose, onSwitchToSignup }) => {
                       e.target.style.borderColor = "#d1d5db";
                   }}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  style={styles.passwordToggle}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                  disabled={loading}
+                >
+                  {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                </button>
                 {errors.password && (
                   <span style={styles.errorText}>{errors.password}</span>
                 )}
