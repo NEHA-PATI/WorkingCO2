@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AuthProvider } from '../auth/useAuth';
-import ProtectedRoute from '../components/ProtectedRoute';
-import Login from '../pages/Login';
+import { AuthProvider } from "@contexts/AuthContext";
+import ProtectedRoute from "@shared/components/ProtectedRoute";
+import Login from "@features/auth/pages/Login";
 
 /**
  * Auth Race Condition Integration Tests

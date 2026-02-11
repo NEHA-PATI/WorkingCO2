@@ -1,19 +1,3 @@
-import {
-  FaChartBar,
-  FaCoins,
-  FaShieldAlt,
-  FaUsers,
-  FaRocket,
-  FaEye,
-} from "react-icons/fa";
-
-import Overview from "../components/org/Overview";
-import AssetManagement from "../components/org/AssetManagement";
-import CreditEarnings from "../components/org/CreditEarnings";
-import ComplianceReports from "../components/org/ComplianceReports";
-import TeamManagement from "../components/org/TeamManagement";
-import QuickActions from "../components/org/QuickActions";
-
 export const ORG_DASHBOARD_BASE = "/org/dashboard";
 
 export const ORG_TAB_CONFIG = [
@@ -21,48 +5,42 @@ export const ORG_TAB_CONFIG = [
     id: "overview",
     path: "overview",
     label: "Overview",
-    icon: FaEye,
-    component: Overview,
+    iconKey: "overview",
     accent: "#3b82f6",
   },
   {
     id: "assets",
     path: "assets",
     label: "Assets",
-    icon: FaChartBar,
-    component: AssetManagement,
+    iconKey: "assets",
     accent: "#10b981",
   },
   {
     id: "earnings",
     path: "earnings",
     label: "Earnings",
-    icon: FaCoins,
-    component: CreditEarnings,
+    iconKey: "earnings",
     accent: "#f59e0b",
   },
   {
     id: "compliance",
     path: "compliance",
     label: "Compliance",
-    icon: FaShieldAlt,
-    component: ComplianceReports,
+    iconKey: "compliance",
     accent: "#ef4444",
   },
   {
     id: "team",
     path: "team",
     label: "Team",
-    icon: FaUsers,
-    component: TeamManagement,
+    iconKey: "team",
     accent: "#8b5cf6",
   },
   {
     id: "actions",
     path: "actions",
     label: "Quick Actions",
-    icon: FaRocket,
-    component: QuickActions,
+    iconKey: "actions",
     accent: "#06b6d4",
   },
 ];
