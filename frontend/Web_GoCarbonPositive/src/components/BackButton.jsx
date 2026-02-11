@@ -1,12 +1,12 @@
 
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { fireToast } from "../services/user/toastService.js";
 
 const BackButton = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    toast.info("Going back...");
+    fireToast("INFO.BACK", "info");
 
     if (window.history.length > 1) {
       navigate(-1);

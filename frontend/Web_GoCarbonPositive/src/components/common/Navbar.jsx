@@ -10,7 +10,7 @@ import {
   FaSignOutAlt,
   FaUserPlus,
 } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { fireToast } from "../../services/user/toastService.js";
 
 import HamburgerMenu from "./HamburgerMenu";
 import WalletPopup from "../../pages/wallet";
@@ -65,7 +65,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
-    toast.success("Logged out successfully!", { autoClose: 2000 });
+    fireToast("AUTH.LOGOUT_SUCCESS", "success");
     localStorage.removeItem("authUser");
 
     localStorage.removeItem("userId");

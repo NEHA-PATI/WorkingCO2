@@ -26,8 +26,9 @@ class SolarController {
       // Validate required fields
       if (!U_ID || !Installed_Capacity || !Installation_Date) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Missing required fields: U_ID, Installed_Capacity, Installation_Date'
+          success: false,
+          message: 'Missing required fields: U_ID, Installed_Capacity, Installation_Date',
+          data: null
         });
       }
 
@@ -40,17 +41,19 @@ class SolarController {
       logger.info(`Solar Panel created successfully for user ${U_ID}`, { suid: newSolar.suid });
 
       res.status(201).json({
-        status: 'success',
+        success: true,
         message: 'Solar Panel created successfully',
-        data: newSolar,
-        solarCount: solarCount
+        data: {
+          solar: newSolar,
+          solarCount: solarCount
+        }
       });
     } catch (error) {
       logger.error('Error creating Solar Panel:', error);
       res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to create Solar Panel',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
@@ -65,25 +68,25 @@ class SolarController {
 
       if (!userId) {
         return res.status(400).json({
-          status: 'error',
-          message: 'User ID is required'
+          success: false,
+          message: 'User ID is required',
+          data: null
         });
       }
 
       const solarPanels = await SolarModel.getByUserId(userId);
 
       res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'Solar Panels retrieved successfully',
-        count: solarPanels.length,
         data: solarPanels
       });
     } catch (error) {
       logger.error('Error fetching Solar Panels:', error);
       res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to fetch Solar Panels',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
@@ -100,22 +103,23 @@ class SolarController {
 
       if (!solar) {
         return res.status(404).json({
-          status: 'error',
-          message: 'Solar Panel not found'
+          success: false,
+          message: 'Solar Panel not found',
+          data: null
         });
       }
 
       res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'Solar Panel retrieved successfully',
         data: solar
       });
     } catch (error) {
       logger.error('Error fetching Solar Panel:', error);
       res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to fetch Solar Panel',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
@@ -138,8 +142,9 @@ class SolarController {
 
       if (Object.keys(updateData).length === 0) {
         return res.status(400).json({
-          status: 'error',
-          message: 'No valid fields to update'
+          success: false,
+          message: 'No valid fields to update',
+          data: null
         });
       }
 
@@ -147,8 +152,9 @@ class SolarController {
       const existingSolar = await SolarModel.getById(suid);
       if (!existingSolar) {
         return res.status(404).json({
-          status: 'error',
-          message: 'Solar Panel not found'
+          success: false,
+          message: 'Solar Panel not found',
+          data: null
         });
       }
 
@@ -158,16 +164,16 @@ class SolarController {
       logger.info(`Solar Panel updated successfully: ${suid}`);
 
       res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'Solar Panel updated successfully',
         data: updatedSolar
       });
     } catch (error) {
       logger.error('Error updating Solar Panel:', error);
       res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to update Solar Panel',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
@@ -184,24 +190,25 @@ class SolarController {
 
       if (!deletedSolar) {
         return res.status(404).json({
-          status: 'error',
-          message: 'Solar Panel not found'
+          success: false,
+          message: 'Solar Panel not found',
+          data: null
         });
       }
 
       logger.info(`Solar Panel deleted successfully: ${suid}`);
 
       res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'Solar Panel deleted successfully',
         data: deletedSolar
       });
     } catch (error) {
       logger.error('Error deleting Solar Panel:', error);
       res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to delete Solar Panel',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
@@ -217,16 +224,18 @@ class SolarController {
 
       if (!status) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Status is required'
+          success: false,
+          message: 'Status is required',
+          data: null
         });
       }
 
       const validStatuses = ['pending', 'approved', 'rejected'];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({
-          status: 'error',
-          message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+          success: false,
+          message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
+          data: null
         });
       }
 
@@ -234,24 +243,25 @@ class SolarController {
 
       if (!updatedSolar) {
         return res.status(404).json({
-          status: 'error',
-          message: 'Solar Panel not found'
+          success: false,
+          message: 'Solar Panel not found',
+          data: null
         });
       }
 
       logger.info(`Solar Panel status updated: ${suid} -> ${status}`);
 
       res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'Solar Panel status updated successfully',
         data: updatedSolar
       });
     } catch (error) {
       logger.error('Error updating Solar Panel status:', error);
       res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to update Solar Panel status',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }

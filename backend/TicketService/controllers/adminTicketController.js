@@ -32,7 +32,9 @@ exports.createTicket = async (req, res) => {
 
         if (!subject || !message) {
             return res.status(400).json({
-                message: "Subject and message are required"
+                success: false,
+                message: "Subject and message are required",
+                data: null
             });
         }
 
@@ -58,14 +60,17 @@ exports.createTicket = async (req, res) => {
         );
 
         res.status(201).json({
+            success: true,
             message: "Ticket submitted successfully",
-            ticket_id
+            data: { ticket_id }
         });
 
     } catch (error) {
         console.error("CREATE TICKET ERROR:", error);
         res.status(500).json({
-            message: "Internal server error"
+            success: false,
+            message: "Internal server error",
+            data: null
         });
     }
 };
@@ -87,12 +92,18 @@ exports.getAllTickets = async (req, res) => {
              ORDER BY t.created_at DESC`
         );
 
-        res.json(result.rows);
+        res.json({
+            success: true,
+            message: "Tickets fetched successfully",
+            data: result.rows
+        });
 
     } catch (error) {
         console.error("GET ALL TICKETS ERROR:", error);
         res.status(500).json({
-            message: "Internal server error"
+            success: false,
+            message: "Internal server error",
+            data: null
         });
     }
 };
@@ -119,16 +130,24 @@ exports.getTicketById = async (req, res) => {
 
         if (result.rows.length === 0) {
             return res.status(404).json({
-                message: "Ticket not found"
+                success: false,
+                message: "Ticket not found",
+                data: null
             });
         }
 
-        res.json(result.rows[0]);
+        res.json({
+            success: true,
+            message: "Ticket fetched successfully",
+            data: result.rows[0]
+        });
 
     } catch (error) {
         console.error("GET TICKET ERROR:", error);
         res.status(500).json({
-            message: "Internal server error"
+            success: false,
+            message: "Internal server error",
+            data: null
         });
     }
 };
@@ -145,7 +164,9 @@ exports.updateTicket = async (req, res) => {
         const allowedStatuses = ["open", "in_progress", "resolved"];
         if (status && !allowedStatuses.includes(status)) {
             return res.status(400).json({
-                message: "Invalid status value"
+                success: false,
+                message: "Invalid status value",
+                data: null
             });
         }
 
@@ -166,19 +187,24 @@ exports.updateTicket = async (req, res) => {
 
         if (result.rowCount === 0) {
             return res.status(404).json({
-                message: "Ticket not found"
+                success: false,
+                message: "Ticket not found",
+                data: null
             });
         }
 
         res.json({
+            success: true,
             message: "Ticket updated successfully",
-            ticket_id
+            data: { ticket_id }
         });
 
     } catch (error) {
         console.error("UPDATE TICKET ERROR:", error);
         res.status(500).json({
-            message: "Internal server error"
+            success: false,
+            message: "Internal server error",
+            data: null
         });
     }
 };
@@ -199,18 +225,24 @@ exports.deleteTicket = async (req, res) => {
 
         if (result.rowCount === 0) {
             return res.status(404).json({
-                message: "Ticket not found"
+                success: false,
+                message: "Ticket not found",
+                data: null
             });
         }
 
         res.json({
-            message: "Ticket deleted successfully"
+            success: true,
+            message: "Ticket deleted successfully",
+            data: null
         });
 
     } catch (error) {
         console.error("DELETE TICKET ERROR:", error);
         res.status(500).json({
-            message: "Internal server error"
+            success: false,
+            message: "Internal server error",
+            data: null
         });
     }
 };

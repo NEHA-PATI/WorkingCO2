@@ -9,6 +9,10 @@ import {
     UserPlus, ClipboardList, Linkedin, Instagram, Users, CalendarCheck, Gamepad2, Brain
 } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import a4 from "./photos/a4.jpeg";
+import a5 from "./photos/a5.jpg";
+import a6 from "./photos/a6.jpg";
+import a7 from "./photos/a7.jpg";
 
 // Inline Styles
 const styles = `
@@ -83,11 +87,11 @@ const iconMap = {
 const HeroSlider = () => {
     const [current, setCurrent] = useState(0);
     const banners = [
-        { id: 1, title: "Welcome to the Arena", subtitle: "Compete, Earn & Win Amazing Rewards", gradient: "from-violet-600 via-purple-600 to-indigo-700", icon: Trophy, accent: "bg-yellow-400" },
-        { id: 2, title: "Weekly Challenge Live", subtitle: "Top 10 winners get exclusive prizes", gradient: "from-emerald-500 via-teal-500 to-cyan-600", icon: Zap, accent: "bg-emerald-300" },
-        { id: 3, title: "Streak Bonus Active", subtitle: "Maintain your streak for 5x multiplier", gradient: "from-orange-500 via-amber-500 to-yellow-500", icon: Sparkles, accent: "bg-orange-300" },
-        { id: 4, title: "Referral Rewards", subtitle: "Invite friends & earn 1000 points each", gradient: "from-pink-500 via-rose-500 to-red-500", icon: Gift, accent: "bg-pink-300" },
-        { id: 5, title: "New Milestone Unlocked", subtitle: "Complete all tasks to become a Legend", gradient: "from-blue-600 via-indigo-600 to-violet-700", icon: Star, accent: "bg-blue-300" }
+        { id: 1, title: "Welcome to the Arena", subtitle: "Compete, Earn & Win Amazing Rewards", gradient: "from-violet-600 via-purple-600 to-indigo-700", icon: Trophy, accent: "bg-yellow-400", image: a4 },
+        { id: 2, title: "Weekly Challenge Live", subtitle: "Top 10 winners get exclusive prizes", gradient: "from-emerald-500 via-teal-500 to-cyan-600", icon: Zap, accent: "bg-emerald-300", image: a5 },
+        { id: 3, title: "Streak Bonus Active", subtitle: "Maintain your streak for 5x multiplier", gradient: "from-orange-500 via-amber-500 to-yellow-500", icon: Sparkles, accent: "bg-orange-300", image: a6 },
+        { id: 4, title: "Referral Rewards", subtitle: "Invite friends & earn 1000 points each", gradient: "from-pink-500 via-rose-500 to-red-500", icon: Gift, accent: "bg-pink-300", image: a7 },
+        { id: 5, title: "New Milestone Unlocked", subtitle: "Complete all tasks to become a Legend", gradient: "from-blue-600 via-indigo-600 to-violet-700", icon: Star, accent: "bg-blue-300", image: a4 }
     ];
 
     useEffect(() => {
@@ -109,8 +113,14 @@ const HeroSlider = () => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -100 }}
                     transition={{ duration: 0.5, ease: "easeInOut" }}
-                    className={`absolute inset-0 bg-gradient-to-r ${banners[current].gradient}`}
+                      
                 >
+                    <img
+                        src={banners[current].image}
+                        alt={banners[current].title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/35" />
                     <div className="absolute inset-0 overflow-hidden">
                         <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
                         <div className="absolute bottom-10 right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
@@ -118,31 +128,31 @@ const HeroSlider = () => {
                     </div>
                     <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
                         <div className="flex items-center gap-8">
-                            <motion.div
+                            {/* <motion.div
                                 initial={{ scale: 0, rotate: -180 }}
                                 animate={{ scale: 1, rotate: 0 }}
                                 transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                                 className={`hidden sm:flex w-24 h-24 ${banners[current].accent} rounded-2xl items-center justify-center shadow-2xl`}
                             >
                                 {React.createElement(banners[current].icon, { className: "w-12 h-12 text-slate-800" })}
-                            </motion.div>
+                            </motion.div> */}
                             <div>
-                                <motion.h1
+                                {/* <motion.h1
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.3 }}
                                     className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight"
                                 >
                                     {banners[current].title}
-                                </motion.h1>
-                                <motion.p
+                                </motion.h1> */}
+                                {/* <motion.p
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.4 }}
                                     className="text-lg sm:text-xl text-white/80 mt-3"
                                 >
                                     {banners[current].subtitle}
-                                </motion.p>
+                                </motion.p> */}
                             </div>
                         </div>
                     </div>
@@ -556,94 +566,94 @@ const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => 
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
                             className="arena-standalone-modal"
                         >
-                        <div className={`relative bg-gradient-to-r ${contest.color} p-6 text-white`}>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onClose(); }}
-                                className="absolute top-4 right-4 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all z-50"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                            <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-                            <div className="relative flex items-center gap-4">
-                                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                                    <Icon className="w-8 h-8" />
+                            <div className={`relative bg-gradient-to-r ${contest.color} p-6 text-white`}>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onClose(); }}
+                                    className="absolute top-4 right-4 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all z-50"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                                <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+                                <div className="relative flex items-center gap-4">
+                                    <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                                        <Icon className="w-8 h-8" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-bold">{contest.title}</h2>
+                                        <p className="text-white/80 mt-1">{contest.description}</p>
+                                    </div>
+                                </div>
+                                <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 0.2, type: "spring" }}
+                                    className="absolute bottom-4 right-4 bg-white text-slate-800 font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-2"
+                                >
+                                    <Sparkles className="w-5 h-5 text-amber-500" />
+                                    <span className="text-base">{contest.points} pts</span>
+                                </motion.div>
+                            </div>
+                            <div className="p-6 space-y-6">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <ScrollText className="w-5 h-5 text-slate-600" />
+                                        <h3 className="font-semibold text-slate-800">Rules & Guidelines</h3>
+                                    </div>
+                                    <div className="space-y-3">
+                                        {contest.rules.map((rule, index) => (
+                                            <motion.div
+                                                key={index}
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: 0.1 + index * 0.1 }}
+                                                className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl"
+                                            >
+                                                <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                    <span className="text-xs font-semibold text-slate-600">{index + 1}</span>
+                                                </div>
+                                                <p className="text-sm text-slate-600">{rule}</p>
+                                            </motion.div>
+                                        ))}
+                                    </div>
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-bold">{contest.title}</h2>
-                                    <p className="text-white/80 mt-1">{contest.description}</p>
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <Gift className="w-5 h-5 text-violet-600" />
+                                        <h3 className="font-semibold text-slate-800">Rewards</h3>
+                                    </div>
+                                    <div className="space-y-2">
+                                        {contest.rewards.map((reward, index) => (
+                                            <motion.div
+                                                key={index}
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: 0.3 + index * 0.1 }}
+                                                className={`flex items-center gap-3 p-3 ${contest.bgColor} ${contest.borderColor} border rounded-xl`}
+                                            >
+                                                <CheckCircle2 className={`w-5 h-5 ${contest.color.includes('violet') ? 'text-violet-500' :
+                                                    contest.color.includes('emerald') ? 'text-emerald-500' :
+                                                        contest.color.includes('blue') ? 'text-blue-500' :
+                                                            contest.color.includes('pink') ? 'text-pink-500' :
+                                                                contest.color.includes('indigo') ? 'text-indigo-500' :
+                                                                    contest.color.includes('amber') ? 'text-amber-500' :
+                                                                        contest.color.includes('cyan') ? 'text-cyan-500' : 'text-fuchsia-500'
+                                                    }`} />
+                                                <span className="text-sm font-medium text-slate-700">{reward}</span>
+                                            </motion.div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                            <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{ delay: 0.2, type: "spring" }}
-                                className="absolute bottom-4 right-4 bg-white text-slate-800 font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-2"
-                            >
-                                <Sparkles className="w-5 h-5 text-amber-500" />
-                                <span className="text-base">{contest.points} pts</span>
-                            </motion.div>
-                        </div>
-                        <div className="p-6 space-y-6">
-                            <div>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <ScrollText className="w-5 h-5 text-slate-600" />
-                                    <h3 className="font-semibold text-slate-800">Rules & Guidelines</h3>
-                                </div>
-                                <div className="space-y-3">
-                                    {contest.rules.map((rule, index) => (
-                                        <motion.div
-                                            key={index}
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.1 + index * 0.1 }}
-                                            className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl"
-                                        >
-                                            <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                <span className="text-xs font-semibold text-slate-600">{index + 1}</span>
-                                            </div>
-                                            <p className="text-sm text-slate-600">{rule}</p>
-                                        </motion.div>
-                                    ))}
-                                </div>
+                            <div className="p-6 pt-0">
+                                <button
+                                    onClick={handleAction}
+                                    disabled={isCompleted}
+                                    className={`arena-standalone-btn w-full bg-gradient-to-r ${contest.color} hover:opacity-90 text-white border-0 shadow-lg h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    {isCompleted ? 'Completed for Today' : contest.buttonText}
+                                </button>
                             </div>
-                            <div>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Gift className="w-5 h-5 text-violet-600" />
-                                    <h3 className="font-semibold text-slate-800">Rewards</h3>
-                                </div>
-                                <div className="space-y-2">
-                                    {contest.rewards.map((reward, index) => (
-                                        <motion.div
-                                            key={index}
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: 0.3 + index * 0.1 }}
-                                            className={`flex items-center gap-3 p-3 ${contest.bgColor} ${contest.borderColor} border rounded-xl`}
-                                        >
-                                            <CheckCircle2 className={`w-5 h-5 ${contest.color.includes('violet') ? 'text-violet-500' :
-                                                contest.color.includes('emerald') ? 'text-emerald-500' :
-                                                    contest.color.includes('blue') ? 'text-blue-500' :
-                                                        contest.color.includes('pink') ? 'text-pink-500' :
-                                                            contest.color.includes('indigo') ? 'text-indigo-500' :
-                                                                contest.color.includes('amber') ? 'text-amber-500' :
-                                                                    contest.color.includes('cyan') ? 'text-cyan-500' : 'text-fuchsia-500'
-                                                }`} />
-                                            <span className="text-sm font-medium text-slate-700">{reward}</span>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="p-6 pt-0">
-                            <button
-                                onClick={handleAction}
-                                disabled={isCompleted}
-                                className={`arena-standalone-btn w-full bg-gradient-to-r ${contest.color} hover:opacity-90 text-white border-0 shadow-lg h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed`}
-                            >
-                                {isCompleted ? 'Completed for Today' : contest.buttonText}
-                            </button>
-                        </div>
                         </motion.div>
                     </div>
                 </>
@@ -1002,10 +1012,10 @@ export default function ArenaStandalone() {
                                             <ContestCard
                                                 contest={contest}
                                                 index={index}
-                                            isCompleted={isTaskCompleted(contest)}
-                                            onClick={() => setSelectedContest(contest)}
-                                        />
-                                    </div>
+                                                isCompleted={isTaskCompleted(contest)}
+                                                onClick={() => setSelectedContest(contest)}
+                                            />
+                                        </div>
                                     ))}
                             </motion.div>
                         </div>

@@ -9,6 +9,11 @@ frontend/**/build/
 frontend/**/.env
 frontend/**/.env.local
 frontend/**/.env.production
+frontend/**/.md
+frontend/**/.docx
+frontend/**/.puml
+frontend/Web_GoCarbonPositive/docs/
+frontend/Web_GoCarbonPositive/flow diagram/
 
 
 # =========================
@@ -26,6 +31,12 @@ backend/**/.env.production
 # =========================
 photos/
 !photos/.gitkeep
+
+frontend/**/.md
+frontend/**/.docx
+frontend/**/.puml
+
+
 
 # =========================
 # LOGS
