@@ -29,7 +29,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const { user, role, isAuthenticated, authLoading, logout } = useAuth();
 
-  const { openLogin, openSignup } = useModal();
+  const { openLogin, openSignup, showLogin, showSignup } = useModal();
 
   /* ================= STATE ================= */
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -99,6 +99,7 @@ export default function Navbar() {
 
   /* ================= RENDER ================= */
   if (authLoading) return null;
+  if (showLogin || showSignup) return null;
 
   return (
     <>
@@ -157,12 +158,16 @@ export default function Navbar() {
 
           {!isAuthenticated ? (
             <div className="auth-buttons">
-
-              <button class="iconic-arena-button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 24">
-                  <path d="m18 0 8 12 10-8-4 20H4L0 4l10 8 8-12z"></path>
-                </svg>
-                ICONIC ARENA
+              <button className="iconic-arena-button">
+                <video
+                  src="/arena-animation.mp4.webm"
+                  className="iconic-arena-video"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                />
+                Iconic Arena
               </button>
 
               <button className="signup-btn" onClick={openSignup}>
@@ -258,15 +263,15 @@ export default function Navbar() {
                         className="user-profile-dropdown-item"
                         onClick={() => {
                           setProfileOpen(false);
-                        openWalletModal();
-                      }}
-                    >
-                      <GiWallet
-                        className="profile-icon profile-icon-amber"
-                        style={{ fontSize: "1.8rem" }}
-                      />
-                      <span>My Wallet</span>
-                    </div>
+                          openWalletModal();
+                        }}
+                      >
+                        <GiWallet
+                          className="profile-icon profile-icon-amber"
+                          style={{ fontSize: "1.8rem" }}
+                        />
+                        <span>My Wallet</span>
+                      </div>
                     )}
 
                     {role !== "admin" && (

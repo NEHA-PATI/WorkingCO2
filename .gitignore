@@ -41,3 +41,14 @@ yarn-error.log*
 .idea/
 .DS_Store
 Thumbs.db
+# Root level node modules (you have a root folder too)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Vite cache
+frontend/**/.vite/
+frontend/**/.cache/
+
+# Sanity / PortableText temp
+**/.sanity/

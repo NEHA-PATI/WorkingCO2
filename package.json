@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@portabletext/react": "^6.0.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-toastify": "^11.0.5"
   }
 }

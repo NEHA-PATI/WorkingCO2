@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaArrowLeft, FaEye, FaEyeSlash, FaGift } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "../../styles/user/WalletUI.css";
+// import { fireToast } from "../services/user/toastService.js";
+import { TOAST_MSG } from "../../services/user/toastMessages";
 
 const WalletUI = () => {
   const navigate = useNavigate();
@@ -127,7 +129,8 @@ const WalletUI = () => {
     const candidate = normalizeAddress(verifyAddressInput);
 
     if (!candidate) {
-      showToast("Please paste your wallet address", "error");
+      showToast(TOAST_MSG.PROFILE.REQUIRED, "error");
+
       return;
     }
 
@@ -136,11 +139,13 @@ const WalletUI = () => {
     );
 
     if (!matched) {
-      showToast("Address not found. Check and try again.", "error");
+      showToast(TOAST_MSG.API.UNAUTHORIZED, "error");
+
       return;
     }
 
-    showToast("Address verified. Continue to create password.", "success");
+    showToast(TOAST_MSG.OTP.VERIFIED, "success");
+
     setPassword("");
     setConfirmPassword("");
     setPage("create");
@@ -148,18 +153,22 @@ const WalletUI = () => {
 
   const handleCreateWallet = () => {
     if (!password || !confirmPassword) {
-      showToast("Please fill all fields", "error");
+      showToast(TOAST_MSG.PROFILE.REQUIRED, "error");
+
       return;
     }
     if (password.length < 8) {
-      showToast("Password must be at least 8 characters", "error");
+      showToast(TOAST_MSG.RESET.INVALID, "error");
+
       return;
     }
     if (password !== confirmPassword) {
-      showToast("Passwords do not match", "error");
+      showToast(TOAST_MSG.RESET.MISMATCH, "error");
+
       return;
     }
-    showToast("Credentials saved successfully", "success");
+    showToast(TOAST_MSG.PROFILE.SAVE_SUCCESS, "success");
+
     setTimeout(() => setPage("success"), 800);
   };
 
@@ -168,12 +177,12 @@ const WalletUI = () => {
     setActivityPage("dashboard");
     setFilterType("All");
     setFilteredTransactions(transactions);
-    showToast("Wallet opened successfully", "success");
+    showToast(TOAST_MSG.AUTH.LOGIN_SUCCESS, "success");
   };
 
   const handleSelectAccount = (accountName) => {
     setSelectedAccount(accountName);
-    showToast(`Switched to ${accountName}`, "success");
+    showToast(`${TOAST_MSG.PROFILE.SAVE_SUCCESS} → ${accountName}`, "success");
   };
 
   const handleFilterChange = (filter) => {
@@ -206,9 +215,9 @@ const WalletUI = () => {
     if (event) event.stopPropagation();
     try {
       await navigator.clipboard.writeText(value);
-      showToast("Address copied", "success");
+      showToast(TOAST_MSG.OTP.RESENT, "success");
     } catch {
-      showToast("Copy failed. Please copy manually.", "error");
+      showToast(TOAST_MSG.API.NETWORK, "error");
     }
   };
 
@@ -230,42 +239,55 @@ const WalletUI = () => {
   };
 
   const renderLanding = () => (
-    <div className="wallet-container landing-page">
-      <div className="landing-content">
-        <div className="logo-section">
-          <div className="logo-icon" aria-hidden="true">
-            <span className="logo-icon-ring" />
-            <span className="logo-icon-core">C</span>
-          </div>
-          <h1 className="wallet-logo">
-            Carbon Positive
-            <br />
-            Wallet
+    <div className="wallet-container modern-landing">
+      <div className="hero-wrapper">
+        {/* LEFT CONTENT */}
+        <div className="hero-left">
+          <div className="hero-badge">⭐ Secure • Simple • Sustainable</div>
+
+          <h1 className="hero-title">
+            <span>Your Gateway to</span> <br />
+            <span className="green-text">Carbon Positive</span> <br />
+            <span>Digital Finance</span> <br />
           </h1>
-          <p className="logo-subtitle">Secure | Simple | Sustainable</p>
+
+          <p className="hero-desc">
+            Experience the future of sustainable finance with a wallet that's
+            secure by design and positive for the planet.
+          </p>
+
+          <div className="hero-buttons">
+            <button
+              className="btn btn-primary hero-btn"
+              onClick={() => {
+                setEntryFlow("new");
+                startLoadingAndNavigate("create");
+              }}
+            >
+              Create New Wallet →
+            </button>
+
+            <button
+              className="btn btn-outline hero-btn"
+              onClick={() => {
+                setEntryFlow("existing");
+                setVerifyAddressInput("");
+                startLoadingAndNavigate("verifyAddress");
+              }}
+            >
+              + Import Existing Wallet
+            </button>
+          </div>
         </div>
 
-        <div className="buttons-section">
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              setEntryFlow("new");
-              startLoadingAndNavigate("create");
-            }}
-          >
-            Create a new wallet
-          </button>
-
-          <button
-            className="btn btn-secondary"
-            onClick={() => {
-              setEntryFlow("existing");
-              setVerifyAddressInput("");
-              startLoadingAndNavigate("verifyAddress");
-            }}
-          >
-            I have an existing wallet
-          </button>
+        {/* RIGHT ILLUSTRATION */}
+        <div className="hero-right">
+          <div className="wallet-illus">
+            <div className="wallet-body">
+              <div className="wallet-dot"></div>
+            </div>
+            <div className="wallet-top"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -723,4 +745,3 @@ const WalletUI = () => {
 };
 
 export default WalletUI;
-

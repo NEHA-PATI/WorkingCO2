@@ -1,7 +1,20 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Clock, Share2, Twitter, Linkedin, Facebook, Link as LinkIcon, User, TrendingUp, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  Share2,
+  Twitter,
+  Linkedin,
+  Facebook,
+  Link as LinkIcon,
+  User,
+  TrendingUp,
+  Loader2,
+} from "lucide-react";
 import { PortableText } from "@portabletext/react";
+
+
 import "../styles/user/blog-detail.css";
 import blogService from "../services/blog/blogService.js";
 import { fireToast } from "../services/user/toastService.js";
@@ -24,7 +37,9 @@ const portableTextComponents = {
     h2: ({ children }) => <h2 className="blog-h2">{children}</h2>,
     h3: ({ children }) => <h3 className="blog-h3">{children}</h3>,
     normal: ({ children }) => <p className="blog-paragraph">{children}</p>,
-    blockquote: ({ children }) => <blockquote className="blog-blockquote">{children}</blockquote>,
+    blockquote: ({ children }) => (
+      <blockquote className="blog-blockquote">{children}</blockquote>
+    ),
   },
   list: {
     bullet: ({ children }) => <ul className="blog-list-bullet">{children}</ul>,
@@ -48,14 +63,16 @@ export default function BlogDetailPage() {
     try {
       const response = await blogService.getPostBySlug(slug);
       setBlog(response.data);
-      
+
       if (response.data?._id) {
         const relatedRes = await blogService.getRelatedPosts(response.data._id);
         setRelatedPosts(relatedRes.data || []);
       }
     } catch (err) {
       console.error("Error fetching blog detail:", err);
-      setError("Failed to load blog post. It might have been moved or deleted.");
+      setError(
+        "Failed to load blog post. It might have been moved or deleted.",
+      );
     } finally {
       setLoading(false);
     }
@@ -82,7 +99,7 @@ export default function BlogDetailPage() {
   const handleShare = (platform) => {
     const url = window.location.href;
     const text = blog?.title || "";
-    
+
     const shareUrls = {
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
@@ -112,9 +129,16 @@ export default function BlogDetailPage() {
   if (error || !blog) {
     return (
       <div className="blog-detail-container">
-        <div className="blog-detail-main" style={{ textAlign: "center", paddingTop: "100px" }}>
+        <div
+          className="blog-detail-main"
+          style={{ textAlign: "center", paddingTop: "100px" }}
+        >
           <h1 className="blog-detail-title">{error || "Blog not found"}</h1>
-          <button onClick={() => navigate("/blog")} className="back-button" style={{ margin: "20px auto" }}>
+          <button
+            onClick={() => navigate("/blog")}
+            className="back-button"
+            style={{ margin: "20px auto" }}
+          >
             Back to Blog
           </button>
         </div>
@@ -128,7 +152,10 @@ export default function BlogDetailPage() {
   return (
     <div className="blog-detail-container">
       {/* Reading Progress Bar */}
-      <div className="reading-progress-bar" style={{ width: `${readingProgress}%`, backgroundColor: categoryColor }} />
+      <div
+        className="reading-progress-bar"
+        style={{ width: `${readingProgress}%`, backgroundColor: categoryColor }}
+      />
 
       {/* Navigation */}
       <div className="blog-detail-nav">
@@ -139,7 +166,10 @@ export default function BlogDetailPage() {
           </button>
 
           <div className="share-container">
-            <button className="share-button" onClick={() => setShowShareMenu(!showShareMenu)}>
+            <button
+              className="share-button"
+              onClick={() => setShowShareMenu(!showShareMenu)}
+            >
               <Share2 size={18} />
               Share
             </button>
@@ -168,17 +198,23 @@ export default function BlogDetailPage() {
         <div
           className="blog-detail-hero-image-bg"
           style={{
-            backgroundImage: blog.coverImage ? `url(${blog.coverImage})` : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundColor: `${categoryColor}40`
+            backgroundImage: blog.coverImage
+              ? `url(${blog.coverImage})`
+              : "none",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundColor: `${categoryColor}40`,
           }}
         />
         <div className="blog-detail-hero-overlay">
           <div className="blog-detail-hero-content-wrapper">
             <div className="blog-categories-detail">
-              {blog.categories?.map(cat => (
-                <span key={cat._id} className="blog-category-tag" style={{ color: getCategoryColor(cat.title) }}>
+              {blog.categories?.map((cat) => (
+                <span
+                  key={cat._id}
+                  className="blog-category-tag"
+                  style={{ color: getCategoryColor(cat.title) }}
+                >
                   {cat.title}
                 </span>
               ))}
@@ -194,13 +230,18 @@ export default function BlogDetailPage() {
                   )}
                 </div>
                 <div>
-                  <div className="author-name">{blog.author?.name || "Anonymous"}</div>
+                  <div className="author-name">
+                    {blog.author?.name || "Anonymous"}
+                  </div>
                   <div className="blog-date-time">
-                    {new Date(blog.publishedAt || blog._createdAt).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })} · <Clock size={12} /> {blog.readTime || "5 min read"}
+                    {new Date(
+                      blog.publishedAt || blog._createdAt,
+                    ).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}{" "}
+                    · <Clock size={12} /> {blog.readTime || "5 min read"}
                   </div>
                 </div>
               </div>
@@ -213,10 +254,12 @@ export default function BlogDetailPage() {
       <main className="blog-detail-main">
         <article className="blog-article">
           <div className="blog-article-content">
-            <PortableText 
-              value={blog.content} 
-              components={portableTextComponents}
-            />
+            {blog.content && (
+              <PortableText
+                value={blog.content}
+                components={portableTextComponents}
+              />
+            )}
           </div>
         </article>
 
@@ -232,15 +275,28 @@ export default function BlogDetailPage() {
           <div className="author-card-content">
             <h3>About {blog.author?.name || "the Author"}</h3>
             <p>
-              {blog.author?.bio || "Passionate writer sharing insights on environmental impact and sustainable technology."}
+              {blog.author?.bio ||
+                "Passionate writer sharing insights on environmental impact and sustainable technology."}
             </p>
             {blog.author?.socialLinks && (
               <div className="author-socials">
                 {blog.author.socialLinks.twitter && (
-                  <a href={blog.author.socialLinks.twitter} target="_blank" rel="noopener noreferrer"><Twitter size={16} /></a>
+                  <a
+                    href={blog.author.socialLinks.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Twitter size={16} />
+                  </a>
                 )}
                 {blog.author.socialLinks.linkedin && (
-                  <a href={blog.author.socialLinks.linkedin} target="_blank" rel="noopener noreferrer"><Linkedin size={16} /></a>
+                  <a
+                    href={blog.author.socialLinks.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Linkedin size={16} />
+                  </a>
                 )}
               </div>
             )}
@@ -256,18 +312,29 @@ export default function BlogDetailPage() {
             </h2>
             <div className="related-posts-grid">
               {relatedPosts.map((post) => (
-                <Link key={post._id} to={`/blog/${post.slug?.current}`} className="related-post-card">
+                <Link
+                  key={post._id}
+                  to={`/blog/${post.slug?.current}`}
+                  className="related-post-card"
+                >
                   <div
                     className="related-post-image"
                     style={{
-                      backgroundImage: post.coverImage ? `url(${post.coverImage})` : 'none',
+                      backgroundImage: post.coverImage
+                        ? `url(${post.coverImage})`
+                        : "none",
                       backgroundColor: `${getCategoryColor(post.categories?.[0]?.title)}40`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center'
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
                     }}
                   />
                   <div className="related-post-content">
-                    <span className="related-post-category" style={{ color: getCategoryColor(post.categories?.[0]?.title) }}>
+                    <span
+                      className="related-post-category"
+                      style={{
+                        color: getCategoryColor(post.categories?.[0]?.title),
+                      }}
+                    >
                       {post.categories?.[0]?.title}
                     </span>
                     <h4>{post.title}</h4>
