@@ -9,6 +9,7 @@
     "test": "jest --coverage --detectOpenHandles"
   },
   "dependencies": {
+    "backend": "file:..",
     "co2-plus": "file:../..",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
