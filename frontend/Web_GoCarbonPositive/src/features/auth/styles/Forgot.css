@@ -1,0 +1,79 @@
+.auth-page {
+  max-width: 400px;
+  margin: 100px auto;
+  text-align: center;
+}
+
+.auth-page h2 {
+  margin-bottom: 8px;
+}
+
+.auth-page p {
+  font-size: 14px;
+  color: #666;
+}
+
+.auth-page form {
+  margin-top: 16px;
+}
+
+.auth-page input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.auth-page button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  background: #22a447;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  padding-right: 40px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: auto;
+  height: auto;
+  color: #666;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.success-text {
+  margin-top: 12px;
+  color: green;
+  font-size: 14px;
+}
+
+.info-text {
+  color: #555;
+  font-size: 14px;
+}
