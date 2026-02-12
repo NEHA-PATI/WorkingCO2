@@ -37,7 +37,6 @@ import ViewAssets from "@features/marketplace/pages/ViewAssets";
 import WalletPage from "@features/marketplace/components/WalletUI";
 import Upload from "@features/marketplace/components/upload";
 
-import ArenaPage from "@features/arena/pages/Arena";
 import ArenaStandalonePage from "@features/arena/pages/arenaStandalone";
 
 import OrgDashboard, {
@@ -74,7 +73,7 @@ const getOrgTabElement = (tabId) => {
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/arena" element={<ArenaPage />} />
+      <Route path="/arena" element={<Navigate to="/arena-standalone" replace />} />
       <Route path="/arena-standalone" element={<ArenaStandalonePage />} />
 
       <Route element={<BaseLayout />}>

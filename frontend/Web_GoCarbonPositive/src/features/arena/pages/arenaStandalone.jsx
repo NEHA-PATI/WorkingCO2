@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useMotionValue, useAnimationFrame } from 'fram
 import {
     Trophy, Medal, Crown, Flame, Sparkles, TrendingUp, Award, Star,
     ChevronLeft, ChevronRight, Check, Zap, X, CheckCircle2, Gift, ScrollText,
-    UserPlus, ClipboardList, Linkedin, Instagram, Users, CalendarCheck, Gamepad2, Brain
+    UserPlus, ClipboardList, Linkedin, Instagram, Users, CalendarCheck, Gamepad2, Brain, Clock
 } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import a4 from "@features/arena/components/photos/a4.jpeg";
@@ -113,7 +113,7 @@ const HeroSlider = () => {
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -100 }}
                     transition={{ duration: 0.5, ease: "easeInOut" }}
-                      
+
                 >
                     <img
                         src={banners[current].image}
@@ -491,7 +491,7 @@ const Leaderboard = () => {
 };
 
 // ContestCard Component
-const ContestCard = ({ contest, index, onClick, isCompleted }) => {
+const ContestCard = ({ contest, index, onClick, isCompleted, timeLeft }) => {
     const Icon = iconMap[contest.icon] || Zap;
 
 
@@ -503,15 +503,15 @@ const ContestCard = ({ contest, index, onClick, isCompleted }) => {
             transition={{ delay: index * 0.1 }}
             whileHover={{ y: isCompleted ? 0 : -4, transition: { duration: 0.2 } }}
             onClick={onClick}
-            className={`group relative ${contest.bgColor} ${contest.borderColor} border rounded-2xl p-5 cursor-pointer overflow-hidden transition-all ${isCompleted ? 'opacity-50 hover:shadow-sm' : 'hover:shadow-lg'
+            className={`group relative ${contest.theme.bg} ${contest.theme.border} border rounded-2xl p-5 cursor-pointer overflow-hidden transition-all ${isCompleted ? 'opacity-50 hover:shadow-sm' : 'hover:shadow-lg'
                 }`}
         >
-            <div className={`absolute inset-0 bg-gradient-to-br ${contest.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+            <div className={`absolute inset-0 bg-gradient-to-br ${contest.theme.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
             <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: index * 0.1 + 0.2, type: "spring" }}
-                className={`absolute top-4 right-4 bg-gradient-to-r ${contest.color} text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5`}
+                className={`absolute top-4 right-4 bg-gradient-to-r ${contest.theme.gradient} text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5`}
             >
                 <Zap className="w-4 h-4" />
                 <span>{contest.points} pts</span>
@@ -526,15 +526,21 @@ const ContestCard = ({ contest, index, onClick, isCompleted }) => {
                     <span>Completed</span>
                 </motion.div>
             )}
-            <div className={`w-12 h-12 bg-gradient-to-br ${contest.color} rounded-xl flex items-center justify-center shadow-lg mb-4`}>
-                <Icon className="w-6 h-6 text-white" />
+            <div className={`w-12 h-12 ${contest.theme.iconBg} rounded-xl flex items-center justify-center shadow-lg mb-4`}>
+                <Icon className={`w-8 h-8 ${contest.theme.iconText}`} />
             </div>
             <h3 className="text-lg font-semibold text-slate-800 mb-1">{contest.title}</h3>
             <p className="text-sm text-slate-500 mb-4">{contest.description}</p>
-            <button className={`arena-standalone-btn w-full bg-gradient-to-r ${contest.color} hover:opacity-90 text-white border-0 shadow-md group-hover:shadow-lg transition-all`}>
+            <button className={`arena-standalone-btn w-full bg-gradient-to-r ${contest.theme.button} hover:opacity-90 text-white border-0 shadow-md group-hover:shadow-lg transition-all`}>
                 <span>{contest.buttonText}</span>
                 <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
             </button>
+            {contest.taskType === "daily_checkin" && isCompleted && timeLeft && (
+                <div className="text-xs text-slate-500 mt-2 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span>Next in {timeLeft}</span>
+                </div>
+            )}
         </motion.div>
     );
 };
@@ -543,6 +549,9 @@ const ContestCard = ({ contest, index, onClick, isCompleted }) => {
 const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => {
     if (!contest) return null;
     const Icon = iconMap[contest.icon] || Zap;
+    const rewardIconColor = contest.theme.iconBg.startsWith('bg-')
+        ? contest.theme.iconBg.replace(/^bg-/, 'text-')
+        : 'text-violet-500';
 
     const handleAction = () => {
         onComplete(contest);
@@ -566,7 +575,7 @@ const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => 
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
                             className="arena-standalone-modal"
                         >
-                            <div className={`relative bg-gradient-to-r ${contest.color} p-6 text-white`}>
+                            <div className={`relative bg-gradient-to-r ${contest.theme.gradient} p-6 text-white`}>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); onClose(); }}
                                     className="absolute top-4 right-4 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all z-50"
@@ -576,8 +585,8 @@ const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => 
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                                 <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
                                 <div className="relative flex items-center gap-4">
-                                    <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                                        <Icon className="w-8 h-8" />
+                                    <div className={`w-16 h-16 ${contest.theme.iconBg} rounded-2xl flex items-center justify-center`}>
+                                        <Icon className={`w-8 h-8 ${contest.theme.iconText}`} />
                                     </div>
                                     <div>
                                         <h2 className="text-2xl font-bold">{contest.title}</h2>
@@ -629,16 +638,9 @@ const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => 
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ delay: 0.3 + index * 0.1 }}
-                                                className={`flex items-center gap-3 p-3 ${contest.bgColor} ${contest.borderColor} border rounded-xl`}
+                                                className={`flex items-center gap-3 p-3 ${contest.theme.bg} ${contest.theme.border} border rounded-xl`}
                                             >
-                                                <CheckCircle2 className={`w-5 h-5 ${contest.color.includes('violet') ? 'text-violet-500' :
-                                                    contest.color.includes('emerald') ? 'text-emerald-500' :
-                                                        contest.color.includes('blue') ? 'text-blue-500' :
-                                                            contest.color.includes('pink') ? 'text-pink-500' :
-                                                                contest.color.includes('indigo') ? 'text-indigo-500' :
-                                                                    contest.color.includes('amber') ? 'text-amber-500' :
-                                                                        contest.color.includes('cyan') ? 'text-cyan-500' : 'text-fuchsia-500'
-                                                    }`} />
+                                                <CheckCircle2 className={`w-5 h-5 ${rewardIconColor}`} />
                                                 <span className="text-sm font-medium text-slate-700">{reward}</span>
                                             </motion.div>
                                         ))}
@@ -649,7 +651,7 @@ const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => 
                                 <button
                                     onClick={handleAction}
                                     disabled={isCompleted}
-                                    className={`arena-standalone-btn w-full bg-gradient-to-r ${contest.color} hover:opacity-90 text-white border-0 shadow-lg h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed`}
+                                    className={`arena-standalone-btn w-full bg-gradient-to-r ${contest.theme.button} hover:opacity-90 text-white border-0 shadow-lg h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
                                     {isCompleted ? 'Completed for Today' : contest.buttonText}
                                 </button>
@@ -850,6 +852,7 @@ const RewardsShowcase = ({ onRedeem }) => {
 export default function ArenaStandalone() {
     const [selectedContest, setSelectedContest] = useState(null);
     const [selectedReward, setSelectedReward] = useState(null);
+    const [timeLeft, setTimeLeft] = useState(null);
     const queryClient = useQueryClient();
 
     const { data: completions = [] } = useQuery({
@@ -865,10 +868,57 @@ export default function ArenaStandalone() {
         }
     });
 
+    const getLatestTaskCompletion = (taskType) => {
+        const taskCompletions = completions.filter(c => c.task_type === taskType);
+        if (taskCompletions.length === 0) return null;
+        return taskCompletions
+            .slice()
+            .sort((a, b) => {
+                const aTime = new Date(a.completed_at || a.completed_date || 0).getTime();
+                const bTime = new Date(b.completed_at || b.completed_date || 0).getTime();
+                return bTime - aTime;
+            })[0];
+    };
+
     const isTaskCompletedToday = (taskType) => {
+        if (taskType === "daily_checkin") {
+            const latestCheckin = getLatestTaskCompletion("daily_checkin");
+            if (!latestCheckin) return false;
+            const completedTime = new Date(latestCheckin.completed_at || latestCheckin.completed_date);
+            const nextTime = new Date(completedTime.getTime() + 24 * 60 * 60 * 1000);
+            return nextTime > new Date();
+        }
         const today = new Date().toISOString().split('T')[0];
         return completions.some(c => c.task_type === taskType && c.completed_date === today);
     };
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const latestCheckin = getLatestTaskCompletion("daily_checkin");
+            if (!latestCheckin) {
+                setTimeLeft(null);
+                return;
+            }
+
+            const completedTime = new Date(latestCheckin.completed_at || latestCheckin.completed_date);
+            const nextTime = new Date(completedTime.getTime() + 24 * 60 * 60 * 1000);
+            const now = new Date();
+            const diff = nextTime - now;
+
+            if (diff <= 0) {
+                setTimeLeft(null);
+                return;
+            }
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [completions]);
 
     const getLocalCompleted = () => {
         try {
@@ -920,9 +970,11 @@ export default function ArenaStandalone() {
         }
 
         if (contest.isDailyTask) {
+            const nowIso = new Date().toISOString();
             createCompletionMutation.mutate({
                 task_type: contest.taskType,
-                completed_date: new Date().toISOString().split('T')[0],
+                completed_at: nowIso,
+                completed_date: nowIso.split('T')[0],
                 points_earned: contest.points
             });
         } else {
@@ -934,14 +986,161 @@ export default function ArenaStandalone() {
     };
 
     const contests = [
-        { id: 1, title: "Sign Up Bonus", description: "Complete your profile setup", points: 500, icon: "UserPlus", color: "from-violet-500 to-purple-600", bgColor: "bg-violet-50", borderColor: "border-violet-200", buttonText: "Complete Profile", taskType: "signup_bonus", rules: ["Fill in all required profile fields", "Upload a profile picture", "Verify your email address", "Add your bio (minimum 50 characters)"], rewards: ["500 Arena Points", "Exclusive 'Pioneer' Badge", "Early access to new features"] },
-        { id: 2, title: "Take a Survey", description: "Share your valuable feedback", points: 150, icon: "ClipboardList", color: "from-emerald-500 to-teal-600", bgColor: "bg-emerald-50", borderColor: "border-emerald-200", buttonText: "Start Survey", taskType: "survey", rules: ["Answer all questions honestly", "Complete survey within 10 minutes", "One survey per day limit", "Thoughtful responses earn bonus points"], rewards: ["150 Arena Points", "Chance for bonus 50 points", "Entry into weekly raffle"] },
-        { id: 3, title: "Connect on LinkedIn", description: "Follow us on LinkedIn", points: 100, icon: "Linkedin", color: "from-blue-500 to-indigo-600", bgColor: "bg-blue-50", borderColor: "border-blue-200", buttonText: "Connect Now", taskType: "linkedin_follow", rules: ["Follow our official LinkedIn page", "Like our latest post", "Share with your network for bonus", "Comment on any post for extra points"], rewards: ["100 Arena Points", "Professional network badge", "LinkedIn exclusive updates"] },
-        { id: 4, title: "Follow on Instagram", description: "Join our Instagram community", points: 100, icon: "Instagram", color: "from-pink-500 to-rose-600", bgColor: "bg-pink-50", borderColor: "border-pink-200", buttonText: "Follow Us", taskType: "instagram_follow", rules: ["Follow our Instagram account", "Like our latest 3 posts", "Tag us in your story for bonus", "Use our hashtag in your posts"], rewards: ["100 Arena Points", "Social butterfly badge", "Featured in our stories"] },
-        { id: 5, title: "Join Community", description: "Be part of our Discord family", points: 200, icon: "Users", color: "from-indigo-500 to-violet-600", bgColor: "bg-indigo-50", borderColor: "border-indigo-200", buttonText: "Join Discord", taskType: "community_join", rules: ["Join our official Discord server", "Introduce yourself in #introductions", "Read and accept community guidelines", "Stay active for weekly bonuses"], rewards: ["200 Arena Points", "Community member role", "Access to exclusive channels"] },
-        { id: 6, title: "Daily Check-in", description: "Claim your daily reward", points: 50, icon: "CalendarCheck", color: "from-amber-500 to-orange-600", bgColor: "bg-amber-50", borderColor: "border-amber-200", buttonText: "Check In", isDailyTask: true, taskType: "daily_checkin", rules: ["Check in once every 24 hours", "Maintain streak for multipliers", "7-day streak = 2x points", "30-day streak = 5x points"], rewards: ["50 Base Points", "Streak multiplier bonus", "Monthly streak badge"] },
-        { id: 7, title: "Play Games", description: "Win points through mini-games", points: 75, icon: "Gamepad2", color: "from-cyan-500 to-blue-600", bgColor: "bg-cyan-50", borderColor: "border-cyan-200", buttonText: "Play Now", isDailyTask: true, taskType: "play_games", rules: ["Complete any available game", "Higher scores = more points", "3 attempts per game daily", "Weekly tournaments available"], rewards: ["Up to 75 Points per game", "Gamer badge", "Tournament eligibility"] },
-        { id: 8, title: "Quiz Challenge", description: "Test your knowledge", points: 120, icon: "Brain", color: "from-fuchsia-500 to-pink-600", bgColor: "bg-fuchsia-50", borderColor: "border-fuchsia-200", buttonText: "Take Quiz", isDailyTask: true, taskType: "quiz", rules: ["Answer 10 questions correctly", "Time limit: 2 minutes", "Each correct answer = 12 points", "Perfect score = bonus 30 points"], rewards: ["Up to 150 Points", "Genius badge", "Leaderboard ranking boost"] }
+        {
+            id: 1,
+            title: "Sign Up Bonus",
+            description: "Complete your profile setup",
+            points: 500,
+            icon: "UserPlus",
+            theme: {
+                gradient: "from-violet-500 to-purple-600",
+                bg: "bg-violet-50",
+                border: "border-violet-200",
+                iconBg: "bg-violet-600",
+                iconText: "text-white",
+                button: "from-violet-500 to-purple-600"
+            },
+            buttonText: "Sign Up Now",
+            taskType: "signup_bonus",
+            rules: ["Sign Up for an account", "Verify your email address", "Complete your profile information", "One-time task, cannot be repeated"],
+
+        },
+        {
+            id: 2,
+            title: "Take a Survey",
+            description: "Share your valuable feedback",
+            points: 150,
+            icon: "ClipboardList",
+            theme: {
+                gradient: "from-emerald-500 to-teal-600",
+                bg: "bg-emerald-50",
+                border: "border-emerald-200",
+                iconBg: "bg-emerald-600",
+                iconText: "text-white",
+                button: "from-emerald-500 to-teal-600"
+            },
+            buttonText: "Start Survey",
+            taskType: "survey",
+            rules: ["Answer all questions honestly", "Complete survey within 10 minutes", "One survey per day limit", "Thoughtful responses earn bonus points"],
+            rewards: ["150 Arena Points", "Chance for bonus 50 points", "Entry into weekly raffle"]
+        },
+        {
+            id: 3,
+            title: "Connect on LinkedIn",
+            description: "Follow us on LinkedIn",
+            points: 100,
+            icon: "Linkedin",
+            theme: {
+                gradient: "from-blue-500 to-indigo-600",
+                bg: "bg-blue-50",
+                border: "border-blue-200",
+                iconBg: "bg-blue-600",
+                iconText: "text-white",
+                button: "from-blue-500 to-indigo-600"
+            },
+            buttonText: "Connect Now",
+            taskType: "linkedin_follow",
+            rules: ["Follow our official LinkedIn page", "Like our latest post", "Share with your network for bonus", "Comment on any post for extra points"],
+            rewards: ["100 Arena Points", "Professional network badge", "LinkedIn exclusive updates"]
+        },
+        {
+            id: 4,
+            title: "Follow on Instagram",
+            description: "Join our Instagram community",
+            points: 100,
+            icon: "Instagram",
+            theme: {
+                gradient: "from-pink-500 to-rose-600",
+                bg: "bg-pink-50",
+                border: "border-pink-200",
+                iconBg: "bg-pink-600",
+                iconText: "text-white",
+                button: "from-pink-500 to-rose-600"
+            },
+            buttonText: "Follow Us",
+            taskType: "instagram_follow",
+            rules: ["Follow our Instagram account", "Like our latest 3 posts", "Tag us in your story for bonus", "Use our hashtag in your posts"],
+            rewards: ["100 Arena Points", "Social butterfly badge", "Featured in our stories"]
+        },
+        {
+            id: 5,
+            title: "Join Community",
+            description: "Be part of our Discord family",
+            points: 200,
+            icon: "Users",
+            theme: {
+                gradient: "from-indigo-500 to-violet-600",
+                bg: "bg-indigo-50",
+                border: "border-indigo-200",
+                iconBg: "bg-indigo-600",
+                iconText: "text-white",
+                button: "from-indigo-500 to-violet-600"
+            },
+            buttonText: "Join Discord",
+            taskType: "community_join",
+            rules: ["Join our official Discord server", "Introduce yourself in #introductions", "Read and accept community guidelines", "Stay active for weekly bonuses"],
+            rewards: ["200 Arena Points", "Community member role", "Access to exclusive channels"]
+        },
+        {
+            id: 6,
+            title: "Daily Check-in",
+            description: "Claim your daily reward",
+            points: 50,
+            icon: "CalendarCheck",
+            theme: {
+                gradient: "from-sky-600 to-indigo-600",
+                bg: "bg-sky-50",
+                border: "border-sky-200",
+                iconBg: "bg-sky-600",
+                iconText: "text-white",
+                button: "from-sky-600 to-indigo-600"
+            },
+            buttonText: "Check In",
+            isDailyTask: true,
+            taskType: "daily_checkin",
+            rules: ["Check in once every 24 hours", "Maintain streak for multipliers", "7-day streak = 2x points", "30-day streak = 5x points"],
+            rewards: ["50 Base Points", "Streak multiplier bonus", "Monthly streak badge"]
+        },
+        {
+            id: 7,
+            title: "Play Games",
+            description: "Win points through mini-games",
+            points: 75,
+            icon: "Gamepad2",
+            theme: {
+                gradient: "from-cyan-500 to-blue-600",
+                bg: "bg-cyan-50",
+                border: "border-cyan-200",
+                iconBg: "bg-cyan-600",
+                iconText: "text-white",
+                button: "from-cyan-500 to-blue-600"
+            },
+            buttonText: "Play Now",
+            isDailyTask: true,
+            taskType: "play_games",
+            rules: ["Complete any available game", "Higher scores = more points", "3 attempts per game daily", "Weekly tournaments available"],
+            rewards: ["Up to 75 Points per game", "Gamer badge", "Tournament eligibility"]
+        },
+        {
+            id: 8,
+            title: "Quiz Challenge",
+            description: "Test your knowledge",
+            points: 120,
+            icon: "Brain",
+            theme: {
+                gradient: "from-fuchsia-500 to-pink-600",
+                bg: "bg-fuchsia-50",
+                border: "border-fuchsia-200",
+                iconBg: "bg-fuchsia-600",
+                iconText: "text-white",
+                button: "from-fuchsia-500 to-pink-600"
+            },
+            buttonText: "Take Quiz",
+            isDailyTask: true,
+            taskType: "quiz",
+            rules: ["Answer 10 questions correctly", "Time limit: 2 minutes", "Each correct answer = 12 points", "Perfect score = bonus 30 points"],
+            rewards: ["Up to 150 Points", "Genius badge", "Leaderboard ranking boost"]
+        }
     ];
 
     // ===== Infinite Carousel Logic =====
@@ -1013,6 +1212,7 @@ export default function ArenaStandalone() {
                                                 contest={contest}
                                                 index={index}
                                                 isCompleted={isTaskCompleted(contest)}
+                                                timeLeft={timeLeft}
                                                 onClick={() => setSelectedContest(contest)}
                                             />
                                         </div>
