@@ -6,7 +6,8 @@ const app = express();
 
 app.use(express.json());
 
-app.use('/api/rewards', rewardRoutes);
+// ✅ Versioned API
+app.use('/api/v1/rewards', rewardRoutes);
 
 app.use(errorMiddleware);
 

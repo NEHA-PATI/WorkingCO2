@@ -111,9 +111,108 @@ const checkWeeklyMilestones = async (u_id) => {
     activity_date: new Date()
   });
 };
+/* ===============================
+   GROUPED RULES FOR FRONTEND
+================================ */
+const getGroupedRules = async () => {
+  const rules = await repo.getAllActiveRules();
+
+  const grouped = {};
+
+  rules.forEach(rule => {
+    const {
+      action_key,
+      action_type,
+      points,
+      milestone_weeks,
+      max_points_per_day
+    } = rule;
+
+    if (!grouped[action_key]) {
+      grouped[action_key] = {};
+    }
+
+    if (action_type === 'consistency') {
+
+      if (!grouped[action_key].consistency) {
+        grouped[action_key].consistency = {};
+      }
+
+      grouped[action_key].consistency[milestone_weeks] = points;
+
+    } else if (action_type === 'daily') {
+
+      grouped[action_key].daily = {
+        points_per_action: points,
+        max_per_day: max_points_per_day || null
+      };
+
+    } else {
+
+      grouped[action_key][action_type] = {
+        points
+      };
+    }
+  });
+
+  return grouped;
+};
+
+const getLeaderboard = async (type = 'monthly') => {
+  if (type === 'lifetime') {
+    return await repo.getLifetimeLeaderboard();
+  }
+  return await repo.getMonthlyLeaderboard();
+};
+
+const getMyRank = async (u_id) => {
+  return await repo.getUserMonthlyRank(u_id);
+};
+
+/* ===============================
+   GET CURRENT STREAK
+================================ */
+const getCurrentStreak = async (u_id) => {
+  return await repo.getDailyStreak(u_id);
+};
+
+const getTodayTaskStatus = async (u_id) => {
+  const todayEvents = await repo.getTodayStatus(u_id);
+
+  const status = {
+    daily_checkin_completed: false,
+    daily_quiz_points_today: 0
+  };
+
+  todayEvents.forEach(event => {
+    if (event.action_key === 'daily_checkin') {
+      status.daily_checkin_completed = true;
+    }
+
+    if (event.action_key === 'daily_quiz') {
+      status.daily_quiz_points_today = Number(event.points);
+    }
+  });
+
+  return status;
+};
+
+const getRewardHistory = async (u_id, page = 1, limit = 20) => {
+  const offset = (page - 1) * limit;
+
+  return await repo.getUserRewardHistory(u_id, limit, offset);
+};
+
 
 module.exports = {
   awardOneTime,
   awardDailyCheckin,
-  awardDailyQuiz
+  awardDailyQuiz,
+  getGroupedRules,
+  getLeaderboard,
+  getMyRank,
+  getCurrentStreak,
+  getTodayTaskStatus,
+  getRewardHistory
+
 };
