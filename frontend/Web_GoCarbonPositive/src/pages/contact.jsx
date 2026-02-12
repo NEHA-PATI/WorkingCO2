@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import '../styles/user/contact.css';
 import { fireToast } from '../services/user/toastService.js';
