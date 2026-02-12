@@ -7,7 +7,7 @@
 
 /* Hero Section */
 .blog-hero {
-  background:#e1faec;
+  background: #38b000;
   padding: 80px 64px 60px;
   position: relative;
   overflow: hidden;
@@ -40,30 +40,30 @@
   backdrop-filter: blur(10px);
   padding: 8px 16px;
   border-radius: 50px;
-  color: rgb(0, 0, 0);
-  font-size: 13px;
+  color: #ffffff;
+  font-size: 12px;
   font-weight: 600;
   margin-bottom: 24px;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .blog-hero-title {
-  font-size: 56px;
+  font-size: 44px;
   font-weight: 800;
-  color: rgb(0, 0, 0);
+  color: #ffffff;
   margin-bottom: 16px;
   line-height: 1.2;
 }
 
 .gradient-text {
-  background: #198a4a;
+  background: linear-gradient(135deg, #9ef01a 0%, #d9f99d 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .blog-hero-subtitle {
-  font-size: 18px;
+  font-size: 16px;
   color: rgba(255, 255, 255, 0.95);
   line-height: 1.6;
   max-width: 600px;
@@ -377,7 +377,7 @@
   }
 
   .blog-hero-title {
-    font-size: 42px;
+    font-size: 36px;
   }
 }
 
@@ -387,11 +387,11 @@
   }
 
   .blog-hero-title {
-    font-size: 36px;
+    font-size: 30px;
   }
 
   .blog-hero-subtitle {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .blog-search {
@@ -423,11 +423,11 @@
   }
 
   .blog-hero-title {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .blog-hero-subtitle {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .blog-search {

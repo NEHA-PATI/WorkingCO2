@@ -20,7 +20,8 @@ import {
   FaChartLine,
   FaStar,
   FaCheckCircle,
-  FaClock
+  FaClock,
+  FaChevronDown
 } from "react-icons/fa"
 
 export default function CommunityPage() {
@@ -196,29 +197,6 @@ export default function CommunityPage() {
               Join our thriving global community to connect with like-minded members, share knowledge, 
               and discover sustainable solutions for a carbon-positive future.
             </p>
-            <div style={styles.heroStats}>
-              <div style={styles.statItem}>
-                <FaUsers style={styles.statIcon} />
-                <div>
-                  <div style={styles.statNumber}>6,046</div>
-                  <div style={styles.statLabel}>Active Members</div>
-                </div>
-              </div>
-              <div style={styles.statItem}>
-                <FaComments style={styles.statIcon} />
-                <div>
-                  <div style={styles.statNumber}>3,102</div>
-                  <div style={styles.statLabel}>Discussions</div>
-                </div>
-              </div>
-              <div style={styles.statItem}>
-                <FaChartLine style={styles.statIcon} />
-                <div>
-                  <div style={styles.statNumber}>12,456</div>
-                  <div style={styles.statLabel}>Solutions Shared</div>
-                </div>
-              </div>
-            </div>
           </div>
           <div style={styles.heroImageContainer}>
             <img 
@@ -239,6 +217,111 @@ export default function CommunityPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             style={styles.searchInput}
           />
+        </div>
+      </div>
+
+      {/* Community Highlights */}
+      <div style={styles.summarySection}>
+        <div style={styles.summaryGrid}>
+          <div style={styles.summaryCard}>
+            <div style={styles.summaryHeader}>
+              <FaChartLine style={styles.summaryHeaderIcon} />
+              <h3 style={styles.sidebarTitle}>Community Stats</h3>
+            </div>
+            <div style={styles.statsGrid}>
+              <div style={styles.summaryStatItem}>
+                <FaUsers style={styles.summaryStatIcon} />
+                <div>
+                  <div style={styles.summaryStatNumber}>6,046</div>
+                  <div style={styles.summaryStatLabel}>Active Members</div>
+                </div>
+              </div>
+              <div style={styles.summaryStatItem}>
+                <FaComments style={styles.summaryStatIcon} />
+                <div>
+                  <div style={styles.summaryStatNumber}>3,102</div>
+                  <div style={styles.summaryStatLabel}>Discussions</div>
+                </div>
+              </div>
+              <div style={styles.summaryStatItem}>
+                <FaChartLine style={styles.summaryStatIcon} />
+                <div>
+                  <div style={styles.summaryStatNumber}>12,456</div>
+                  <div style={styles.summaryStatLabel}>Solutions Shared</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={styles.summaryCard}>
+            <div style={styles.summaryHeader}>
+              <FaTrophy style={styles.summaryHeaderIcon} />
+              <h3 style={styles.sidebarTitle}>Top Contributors</h3>
+            </div>
+            <div style={styles.contributorsList}>
+              {topContributors.slice(0, 3).map((contributor, index) => (
+                <div key={contributor.id} style={styles.contributorItem}>
+                  <div style={styles.contributorRank}>#{index + 1}</div>
+                  <div style={styles.contributorAvatar}>{contributor.avatar}</div>
+                  <div style={styles.contributorInfo}>
+                    <div style={styles.contributorName}>{contributor.name}</div>
+                    <div style={styles.contributorMeta}>
+                      <span style={{...styles.contributorBadge, backgroundColor: contributor.badgeColor}}>
+                        {contributor.badge}
+                      </span>
+                      <span style={styles.contributorGroup}>
+                        {communityGroups.find(g => g.id === contributor.group)?.name}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={styles.contributorScore}>
+                    <FaStar style={{color: '#fbbf24', fontSize: '14px'}} />
+                    <span>{contributor.score}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button style={styles.seeMoreButton} aria-label="View more contributors">
+              +
+            </button>
+          </div>
+
+          <div style={styles.summaryCard}>
+            <div style={styles.summaryHeader}>
+              <FaRegLightbulb style={styles.summaryHeaderIcon} />
+              <h3 style={styles.sidebarTitle}>Popular Topics</h3>
+            </div>
+            <div style={styles.tagsGrid}>
+              {popularTags.map((tag, idx) => (
+                <span key={idx} style={styles.popularTag}>{tag}</span>
+              ))}
+            </div>
+          </div>
+
+          <div style={styles.summaryCard}>
+            <div style={styles.summaryHeader}>
+              <FaCheckCircle style={styles.summaryHeaderIcon} />
+              <h3 style={styles.sidebarTitle}>Community Guidelines</h3>
+            </div>
+            <ul style={styles.guidelinesList}>
+              <li style={styles.guidelineItem}>
+                <FaCheckCircle style={styles.guidelineIcon} />
+                Be respectful and inclusive
+              </li>
+              <li style={styles.guidelineItem}>
+                <FaCheckCircle style={styles.guidelineIcon} />
+                Share knowledge constructively
+              </li>
+              <li style={styles.guidelineItem}>
+                <FaCheckCircle style={styles.guidelineIcon} />
+                Verify information before posting
+              </li>
+              <li style={styles.guidelineItem}>
+                <FaCheckCircle style={styles.guidelineIcon} />
+                Support sustainable practices
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -289,7 +372,7 @@ export default function CommunityPage() {
               {[
                 { id: "all", label: "All Discussions", icon: <FaFire /> },
                 { id: "trending", label: "Trending", icon: <FaFire /> },
-                { id: "discussions", label: "Discussions", icon: <FaComments /> },
+                // { id: "discussions", label: "Discussions", icon: <FaComments /> },
                 { id: "questions", label: "Q&A", icon: <FaQuestionCircle /> },
                 { id: "resources", label: "Resources", icon: <FaBook /> },
               ].map((tab) => (
@@ -305,6 +388,24 @@ export default function CommunityPage() {
                   <span style={styles.tabLabel}>{tab.label}</span>
                 </button>
               ))}
+              <details style={styles.categoryDropdown}>
+                <summary style={styles.categoryDropdownSummary}>
+                  <FaBell />
+                  <span style={styles.tabLabel}>Categories</span>
+                  <FaChevronDown style={styles.dropdownIcon} />
+                </summary>
+                <div style={styles.categoryDropdownMenu}>
+                  {discussionCategories.map((category) => (
+                    <button key={category.id} style={styles.categoryDropdownItem}>
+                      <div style={styles.categoryLeft}>
+                        <span style={styles.categoryIcon}>{category.icon}</span>
+                        <span style={styles.categoryName}>{category.name}</span>
+                      </div>
+                      <span style={styles.categoryCount}>{category.count}</span>
+                    </button>
+                  ))}
+                </div>
+              </details>
             </div>
 
             {/* Filter Info */}
@@ -402,85 +503,7 @@ export default function CommunityPage() {
 
           {/* Right Sidebar */}
           <aside style={styles.sidebar}>
-            {/* Discussion Categories */}
-            <div style={styles.sidebarCard}>
-              <h3 style={styles.sidebarTitle}>Categories</h3>
-              <div style={styles.categoriesList}>
-                {discussionCategories.map((category) => (
-                  <button key={category.id} style={styles.categoryItem}>
-                    <div style={styles.categoryLeft}>
-                      <span style={styles.categoryIcon}>{category.icon}</span>
-                      <span style={styles.categoryName}>{category.name}</span>
-                    </div>
-                    <span style={styles.categoryCount}>{category.count}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Top Contributors */}
-            <div style={styles.sidebarCard}>
-              <div style={styles.sidebarHeader}>
-                <FaTrophy style={{color: '#10b981', fontSize: '20px'}} />
-                <h3 style={styles.sidebarTitle}>Top Contributors</h3>
-              </div>
-              <div style={styles.contributorsList}>
-                {topContributors.map((contributor, index) => (
-                  <div key={contributor.id} style={styles.contributorItem}>
-                    <div style={styles.contributorRank}>#{index + 1}</div>
-                    <div style={styles.contributorAvatar}>{contributor.avatar}</div>
-                    <div style={styles.contributorInfo}>
-                      <div style={styles.contributorName}>{contributor.name}</div>
-                      <div style={styles.contributorMeta}>
-                        <span style={{...styles.contributorBadge, backgroundColor: contributor.badgeColor}}>
-                          {contributor.badge}
-                        </span>
-                        <span style={styles.contributorGroup}>
-                          {communityGroups.find(g => g.id === contributor.group)?.name}
-                        </span>
-                      </div>
-                    </div>
-                    <div style={styles.contributorScore}>
-                      <FaStar style={{color: '#fbbf24', fontSize: '14px'}} />
-                      <span>{contributor.score}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Popular Tags */}
-            <div style={styles.sidebarCard}>
-              <h3 style={styles.sidebarTitle}>Popular Topics</h3>
-              <div style={styles.tagsGrid}>
-                {popularTags.map((tag, idx) => (
-                  <span key={idx} style={styles.popularTag}>{tag}</span>
-                ))}
-              </div>
-            </div>
-
-            {/* Community Guidelines */}
-            <div style={styles.sidebarCard}>
-              <h3 style={styles.sidebarTitle}>Community Guidelines</h3>
-              <ul style={styles.guidelinesList}>
-                <li style={styles.guidelineItem}>
-                  <FaCheckCircle style={styles.guidelineIcon} />
-                  Be respectful and inclusive
-                </li>
-                <li style={styles.guidelineItem}>
-                  <FaCheckCircle style={styles.guidelineIcon} />
-                  Share knowledge constructively
-                </li>
-                <li style={styles.guidelineItem}>
-                  <FaCheckCircle style={styles.guidelineIcon} />
-                  Verify information before posting
-                </li>
-                <li style={styles.guidelineItem}>
-                  <FaCheckCircle style={styles.guidelineIcon} />
-                  Support sustainable practices
-                </li>
-              </ul>
-            </div>
           </aside>
         </div>
       </div>
@@ -498,7 +521,7 @@ const styles = {
 
   // Hero Section
   heroSection: {
-    background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 50%, #6ee7b7 100%)',
+    background: '#38b000',
     padding: '48px 24px',
     borderBottom: '2px solid #10b981',
   },
@@ -517,13 +540,13 @@ const styles = {
   heroTitle: {
     fontSize: '3rem',
     fontWeight: '800',
-    color: '#065f46',
+    color: '#ffffff',
     marginBottom: '16px',
     lineHeight: '1.2',
   },
   heroDescription: {
     fontSize: '1.125rem',
-    color: '#047857',
+    color: '#ffffff',
     marginBottom: '32px',
     lineHeight: '1.7',
   },
@@ -539,16 +562,16 @@ const styles = {
   },
   statIcon: {
     fontSize: '32px',
-    color: '#10b981',
+    color: '#ffffff',
   },
   statNumber: {
     fontSize: '1.5rem',
     fontWeight: '700',
-    color: '#065f46',
+    color: '#ffffff',
   },
   statLabel: {
     fontSize: '0.875rem',
-    color: '#047857',
+    color: '#ffffff',
   },
   heroImageContainer: {
     flexShrink: '0',
@@ -579,6 +602,75 @@ const styles = {
     outline: 'none',
     backgroundColor: '#ffffff',
     transition: 'all 0.3s ease',
+  },
+
+  // Community Highlights
+  summarySection: {
+    maxWidth: '1400px',
+    margin: '32px auto 16px',
+    padding: '0 24px',
+  },
+  summaryGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '24px',
+    alignItems: 'stretch',
+    gridAutoRows: '1fr',
+  },
+  summaryCard: {
+    backgroundColor: '#f9fafb',
+    border: '2px solid #e5e7eb',
+    borderRadius: '16px',
+    padding: '24px',
+    height: '100%',
+  },
+  summaryHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    marginBottom: '16px',
+  },
+  summaryHeaderIcon: {
+    color: '#10b981',
+    fontSize: '20px',
+    lineHeight: '1',
+    display: 'block',
+  },
+  statsGrid: {
+    display: 'grid',
+    gap: '12px',
+  },
+  summaryStatItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  summaryStatIcon: {
+    fontSize: '24px',
+    color: '#10b981',
+  },
+  summaryStatNumber: {
+    fontSize: '1.25rem',
+    fontWeight: '700',
+    color: '#111827',
+  },
+  summaryStatLabel: {
+    fontSize: '0.875rem',
+    color: '#6b7280',
+  },
+  seeMoreButton: {
+    marginTop: '16px',
+    alignSelf: 'flex-start',
+    width: '36px',
+    height: '36px',
+    borderRadius: '10px',
+    border: '1px solid #38b000',
+    backgroundColor: '#38b000',
+    color: '#ffffff',
+    fontSize: '20px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    lineHeight: '1',
   },
 
   // Community Groups Section
@@ -650,13 +742,13 @@ const styles = {
 
   // Main Content
   mainContent: {
-    maxWidth: '1400px',
+    maxWidth: '100%',
     margin: '0 auto 48px',
     padding: '0 24px',
   },
   contentGrid: {
     display: 'grid',
-    gridTemplateColumns: '1fr 360px',
+    gridTemplateColumns: '1fr',
     gap: '32px',
   },
 
@@ -667,13 +759,15 @@ const styles = {
     gap: '24px',
   },
   tabsContainer: {
-    display: 'flex',
-    gap: '8px',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(5, 1fr)',
+    gap: '12px',
     backgroundColor: '#ffffff',
     padding: '8px',
     borderRadius: '12px',
     border: '1px solid #e5e7eb',
-    overflowX: 'auto',
+    overflow: 'visible',
+    alignItems: 'center',
   },
   tabButton: {
     display: 'flex',
@@ -689,13 +783,69 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.2s ease',
     whiteSpace: 'nowrap',
+    justifyContent: 'center',
+    width: '100%',
+    lineHeight: '1',
   },
   tabButtonActive: {
-    backgroundColor: '#d1fae5',
-    color: '#065f46',
+    backgroundColor: '#38b000',
+    color: '#ffffff',
   },
   tabLabel: {
     display: 'inline',
+    lineHeight: '1',
+  },
+  categoryDropdown: {
+    position: 'relative',
+    width: '100%',
+  },
+  categoryDropdownSummary: {
+    listStyle: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 20px',
+    border: 'none',
+    borderRadius: '8px',
+    backgroundColor: 'transparent',
+    color: '#6b7280',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    justifyContent: 'center',
+    width: '100%',
+    lineHeight: '1',
+  },
+  dropdownIcon: {
+    fontSize: '12px',
+    marginLeft: '4px',
+  },
+  categoryDropdownMenu: {
+    position: 'absolute',
+    top: 'calc(100% + 8px)',
+    left: 0,
+    minWidth: '260px',
+    backgroundColor: '#ffffff',
+    border: '1px solid #e5e7eb',
+    borderRadius: '12px',
+    padding: '8px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    boxShadow: '0 12px 30px rgba(0, 0, 0, 0.08)',
+    zIndex: 50,
+  },
+  categoryDropdownItem: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '10px 12px',
+    backgroundColor: '#f9fafb',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
   },
   filterInfo: {
     backgroundColor: '#ecfdf5',
@@ -711,7 +861,7 @@ const styles = {
   clearFilter: {
     marginLeft: 'auto',
     padding: '4px 12px',
-    backgroundColor: '#10b981',
+    backgroundColor: '#38b000',
     color: '#ffffff',
     border: 'none',
     borderRadius: '6px',
@@ -744,7 +894,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     padding: '10px 20px',
-    backgroundColor: '#10b981',
+    backgroundColor: '#38b000',
     color: '#ffffff',
     border: 'none',
     borderRadius: '8px',
@@ -884,9 +1034,7 @@ const styles = {
 
   // Sidebar
   sidebar: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
+    display: 'none',
   },
   sidebarCard: {
     backgroundColor: '#ffffff',

@@ -199,10 +199,9 @@ const IndustrialSolutions = () => {
           <div className="hero-content">
             {/* <div className="hero-number">01</div> */}
             <h2 className="hero-title">
-              WE BUILD A<br />
-              SUSTAINABLE
+              WE BUILD A SUSTAINABLE
               <br />
-              FUTURE
+              <span className="hero-title-center">FUTURE</span>
             </h2>
             <p className="hero-subtitle">
               Industrial solutions that transform your business while protecting
@@ -346,7 +345,7 @@ const IndustrialSolutions = () => {
                   value={formData.contact_person_name}
                   onChange={handleFormChange}
                   className="form-input"
-                  placeholder="Enter your full name"
+                 
                   required
                 />
               </div>
@@ -362,7 +361,7 @@ const IndustrialSolutions = () => {
                   value={formData.contact_email}
                   onChange={handleFormChange}
                   className="form-input"
-                  placeholder="Enter your email"
+               
                   required
                 />
               </div>
@@ -376,7 +375,7 @@ const IndustrialSolutions = () => {
                   value={formData.contact_number}
                   onChange={handleFormChange}
                   className="form-input"
-                  placeholder="Enter your phone number"
+              
                 />
               </div>
 
