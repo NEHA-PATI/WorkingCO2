@@ -1,5 +1,8 @@
 const pool = require('../../config/db');
 
+/* ===============================
+   MONTHLY POINTS
+================================ */
 const getMonthlyPoints = async (u_id) => {
   const { rows } = await pool.query(`
     SELECT COALESCE(SUM(points),0) AS total
@@ -12,6 +15,9 @@ const getMonthlyPoints = async (u_id) => {
   return Number(rows[0].total);
 };
 
+/* ===============================
+   RULE FETCH
+================================ */
 const getRule = async (action_key, action_type, milestone_weeks = null) => {
   const { rows } = await pool.query(`
     SELECT *
@@ -26,6 +32,39 @@ const getRule = async (action_key, action_type, milestone_weeks = null) => {
   return rows[0];
 };
 
+/* ===============================
+   CHECK IF EVENT EXISTS (prevent duplicate)
+================================ */
+const hasEventToday = async (u_id, action_key, action_type) => {
+  const { rows } = await pool.query(`
+    SELECT 1
+    FROM user_reward_events
+    WHERE u_id = $1
+      AND action_key = $2
+      AND action_type = $3
+      AND activity_date = CURRENT_DATE
+    LIMIT 1
+  `, [u_id, action_key, action_type]);
+
+  return rows.length > 0;
+};
+
+const hasMilestoneReward = async (u_id, weeks) => {
+  const { rows } = await pool.query(`
+    SELECT 1
+    FROM user_reward_events
+    WHERE u_id = $1
+      AND action_type = 'consistency'
+      AND milestone_weeks = $2
+    LIMIT 1
+  `, [u_id, weeks]);
+
+  return rows.length > 0;
+};
+
+/* ===============================
+   INSERT EVENT
+================================ */
 const insertRewardEvent = async ({
   u_id,
   action_key,
@@ -38,10 +77,12 @@ const insertRewardEvent = async ({
     INSERT INTO user_reward_events
     (u_id, action_key, action_type, points, activity_date, milestone_weeks)
     VALUES ($1,$2,$3,$4,$5,$6)
-    ON CONFLICT DO NOTHING
   `, [u_id, action_key, action_type, points, activity_date, milestone_weeks]);
 };
 
+/* ===============================
+   STREAK LOGIC (real continuous streak)
+================================ */
 const getDailyStreak = async (u_id) => {
   const { rows } = await pool.query(`
     WITH ordered AS (
@@ -60,10 +101,11 @@ const getDailyStreak = async (u_id) => {
   return Number(rows[0].streak);
 };
 
-
 module.exports = {
   getMonthlyPoints,
   getRule,
   insertRewardEvent,
-  getDailyStreak
+  getDailyStreak,
+  hasEventToday,
+  hasMilestoneReward
 };
