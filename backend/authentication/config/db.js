@@ -2,28 +2,22 @@ const { Pool } = require("pg");
 require("dotenv").config();
 
 const isProduction = process.env.NODE_ENV === "production";
+const isRDS = process.env.DB_HOST && process.env.DB_HOST.includes("rds.amazonaws.com");
 
-// ✅ Choose between DATABASE_URL and individual credentials
-const connectionConfig = process.env.DATABASE_URL
-  ? {
-      connectionString: process.env.DATABASE_URL,
-      ssl: { require: true, rejectUnauthorized: false }, // Render requires SSL
-    }
-  : {
-      user: process.env.DB_USER,
-      host: process.env.DB_HOST,
-      database: process.env.DB_NAME,
-      password: process.env.DB_PASSWORD,
-      port: process.env.DB_PORT || 5432,
-      ssl: false, // local dev (no SSL)
-    };
-
-// ✅ Connection pool setup
 const pool = new Pool({
-  ...connectionConfig,
-  max: 20, // max clients in pool
-  idleTimeoutMillis: 30000, // close idle clients after 30s
-  connectionTimeoutMillis: 2000, // return error after 2s if cannot connect
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT || 5432,
+
+  ssl: isRDS
+    ? { rejectUnauthorized: false } // ✅ AWS RDS
+    : false,                         // ✅ local postgres
+
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000, // ⬅️ 2s bahut kam tha
 });
 
 pool.on("connect", () => {
@@ -31,15 +25,17 @@ pool.on("connect", () => {
 });
 
 pool.on("error", (err) => {
-  console.error("❌ Unexpected database error:", err.message);
-  setTimeout(() => {
-    console.log("♻️ Reconnecting to database...");
-  }, 2000);
+  console.error("❌ Unexpected database error:", err);
 });
 
-// ✅ Test connection on startup
-pool.query("SELECT NOW()")
-  .then((res) => console.log("🕐 DB time:", res.rows[0].now))
-  .catch((err) => console.error("❌ PostgreSQL connection error:", err));
+// Test connection
+(async () => {
+  try {
+    const res = await pool.query("SELECT NOW()");
+    console.log("🕐 DB time:", res.rows[0].now);
+  } catch (err) {
+    console.error("❌ PostgreSQL connection error:", err.message);
+  }
+})();
 
 module.exports = pool;
