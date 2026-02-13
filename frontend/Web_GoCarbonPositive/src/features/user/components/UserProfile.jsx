@@ -337,7 +337,10 @@ console.log("🔍 UserProfile localStorage snapshot:", {
       }
     } catch (err) {
   console.error("Fetch profile failed", err);
-  fireToast("PROFILE.FETCH_FAILED", "error");
+  fireToast("PROFILE.FETCH_FAILED", "error", {}, {
+    toastId: "profile-fetch-failed",
+    style: { whiteSpace: "nowrap" },
+  });
   setIsEditing(true);
 }
 finally {

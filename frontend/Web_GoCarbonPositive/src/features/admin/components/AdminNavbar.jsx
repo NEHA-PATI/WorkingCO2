@@ -5,6 +5,7 @@ import { FaUserFriends } from "react-icons/fa";
 import { MdSupportAgent } from "react-icons/md";
 import { GiSettingsKnobs } from "react-icons/gi";
 import { BsShieldCheck } from "react-icons/bs";
+import { FaBoxesStacked } from "react-icons/fa6";
 
 import "@features/admin/styles/AdminNavbar.css";
 
@@ -16,6 +17,7 @@ const AdminNavbar = () => {
   const getActiveTab = () => {
     const path = location.pathname;
     if (path.includes("/admin/users")) return "users";
+    if (path.includes("/admin/asset-management")) return "asset-management";
     if (path.includes("/admin/support")) return "support";
     if (path.includes("/admin/configuration")) return "configuration";
     if (path.includes("/admin/security")) return "security";
@@ -45,6 +47,12 @@ const AdminNavbar = () => {
       label: "Users",
       icon: <FaUserFriends className="icon users-icon" />,
       path: "/admin/users",
+    },
+    {
+      id: "asset-management",
+      label: "Asset Management",
+      icon: <FaBoxesStacked className="icon asset-icon" />,
+      path: "/admin/asset-management",
     },
 
     {
