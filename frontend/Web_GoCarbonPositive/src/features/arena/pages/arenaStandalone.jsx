@@ -1,14 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import "@features/arena/styles/arenaglobals.css";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { motion, AnimatePresence, useMotionValue, useAnimationFrame } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
+import { AnimatePresence, useMotionValue, useAnimationFrame } from 'framer-motion';
 import {
-    Trophy, Medal, Crown, Flame, Sparkles, TrendingUp, Award, Star,
+    Trophy, Crown, Flame, Sparkles, TrendingUp, Star,
     ChevronLeft, ChevronRight, Check, Zap, X, CheckCircle2, Gift, ScrollText,
     UserPlus, ClipboardList, Linkedin, Instagram, Users, CalendarCheck, Gamepad2, Brain, Clock
 } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { ENV } from '@config/env';
+import arenaApi from '@features/arena/services/arenaApi';
+import { useCountdown } from '@features/arena/hooks/useCountdown';
 import a4 from "@features/arena/components/photos/a4.jpeg";
 import a5 from "@features/arena/components/photos/a5.jpg";
 import a6 from "@features/arena/components/photos/a6.jpg";
@@ -41,6 +47,49 @@ const styles = `
 .arena-standalone-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.points-pill,
+.completed-pill {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  min-width: 92px;
+  height: 36px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  gap: 0.35rem;
+  z-index: 10;
+}
+
+.points-pill {
+  color: white;
+  box-shadow: 0 10px 18px -10px rgba(0, 0, 0, 0.45);
+}
+
+.completed-pill {
+  background: linear-gradient(90deg, rgb(34, 197, 94), rgb(22, 163, 74));
+  color: white;
+  box-shadow: 0 10px 18px -10px rgba(21, 128, 61, 0.45);
+}
+
+.cooldown-pill {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgb(71, 85, 105);
+  z-index: 10;
 }
 
 .arena-standalone-modal-backdrop {
@@ -83,6 +132,188 @@ const iconMap = {
     UserPlus, ClipboardList, Linkedin, Instagram, Users, CalendarCheck, Gamepad2, Brain
 };
 
+const QUIZ_TASK_KEY = 'daily_quiz';
+
+const DEFAULT_THEME = {
+    gradient: "from-slate-500 to-slate-700",
+    bg: "bg-slate-50",
+    border: "border-slate-200",
+    iconBg: "bg-slate-600",
+    iconText: "text-white",
+    button: "from-slate-600 to-slate-700"
+};
+
+const CONTEST_UI_CONFIG = {
+    sign_up: {
+        title: "Sign Up Bonus",
+        description: "One-time signup reward from rewards configuration",
+        icon: "UserPlus",
+        buttonText: "Claim Bonus",
+        rules: ["Configured from backend reward rules", "One-time task"],
+        rewards: ["Points from reward_rules table"],
+        theme: {
+            gradient: "from-violet-500 to-purple-600",
+            bg: "bg-violet-50",
+            border: "border-violet-200",
+            iconBg: "bg-violet-600",
+            iconText: "text-white",
+            button: "from-violet-500 to-purple-600"
+        }
+    },
+    complete_profile: {
+        title: "Complete Profile",
+        description: "Finish your profile to unlock bonus points",
+        icon: "UserPlus",
+        buttonText: "Mark Complete",
+        rules: ["Configured from backend reward rules", "One-time task"],
+        rewards: ["Points from reward_rules table"],
+        theme: {
+            gradient: "from-indigo-500 to-violet-600",
+            bg: "bg-indigo-50",
+            border: "border-indigo-200",
+            iconBg: "bg-indigo-600",
+            iconText: "text-white",
+            button: "from-indigo-500 to-violet-600"
+        }
+    },
+    take_survey: {
+        title: "Take a Survey",
+        description: "Share your feedback and claim points",
+        icon: "ClipboardList",
+        buttonText: "Start Survey",
+        rules: ["Configured from backend reward rules", "One-time task"],
+        rewards: ["Points from reward_rules table"],
+        theme: {
+            gradient: "from-emerald-500 to-teal-600",
+            bg: "bg-emerald-50",
+            border: "border-emerald-200",
+            iconBg: "bg-emerald-600",
+            iconText: "text-white",
+            button: "from-emerald-500 to-teal-600"
+        }
+    },
+    connect_linkedin: {
+        title: "Connect on LinkedIn",
+        description: "Follow us on LinkedIn",
+        icon: "Linkedin",
+        buttonText: "Connect Now",
+        rules: ["Configured from backend reward rules", "One-time task"],
+        rewards: ["Points from reward_rules table"],
+        theme: {
+            gradient: "from-blue-500 to-indigo-600",
+            bg: "bg-blue-50",
+            border: "border-blue-200",
+            iconBg: "bg-blue-600",
+            iconText: "text-white",
+            button: "from-blue-500 to-indigo-600"
+        }
+    },
+    connect_instagram: {
+        title: "Follow on Instagram",
+        description: "Join our Instagram community",
+        icon: "Instagram",
+        buttonText: "Follow Us",
+        rules: ["Configured from backend reward rules", "One-time task"],
+        rewards: ["Points from reward_rules table"],
+        theme: {
+            gradient: "from-pink-500 to-rose-600",
+            bg: "bg-pink-50",
+            border: "border-pink-200",
+            iconBg: "bg-pink-600",
+            iconText: "text-white",
+            button: "from-pink-500 to-rose-600"
+        }
+    },
+    join_community: {
+        title: "Join Community",
+        description: "Be part of our community",
+        icon: "Users",
+        buttonText: "Join Community",
+        rules: ["Configured from backend reward rules", "One-time task"],
+        rewards: ["Points from reward_rules table"],
+        theme: {
+            gradient: "from-cyan-500 to-blue-600",
+            bg: "bg-cyan-50",
+            border: "border-cyan-200",
+            iconBg: "bg-cyan-600",
+            iconText: "text-white",
+            button: "from-cyan-500 to-blue-600"
+        }
+    },
+    daily_checkin: {
+        title: "Daily Check-in",
+        description: "Claim your daily check-in points",
+        icon: "CalendarCheck",
+        buttonText: "Check In",
+        rules: ["Available once every 24 hours", "Cooldown controlled by backend"],
+        rewards: ["Daily points + streak progression"],
+        theme: {
+            gradient: "from-sky-600 to-indigo-600",
+            bg: "bg-sky-50",
+            border: "border-sky-200",
+            iconBg: "bg-sky-600",
+            iconText: "text-white",
+            button: "from-sky-600 to-indigo-600"
+        }
+    },
+    daily_quiz: {
+        title: "Daily Quiz",
+        description: "Submit your correct answers to earn points",
+        icon: "Brain",
+        buttonText: "Submit Score",
+        rules: ["Enter number of correct answers", "Daily cap is from backend"],
+        rewards: ["Points from reward_rules table"],
+        theme: {
+            gradient: "from-fuchsia-500 to-pink-600",
+            bg: "bg-fuchsia-50",
+            border: "border-fuchsia-200",
+            iconBg: "bg-fuchsia-600",
+            iconText: "text-white",
+            button: "from-fuchsia-500 to-pink-600"
+        }
+    }
+};
+
+const humanizeTaskType = (taskType) => taskType
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+const getStoredUserId = () => {
+    try {
+        const raw = localStorage.getItem('authUser');
+        const parsed = raw ? JSON.parse(raw) : null;
+        return parsed?.u_id || ENV.DEFAULT_USER_ID || null;
+    } catch {
+        return ENV.DEFAULT_USER_ID || null;
+    }
+};
+
+const getErrorMessage = (error, fallback = 'Something went wrong') => {
+    const backendMessage = error?.response?.data?.message;
+    const backendReason = error?.response?.data?.data?.reason;
+
+    if (backendMessage) return backendMessage;
+    if (backendReason) return backendReason.replace(/_/g, ' ').toLowerCase();
+    return error?.message || fallback;
+};
+
+const rankEmoji = (rank) => {
+    if (rank === 1) return '🏆';
+    if (rank === 2) return '🔥';
+    if (rank === 3) return '⚡';
+    if (rank <= 10) return '🌟';
+    return '✨';
+};
+
+const isScoreTask = (contest) => {
+    if (!contest) return false;
+    if (contest.taskType === 'daily_checkin') return false;
+    if (contest.taskType === QUIZ_TASK_KEY) return true;
+
+    const requiredScore = Number(contest.requiredScore ?? contest?.backend?.required_score);
+    return Number.isFinite(requiredScore) && requiredScore > 0;
+};
+
 // HeroSlider Component
 const HeroSlider = () => {
     const [current, setCurrent] = useState(0);
@@ -99,7 +330,7 @@ const HeroSlider = () => {
             setCurrent((prev) => (prev + 1) % banners.length);
         }, 5000);
         return () => clearInterval(timer);
-    }, []);
+    }, [banners.length]);
 
     const next = () => setCurrent((prev) => (prev + 1) % banners.length);
     const prev = () => setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
@@ -185,7 +416,7 @@ const HeroSlider = () => {
 };
 
 // MilestoneTracker Component
-const MilestoneTracker = ({ currentStreak }) => {
+const MilestoneTracker = ({ currentStreak, longestStreak, lastCheckinDate }) => {
     const today = new Date();
     const currentDay = today.getDate();
     const currentMonth = today.toLocaleString('default', { month: 'short' }).toUpperCase();
@@ -252,6 +483,10 @@ const MilestoneTracker = ({ currentStreak }) => {
                         </div>
                         <p className="text-sm text-slate-500 mt-1">
                             {currentStreak > 0 ? `${currentStreak} day streak!` : 'Start your streak today'}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-1">
+                            Longest: {longestStreak || 0} days
+                            {lastCheckinDate ? ` · Last check-in: ${lastCheckinDate}` : ''}
                         </p>
                     </div>
                 </div>
@@ -341,26 +576,12 @@ const MilestoneTracker = ({ currentStreak }) => {
 };
 
 // Leaderboard Component
-const Leaderboard = () => {
-    const leaderboardData = [
-        { rank: 1, name: "Alex Chen", points: 12450, emoji: "🏆", trend: "up", avatar: "AC" },
-        { rank: 2, name: "Sarah Kim", points: 11200, emoji: "🔥", trend: "up", avatar: "SK" },
-        { rank: 3, name: "Mike Ross", points: 10850, emoji: "⚡", trend: "same", avatar: "MR" },
-        { rank: 4, name: "Emma Wilson", points: 9600, emoji: "🌟", trend: "up", avatar: "EW" },
-        { rank: 5, name: "James Lee", points: 8750, emoji: "💎", trend: "down", avatar: "JL" },
-        { rank: 6, name: "Lisa Wang", points: 7900, emoji: "🎯", trend: "up", avatar: "LW" },
-        { rank: 7, name: "David Park", points: 7200, emoji: "🚀", trend: "same", avatar: "DP" },
-        { rank: 8, name: "Amy Zhang", points: 6800, emoji: "✨", trend: "up", avatar: "AZ" },
-        { rank: 9, name: "Tom Brown", points: 6100, emoji: "💫", trend: "down", avatar: "TB" },
-        { rank: 10, name: "Nina Patel", points: 5500, emoji: "🌈", trend: "up", avatar: "NP" },
-    ];
-
+const Leaderboard = ({ leaderboardData, isLoading, myRank, onSeeMore }) => {
     const maxVisible = 7;
     const visibleList = leaderboardData.slice(0, maxVisible);
-    const hasMore = leaderboardData.length > maxVisible;
 
     return (
-        <div>
+        <div className="w-full">
             <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -383,77 +604,45 @@ const Leaderboard = () => {
                 </div>
 
                 <div className="p-3">
-                    {visibleList.map((user, index) => {
+                    {isLoading && (
+                        <div className="py-8 text-center text-sm text-slate-500">Loading leaderboard...</div>
+                    )}
+                    {!isLoading && visibleList.length === 0 && (
+                        <div className="py-8 text-center text-sm text-slate-500">No leaderboard data available.</div>
+                    )}
+
+                    {!isLoading && visibleList.map((user, index) => {
                         const isTop = user.rank <= 3;
 
                         return (
                             <motion.div
-                                key={user.rank}
+                                key={`${user.rank}-${user.u_id}`}
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.05 }}
                                 whileHover={{ scale: 1.02, x: 4 }}
-                                className={`
-                                flex items-center gap-3 p-3 rounded-xl mb-2
-                                transition-all cursor-pointer
-                                border
-                                ${isTop
-                                        ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-300'
-                                        : 'bg-white hover:bg-slate-50 border-transparent hover:border-slate-200'
-                                    }
-                            `}
+                                className={`flex items-center gap-3 p-3 rounded-xl mb-2 transition-all cursor-pointer border ${isTop ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-300' : 'bg-white hover:bg-slate-50 border-transparent hover:border-slate-200'}`}
                             >
-                                <div
-                                    className={`
-                                    w-8 h-8 rounded-lg flex items-center justify-center
-                                    font-bold text-sm
-                                    ${isTop ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-600'}
-                                `}
-                                >
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm ${isTop ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-600'}`}>
                                     {user.rank}
                                 </div>
-                                <div
-                                    className={`
-                                    w-9 h-9 rounded-full flex items-center justify-center
-                                    text-white text-sm font-semibold shadow
-                                    ${isTop
-                                            ? 'bg-gradient-to-br from-amber-500 to-orange-500'
-                                            : 'bg-gradient-to-br from-violet-400 to-purple-500'
-                                        }
-                                `}
-                                >
+                                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-semibold shadow ${isTop ? 'bg-gradient-to-br from-amber-500 to-orange-500' : 'bg-gradient-to-br from-violet-400 to-purple-500'}`}>
                                     {user.avatar}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1.5">
                                         <span className="text-base">{user.emoji}</span>
-                                        <span className="font-medium text-slate-800 text-sm truncate">
-                                            {user.name}
-                                        </span>
+                                        <span className="font-medium text-slate-800 text-sm truncate">{user.name}</span>
                                     </div>
                                     <div className="flex items-center gap-1 mt-0.5">
                                         <Sparkles className={`w-3 h-3 ${isTop ? 'text-amber-500' : 'text-violet-400'}`} />
-                                        <span className="text-xs text-slate-500">
-                                            {user.points.toLocaleString()} pts
-                                        </span>
+                                        <span className="text-xs text-slate-500">{user.points.toLocaleString()} pts</span>
                                     </div>
                                 </div>
-                                <div
-                                    className={
-                                        user.trend === 'up'
-                                            ? 'text-emerald-500'
-                                            : user.trend === 'down'
-                                                ? 'text-red-400'
-                                                : 'text-slate-400'
-                                    }
-                                >
-                                    {user.trend === 'up' && (
-                                        <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 1, repeat: Infinity }}>
-                                            <TrendingUp className="w-4 h-4" />
-                                        </motion.div>
-                                    )}
-                                    {user.trend === 'down' && <TrendingUp className="w-4 h-4 rotate-180" />}
-                                    {user.trend === 'same' && <div className="w-4 h-0.5 bg-slate-300 rounded-full" />}
+                                <div className="text-emerald-500">
+                                    <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 1, repeat: Infinity }}>
+                                        <TrendingUp className="w-4 h-4" />
+                                    </motion.div>
                                 </div>
                             </motion.div>
                         );
@@ -461,17 +650,13 @@ const Leaderboard = () => {
                 </div>
 
                 <div className="p-4 border-t border-slate-100 bg-gradient-to-r from-violet-50 to-purple-50 rounded-b-2xl">
-                    {hasMore && (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                window.location.href = "/leaderboard";
-                            }}
-                            className="mb-3 w-full arena-standalone-btn bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 h-10"
-                        >
-                            See More
-                        </button>
-                    )}
+                    <button
+                        type="button"
+                        onClick={onSeeMore}
+                        className="mb-3 w-full arena-standalone-btn bg-violet-600 border border-violet-600 text-white hover:bg-violet-700 h-10"
+                    >
+                        See More
+                    </button>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center shadow">
@@ -480,7 +665,7 @@ const Leaderboard = () => {
                             <span className="text-sm font-semibold text-slate-700">Your Rank</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="font-bold text-violet-600 text-lg">#42</span>
+                            <span className="font-bold text-violet-600 text-lg">{myRank ? `#${myRank}` : '--'}</span>
                             <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                         </div>
                     </div>
@@ -491,70 +676,122 @@ const Leaderboard = () => {
 };
 
 // ContestCard Component
-const ContestCard = ({ contest, index, onClick, isCompleted, timeLeft }) => {
+const ContestCard = ({ contest, index, onClick, state, onCooldownExpired }) => {
     const Icon = iconMap[contest.icon] || Zap;
+    const cooldownTarget = state === 'COOLDOWN' ? contest.backend?.next_available_at : null;
+    const { formatted: cooldownText, isExpired } = useCountdown(cooldownTarget);
 
+    useEffect(() => {
+        if (state === 'COOLDOWN' && isExpired) {
+            onCooldownExpired?.();
+        }
+    }, [state, isExpired, onCooldownExpired]);
 
+    const effectiveState = state === 'COOLDOWN' && isExpired ? 'AVAILABLE' : state;
+    const isCompleted = effectiveState === 'COMPLETED';
+    const isCooldown = effectiveState === 'COOLDOWN';
+    const isUnavailable = isCompleted || isCooldown;
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            whileHover={{ y: isCompleted ? 0 : -4, transition: { duration: 0.2 } }}
-            onClick={onClick}
-            className={`group relative ${contest.theme.bg} ${contest.theme.border} border rounded-2xl p-5 cursor-pointer overflow-hidden transition-all ${isCompleted ? 'opacity-50 hover:shadow-sm' : 'hover:shadow-lg'
-                }`}
+            whileHover={{ y: isUnavailable ? 0 : -4, transition: { duration: 0.2 } }}
+            onClick={() => onClick(contest.taskType)}
+            className={`group relative ${contest.theme.bg} ${contest.theme.border} border rounded-2xl p-5 cursor-pointer overflow-hidden transition-all ${isCompleted ? 'opacity-70 hover:shadow-sm' : 'hover:shadow-lg'}`}
         >
             <div className={`absolute inset-0 bg-gradient-to-br ${contest.theme.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
-            <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: index * 0.1 + 0.2, type: "spring" }}
-                className={`absolute top-4 right-4 bg-gradient-to-r ${contest.theme.gradient} text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5`}
-            >
-                <Zap className="w-4 h-4" />
-                <span>{contest.points} pts</span>
-            </motion.div>
-            {isCompleted && (
-                <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute top-4 left-4 bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1"
-                >
-                    <ChevronRight className="w-3 h-3" />
+            {isCooldown ? (
+                <div className="cooldown-pill">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{cooldownText}</span>
+                </div>
+            ) : isCompleted ? (
+                <div className="completed-pill">
+                    <Check className="w-3.5 h-3.5" />
                     <span>Completed</span>
-                </motion.div>
+                </div>
+            ) : (
+                <div className={`points-pill bg-gradient-to-r ${contest.theme.gradient}`}>
+                    <Zap className="w-3.5 h-3.5" />
+                    <span>{Number(contest.points || 0).toLocaleString()} pts</span>
+                </div>
             )}
             <div className={`w-12 h-12 ${contest.theme.iconBg} rounded-xl flex items-center justify-center shadow-lg mb-4`}>
                 <Icon className={`w-8 h-8 ${contest.theme.iconText}`} />
             </div>
             <h3 className="text-lg font-semibold text-slate-800 mb-1">{contest.title}</h3>
             <p className="text-sm text-slate-500 mb-4">{contest.description}</p>
-            <button className={`arena-standalone-btn w-full bg-gradient-to-r ${contest.theme.button} hover:opacity-90 text-white border-0 shadow-md group-hover:shadow-lg transition-all`}>
-                <span>{contest.buttonText}</span>
-                <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+            <button
+                className={`arena-standalone-btn w-full border-0 shadow-md transition-all ${isCooldown ? 'bg-slate-100 text-slate-500' : isCompleted ? 'bg-emerald-100 text-emerald-700' : `bg-gradient-to-r ${contest.theme.button} hover:opacity-90 text-white group-hover:shadow-lg`}`}
+                disabled={isUnavailable}
+            >
+                <span>
+                    {isCompleted
+                        ? 'Completed'
+                        : isCooldown
+                            ? 'On Cooldown'
+                            : contest.buttonText}
+                </span>
+                {!isUnavailable && (
+                    <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                )}
             </button>
-            {contest.taskType === "daily_checkin" && isCompleted && timeLeft && (
-                <div className="text-xs text-slate-500 mt-2 flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    <span>Next in {timeLeft}</span>
-                </div>
-            )}
         </motion.div>
     );
 };
 
 // ContestModal Component
-const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => {
+const ContestModal = ({
+    contest,
+    isOpen,
+    onClose,
+    onComplete,
+    isSubmitting,
+    state,
+    onCooldownExpired
+}) => {
+    const [scoreInput, setScoreInput] = useState('');
+
+    const cooldownTarget = state === 'COOLDOWN' ? contest?.backend?.next_available_at : null;
+    const { formatted: cooldownText, isExpired } = useCountdown(cooldownTarget);
+
+    useEffect(() => {
+        if (state === 'COOLDOWN' && isExpired) {
+            onCooldownExpired?.();
+        }
+    }, [state, isExpired, onCooldownExpired]);
+
+    useEffect(() => {
+        if (!isOpen || !contest) return;
+        setScoreInput('');
+    }, [isOpen, contest, contest?.taskType]);
+
     if (!contest) return null;
+
     const Icon = iconMap[contest.icon] || Zap;
     const rewardIconColor = contest.theme.iconBg.startsWith('bg-')
         ? contest.theme.iconBg.replace(/^bg-/, 'text-')
         : 'text-violet-500';
+    const contestUsesScoreInput = isScoreTask(contest);
+    const effectiveState = state === 'COOLDOWN' && isExpired ? 'AVAILABLE' : state;
+    const hasValidScore = scoreInput.trim() !== '' && Number.isFinite(Number(scoreInput));
+
+    const canComplete = () => {
+        if (isSubmitting) return false;
+        if (effectiveState === 'COMPLETED' || effectiveState === 'COOLDOWN') return false;
+        if (contestUsesScoreInput) return hasValidScore;
+        return true;
+    };
 
     const handleAction = () => {
-        onComplete(contest);
+        if (contestUsesScoreInput && !hasValidScore) {
+            toast.error('Enter a valid score.');
+            return;
+        }
+        const payload = contestUsesScoreInput ? { score: Number(scoreInput) } : {};
+        onComplete(contest, payload);
     };
 
     return (
@@ -593,15 +830,27 @@ const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => 
                                         <p className="text-white/80 mt-1">{contest.description}</p>
                                     </div>
                                 </div>
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ delay: 0.2, type: "spring" }}
-                                    className="absolute bottom-4 right-4 bg-white text-slate-800 font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-2"
-                                >
-                                    <Sparkles className="w-5 h-5 text-amber-500" />
-                                    <span className="text-base">{contest.points} pts</span>
-                                </motion.div>
+                                {effectiveState === 'COOLDOWN' ? (
+                                    <div className="absolute bottom-4 right-4 text-sm font-semibold bg-white/10 px-3 py-1 rounded-full flex items-center gap-1.5">
+                                        <Clock className="w-4 h-4" />
+                                        <span>{cooldownText}</span>
+                                    </div>
+                                ) : effectiveState === 'COMPLETED' ? (
+                                    <div className="absolute bottom-4 right-4 text-sm font-semibold bg-green-500 px-3 py-1 rounded-full flex items-center gap-1.5">
+                                        <Check className="w-4 h-4" />
+                                        <span>Completed</span>
+                                    </div>
+                                ) : (
+                                    <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ delay: 0.2, type: "spring" }}
+                                        className="absolute bottom-4 right-4 bg-white text-slate-800 font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-2"
+                                    >
+                                        <Sparkles className="w-5 h-5 text-amber-500" />
+                                        <span className="text-base">{Number(contest.points || 0).toLocaleString()} pts</span>
+                                    </motion.div>
+                                )}
                             </div>
                             <div className="p-6 space-y-6">
                                 <div>
@@ -646,123 +895,38 @@ const ContestModal = ({ contest, isOpen, onClose, onComplete, isCompleted }) => 
                                         ))}
                                     </div>
                                 </div>
+                                {contestUsesScoreInput && (
+                                    <div className="rounded-xl border border-slate-200 p-4 bg-slate-50">
+                                        <div className="mb-3">
+                                            <h4 className="text-sm font-semibold text-slate-800">Score Submission</h4>
+                                            <p className="text-xs text-slate-500 mt-1">Submit your latest score to claim points.</p>
+                                        </div>
+                                        <div className="flex flex-col gap-3">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={scoreInput}
+                                                onChange={(e) => setScoreInput(e.target.value)}
+                                                className="flex-1 h-11 rounded-lg border border-slate-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
+                                                placeholder="Enter your latest score"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <div className="p-6 pt-0">
                                 <button
                                     onClick={handleAction}
-                                    disabled={isCompleted}
+                                    disabled={!canComplete()}
                                     className={`arena-standalone-btn w-full bg-gradient-to-r ${contest.theme.button} hover:opacity-90 text-white border-0 shadow-lg h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
-                                    {isCompleted ? 'Completed for Today' : contest.buttonText}
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                </>
-            )}
-        </AnimatePresence>
-    );
-};
-
-const RedeemModal = ({ reward, isOpen, onClose }) => {
-    const [addressType, setAddressType] = useState("home");
-    const [address, setAddress] = useState("");
-
-    if (!reward) return null;
-
-    return (
-        <AnimatePresence>
-            {isOpen && (
-                <>
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        className="arena-standalone-modal-backdrop"
-                    />
-                    <div className="arena-standalone-modal-wrap">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="arena-standalone-modal"
-                        >
-                            <div className="relative bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); onClose(); }}
-                                    className="absolute top-4 right-4 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all z-50"
-                                >
-                                    <X className="w-4 h-4" />
-                                </button>
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                                <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-                                <div className="relative">
-                                    <h3 className="text-2xl font-bold">Redeem Your Tokens</h3>
-                                    <p className="text-white/80 mt-1 text-sm">Confirm reward delivery details</p>
-                                </div>
-                            </div>
-
-                            <div className="p-6 space-y-5">
-                                <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl p-4">
-                                    <div>
-                                        <div className="text-sm text-slate-500">Reward</div>
-                                        <div className="text-lg font-semibold text-slate-800">{reward.name}</div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-sm text-slate-500">Points</div>
-                                        <div className="text-lg font-bold text-amber-600">{reward.points.toLocaleString()} pts</div>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700">Select Address Type</label>
-                                    <select
-                                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
-                                        value={addressType}
-                                        onChange={(e) => setAddressType(e.target.value)}
-                                    >
-                                        <option value="home">Home</option>
-                                        <option value="office">Office</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-slate-700">Delivery Address</label>
-                                    <textarea
-                                        rows={3}
-                                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
-                                        placeholder="Enter full delivery address"
-                                        value={address}
-                                        onChange={(e) => setAddress(e.target.value)}
-                                    />
-                                </div>
-
-                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                                    <div className="flex items-center justify-between text-sm text-slate-600">
-                                        <span>Your Points</span>
-                                        <span className="font-semibold">12,450 pts</span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-sm text-slate-600 mt-1">
-                                        <span>After Redeem</span>
-                                        <span className="font-semibold">7,450 pts</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="p-6 pt-0 flex items-center gap-3">
-                                <button
-                                    onClick={onClose}
-                                    className="arena-standalone-btn w-full bg-slate-100 text-slate-700 hover:bg-slate-200"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={onClose}
-                                    className="arena-standalone-btn w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90"
-                                >
-                                    Confirm Redeem
+                                    {effectiveState === 'COMPLETED'
+                                        ? 'Completed'
+                                        : effectiveState === 'COOLDOWN'
+                                            ? `Available in ${cooldownText}`
+                                            : contestUsesScoreInput
+                                                ? 'Complete & Claim Points'
+                                                : contest.buttonText}
                                 </button>
                             </div>
                         </motion.div>
@@ -774,14 +938,8 @@ const RedeemModal = ({ reward, isOpen, onClose }) => {
 };
 
 // RewardsShowcase Component
-const RewardsShowcase = ({ onRedeem }) => {
-    const rewards = [
-        { name: "Premium T-Shirt", points: 5000 },
-        { name: "Steel Bottle", points: 3500 },
-        { name: "Designer Keychain", points: 2000 },
-        { name: "Summer Internship", points: 15000 }
-    ];
-
+// RewardsShowcase Component
+const RewardsShowcase = ({ rewards, isLoading, onSeeMore }) => {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -812,336 +970,254 @@ const RewardsShowcase = ({ onRedeem }) => {
                     />
 
                     <div className="max-w-2xl mx-auto">
-                        <p className="text-slate-600 mb-4 text-sm">Redeem your points for amazing prizes:</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {rewards.map((reward, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.7 + index * 0.1 }}
-                                    whileHover={{ scale: 1.05, x: 5 }}
-                                    onClick={() => onRedeem?.(reward)}
-                                    className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border-2 border-amber-200 shadow-md flex items-center justify-between cursor-pointer hover:border-amber-300"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-2 h-2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500" />
-                                        <span className="font-semibold text-slate-700">{reward.name}</span>
-                                    </div>
-                                    <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                                        {reward.points.toLocaleString()} pts
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
+                        {/* <p className="text-slate-600 mb-4 text-sm">Redeem your Arena points for real-world rewards. See full catalog for details.</p> */}
+                        {isLoading ? (
+                            <div className="py-10 text-center text-sm text-slate-500">Loading rewards...</div>
+                        ) : rewards.length === 0 ? (
+                            <div className="py-10 text-center text-sm text-slate-500">Rewards catalog is currently unavailable.</div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {rewards.map((reward, index) => (
+                                    <motion.div
+                                        key={reward.reward_id || index}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.2 + index * 0.08 }}
+                                        className="bg-white/90 backdrop-blur-sm rounded-xl p-4 border border-amber-200 shadow-sm"
+                                    >
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-amber-100 border border-amber-200 flex-shrink-0">
+                                                {reward.image_url ? (
+                                                    <img src={reward.image_url} alt={reward.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-amber-700 text-xs font-semibold">IMG</div>
+                                                )}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-slate-800 truncate">{reward.name}</p>
+                                                <p className="text-xs text-slate-500">Rs. {Number(reward.price_inr || 0).toLocaleString('en-IN')}</p>
+                                            </div>
+                                        </div>
+                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold">
+                                            <Zap className="w-3 h-3" />
+                                            {Number(reward.points || 0).toLocaleString()} pts
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <motion.p
                         animate={{ opacity: [0.6, 1, 0.6] }}
                         transition={{ duration: 2, repeat: Infinity }}
                         className="mt-6 text-slate-600 font-medium"
                     >
-                        Complete challenges to earn points and unlock rewards!
+                        Redeem your Arena points for real-world rewards. See full catalog for details.
                     </motion.p>
+                    <div className="mt-6 flex flex-wrap items-center gap-3">
+                        <button
+                            type="button"
+                            onClick={onSeeMore}
+                            className="arena-standalone-btn bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:opacity-90"
+                        >
+                            See More
+                        </button>
+
+                    </div>
+
                 </div>
             </div>
         </motion.div>
     );
 };
+const HistoryShortcut = ({ onOpen }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="mt-10"
+    >
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h3 className="text-base font-semibold text-slate-800">Points Activity</h3>
+                <p className="text-sm text-slate-500">Track each task completion and points earned in your Arena history.</p>
+            </div>
+            <button
+                type="button"
+                onClick={onOpen}
+                className="arena-standalone-btn bg-slate-900 text-white hover:bg-slate-800"
+            >
+                View Points History
+            </button>
+        </div>
+    </motion.div>
+
+
+
+);
 
 // Main Arena Component// Main Arena Component
 export default function ArenaStandalone() {
-    const [selectedContest, setSelectedContest] = useState(null);
-    const [selectedReward, setSelectedReward] = useState(null);
-    const [timeLeft, setTimeLeft] = useState(null);
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const [selectedContestTask, setSelectedContestTask] = useState(null);
+    const userId = useMemo(() => getStoredUserId(), []);
+    const hasAuthUser = Boolean(userId);
 
-    const { data: completions = [] } = useQuery({
-        queryKey: ['arenaStandaloneCompletions'],
-        queryFn: () => base44.entities.DailyCompletion.list()
+    const contestMetadataQuery = useQuery({
+        queryKey: ['arenaContestMetadata'],
+        queryFn: () => arenaApi.getContestMetadata(),
+        staleTime: 60 * 1000
     });
 
-    const createCompletionMutation = useMutation({
-        mutationFn: (data) => base44.entities.DailyCompletion.create(data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['arenaStandaloneCompletions'] });
+    const contestStatusQuery = useQuery({
+        queryKey: ['arenaContestStatus'],
+        queryFn: () => arenaApi.getContestStatus(),
+        enabled: hasAuthUser,
+        refetchInterval: 30 * 1000
+    });
+
+    const streakQuery = useQuery({
+        queryKey: ['arenaStreak'],
+        queryFn: () => arenaApi.getStreak(),
+        enabled: hasAuthUser,
+        refetchInterval: 30 * 1000
+    });
+
+    const leaderboardQuery = useQuery({
+        queryKey: ['arenaLeaderboard', 'monthly', 1, 10],
+        queryFn: () => arenaApi.getLeaderboard({ type: 'monthly', page: 1, limit: 10 })
+    });
+
+    const myRankQuery = useQuery({
+        queryKey: ['arenaMyRank'],
+        queryFn: () => arenaApi.getMyRank(),
+        enabled: hasAuthUser
+    });
+
+    const rewardsPreviewQuery = useQuery({
+        queryKey: ['arenaRewardPreview', 1, 4],
+        queryFn: () => arenaApi.getRewardCatalog({ page: 1, limit: 4 })
+    });
+
+    const invalidateArenaData = useCallback(() => {
+        queryClient.invalidateQueries({ queryKey: ['arenaContestStatus'] });
+        queryClient.invalidateQueries({ queryKey: ['arenaStreak'] });
+        queryClient.invalidateQueries({ queryKey: ['arenaLeaderboard'] });
+        queryClient.invalidateQueries({ queryKey: ['arenaMyRank'] });
+        queryClient.invalidateQueries({ queryKey: ['arenaRewardPreview'] });
+    }, [queryClient]);
+
+    const completeTaskMutation = useMutation({
+        mutationFn: async ({ contest, score }) => {
+            if (contest.taskType === 'daily_checkin') return arenaApi.completeDailyCheckin();
+            if (contest.taskType === QUIZ_TASK_KEY) return arenaApi.completeDailyQuiz(score);
+            if (isScoreTask(contest)) return arenaApi.completeScoreTask(contest.taskType, score);
+            return arenaApi.completeOneTimeTask(contest.taskType);
+        },
+        onSuccess: (result) => {
+            if (result?.awarded === false) {
+                toast.info(getErrorMessage({ response: { data: { data: { reason: result?.reason } } } }, 'Task not completed.'));
+                return;
+            }
             toast.success('Task completed! Points added.');
+            setSelectedContestTask(null);
+        },
+        onError: (error) => {
+            toast.error(getErrorMessage(error, 'Unable to complete task right now.'));
+        },
+        onSettled: () => {
+            invalidateArenaData();
         }
     });
 
-    const getLatestTaskCompletion = (taskType) => {
-        const taskCompletions = completions.filter(c => c.task_type === taskType);
-        if (taskCompletions.length === 0) return null;
-        return taskCompletions
-            .slice()
-            .sort((a, b) => {
-                const aTime = new Date(a.completed_at || a.completed_date || 0).getTime();
-                const bTime = new Date(b.completed_at || b.completed_date || 0).getTime();
-                return bTime - aTime;
-            })[0];
+    const statusByTask = useMemo(() => {
+        const statusList = contestStatusQuery.data || [];
+        return statusList.reduce((acc, item) => {
+            acc[item.task_type] = item;
+            return acc;
+        }, {});
+    }, [contestStatusQuery.data]);
+
+    const mergedContests = useMemo(() => {
+        const metadataList = contestMetadataQuery.data || [];
+
+        return metadataList.map((metadata, index) => {
+            const backend = statusByTask[metadata.task_type] || {};
+            const configuredActionType = metadata.action_type || backend.action_type || (metadata.repeatable ? 'daily' : 'one_time');
+            const configuredUi = CONTEST_UI_CONFIG[metadata.task_type] || {};
+
+            return {
+                id: index + 1,
+                taskType: metadata.task_type,
+                title: configuredUi.title || humanizeTaskType(metadata.task_type),
+                description: configuredUi.description || 'Task configured from backend reward rules',
+                icon: configuredUi.icon || (configuredActionType === 'daily' ? 'CalendarCheck' : 'Zap'),
+                theme: configuredUi.theme || DEFAULT_THEME,
+                buttonText: configuredUi.buttonText || (configuredActionType === 'daily' ? 'Claim Points' : 'Complete Task'),
+                rules: configuredUi.rules || ['Configured from backend reward rules'],
+                rewards: configuredUi.rewards || ['Points from reward_rules table'],
+                requiredScore: metadata.required_score ?? null,
+                points: Number(metadata.points ?? backend.points ?? 0),
+                backend: {
+                    ...backend,
+                    action_type: backend.action_type || configuredActionType,
+                    repeatable: backend.repeatable ?? metadata.repeatable ?? (configuredActionType === 'daily'),
+                    required_score: backend.required_score ?? metadata.required_score ?? null,
+                    points: Number(backend.points ?? metadata.points ?? 0)
+                }
+            };
+        });
+    }, [contestMetadataQuery.data, statusByTask]);
+
+    const getContestState = useCallback((contest) => {
+        const backend = contest?.backend || {};
+        const nextAvailableAt = backend.next_available_at ? new Date(backend.next_available_at).getTime() : null;
+        const cooldownActive = Boolean(nextAvailableAt && nextAvailableAt > Date.now());
+        if (cooldownActive) return 'COOLDOWN';
+        if (backend.completed) return 'COMPLETED';
+        return 'AVAILABLE';
+    }, []);
+
+    const sortedContests = useMemo(() => {
+        const priority = { AVAILABLE: 0, COMPLETED: 1, COOLDOWN: 2 };
+        return [...mergedContests].sort((a, b) => priority[getContestState(a)] - priority[getContestState(b)]);
+    }, [mergedContests, getContestState]);
+
+    const selectedContest = useMemo(
+        () => mergedContests.find((contest) => contest.taskType === selectedContestTask) || null,
+        [mergedContests, selectedContestTask]
+    );
+
+    const selectedContestState = useMemo(
+        () => (selectedContest ? getContestState(selectedContest) : 'AVAILABLE'),
+        [selectedContest, getContestState]
+    );
+
+    const handleTaskComplete = (contest, payload = {}) => {
+        completeTaskMutation.mutate({ contest, score: payload.score });
     };
 
-    const isTaskCompletedToday = (taskType) => {
-        if (taskType === "daily_checkin") {
-            const latestCheckin = getLatestTaskCompletion("daily_checkin");
-            if (!latestCheckin) return false;
-            const completedTime = new Date(latestCheckin.completed_at || latestCheckin.completed_date);
-            const nextTime = new Date(completedTime.getTime() + 24 * 60 * 60 * 1000);
-            return nextTime > new Date();
-        }
-        const today = new Date().toISOString().split('T')[0];
-        return completions.some(c => c.task_type === taskType && c.completed_date === today);
-    };
+    const handleCooldownExpired = useCallback(() => {
+        queryClient.invalidateQueries({ queryKey: ['arenaContestStatus'] });
+    }, [queryClient]);
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const latestCheckin = getLatestTaskCompletion("daily_checkin");
-            if (!latestCheckin) {
-                setTimeLeft(null);
-                return;
-            }
-
-            const completedTime = new Date(latestCheckin.completed_at || latestCheckin.completed_date);
-            const nextTime = new Date(completedTime.getTime() + 24 * 60 * 60 * 1000);
-            const now = new Date();
-            const diff = nextTime - now;
-
-            if (diff <= 0) {
-                setTimeLeft(null);
-                return;
-            }
-
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff / (1000 * 60)) % 60);
-            const seconds = Math.floor((diff / 1000) % 60);
-
-            setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [completions]);
-
-    const getLocalCompleted = () => {
-        try {
-            const raw = localStorage.getItem("arenaStandaloneCompleted");
-            return raw ? JSON.parse(raw) : {};
-        } catch {
-            return {};
-        }
-    };
-
-    const setLocalCompleted = (taskType) => {
-        const current = getLocalCompleted();
-        current[taskType] = new Date().toISOString();
-        localStorage.setItem("arenaStandaloneCompleted", JSON.stringify(current));
-    };
-
-    const isTaskCompleted = (contest) => {
-        if (!contest?.taskType) return false;
-        if (contest.isDailyTask) return isTaskCompletedToday(contest.taskType);
-        const local = getLocalCompleted();
-        return Boolean(local[contest.taskType]);
-    };
-
-    const calculateStreak = () => {
-        const checkins = completions.filter(c => c.task_type === 'daily_checkin');
-        if (checkins.length === 0) return 0;
-
-        const dates = checkins.map(c => new Date(c.completed_date)).sort((a, b) => b - a);
-        let streak = 1;
-
-        for (let i = 0; i < dates.length - 1; i++) {
-            const diff = Math.floor((dates[i] - dates[i + 1]) / (1000 * 60 * 60 * 24));
-            if (diff === 1) {
-                streak++;
-            } else if (diff > 1) {
-                break;
-            }
-        }
-
-        return streak;
-    };
-
-    const currentStreak = calculateStreak();
-
-    const handleTaskComplete = (contest) => {
-        if (contest.isDailyTask && isTaskCompletedToday(contest.taskType)) {
-            toast.info('Already completed today! Come back tomorrow.');
-            return;
-        }
-
-        if (contest.isDailyTask) {
-            const nowIso = new Date().toISOString();
-            createCompletionMutation.mutate({
-                task_type: contest.taskType,
-                completed_at: nowIso,
-                completed_date: nowIso.split('T')[0],
-                points_earned: contest.points
-            });
-        } else {
-            setLocalCompleted(contest.taskType);
-            toast.success('Task completed! Points added.');
-        }
-
-        setSelectedContest(null);
-    };
-
-    const contests = [
-        {
-            id: 1,
-            title: "Sign Up Bonus",
-            description: "Complete your profile setup",
-            points: 500,
-            icon: "UserPlus",
-            theme: {
-                gradient: "from-violet-500 to-purple-600",
-                bg: "bg-violet-50",
-                border: "border-violet-200",
-                iconBg: "bg-violet-600",
-                iconText: "text-white",
-                button: "from-violet-500 to-purple-600"
-            },
-            buttonText: "Sign Up Now",
-            taskType: "signup_bonus",
-            rules: ["Sign Up for an account", "Verify your email address", "Complete your profile information", "One-time task, cannot be repeated"],
-
-        },
-        {
-            id: 2,
-            title: "Take a Survey",
-            description: "Share your valuable feedback",
-            points: 150,
-            icon: "ClipboardList",
-            theme: {
-                gradient: "from-emerald-500 to-teal-600",
-                bg: "bg-emerald-50",
-                border: "border-emerald-200",
-                iconBg: "bg-emerald-600",
-                iconText: "text-white",
-                button: "from-emerald-500 to-teal-600"
-            },
-            buttonText: "Start Survey",
-            taskType: "survey",
-            rules: ["Answer all questions honestly", "Complete survey within 10 minutes", "One survey per day limit", "Thoughtful responses earn bonus points"],
-            rewards: ["150 Arena Points", "Chance for bonus 50 points", "Entry into weekly raffle"]
-        },
-        {
-            id: 3,
-            title: "Connect on LinkedIn",
-            description: "Follow us on LinkedIn",
-            points: 100,
-            icon: "Linkedin",
-            theme: {
-                gradient: "from-blue-500 to-indigo-600",
-                bg: "bg-blue-50",
-                border: "border-blue-200",
-                iconBg: "bg-blue-600",
-                iconText: "text-white",
-                button: "from-blue-500 to-indigo-600"
-            },
-            buttonText: "Connect Now",
-            taskType: "linkedin_follow",
-            rules: ["Follow our official LinkedIn page", "Like our latest post", "Share with your network for bonus", "Comment on any post for extra points"],
-            rewards: ["100 Arena Points", "Professional network badge", "LinkedIn exclusive updates"]
-        },
-        {
-            id: 4,
-            title: "Follow on Instagram",
-            description: "Join our Instagram community",
-            points: 100,
-            icon: "Instagram",
-            theme: {
-                gradient: "from-pink-500 to-rose-600",
-                bg: "bg-pink-50",
-                border: "border-pink-200",
-                iconBg: "bg-pink-600",
-                iconText: "text-white",
-                button: "from-pink-500 to-rose-600"
-            },
-            buttonText: "Follow Us",
-            taskType: "instagram_follow",
-            rules: ["Follow our Instagram account", "Like our latest 3 posts", "Tag us in your story for bonus", "Use our hashtag in your posts"],
-            rewards: ["100 Arena Points", "Social butterfly badge", "Featured in our stories"]
-        },
-        {
-            id: 5,
-            title: "Join Community",
-            description: "Be part of our Discord family",
-            points: 200,
-            icon: "Users",
-            theme: {
-                gradient: "from-indigo-500 to-violet-600",
-                bg: "bg-indigo-50",
-                border: "border-indigo-200",
-                iconBg: "bg-indigo-600",
-                iconText: "text-white",
-                button: "from-indigo-500 to-violet-600"
-            },
-            buttonText: "Join Discord",
-            taskType: "community_join",
-            rules: ["Join our official Discord server", "Introduce yourself in #introductions", "Read and accept community guidelines", "Stay active for weekly bonuses"],
-            rewards: ["200 Arena Points", "Community member role", "Access to exclusive channels"]
-        },
-        {
-            id: 6,
-            title: "Daily Check-in",
-            description: "Claim your daily reward",
-            points: 50,
-            icon: "CalendarCheck",
-            theme: {
-                gradient: "from-sky-600 to-indigo-600",
-                bg: "bg-sky-50",
-                border: "border-sky-200",
-                iconBg: "bg-sky-600",
-                iconText: "text-white",
-                button: "from-sky-600 to-indigo-600"
-            },
-            buttonText: "Check In",
-            isDailyTask: true,
-            taskType: "daily_checkin",
-            rules: ["Check in once every 24 hours", "Maintain streak for multipliers", "7-day streak = 2x points", "30-day streak = 5x points"],
-            rewards: ["50 Base Points", "Streak multiplier bonus", "Monthly streak badge"]
-        },
-        {
-            id: 7,
-            title: "Play Games",
-            description: "Win points through mini-games",
-            points: 75,
-            icon: "Gamepad2",
-            theme: {
-                gradient: "from-cyan-500 to-blue-600",
-                bg: "bg-cyan-50",
-                border: "border-cyan-200",
-                iconBg: "bg-cyan-600",
-                iconText: "text-white",
-                button: "from-cyan-500 to-blue-600"
-            },
-            buttonText: "Play Now",
-            isDailyTask: true,
-            taskType: "play_games",
-            rules: ["Complete any available game", "Higher scores = more points", "3 attempts per game daily", "Weekly tournaments available"],
-            rewards: ["Up to 75 Points per game", "Gamer badge", "Tournament eligibility"]
-        },
-        {
-            id: 8,
-            title: "Quiz Challenge",
-            description: "Test your knowledge",
-            points: 120,
-            icon: "Brain",
-            theme: {
-                gradient: "from-fuchsia-500 to-pink-600",
-                bg: "bg-fuchsia-50",
-                border: "border-fuchsia-200",
-                iconBg: "bg-fuchsia-600",
-                iconText: "text-white",
-                button: "from-fuchsia-500 to-pink-600"
-            },
-            buttonText: "Take Quiz",
-            isDailyTask: true,
-            taskType: "quiz",
-            rules: ["Answer 10 questions correctly", "Time limit: 2 minutes", "Each correct answer = 12 points", "Perfect score = bonus 30 points"],
-            rewards: ["Up to 150 Points", "Genius badge", "Leaderboard ranking boost"]
-        }
-    ];
+    const currentStreak = Number(streakQuery.data?.current_streak || 0);
+    const longestStreak = Number(streakQuery.data?.longest_streak || 0);
+    const lastCheckinDate = streakQuery.data?.last_checkin_date || null;
+    const leaderboardData = useMemo(() => {
+        const items = leaderboardQuery.data?.data || [];
+        return items.map((item) => {
+            const userIdLabel = item.u_id || `User-${item.rank}`;
+            return {
+                ...item,
+                name: `User ${String(userIdLabel).slice(-6)}`,
+                avatar: String(userIdLabel).replace(/[^a-zA-Z0-9]/g, '').slice(-2).toUpperCase() || 'AR',
+                emoji: rankEmoji(item.rank)
+            };
+        });
+    }, [leaderboardQuery.data]);
+    const rewardsPreview = rewardsPreviewQuery.data?.data || [];
 
     // ===== Infinite Carousel Logic =====
     const carouselRef = useRef(null);
@@ -1149,7 +1225,7 @@ export default function ArenaStandalone() {
     const isPausedRef = useRef(false);
 
     // duplicate contests for circular behavior
-    const carouselItems = [...contests, ...contests];
+    const carouselItems = [...sortedContests, ...sortedContests];
 
     // auto scroll speed (px/sec)
     const AUTO_SCROLL_SPEED = 150;
@@ -1175,7 +1251,11 @@ export default function ArenaStandalone() {
             <div className="arena-standalone-page arena-scope">
                 <HeroSlider />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <MilestoneTracker currentStreak={currentStreak} />
+                    <MilestoneTracker
+                        currentStreak={currentStreak}
+                        longestStreak={longestStreak}
+                        lastCheckinDate={lastCheckinDate}
+                    />
                     <div>
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
                             <h2 className="text-2xl font-bold text-slate-800">Earn Points</h2>
@@ -1193,30 +1273,20 @@ export default function ArenaStandalone() {
                                 dragMomentum={true}
                                 dragElastic={0.08}
                             >
-                                {carouselItems
-                                    .sort((a, b) => {
-                                        if (a.isDailyTask && b.isDailyTask) {
-                                            const aCompleted = isTaskCompletedToday(a.taskType);
-                                            const bCompleted = isTaskCompletedToday(b.taskType);
-                                            if (aCompleted && !bCompleted) return 1;
-                                            if (!aCompleted && bCompleted) return -1;
-                                        }
-                                        return 0;
-                                    })
-                                    .map((contest, index) => (
-                                        <div
-                                            key={`${contest.id}-${index}`}
-                                            className="min-w-[280px] sm:min-w-[320px]"
-                                        >
-                                            <ContestCard
-                                                contest={contest}
-                                                index={index}
-                                                isCompleted={isTaskCompleted(contest)}
-                                                timeLeft={timeLeft}
-                                                onClick={() => setSelectedContest(contest)}
-                                            />
-                                        </div>
-                                    ))}
+                                {carouselItems.map((contest, index) => (
+                                    <div
+                                        key={`${contest.id}-${index}`}
+                                        className="min-w-[280px] sm:min-w-[320px]"
+                                    >
+                                        <ContestCard
+                                            contest={contest}
+                                            index={index}
+                                            state={getContestState(contest)}
+                                            onClick={setSelectedContestTask}
+                                            onCooldownExpired={handleCooldownExpired}
+                                        />
+                                    </div>
+                                ))}
                             </motion.div>
                         </div>
                     </div>
@@ -1232,28 +1302,34 @@ export default function ArenaStandalone() {
                         "
                     >
                         <div className="h-full">
-                            <RewardsShowcase onRedeem={setSelectedReward} />
+                            <RewardsShowcase
+                                rewards={rewardsPreview}
+                                isLoading={rewardsPreviewQuery.isLoading}
+                                onSeeMore={() => navigate('/arena/rewards')}
+                            />
                         </div>
                         <div className="h-full flex">
-                            <Leaderboard />
+                            <Leaderboard
+                                leaderboardData={leaderboardData}
+                                isLoading={leaderboardQuery.isLoading}
+                                myRank={myRankQuery.data}
+                                onSeeMore={() => navigate('/arena/leaderboard')}
+                            />
                         </div>
                     </div>
+                    <HistoryShortcut onOpen={() => navigate('/arena/history')} />
 
                 </div>
                 <ContestModal
                     contest={selectedContest}
                     isOpen={!!selectedContest}
-                    onClose={() => setSelectedContest(null)}
+                    onClose={() => setSelectedContestTask(null)}
                     onComplete={handleTaskComplete}
-                    isCompleted={isTaskCompleted(selectedContest)}
-                />
-                <RedeemModal
-                    reward={selectedReward}
-                    isOpen={!!selectedReward}
-                    onClose={() => setSelectedReward(null)}
+                    isSubmitting={completeTaskMutation.isPending}
+                    state={selectedContestState}
+                    onCooldownExpired={handleCooldownExpired}
                 />
             </div>
         </>
     );
 }
-

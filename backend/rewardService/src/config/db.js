@@ -1,29 +1,44 @@
 const { Pool } = require('pg');
 const path = require('path');
 const fs = require('fs');
+const dotenv = require('dotenv');
 
-// Load .env from root directory
-require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+const envCandidates = [
+  path.resolve(__dirname, '../../.env'),
+  path.resolve(__dirname, '../../../.env'),
+  path.resolve(__dirname, '../../../../.env'),
+  path.resolve(__dirname, '../../../authentication/.env')
+];
 
-// Create logs directory if it doesn't exist
-const logsDir = path.join(__dirname, '../../logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
+let loadedFrom = null;
+for (const envPath of envCandidates) {
+  if (!fs.existsSync(envPath)) {
+    continue;
+  }
+
+  dotenv.config({ path: envPath });
+  loadedFrom = envPath;
+  break;
 }
 
-// Create connection pool
+if (!loadedFrom) {
+  dotenv.config();
+}
+
+const dbPort = Number.parseInt(process.env.DB_PORT || '5432', 10);
+
 const pool = new Pool({
   host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT),
+  port: Number.isNaN(dbPort) ? 5432 : dbPort,
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
-  password: String(process.env.DB_PASSWORD),
+  password: process.env.DB_PASSWORD,
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000
 });
 
-pool.on('error', (err, client) => {
+pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
 });
 
@@ -32,12 +47,12 @@ const testConnection = async () => {
   try {
     client = await pool.connect();
     const result = await client.query('SELECT NOW()');
-    console.log('✅ Database connected successfully');
+    console.log('Database connected successfully');
     console.log('Current time:', result.rows[0].now);
     client.release();
     return true;
   } catch (error) {
-    console.error('❌ Database connection failed');
+    console.error('Database connection failed');
     console.error('Error message:', error.message);
     console.error('Error code:', error.code);
     if (client) client.release();
