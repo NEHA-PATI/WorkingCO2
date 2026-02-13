@@ -376,7 +376,7 @@ const { login } = useAuth();
   setError({});
 
   try {
-    const response = await fetch("http://15.206.213.50:5002/api/v1/auth/register", {
+    const response = await fetch(`${API_URL}/api/v1/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -399,7 +399,7 @@ const { login } = useAuth();
 
     // ✅ SUCCESS CASE
     setTempEmail(formData.email.toLowerCase().trim());
-    setTempToken(data.tempToken);
+    setTempToken(data.data?.tempToken);
     setShowOTP(true);
 
     fireToast("REGISTER.OTP_SENT", "success");
@@ -499,7 +499,7 @@ const { login } = useAuth();
       }
 
       // 🔥 VERY IMPORTANT — replace old token
-      setTempToken(data.tempToken);
+      setTempToken(data.data?.tempToken);
 
       fireToast("OTP.RESENT", "success");
 
@@ -655,7 +655,7 @@ const { login } = useAuth();
                         style={styles.link}
                         onClick={(e) => {
                           e.preventDefault();
-                          alert("Terms of Service");
+                          fireToast("TERMS.OPENED", "info");
                         }}
                       >
                         Terms of Service
@@ -666,7 +666,7 @@ const { login } = useAuth();
                         style={styles.link}
                         onClick={(e) => {
                           e.preventDefault();
-                          alert("Privacy Policy");
+                          fireToast("PRIVACY.OPENED", "info");
                         }}
                       >
                         Privacy Policy

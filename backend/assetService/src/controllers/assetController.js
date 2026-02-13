@@ -44,10 +44,18 @@ export const getMetrics = async (req, res) => {
     `;
 
     const { rows } = await query(sql);
-    res.json(rows[0]);
+    res.json({
+      success: true,
+      message: "Metrics fetched successfully",
+      data: rows[0]
+    });
   } catch (err) {
     console.error("METRICS ERROR:", err);
-    res.status(500).json({ error: "Failed to fetch metrics" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch metrics",
+      data: null
+    });
   }
 };
 
@@ -108,10 +116,18 @@ ORDER BY submitted_on DESC;
 `;
 
     const { rows } = await query(sql);
-    res.json(rows);
+    res.json({
+      success: true,
+      message: "Workflow assets fetched successfully",
+      data: rows
+    });
   } catch (err) {
     console.error("WORKFLOW ERROR:", err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      data: null
+    });
   }
 };
 
@@ -172,10 +188,18 @@ ORDER BY created_at DESC;
     `;
 
     const { rows } = await query(sql);
-    res.json(rows);
+    res.json({
+      success: true,
+      message: "Approved assets fetched successfully",
+      data: rows
+    });
   } catch (err) {
     console.error("APPROVED ERROR:", err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      data: null
+    });
   }
 };
 
@@ -200,13 +224,25 @@ export const updateAssetStatus = async (req, res) => {
     } else if (type === "solar") {
       sql = `UPDATE solar_panels SET status=$1 WHERE suid=$2`;
     } else {
-      return res.status(400).json({ error: "Invalid asset type" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid asset type",
+        data: null
+      });
     }
 
     await query(sql, [status, id]);
-    res.json({ success: true });
+    res.json({
+      success: true,
+      message: "Asset status updated successfully",
+      data: null
+    });
   } catch (err) {
-    res.status(500).json({ error: "Status update failed" });
+    res.status(500).json({
+      success: false,
+      message: "Status update failed",
+      data: null
+    });
   }
 };
 
@@ -260,10 +296,18 @@ export const getRejectedAssets = async (req, res) => {
     `;
 
     const { rows } = await query(sql);
-    res.json(rows);
+    res.json({
+      success: true,
+      message: "Rejected assets fetched successfully",
+      data: rows
+    });
   } catch (err) {
     console.error("REJECTED ERROR:", err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      data: null
+    });
   }
 };
 
@@ -336,9 +380,17 @@ export const getAssetDetails = async (req, res) => {
     }
 
     const { rows } = await query(sql, [id]);
-    res.json(rows[0]);
+    res.json({
+      success: true,
+      message: "Asset details fetched successfully",
+      data: rows[0]
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to fetch asset details" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch asset details",
+      data: null
+    });
   }
 };

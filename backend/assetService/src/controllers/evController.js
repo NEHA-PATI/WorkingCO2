@@ -90,52 +90,59 @@ class EVController {
       // According to schema: only ev_id, vuid, and u_id are NOT NULL
       if (!u_id) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Missing required field: u_id'
+          success: false,
+          message: 'Missing required field: u_id',
+          data: null
         });
       }
       
       // Validate integer fields are not NaN if provided
       if (purchase_year !== null && (isNaN(purchase_year) || purchase_year < 2000 || purchase_year > 2030)) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Invalid purchase_year. Must be a number between 2000 and 2030'
+          success: false,
+          message: 'Invalid purchase_year. Must be a number between 2000 and 2030',
+          data: null
         });
       }
       
       if (range !== null && (isNaN(range) || range <= 0)) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Invalid range. Must be a positive integer'
+          success: false,
+          message: 'Invalid range. Must be a positive integer',
+          data: null
         });
       }
       
       if (top_speed !== null && isNaN(top_speed)) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Invalid top_speed. Must be a number'
+          success: false,
+          message: 'Invalid top_speed. Must be a number',
+          data: null
         });
       }
       
       // Validate numeric fields are not NaN if provided
       if (energy_consumed !== null && isNaN(energy_consumed)) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Invalid energy_consumed. Must be a number'
+          success: false,
+          message: 'Invalid energy_consumed. Must be a number',
+          data: null
         });
       }
       
       if (grid_emission_factor !== null && isNaN(grid_emission_factor)) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Invalid grid_emission_factor. Must be a number'
+          success: false,
+          message: 'Invalid grid_emission_factor. Must be a number',
+          data: null
         });
       }
       
       if (charging_time !== null && isNaN(charging_time)) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Invalid charging_time. Must be a number'
+          success: false,
+          message: 'Invalid charging_time. Must be a number',
+          data: null
         });
       }
 
@@ -163,10 +170,12 @@ class EVController {
       });
 
       return res.status(201).json({
-        status: 'success',
+        success: true,
         message: 'EV created successfully',
-        data: newEV,
-        evCount
+        data: {
+          ev: newEV,
+          evCount
+        }
       });
     } catch (error) {
       logger.error('Error creating EV:', error);
@@ -203,14 +212,16 @@ class EVController {
       
       // Return more detailed error information
       return res.status(statusCode).json({
-        status: 'error',
+        success: false,
         message: errorMessage,
-        error: error.message,
-        details: process.env.NODE_ENV === 'development' ? {
-          stack: error.stack,
-          name: error.name,
-          code: error.code
-        } : undefined
+        data: {
+          error: error.message,
+          details: process.env.NODE_ENV === 'development' ? {
+            stack: error.stack,
+            name: error.name,
+            code: error.code
+          } : undefined
+        }
       });
     }
   }
@@ -225,25 +236,25 @@ class EVController {
 
       if (!userId) {
         return res.status(400).json({
-          status: 'error',
-          message: 'User ID is required'
+          success: false,
+          message: 'User ID is required',
+          data: null
         });
       }
 
       const evs = await EVModel.getByUserId(userId);
 
       return res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'EVs retrieved successfully',
-        count: evs.length,
         data: evs
       });
     } catch (error) {
       logger.error('Error fetching EVs:', error);
       return res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to fetch EVs',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
@@ -260,22 +271,23 @@ class EVController {
 
       if (!ev) {
         return res.status(404).json({
-          status: 'error',
-          message: 'EV not found'
+          success: false,
+          message: 'EV not found',
+          data: null
         });
       }
 
       return res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'EV retrieved successfully',
         data: ev
       });
     } catch (error) {
       logger.error('Error fetching EV:', error);
       return res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to fetch EV',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
@@ -298,16 +310,18 @@ class EVController {
 
       if (Object.keys(updateData).length === 0) {
         return res.status(400).json({
-          status: 'error',
-          message: 'No valid fields to update'
+          success: false,
+          message: 'No valid fields to update',
+          data: null
         });
       }
 
       const existingEV = await EVModel.getById(ev_id);
       if (!existingEV) {
         return res.status(404).json({
-          status: 'error',
-          message: 'EV not found'
+          success: false,
+          message: 'EV not found',
+          data: null
         });
       }
 
@@ -316,16 +330,16 @@ class EVController {
       logger.info(`EV updated successfully: ${ev_id}`);
 
       return res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'EV updated successfully',
         data: updatedEV
       });
     } catch (error) {
       logger.error('Error updating EV:', error);
       return res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to update EV',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
@@ -342,24 +356,25 @@ class EVController {
 
       if (!deletedEV) {
         return res.status(404).json({
-          status: 'error',
-          message: 'EV not found'
+          success: false,
+          message: 'EV not found',
+          data: null
         });
       }
 
       logger.info(`EV deleted successfully: ${ev_id}`);
 
       return res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'EV deleted successfully',
         data: deletedEV
       });
     } catch (error) {
       logger.error('Error deleting EV:', error);
       return res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to delete EV',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
@@ -375,16 +390,18 @@ class EVController {
 
       if (!status) {
         return res.status(400).json({
-          status: 'error',
-          message: 'Status is required'
+          success: false,
+          message: 'Status is required',
+          data: null
         });
       }
 
       const validStatuses = ['pending', 'approved', 'rejected'];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({
-          status: 'error',
-          message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+          success: false,
+          message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
+          data: null
         });
       }
 
@@ -397,24 +414,25 @@ class EVController {
 
       if (!updatedEV) {
         return res.status(404).json({
-          status: 'error',
-          message: 'EV not found'
+          success: false,
+          message: 'EV not found',
+          data: null
         });
       }
 
       logger.info(`EV status updated: ${ev_id} -> ${status}`);
 
       return res.status(200).json({
-        status: 'success',
+        success: true,
         message: 'EV status updated successfully',
         data: updatedEV
       });
     } catch (error) {
       logger.error('Error updating EV status:', error);
       return res.status(500).json({
-        status: 'error',
+        success: false,
         message: 'Failed to update EV status',
-        error: error.message
+        data: { error: error.message }
       });
     }
   }
