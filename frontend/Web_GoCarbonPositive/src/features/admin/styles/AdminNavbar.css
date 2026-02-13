@@ -1,35 +1,39 @@
 .admin-navbar {
   display: flex;
-  justify-content: space-around;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
   background: #ffffff;
   width: 100%;
-  height: 90px;
+  height: 100%;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  margin: 0 auto;
-  padding: 0 1rem;
+  border-radius: 16px;
+  margin: 0;
+  padding: 0.9rem;
   box-sizing: border-box;
+  overflow-y: auto;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-  z-index: 999;
-  margin-top: 70px; /* decreased gap between header and navbar */
 }
 
 /* Nav Items */
 .nav-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 0.7rem 1rem;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 600;
   color: #0f172a;
-  flex: 1;
   user-select: none;
-  caret-color: transparent; /* removes text cursor */
+  caret-color: transparent;
+}
+
+.nav-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nav-item:hover {
@@ -43,69 +47,73 @@
   border: 2px solid #16a34a;
 }
 
-
-
 /* ICON BASE STYLE */
 .icon {
-  font-size: 1.8rem;
+  font-size: 1.2rem;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 /* DISTINCT ICON COLORS */
 .overview-icon {
-  color: #3b82f6; /* blue */
+  color: #3b82f6;
 }
 .users-icon {
-  color: #10b981; /* green */
+  color: #10b981;
+}
+.asset-icon {
+  color: #0ea5e9;
 }
 .support-icon {
-  color: #f59e0b; /* amber */
+  color: #f59e0b;
 }
 .config-icon {
-  color: #8b5cf6; /* purple */
+  color: #8b5cf6;
 }
 .security-icon {
-  color: #ef4444; /* red */
+  color: #ef4444;
 }
 
-/* HOVER EFFECTS WITH GLOW */
+/* HOVER EFFECTS */
 .nav-item:hover .overview-icon {
   color: #2563eb;
-  filter: drop-shadow(0 0 6px rgba(59,130,246,0.5));
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.5));
 }
 .nav-item:hover .users-icon {
   color: #059669;
-  filter: drop-shadow(0 0 6px rgba(16,185,129,0.5));
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.5));
+}
+.nav-item:hover .asset-icon {
+  color: #0284c7;
+  filter: drop-shadow(0 0 6px rgba(14, 165, 233, 0.45));
 }
 .nav-item:hover .support-icon {
   color: #d97706;
-  filter: drop-shadow(0 0 6px rgba(245,158,11,0.5));
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5));
 }
 .nav-item:hover .config-icon {
   color: #7c3aed;
-  filter: drop-shadow(0 0 6px rgba(139,92,246,0.5));
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.5));
 }
 .nav-item:hover .security-icon {
   color: #dc2626;
-  filter: drop-shadow(0 0 6px rgba(239,68,68,0.5));
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.5));
 }
 
 /* ACTIVE STATE ICON EFFECT */
 .nav-item.active .icon {
-  transform: scale(1.2);
+  transform: scale(1.1);
   filter: brightness(1.2);
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .admin-navbar {
-    flex-wrap: wrap;
     height: auto;
-    padding: 0.5rem;
+    padding: 0.75rem;
   }
 
   .nav-item {
-    flex: 1 1 45%;
-    margin: 0.5rem;
+    width: 100%;
   }
 }
