@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../styles/user/contact.css';
+import "@features/user/styles/contact.css";
 import { fireToast } from '../services/user/toastService.js';
 import { contactApiClient,ticketApiClient } from '../services/apiClient.js';
 export default function Contact() {
