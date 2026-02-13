@@ -1,0 +1,778 @@
+/* Profile Form Unique Classnames - pf prefix */
+
+
+/* Color Variables */
+:root {
+  --pf-primary: oklch(0.65 0.08 142);
+  --pf-primary-hover: oklch(0.6 0.08 142);
+  --pf-background: oklch(1 0 0);
+  --pf-foreground: oklch(0.15 0 0);
+  --pf-border: oklch(0.92 0 0);
+  --pf-text-secondary: oklch(0.5 0 0);
+  --pf-red: #ef4444;
+  --pf-gray-700: #374151;
+  --pf-gray-600: #4b5563;
+  --pf-gray-300: #d1d5db;
+  --pf-gray-100: #f3f4f6;
+  --pf-white: #ffffff;
+  --pf-white-10: rgba(255, 255, 255, 0.1);
+  --pf-white-20: rgba(255, 255, 255, 0.2);
+  --pf-white-75: rgba(255, 255, 255, 0.75);
+  --pf-white-90: rgba(255, 255, 255, 0.9);
+}
+
+
+/* Main Container */
+.pf-wrapper {
+  display: flex;
+  min-height: 100%;
+  background-color: var(--pf-background);
+  overflow: visible;
+  align-items: flex-start;
+}
+
+
+/* Left Side - Scrollable Form */
+.pf-left-container {
+  width: 50%;
+  max-height: none;
+  overflow-y: visible;
+  background-color: var(--pf-white);
+  border-right: 1px solid var(--pf-border);
+}
+
+
+.pf-content-area {
+  max-width: 41rem;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+
+/* Header */
+.pf-header {
+  margin-bottom: 2rem;
+}
+
+
+.pf-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--pf-primary);
+  margin-bottom: 0.5rem;
+}
+
+
+.pf-subtitle {
+  font-size: 1rem;
+  color: var(--pf-gray-600);
+}
+
+
+/* Sections */
+.pf-section {
+  margin-bottom: 2rem;
+}
+
+
+.pf-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--pf-primary);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+
+.pf-section-number {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--pf-primary);
+  color: var(--pf-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+
+/* Grid */
+.pf-grid-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+
+/* Form Groups */
+.pf-form-group {
+  margin-bottom: 1.5rem;
+}
+
+
+/* Labels */
+.pf-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--pf-gray-700);
+  margin-bottom: 0.5rem;
+}
+
+
+.pf-required {
+  color: var(--pf-red);
+}
+
+
+/* Inputs */
+.pf-input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--pf-gray-300);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: var(--pf-foreground);
+  transition: all 0.2s;
+}
+
+
+.pf-input:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--pf-primary),
+    inset 0 0 0 1px transparent;
+}
+
+
+.pf-input::placeholder {
+  color: var(--pf-text-secondary);
+}
+
+
+/* Phone Input Wrapper */
+.pf-phone-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+}
+
+
+.pf-country-code-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--pf-gray-300);
+  border-radius: 0.5rem;
+  width: 6rem;
+  font-size: 1rem;
+  color: var(--pf-foreground);
+  background-color: var(--pf-white);
+  transition: all 0.2s;
+}
+
+
+.pf-country-code-select:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--pf-primary);
+}
+
+
+.pf-country-code-readonly {
+  cursor: default;
+}
+
+
+.pf-phone-input {
+  flex: 1;
+}
+
+
+/* Textarea */
+.pf-textarea {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--pf-gray-300);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: var(--pf-foreground);
+  resize: none;
+  height: 5rem;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+
+.pf-textarea:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--pf-primary),
+    inset 0 0 0 1px transparent;
+}
+
+
+.pf-textarea::placeholder {
+  color: var(--pf-text-secondary);
+}
+
+
+/* Select Wrapper */
+.pf-select-wrapper {
+  position: relative;
+}
+
+
+.pf-select {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--pf-gray-300);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: var(--pf-foreground);
+  background-color: var(--pf-white);
+  appearance: none;
+  transition: all 0.2s;
+}
+
+
+.pf-select:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--pf-primary);
+}
+
+
+.pf-select-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--pf-text-secondary);
+  pointer-events: none;
+}
+
+
+/* Input Specify */
+.pf-input-specify {
+  margin-top: 0.75rem;
+}
+
+
+/* Address Block */
+.pf-address-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+
+.pf-additional-address {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--pf-border);
+}
+
+
+.pf-address-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+
+.pf-address-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--pf-gray-700);
+}
+
+
+.pf-remove-btn {
+  padding: 0.5rem;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 0.5rem;
+}
+
+
+.pf-remove-btn:hover {
+  background-color: #fee2e2;
+}
+
+
+.pf-remove-btn svg {
+  color: var(--pf-red);
+}
+
+
+/* Buttons */
+.pf-add-address-btn {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--pf-primary);
+  color: var(--pf-white);
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+
+.pf-add-address-btn:hover {
+  background-color: var(--pf-primary-hover);
+}
+
+
+.pf-confirm-add-btn {
+  margin-top: 1.5rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--pf-primary);
+  color: var(--pf-white);
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+
+.pf-confirm-add-btn:hover {
+  background-color: var(--pf-primary-hover);
+}
+
+
+/* Button Group */
+.pf-button-group {
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 2rem;
+}
+
+
+.pf-save-btn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--pf-primary);
+  color: var(--pf-white);
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+}
+
+
+.pf-save-btn:hover {
+  background-color: var(--pf-primary-hover);
+}
+
+
+.pf-cancel-btn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--pf-white);
+  color: var(--pf-primary);
+  border: 2px solid var(--pf-primary);
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+}
+
+
+.pf-cancel-btn:hover {
+  background-color: rgba(101, 161, 123, 0.05);
+}
+
+
+/* Right Side - Sticky Design Section, not overlapping footer */
+.pf-right-container {
+  width: 50%;
+  background-color: var(--pf-primary);
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--pf-white);
+  overflow: hidden;
+}
+
+
+.pf-right-content {
+  text-align: center;
+  max-width: 28rem;
+  position: relative;
+  z-index: 10;
+}
+
+
+/* Icon */
+.pf-icon-wrapper {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+
+.pf-icon-circle {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  background-color: var(--pf-white-10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.pf-icon-circle svg {
+  color: var(--pf-white);
+}
+
+
+.pf-checkmark {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  width: 2rem;
+  height: 2rem;
+  background-color: var(--pf-white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pf-primary);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+
+/* Right Title and Subtitle */
+.pf-right-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--pf-white);
+}
+
+
+.pf-right-subtitle {
+  font-size: 1.125rem;
+  color: var(--pf-white-90);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+
+/* Features Box */
+.pf-features-box {
+  background-color: var(--pf-white-10);
+  backdrop-filter: blur(4px);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--pf-white-20);
+}
+
+
+.pf-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+
+.pf-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+
+.pf-feature-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background-color: var(--pf-white);
+  margin-top: 0.5rem;
+  flex-shrink: 0;
+}
+
+
+.pf-feature-text {
+  font-size: 0.875rem;
+  color: var(--pf-white-90);
+  text-align: left;
+}
+
+
+/* Footer Text */
+.pf-footer-text {
+  font-size: 0.875rem;
+  color: var(--pf-white-75);
+}
+
+
+/* Decorative Elements */
+.pf-decoration {
+  position: absolute;
+  border-radius: 50%;
+  background-color: var(--pf-white-10);
+}
+
+
+.pf-decoration-bottom {
+  bottom: 0;
+  right: 0;
+  width: 16rem;
+  height: 16rem;
+  margin-right: -8rem;
+  margin-bottom: -8rem;
+}
+
+
+.pf-decoration-top {
+  top: 0;
+  left: 0;
+  width: 10rem;
+  height: 10rem;
+  margin-left: -5rem;
+  margin-top: -5rem;
+}
+
+
+/* Summary Card – improved design */
+.pf-summary-card {
+  background: radial-gradient(circle at top left, #ffffff 0%, #f9fafb 45%, #eef2ff 100%);
+  border-radius: 1rem;
+  padding: 1.75rem 1.75rem 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  margin-bottom: 2rem;
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.12),
+    0 2px 6px rgba(15, 23, 42, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.pf-summary-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(129, 140, 248, 0.16), transparent 55%);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.pf-summary-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pf-summary-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--pf-gray-700);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pf-summary-title::after {
+  content: "Saved";
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background-color: rgba(16, 185, 129, 0.08);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.pf-summary-section {
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.5);
+}
+
+.pf-summary-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0;
+}
+
+.pf-summary-section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--pf-gray-700);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.9;
+}
+
+.pf-summary-section p {
+  font-size: 0.9rem;
+  color: var(--pf-gray-700);
+  margin-bottom: 0.25rem;
+}
+
+.pf-summary-section p strong {
+  font-weight: 600;
+  color: var(--pf-gray-600);
+  display: inline-block;
+  min-width: 6.5rem;
+}
+
+.pf-summary-address {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  margin-bottom: 0.6rem;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
+}
+
+.pf-summary-address-title {
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--pf-primary);
+}
+
+.pf-summary-address p {
+  font-size: 0.85rem;
+  color: var(--pf-gray-700);
+  line-height: 1.35;
+}
+
+.pf-summary-buttons {
+  margin-top: 1.25rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.3);
+  padding-top: 0.9rem;
+}
+
+
+/* Scrollbar for left side */
+.pf-left-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+
+.pf-left-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+.pf-left-container::-webkit-scrollbar-thumb {
+  background: var(--pf-gray-300);
+  border-radius: 4px;
+}
+
+
+.pf-left-container::-webkit-scrollbar-thumb:hover {
+  background: var(--pf-gray-600);
+}
+
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .pf-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+
+  .pf-left-container {
+    width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid var(--pf-border);
+    overflow-y: auto;
+  }
+
+
+  .pf-right-container {
+    width: 100%;
+    position: relative;
+    top: auto;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+
+  .pf-grid-two {
+    grid-template-columns: 1fr;
+  }
+
+
+  .pf-button-group {
+    flex-direction: column;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .pf-content-area {
+    padding: 1.5rem;
+  }
+
+
+  .pf-title {
+    font-size: 1.5rem;
+  }
+
+
+  .pf-section-title {
+    font-size: 1.125rem;
+  }
+
+
+  .pf-right-title {
+    font-size: 1.875rem;
+  }
+
+
+  .pf-right-subtitle {
+    font-size: 1rem;
+  }
+
+
+  .pf-phone-input-wrapper {
+    flex-direction: column;
+  }
+
+
+  .pf-country-code-select {
+    width: 100%;
+  }
+}

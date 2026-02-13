@@ -1,17 +1,13 @@
-import UserProfile from "../components/user/UserProfile";
-import OrgProfile from "../components/org/OrgProfile";
-import AdminProfile from "../components/admin/AdminProfile";
-
 const profileConfig = {
-    user: {
-        component: UserProfile,
-    },
-    organization: {
-        component: OrgProfile,
-    },
-    admin: {
-        component: AdminProfile,
-    },
+  user: {
+    route: "/user/profile",
+  },
+  organization: {
+    route: "/org/profile",
+  },
+  admin: {
+    route: "/admin/profile",
+  },
 };
 
 export default profileConfig;

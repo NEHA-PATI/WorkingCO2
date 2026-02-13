@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const Reset = require("../models/passwordResetModel");
 const pool = require("../config/db");
-const sendResetEmail = require("../utils/sendResetEmail");
+const { sendMail, MAIL_TYPES } = require("./mail");
 
 exports.forgotPassword = async (email) => {
   console.log("📧 PASSWORD SERVICE:", email);
@@ -31,7 +31,11 @@ exports.forgotPassword = async (email) => {
   const resetLink = `${process.env.FRONTEND_URL}/reset-password/${rawToken}`;
 
 
-  await sendResetEmail(user.email, resetLink);
+  await sendMail({
+    type: MAIL_TYPES.PASSWORD_RESET,
+    to: user.email,
+    data: { resetLink },
+  });
 };
 
 exports.resetPassword = async (token, newPassword) => {

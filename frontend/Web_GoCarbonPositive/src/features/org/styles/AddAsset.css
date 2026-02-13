@@ -1,0 +1,155 @@
+.dashboard-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    background: #f5f5f7;
+    padding: 2rem;
+  }
+  
+  .dashboard-container .card {
+    background: #ffffff; /* white background */
+    border-radius: 20px;
+    padding: 1.5rem;
+    color: #000000; /* text black */
+    width: 320px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center; /* center text */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+  }
+  
+  .dashboard-container .card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    filter: brightness(1.03);
+  }
+  
+  .dashboard-container .card-icon {
+    font-size: 1.9rem;
+    color: #2563eb !important; /* fallback */
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    position: static !important;
+    top: auto;
+    right: auto;
+    filter: none;
+    transform: none;
+    z-index: 1;
+  }
+
+  .dashboard-container .card.electric-vehicle .card-icon {
+    color: #3b82f6 !important;
+    fill: currentColor;
+    stroke: currentColor;
+  }
+
+  .dashboard-container .card.trees .card-icon {
+    color: #10b981 !important;
+    fill: currentColor;
+    stroke: currentColor;
+  }
+
+  .dashboard-container .card.solar-panel .card-icon {
+    color: #f59e0b !important;
+    fill: currentColor;
+    stroke: currentColor;
+  }
+  
+  .dashboard-container h2 {
+    margin: 0.5rem 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+  }
+
+  .dashboard-container .card-title {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .dashboard-container .card-title .card-icon {
+    order: -1;
+  }
+  
+  .dashboard-container .subtitle {
+    font-size: 1rem;
+    opacity: 0.85;
+    margin: 0.5rem 0;
+  }
+  
+  .dashboard-container .description {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    line-height: 1.4;
+  }
+  
+  .dashboard-container .add-button {
+    background-color: #2563eb; /* soft blue */
+    color: #382f2f;
+    padding: 0.6rem 1.4rem;
+    border-radius: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .dashboard-container .add-button:hover {
+    background-color: #1e4fcb; /* slightly darker on hover */
+    transform: scale(1.05);
+  }
+  
+  .dashboard-container .blog-points {
+    list-style: none;
+    padding-left: 1rem;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    text-align: left; /* keep bullet points left-aligned */
+  }
+  
+  .dashboard-container .blog-points li::before {
+    content: '•';
+    color: #000;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+  }
+  
+  .dashboard-container .add-button.blue {
+    background-color: #93c5fd; /* light blue */
+  }
+  
+  .dashboard-container .add-button.blue:hover {
+    background-color: #60a5fa;
+  }
+  
+  .dashboard-container .add-button.green {
+    background-color: #86efac; /* light green */
+  }
+  
+  .dashboard-container .add-button.green:hover {
+    background-color: #4ade80;
+  }
+  
+  .dashboard-container .add-button.orange {
+    background-color: #fdba74; /* light orange */
+  }
+  
+  .dashboard-container .add-button.orange:hover {
+    background-color: #fb923c;
+  }
+  
+  .dashboard-container .add-button.purple {
+    background-color: #c4b5fd; /* light purple */
+  }
+  
+  .dashboard-container .add-button.purple:hover {
+    background-color: #a78bfa;
+  }
