@@ -1,0 +1,415 @@
+:root {
+  --cs-bg: #f8fafc;
+  --cs-card-bg: #ffffff;
+  --cs-border-soft: #e2e8f0;
+  --cs-text-main: #0f172a;
+  --cs-text-muted: #64748b;
+  --cs-pill-neutral-bg: #f1f5f9;
+  --cs-pill-neutral-text: #64748b;
+  --cs-green: #22c55e;
+  --cs-green-soft: #dcfce7;
+  --cs-orange: #fb923c;
+  --cs-orange-soft: #ffedd5;
+  --cs-blue: #2563eb;
+  --cs-blue-soft: #dbeafe;
+  --cs-purple: #a855f7;
+  --cs-gold: #facc15;
+  --cs-shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.12),
+    0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+/* Page */
+.cs-page {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #e0f2fe 0, #f8fafc 42%, #f9fafb 100%);
+  display: flex;
+  justify-content: center;
+  padding: 32px 16px;
+  box-sizing: border-box;
+}
+
+.cs-container {
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* Top grid */
+.cs-top-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+/* Cards */
+.cs-card {
+  background-color: transparent;
+  border-radius: 18px;
+  position: relative;
+}
+
+.cs-card-top {
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+}
+
+.cs-card-bottom {
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.14);
+}
+
+/* Top colored bar */
+.cs-card-top-bar {
+  height: 5px;
+  border-radius: 18px 18px 0 0;
+  background-image: linear-gradient(90deg, #38bdf8, #6366f1, #f97316);
+}
+
+.cs-card-top-bar-1 {
+  background-image: linear-gradient(90deg, #38bdf8, #6366f1);
+}
+
+.cs-card-top-bar-2 {
+  background-image: linear-gradient(90deg, #22c55e, #0ea5e9);
+}
+
+.cs-card-top-bar-3 {
+  background-image: linear-gradient(90deg, #f97316, #facc15);
+}
+
+.cs-card-top-bar-4 {
+  background-image: linear-gradient(90deg, #a855f7, #6366f1);
+}
+
+/* Inner card */
+.cs-card-inner {
+  background-color: var(--cs-card-bg);
+  border-radius: 0 0 18px 18px;
+  padding: 18px 20px 16px;
+  border: 1px solid rgba(15, 23, 42, 0.04);
+}
+
+.cs-card-inner-bottom {
+  padding-top: 20px;
+}
+
+/* Header area */
+.cs-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cs-icon-pill {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f172a;
+  background: transparent;
+}
+
+.cs-icon-pill-blue {
+  background: transparent;
+  color: #2563eb;
+}
+
+.cs-icon-pill-green {
+  background: transparent;
+  color: #16a34a;
+}
+
+.cs-icon-pill-gold {
+  background: transparent;
+  color: #f59e0b;
+}
+
+.cs-icon-pill-purple {
+  background: transparent;
+  color: #7c3aed;
+}
+
+.cs-icon-pill-blue svg {
+  color: #2563eb;
+  fill: #2563eb;
+}
+
+.cs-icon-pill-green svg {
+  color: #16a34a;
+  fill: #16a34a;
+}
+
+.cs-icon-pill-gold svg {
+  color: #f59e0b;
+  fill: #f59e0b;
+}
+
+.cs-icon-pill-purple svg {
+  color: #7c3aed;
+  fill: #7c3aed;
+}
+
+.cs-money-dot {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.cs-card-label {
+  font-size: 12px;
+  letter-spacing: 0.13em;
+  font-weight: 600;
+  color: var(--cs-text-muted);
+  text-transform: uppercase;
+}
+
+/* Main value */
+.cs-card-value {
+  margin-top: 8px;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--cs-text-main);
+}
+
+/* Footer pill */
+.cs-card-footer-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 14px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cs-card-footer-neutral {
+  background-color: var(--cs-pill-neutral-bg);
+  color: var(--cs-pill-neutral-text);
+}
+
+.cs-card-footer-green {
+  background-color: var(--cs-green-soft);
+  color: #166534;
+}
+
+/* Bottom cards grid */
+.cs-bottom-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+/* Title row in bottom cards */
+.cs-card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.cs-card-title-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cs-card-title-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f172a;
+  background: transparent;
+}
+
+.cs-ev-bg {
+  background: transparent;
+  color: #2563eb;
+}
+
+.cs-tree-bg {
+  background: transparent;
+  color: #16a34a;
+}
+
+.cs-solar-bg {
+  background: transparent;
+  color: #f97316;
+}
+
+.cs-ev-bg svg {
+  color: #2563eb;
+  fill: #2563eb;
+}
+
+.cs-tree-bg svg {
+  color: #16a34a;
+  fill: #16a34a;
+}
+
+.cs-solar-bg svg {
+  color: #f97316;
+  fill: #f97316;
+}
+
+.cs-icon-pill-gold .cs-money-dot {
+  color: #f59e0b;
+}
+
+.cs-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cs-text-main);
+}
+
+/* Status pill */
+.cs-status-pill {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cs-status-pill-green {
+  background-color: var(--cs-green-soft);
+  color: #166534;
+}
+
+.cs-status-pill-blue {
+  background-color: var(--cs-blue-soft);
+  color: #1d4ed8;
+}
+
+.cs-status-pill-orange {
+  background-color: var(--cs-orange-soft);
+  color: #9a3412;
+}
+
+/* Detail rows */
+.cs-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 2px;
+  font-size: 13px;
+}
+
+.cs-detail-row + .cs-detail-row {
+  border-top: 1px solid #edf2f7;
+}
+
+.cs-detail-row:first-of-type {
+  border-top: 1px solid #edf2f7;
+}
+
+.cs-detail-row-divider {
+  margin-bottom: 10px;
+}
+
+.cs-detail-label {
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--cs-text-muted);
+}
+
+.cs-detail-value {
+  font-weight: 600;
+  color: var(--cs-text-main);
+}
+
+.cs-detail-unit {
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--cs-text-muted);
+}
+
+/* Conditions card (inside Solar card) */
+.cs-conditions-card {
+  margin-top: 10px;
+  border-radius: 12px;
+  background-color: #fef9c3;
+  border: 1px solid #facc15;
+  padding: 12px 14px;
+}
+
+.cs-conditions-header {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #854d0e;
+  margin-bottom: 8px;
+}
+
+.cs-conditions-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.cs-conditions-label {
+  font-weight: 600;
+  color: #713f12;
+  min-width: 80px;
+}
+
+.cs-conditions-value {
+  text-align: right;
+  color: #451a03;
+  flex: 1;
+}
+
+.cs-conditions-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: radial-gradient(circle, #facc15, #f97316);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .cs-top-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cs-bottom-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .cs-page {
+    padding: 20px 12px 28px;
+  }
+
+  .cs-top-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cs-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cs-card-value {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cs-card-inner,
+  .cs-card-inner-bottom {
+    padding: 16px 14px 14px;
+  }
+
+  .cs-detail-row {
+    font-size: 12px;
+  }
+}

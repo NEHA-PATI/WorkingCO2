@@ -4,6 +4,9 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
+const mailRoutes = require("./routes/mailRoutes");
+
+const sendOTP = require("../authentication/utils/sendOTP"); // adjust path if needed
 
 const app = express();
 
@@ -14,7 +17,9 @@ app.set("trust proxy", 1); // 🔥 REQUIRED for rate-limit behind proxy
 app.use(helmet());
 
 // ==================== LOGGING ====================
-app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+app.use(
+  morgan(process.env.NODE_ENV === "production" ? "combined" : "dev")
+);
 
 // ==================== CORS CONFIGURATION ====================
 const allowedOrigins = [
@@ -45,7 +50,7 @@ app.use(
   })
 );
 
-// ==================== BODY PARSING ====================
+// ==================== BODY ====================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -82,18 +87,14 @@ const oauthRoutes = require("./routes/oauthRoutes");
 
 app.use("/api/v1/auth", authLimiter, authRoutes);
 app.use("/api/v1/users", userRoutes);
-// // 🆕 Forgot password module
-// app.use("/api/auth/password", authLimiter, passwordRoutes);
-// ❌ OLD (problematic)
-// app.use("/api/auth/password", authLimiter, passwordRoutes);
-
-// ✅ NEW (WORKING)
 app.use("/api/v1/auth/password", passwordRoutes);
-
-// 🆕 OAuth module (Google now, DigiLocker later)
 app.use("/api/v1/auth/oauth", oauthRoutes);
 
-// Health check
+
+app.use("/api/v1/mail", mailRoutes);
+
+
+// Health Check
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "success",
