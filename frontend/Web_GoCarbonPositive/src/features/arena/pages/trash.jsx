@@ -132,151 +132,7 @@ const iconMap = {
     UserPlus, ClipboardList, Linkedin, Instagram, Users, CalendarCheck, Gamepad2, Brain
 };
 
-const QUIZ_TASK_KEY = 'daily_quiz';
-
-const DEFAULT_THEME = {
-    gradient: "from-slate-500 to-slate-700",
-    bg: "bg-slate-50",
-    border: "border-slate-200",
-    iconBg: "bg-slate-600",
-    iconText: "text-white",
-    button: "from-slate-600 to-slate-700"
-};
-
-const CONTEST_UI_CONFIG = {
-    sign_up: {
-        title: "Sign Up Bonus",
-        description: "One-time signup reward from rewards configuration",
-        icon: "UserPlus",
-        buttonText: "Claim Bonus",
-        rules: ["Configured from backend reward rules", "One-time task"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-violet-500 to-purple-600",
-            bg: "bg-violet-50",
-            border: "border-violet-200",
-            iconBg: "bg-violet-600",
-            iconText: "text-white",
-            button: "from-violet-500 to-purple-600"
-        }
-    },
-    complete_profile: {
-        title: "Complete Profile",
-        description: "Finish your profile to unlock bonus points",
-        icon: "UserPlus",
-        buttonText: "Mark Complete",
-        rules: ["Configured from backend reward rules", "One-time task"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-indigo-500 to-violet-600",
-            bg: "bg-indigo-50",
-            border: "border-indigo-200",
-            iconBg: "bg-indigo-600",
-            iconText: "text-white",
-            button: "from-indigo-500 to-violet-600"
-        }
-    },
-    take_survey: {
-        title: "Take a Survey",
-        description: "Share your feedback and claim points",
-        icon: "ClipboardList",
-        buttonText: "Start Survey",
-        rules: ["Configured from backend reward rules", "One-time task"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-emerald-500 to-teal-600",
-            bg: "bg-emerald-50",
-            border: "border-emerald-200",
-            iconBg: "bg-emerald-600",
-            iconText: "text-white",
-            button: "from-emerald-500 to-teal-600"
-        }
-    },
-    connect_linkedin: {
-        title: "Connect on LinkedIn",
-        description: "Follow us on LinkedIn",
-        icon: "Linkedin",
-        buttonText: "Connect Now",
-        rules: ["Configured from backend reward rules", "One-time task"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-blue-500 to-indigo-600",
-            bg: "bg-blue-50",
-            border: "border-blue-200",
-            iconBg: "bg-blue-600",
-            iconText: "text-white",
-            button: "from-blue-500 to-indigo-600"
-        }
-    },
-    connect_instagram: {
-        title: "Follow on Instagram",
-        description: "Join our Instagram community",
-        icon: "Instagram",
-        buttonText: "Follow Us",
-        rules: ["Configured from backend reward rules", "One-time task"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-pink-500 to-rose-600",
-            bg: "bg-pink-50",
-            border: "border-pink-200",
-            iconBg: "bg-pink-600",
-            iconText: "text-white",
-            button: "from-pink-500 to-rose-600"
-        }
-    },
-    join_community: {
-        title: "Join Community",
-        description: "Be part of our community",
-        icon: "Users",
-        buttonText: "Join Community",
-        rules: ["Configured from backend reward rules", "One-time task"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-cyan-500 to-blue-600",
-            bg: "bg-cyan-50",
-            border: "border-cyan-200",
-            iconBg: "bg-cyan-600",
-            iconText: "text-white",
-            button: "from-cyan-500 to-blue-600"
-        }
-    },
-    daily_checkin: {
-        title: "Daily Check-in",
-        description: "Claim your daily check-in points",
-        icon: "CalendarCheck",
-        buttonText: "Check In",
-        rules: ["Available once every 24 hours", "Cooldown controlled by backend"],
-        rewards: ["Daily points + streak progression"],
-        theme: {
-            gradient: "from-sky-600 to-indigo-600",
-            bg: "bg-sky-50",
-            border: "border-sky-200",
-            iconBg: "bg-sky-600",
-            iconText: "text-white",
-            button: "from-sky-600 to-indigo-600"
-        }
-    },
-    daily_quiz: {
-        title: "Daily Quiz",
-        description: "Submit your correct answers to earn points",
-        icon: "Brain",
-        buttonText: "Submit Score",
-        rules: ["Enter number of correct answers", "Daily cap is from backend"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-fuchsia-500 to-pink-600",
-            bg: "bg-fuchsia-50",
-            border: "border-fuchsia-200",
-            iconBg: "bg-fuchsia-600",
-            iconText: "text-white",
-            button: "from-fuchsia-500 to-pink-600"
-        }
-    }
-};
-
-const humanizeTaskType = (taskType) => taskType
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+const SCORE_TASK_TYPES = new Set(['play_games', 'quiz']);
 
 const getStoredUserId = () => {
     try {
@@ -303,15 +159,6 @@ const rankEmoji = (rank) => {
     if (rank === 3) return '⚡';
     if (rank <= 10) return '🌟';
     return '✨';
-};
-
-const isScoreTask = (contest) => {
-    if (!contest) return false;
-    if (contest.taskType === 'daily_checkin') return false;
-    if (contest.taskType === QUIZ_TASK_KEY) return true;
-
-    const requiredScore = Number(contest.requiredScore ?? contest?.backend?.required_score);
-    return Number.isFinite(requiredScore) && requiredScore > 0;
 };
 
 // HeroSlider Component
@@ -774,23 +621,23 @@ const ContestModal = ({
     const rewardIconColor = contest.theme.iconBg.startsWith('bg-')
         ? contest.theme.iconBg.replace(/^bg-/, 'text-')
         : 'text-violet-500';
-    const contestUsesScoreInput = isScoreTask(contest);
+    const isScoreTask = SCORE_TASK_TYPES.has(contest.taskType);
     const effectiveState = state === 'COOLDOWN' && isExpired ? 'AVAILABLE' : state;
     const hasValidScore = scoreInput.trim() !== '' && Number.isFinite(Number(scoreInput));
 
     const canComplete = () => {
         if (isSubmitting) return false;
         if (effectiveState === 'COMPLETED' || effectiveState === 'COOLDOWN') return false;
-        if (contestUsesScoreInput) return hasValidScore;
+        if (isScoreTask) return hasValidScore;
         return true;
     };
 
     const handleAction = () => {
-        if (contestUsesScoreInput && !hasValidScore) {
+        if (isScoreTask && !hasValidScore) {
             toast.error('Enter a valid score.');
             return;
         }
-        const payload = contestUsesScoreInput ? { score: Number(scoreInput) } : {};
+        const payload = isScoreTask ? { score: Number(scoreInput) } : {};
         onComplete(contest, payload);
     };
 
@@ -895,7 +742,7 @@ const ContestModal = ({
                                         ))}
                                     </div>
                                 </div>
-                                {contestUsesScoreInput && (
+                                {isScoreTask && (
                                     <div className="rounded-xl border border-slate-200 p-4 bg-slate-50">
                                         <div className="mb-3">
                                             <h4 className="text-sm font-semibold text-slate-800">Score Submission</h4>
@@ -924,7 +771,7 @@ const ContestModal = ({
                                         ? 'Completed'
                                         : effectiveState === 'COOLDOWN'
                                             ? `Available in ${cooldownText}`
-                                            : contestUsesScoreInput
+                                            : isScoreTask
                                                 ? 'Complete & Claim Points'
                                                 : contest.buttonText}
                                 </button>
@@ -1111,8 +958,7 @@ export default function ArenaStandalone() {
     const completeTaskMutation = useMutation({
         mutationFn: async ({ contest, score }) => {
             if (contest.taskType === 'daily_checkin') return arenaApi.completeDailyCheckin();
-            if (contest.taskType === QUIZ_TASK_KEY) return arenaApi.completeDailyQuiz(score);
-            if (isScoreTask(contest)) return arenaApi.completeScoreTask(contest.taskType, score);
+            if (SCORE_TASK_TYPES.has(contest.taskType)) return arenaApi.completeScoreTask(contest.taskType, score);
             return arenaApi.completeOneTimeTask(contest.taskType);
         },
         onSuccess: (result) => {
@@ -1131,6 +977,170 @@ export default function ArenaStandalone() {
         }
     });
 
+    const contests = useMemo(() => ([
+        {
+            id: 1,
+            title: "Sign Up Bonus",
+            description: "Complete your profile setup",
+            points: 0,
+            icon: "UserPlus",
+            theme: {
+                gradient: "from-violet-500 to-purple-600",
+                bg: "bg-violet-50",
+                border: "border-violet-200",
+                iconBg: "bg-violet-600",
+                iconText: "text-white",
+                button: "from-violet-500 to-purple-600"
+            },
+            buttonText: "Sign Up Now",
+            taskType: "signup_bonus",
+            rules: ["Sign up for an account", "Verify your email address", "Complete your profile information", "One-time task, cannot be repeated"],
+            rewards: ["Arena points for account completion"]
+
+        },
+        {
+            id: 2,
+            title: "Take a Survey",
+            description: "Share your valuable feedback",
+            points: 0,
+            icon: "ClipboardList",
+            theme: {
+                gradient: "from-emerald-500 to-teal-600",
+                bg: "bg-emerald-50",
+                border: "border-emerald-200",
+                iconBg: "bg-emerald-600",
+                iconText: "text-white",
+                button: "from-emerald-500 to-teal-600"
+            },
+            buttonText: "Start Survey",
+            taskType: "survey",
+            rules: ["Answer all questions honestly", "Complete survey flow", "One-time task", "Complete all required questions"],
+            rewards: ["Arena points for survey completion"]
+        },
+        {
+            id: 3,
+            title: "Connect on LinkedIn",
+            description: "Follow us on LinkedIn",
+            points: 0,
+            icon: "Linkedin",
+            theme: {
+                gradient: "from-blue-500 to-indigo-600",
+                bg: "bg-blue-50",
+                border: "border-blue-200",
+                iconBg: "bg-blue-600",
+                iconText: "text-white",
+                button: "from-blue-500 to-indigo-600"
+            },
+            buttonText: "Connect Now",
+            taskType: "linkedin_follow",
+            rules: ["Follow our official LinkedIn page", "Verify follow action once", "One-time task"],
+            rewards: ["Arena points for social completion"]
+        },
+        {
+            id: 4,
+            title: "Follow on Instagram",
+            description: "Join our Instagram community",
+            points: 0,
+            icon: "Instagram",
+            theme: {
+                gradient: "from-pink-500 to-rose-600",
+                bg: "bg-pink-50",
+                border: "border-pink-200",
+                iconBg: "bg-pink-600",
+                iconText: "text-white",
+                button: "from-pink-500 to-rose-600"
+            },
+            buttonText: "Follow Us",
+            taskType: "instagram_follow",
+            rules: ["Follow our Instagram account", "Verify follow action once", "One-time task"],
+            rewards: ["Arena points for social completion"]
+        },
+        {
+            id: 5,
+            title: "Join Community",
+            description: "Be part of our community",
+            points: 0,
+            icon: "Users",
+            theme: {
+                gradient: "from-indigo-500 to-violet-600",
+                bg: "bg-indigo-50",
+                border: "border-indigo-200",
+                iconBg: "bg-indigo-600",
+                iconText: "text-white",
+                button: "from-indigo-500 to-violet-600"
+            },
+            buttonText: "Join Community",
+            taskType: "community_join",
+            rules: ["Join our official community channel", "Complete introduction step", "One-time task"],
+            rewards: ["Arena points for community participation"]
+        },
+        {
+            id: 6,
+            title: "Daily Check-in",
+            description: "Claim your daily reward",
+            points: 0,
+            icon: "CalendarCheck",
+            theme: {
+                gradient: "from-sky-600 to-indigo-600",
+                bg: "bg-sky-50",
+                border: "border-sky-200",
+                iconBg: "bg-sky-600",
+                iconText: "text-white",
+                button: "from-sky-600 to-indigo-600"
+            },
+            buttonText: "Check In",
+            taskType: "daily_checkin",
+            rules: ["Available once every 24 hours", "Use backend-provided availability window", "Streak grows with consecutive check-ins"],
+            rewards: ["Daily Arena points + streak progression"]
+        },
+        {
+            id: 7,
+            title: "Play Games",
+            description: "Win points through mini-games",
+            points: 0,
+            icon: "Gamepad2",
+            theme: {
+                gradient: "from-cyan-500 to-blue-600",
+                bg: "bg-cyan-50",
+                border: "border-cyan-200",
+                iconBg: "bg-cyan-600",
+                iconText: "text-white",
+                button: "from-cyan-500 to-blue-600"
+            },
+            buttonText: "Submit Score",
+            taskType: "play_games",
+            rules: ["Enter your latest game score", "Available anytime", "Repeatable task"],
+            rewards: ["Arena points for valid score submissions"]
+        },
+        {
+            id: 8,
+            title: "Quiz Challenge",
+            description: "Test your knowledge",
+            points: 0,
+            icon: "Brain",
+            theme: {
+                gradient: "from-fuchsia-500 to-pink-600",
+                bg: "bg-fuchsia-50",
+                border: "border-fuchsia-200",
+                iconBg: "bg-fuchsia-600",
+                iconText: "text-white",
+                button: "from-fuchsia-500 to-pink-600"
+            },
+            buttonText: "Submit Score",
+            taskType: "quiz",
+            rules: ["Enter your latest quiz score", "Available anytime", "Repeatable task"],
+            rewards: ["Arena points for valid score submissions"]
+        }
+    ]), []);
+
+    const metadataByTask = useMemo(() => {
+        const list = contestMetadataQuery.data || [];
+        return list.reduce((acc, item) => {
+            acc[item.task_type] = item;
+            return acc;
+        }, {});
+    }, [contestMetadataQuery.data]);
+
     const statusByTask = useMemo(() => {
         const statusList = contestStatusQuery.data || [];
         return statusList.reduce((acc, item) => {
@@ -1139,36 +1149,20 @@ export default function ArenaStandalone() {
         }, {});
     }, [contestStatusQuery.data]);
 
-    const mergedContests = useMemo(() => {
-        const metadataList = contestMetadataQuery.data || [];
-
-        return metadataList.map((metadata, index) => {
-            const backend = statusByTask[metadata.task_type] || {};
-            const configuredActionType = metadata.action_type || backend.action_type || (metadata.repeatable ? 'daily' : 'one_time');
-            const configuredUi = CONTEST_UI_CONFIG[metadata.task_type] || {};
-
+    const mergedContests = useMemo(() => (
+        contests.map((contest) => {
+            const metadata = metadataByTask[contest.taskType] || {};
+            const backend = statusByTask[contest.taskType] || {};
             return {
-                id: index + 1,
-                taskType: metadata.task_type,
-                title: configuredUi.title || humanizeTaskType(metadata.task_type),
-                description: configuredUi.description || 'Task configured from backend reward rules',
-                icon: configuredUi.icon || (configuredActionType === 'daily' ? 'CalendarCheck' : 'Zap'),
-                theme: configuredUi.theme || DEFAULT_THEME,
-                buttonText: configuredUi.buttonText || (configuredActionType === 'daily' ? 'Claim Points' : 'Complete Task'),
-                rules: configuredUi.rules || ['Configured from backend reward rules'],
-                rewards: configuredUi.rewards || ['Points from reward_rules table'],
-                requiredScore: metadata.required_score ?? null,
-                points: Number(metadata.points ?? backend.points ?? 0),
+                ...contest,
+                points: Number(metadata.points ?? backend.points ?? contest.points ?? 0),
                 backend: {
                     ...backend,
-                    action_type: backend.action_type || configuredActionType,
-                    repeatable: backend.repeatable ?? metadata.repeatable ?? (configuredActionType === 'daily'),
-                    required_score: backend.required_score ?? metadata.required_score ?? null,
-                    points: Number(backend.points ?? metadata.points ?? 0)
+                    points: Number(backend.points ?? metadata.points ?? contest.points ?? 0)
                 }
             };
-        });
-    }, [contestMetadataQuery.data, statusByTask]);
+        })
+    ), [contests, metadataByTask, statusByTask]);
 
     const getContestState = useCallback((contest) => {
         const backend = contest?.backend || {};
