@@ -21,6 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.13.2",
+    "backend": "file:..",
     "cloudinary": "^2.8.0",
     "co2-plus": "file:../..",
     "compression": "^1.7.4",
@@ -46,7 +47,14 @@
   },
   "nodemonConfig": {
     "quiet": true,
-    "ignore": ["node_modules"],
-    "watch": ["server.js", "src", "routes", "controllers"]
+    "ignore": [
+      "node_modules"
+    ],
+    "watch": [
+      "server.js",
+      "src",
+      "routes",
+      "controllers"
+    ]
   }
 }

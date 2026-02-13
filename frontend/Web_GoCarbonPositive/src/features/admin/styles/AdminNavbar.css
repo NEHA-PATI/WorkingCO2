@@ -1,0 +1,119 @@
+.admin-navbar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+  background: #ffffff;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  margin: 0;
+  padding: 0.9rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Nav Items */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  color: #0f172a;
+  user-select: none;
+  caret-color: transparent;
+}
+
+.nav-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-item:hover {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+
+/* Active State */
+.nav-item.active {
+  background-color: #ecfdf5;
+  border: 2px solid #16a34a;
+}
+
+/* ICON BASE STYLE */
+.icon {
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+/* DISTINCT ICON COLORS */
+.overview-icon {
+  color: #3b82f6;
+}
+.users-icon {
+  color: #10b981;
+}
+.asset-icon {
+  color: #0ea5e9;
+}
+.support-icon {
+  color: #f59e0b;
+}
+.config-icon {
+  color: #8b5cf6;
+}
+.security-icon {
+  color: #ef4444;
+}
+
+/* HOVER EFFECTS */
+.nav-item:hover .overview-icon {
+  color: #2563eb;
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.5));
+}
+.nav-item:hover .users-icon {
+  color: #059669;
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.5));
+}
+.nav-item:hover .asset-icon {
+  color: #0284c7;
+  filter: drop-shadow(0 0 6px rgba(14, 165, 233, 0.45));
+}
+.nav-item:hover .support-icon {
+  color: #d97706;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5));
+}
+.nav-item:hover .config-icon {
+  color: #7c3aed;
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.5));
+}
+.nav-item:hover .security-icon {
+  color: #dc2626;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.5));
+}
+
+/* ACTIVE STATE ICON EFFECT */
+.nav-item.active .icon {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .admin-navbar {
+    height: auto;
+    padding: 0.75rem;
+  }
+
+  .nav-item {
+    width: 100%;
+  }
+}

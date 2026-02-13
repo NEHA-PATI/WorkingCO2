@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@features/*": [
+        "src/features/*"
+      ],
+      "@shared/*": [
+        "src/shared/*"
+      ],
+      "@layouts/*": [
+        "src/layouts/*"
+      ],
+      "@config/*": [
+        "src/config/*"
+      ],
+      "@routes/*": [
+        "src/routes/*"
+      ],
+      "@contexts/*": [
+        "src/contexts/*"
+      ]
+    }
+  }
+}
