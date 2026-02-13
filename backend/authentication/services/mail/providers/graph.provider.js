@@ -1,4 +1,3 @@
-
 require("dotenv").config();
 const axios = require("axios");
 const qs = require("qs");
@@ -6,9 +5,7 @@ const qs = require("qs");
 let cachedToken = null;
 let tokenExpiry = null;
 
-// 🔹 Get Access Token (with caching)
 const getAccessToken = async () => {
-  // If token exists and not expired, reuse it
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
     return cachedToken;
   }
@@ -29,46 +26,33 @@ const getAccessToken = async () => {
   );
 
   cachedToken = response.data.access_token;
-
-  // Token expires in seconds → convert to ms and subtract 1 min buffer
   tokenExpiry = Date.now() + (response.data.expires_in - 60) * 1000;
 
   return cachedToken;
 };
 
-const sendOTP = async (email, otp) => {
+const sendViaGraph = async ({ to, subject, html }) => {
   try {
     const token = await getAccessToken();
-
-    const htmlContent = `
-      <div style="font-family:Arial, sans-serif; padding:20px;">
-        <h2>Your OTP Code</h2>
-        <p>Hello 👋,</p>
-        <p>Your One-Time Password (OTP) is:</p>
-        <h3 style="color:#2b6cb0;">${otp}</h3>
-        <p>This code will expire in 10 minutes.</p>
-        <br/>
-        <p>— The Team</p>
-      </div>
-    `;
 
     await axios.post(
       `https://graph.microsoft.com/v1.0/users/${process.env.MAILBOX}/sendMail`,
       {
         message: {
-          subject: "Your OTP Code",
+          subject,
           body: {
             contentType: "HTML",
-            content: htmlContent,
+            content: html,
           },
           toRecipients: [
             {
               emailAddress: {
-                address: email,
+                address: to,
               },
             },
           ],
         },
+        saveToSentItems: true, // ✅ add this
       },
       {
         headers: {
@@ -79,10 +63,9 @@ const sendOTP = async (email, otp) => {
     );
 
     return { success: true };
-
   } catch (error) {
     console.error(
-      "Microsoft Graph OTP Error:",
+      "Microsoft Graph mail error:",
       error.response?.data || error.message
     );
 
@@ -93,4 +76,4 @@ const sendOTP = async (email, otp) => {
   }
 };
 
-module.exports = sendOTP;
+module.exports = sendViaGraph;
