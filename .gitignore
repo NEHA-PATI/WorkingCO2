@@ -9,6 +9,16 @@ frontend/**/build/
 frontend/**/.env
 frontend/**/.env.local
 frontend/**/.env.production
+frontend/**/.md
+frontend/**/.docx
+frontend/**/.puml
+frontend/Web_GoCarbonPositive/docs/
+frontend/Web_GoCarbonPositive/flow diagram/
+frontend/Web_GoCarbonPositive/Frontend_Architecture_Report_GoCarbonPositive.docx
+frontend/Web_GoCarbonPositive/Frontend_Architecture_Report_GoCarbonPositive.md
+frontend/Web_GoCarbonPositive/~$ontend_Architecture_Report_GoCarbonPositive.docx
+node_modules/pandoc/
+
 
 
 # =========================
@@ -27,6 +37,12 @@ backend/**/.env.production
 photos/
 !photos/.gitkeep
 
+frontend/**/.md
+frontend/**/.docx
+frontend/**/.puml
+
+
+
 # =========================
 # LOGS
 # =========================
@@ -41,6 +57,20 @@ yarn-error.log*
 .idea/
 .DS_Store
 Thumbs.db
+<<<<<<< HEAD
 
 backup.sql
 *.sql
+=======
+# Root level node modules (you have a root folder too)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Vite cache
+frontend/**/.vite/
+frontend/**/.cache/
+
+# Sanity / PortableText temp
+**/.sanity/
+>>>>>>> 91003e7bc6042acc8c14b1ed8e453e09d3a15626
