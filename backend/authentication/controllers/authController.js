@@ -188,13 +188,25 @@ exports.register = async (req, res) => {
 
   try {
     if (!validateUsername(username)) {
-      return res.status(400).json({ message: "Invalid username" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid username",
+        data: null,
+      });
     }
     if (!validateEmail(email)) {
-      return res.status(400).json({ message: "Invalid email" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email",
+        data: null,
+      });
     }
     if (!validatePassword(password)) {
-      return res.status(400).json({ message: "Weak password" });
+      return res.status(400).json({
+        success: false,
+        message: "Weak password",
+        data: null,
+      });
     }
 
     // Check already exists
@@ -203,7 +215,11 @@ exports.register = async (req, res) => {
       [email.toLowerCase()]
     );
     if (exists.rows.length > 0) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({
+        success: false,
+        message: "User already exists",
+        data: null,
+      });
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
@@ -225,12 +241,17 @@ exports.register = async (req, res) => {
     await sendOTP(email, otp);
 
     return res.status(200).json({
+      success: true,
       message: "OTP sent to your email",
-      tempToken, // 🔥 frontend must keep this
+      data: { tempToken }, // 🔥 frontend must keep this
     });
   } catch (err) {
     console.error("Register Error:", err);
-    res.status(500).json({ message: "Registration failed" });
+    res.status(500).json({
+      success: false,
+      message: "Registration failed",
+      data: null,
+    });
   }
 };
 
@@ -241,18 +262,30 @@ exports.verifyOTP = async (req, res) => {
 
   try {
     if (!otp || !tempToken) {
-      return res.status(400).json({ message: "OTP and token required" });
+      return res.status(400).json({
+        success: false,
+        message: "OTP and token required",
+        data: null,
+      });
     }
 
     let payload;
     try {
       payload = jwt.verify(tempToken, process.env.JWT_OTP_SECRET);
     } catch {
-      return res.status(400).json({ message: "OTP expired. Please register again." });
+      return res.status(400).json({
+        success: false,
+        message: "OTP expired. Please register again.",
+        data: null,
+      });
     }
 
     if (payload.otp !== otp) {
-      return res.status(400).json({ message: "Invalid OTP" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+        data: null,
+      });
     }
 
     // 🔥 FIRST TIME DB INSERT
@@ -274,18 +307,25 @@ exports.verifyOTP = async (req, res) => {
     await pool.query("UPDATE users SET u_id=$1 WHERE id=$2", [u_id, userId]);
 
     return res.status(201).json({
+      success: true,
       message: "Email verified successfully. Account created.",
-      user: {
-        id: userId,
-        u_id,
-        email: payload.email,
-        verified: true,
-        status: "pending",
+      data: {
+        user: {
+          id: userId,
+          u_id,
+          email: payload.email,
+          verified: true,
+          status: "pending",
+        },
       },
     });
   } catch (err) {
     console.error("verifyOTP Error:", err);
-    res.status(500).json({ message: "OTP verification failed" });
+    res.status(500).json({
+      success: false,
+      message: "OTP verification failed",
+      data: null,
+    });
   }
 };
 
@@ -297,11 +337,19 @@ exports.login = async (req, res) => {
   try {
     // Validation
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+        data: null,
+      });
     }
 
     if (!validateEmail(email)) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email or password",
+        data: null,
+      });
     }
 
     // Fetch user with role
@@ -314,7 +362,11 @@ exports.login = async (req, res) => {
     );
 
     if (userRes.rows.length === 0) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email or password",
+        data: null,
+      });
     }
 
     const user = userRes.rows[0];
@@ -322,34 +374,43 @@ exports.login = async (req, res) => {
     // Check if account is locked
     if (user.lock_until && new Date(user.lock_until) > new Date()) {
       return res.status(429).json({
+        success: false,
         message: "Account locked due to multiple failed attempts. Try again later.",
+        data: null,
       });
     }
 
     // Check if email is verified
     if (!user.verified) {
-      return res.status(400).json({ message: "Please verify your email first." });
+      return res.status(400).json({
+        success: false,
+        message: "Please verify your email first.",
+        data: null,
+      });
     }
 
     // ✅ ONLY BLOCK REJECTED, SUSPENDED, AND INACTIVE USERS (ALLOW PENDING)
     if (user.status === 'rejected') {
       return res.status(403).json({
+        success: false,
         message: "Your account has been rejected. Please contact support for more information.",
-        status: 'rejected'
+        data: { status: 'rejected' }
       });
     }
 
     if (user.status === 'suspended') {
       return res.status(403).json({
+        success: false,
         message: "Your account has been suspended. Please contact support.",
-        status: 'suspended'
+        data: { status: 'suspended' }
       });
     }
 
     if (user.status === 'inactive') {
       return res.status(403).json({
+        success: false,
         message: "Your account is inactive. Please contact support to reactivate.",
-        status: 'inactive'
+        data: { status: 'inactive' }
       });
     }
 
@@ -403,7 +464,11 @@ exports.login = async (req, res) => {
         }
       }
       
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email or password",
+        data: null,
+      });
     }
 
     // Reset attempts on successful login
@@ -462,13 +527,17 @@ exports.login = async (req, res) => {
     }
 
     res.status(200).json({
+      success: true,
       message,
-      token,
-      user: safeUser,
+      data: { token, user: safeUser },
     });
   } catch (err) {
     console.error("Login Error:", err);
-    res.status(500).json({ message: "Login failed" });
+    res.status(500).json({
+      success: false,
+      message: "Login failed",
+      data: null,
+    });
   }
 };
 
@@ -482,7 +551,9 @@ exports.resendOTP = async (req, res) => {
       payload = jwt.verify(tempToken, process.env.JWT_OTP_SECRET);
     } catch {
       return res.status(400).json({
+        success: false,
         message: "Session expired. Please register again.",
+        data: null,
       });
     }
 
@@ -503,12 +574,22 @@ exports.resendOTP = async (req, res) => {
     await sendOTP(payload.email, newOtp);
 
     return res.status(200).json({
+      success: true,
       message: "OTP resent successfully",
-      tempToken: newTempToken, // 🔥 MUST replace old one on frontend
+      data: { tempToken: newTempToken },
     });
   } catch (err) {
     console.error("Resend OTP Error:", err);
-    res.status(500).json({ message: "Failed to resend OTP" });
+    res.status(500).json({
+      success: false,
+      message: "Failed to resend OTP",
+      data: null,
+    });
   }
 };
+
+
+
+
+
 

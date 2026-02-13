@@ -16,10 +16,13 @@ import Configuration from "./pages/Configuration";
 import Analytics from "./pages/Analytics";
 import CareerManagement from "./pages/CareerManagement";
 import CaseStudyManagement from "./pages/CaseStudyManagement";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   return (
     <Router>
+      <ToastContainer />
       <Routes>
         {/* Redirect /login to home page since admin logs in from there */}
         <Route path="/login" element={<Navigate to="/" replace />} />

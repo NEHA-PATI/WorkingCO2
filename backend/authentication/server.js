@@ -82,11 +82,18 @@ const oauthRoutes = require("./routes/oauthRoutes");
 
 app.use("/api/v1/auth", authLimiter, authRoutes);
 app.use("/api/v1/users", userRoutes);
+// // 🆕 Forgot password module
+// app.use("/api/auth/password", authLimiter, passwordRoutes);
+// ❌ OLD (problematic)
+// app.use("/api/auth/password", authLimiter, passwordRoutes);
+
+// ✅ NEW (WORKING)
 app.use("/api/v1/auth/password", passwordRoutes);
+
+// 🆕 OAuth module (Google now, DigiLocker later)
 app.use("/api/v1/auth/oauth", oauthRoutes);
 
-
-// ==================== HEALTH CHECK ====================
+// Health check
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "success",

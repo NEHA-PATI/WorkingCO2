@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Share2, Twitter, Linkedin, Facebook, Link as LinkIcon
 import { PortableText } from "@portabletext/react";
 import "../styles/user/blog-detail.css";
 import blogService from "../services/blog/blogService.js";
+import { fireToast } from "../services/user/toastService.js";
 
 const CATEGORY_COLORS = {
   INSIGHTS: "#9b59b6",
@@ -90,7 +91,7 @@ export default function BlogDetailPage() {
 
     if (platform === "copy") {
       navigator.clipboard.writeText(url);
-      alert("Link copied to clipboard!");
+      fireToast("SHARE.COPIED", "success");
     } else {
       window.open(shareUrls[platform], "_blank");
     }

@@ -8,7 +8,7 @@ import { MdElectricCar } from "react-icons/md";
 
 import PopupForms from "../components/user/popupform";
 import axios from "axios";
-
+import assetApiClient from "../services/apiClient";
 const Upload = () => {
   const [activeEVPopup, setActiveEVPopup] = useState(false);
   const [activeTreePopup, setActiveTreePopup] = useState(false);
@@ -24,11 +24,10 @@ const Upload = () => {
   // };
   const handleSaveEV = async (formData) => {
     try {
-      const res = await axios.post(
-        "https://add-asset-service.onrender.com/api/evmasterdata",
-        formData
-      );
-
+       const res = await assetApiClient.post(
+      "/evmasterdata",
+      formData
+    );
       // eslint-disable-next-line no-undef
       setEvList((prev) => [...prev, res.data.data]);
       setEvCount(res.data.evCount);

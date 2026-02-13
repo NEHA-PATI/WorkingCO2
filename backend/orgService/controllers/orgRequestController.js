@@ -59,7 +59,9 @@ exports.createOrgRequest = async (req, res) => {
 
         if (missing.length > 0) {
             return res.status(400).json({
-                message: `Missing required fields: ${missing.join(", ")}`
+                success: false,
+                message: `Missing required fields: ${missing.join(", ")}`,
+                data: null
             });
         }
 
@@ -95,13 +97,18 @@ exports.createOrgRequest = async (req, res) => {
         console.log("ORG REQUEST INSERTED:", org_request_id);
 
         res.status(201).json({
+            success: true,
             message: "Organization request submitted successfully",
-            org_request_id
+            data: { org_request_id }
         });
 
     } catch (error) {
         console.error("CREATE ORG REQUEST ERROR:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            data: null
+        });
     }
 };
 
@@ -114,10 +121,18 @@ exports.getAllOrgRequests = async (req, res) => {
         const result = await pool.query(
             `SELECT * FROM org_requests ORDER BY created_at DESC`
         );
-        res.json(result.rows);
+        res.json({
+            success: true,
+            message: "Organization requests fetched successfully",
+            data: result.rows
+        });
     } catch (error) {
         console.error("GET ALL REQUESTS ERROR:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            data: null
+        });
     }
 };
 
@@ -135,14 +150,26 @@ exports.getOrgRequestById = async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ message: "Request not found" });
+            return res.status(404).json({
+                success: false,
+                message: "Request not found",
+                data: null
+            });
         }
 
-        res.json(result.rows[0]);
+        res.json({
+            success: true,
+            message: "Organization request fetched successfully",
+            data: result.rows[0]
+        });
 
     } catch (error) {
         console.error("GET REQUEST ERROR:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            data: null
+        });
     }
 };
 
@@ -151,15 +178,25 @@ exports.getOrgRequestById = async (req, res) => {
  * PUT /api/org-requests/:id/approve
  */
 exports.approveOrgRequest = async (req, res) => {
-    const client = await pool.connect();
+    const { id } = req.params; // org_request_id
+    const { password } = req.body;
 
+    if (!password) {
+        return res.status(400).json({
+            message: "Password is required to approve organization"
+        });
+    }
+
+    let client;
     try {
         const { id } = req.params; // org_request_id
         const { password } = req.body;
 
         if (!password) {
             return res.status(400).json({
-                message: "Password is required to approve organization"
+                success: false,
+                message: "Password is required to approve organization",
+                data: null
             });
         }
 
@@ -176,13 +213,19 @@ exports.approveOrgRequest = async (req, res) => {
 
         if (request.rows.length === 0) {
             await client.query("ROLLBACK");
-            return res.status(404).json({ message: "Request not found" });
+            return res.status(404).json({
+                success: false,
+                message: "Request not found",
+                data: null
+            });
         }
 
         if (request.rows[0].request_status !== "pending") {
             await client.query("ROLLBACK");
             return res.status(400).json({
-                message: "Request already processed"
+                success: false,
+                message: "Request already processed",
+                data: null
             });
         }
 
@@ -219,16 +262,25 @@ exports.approveOrgRequest = async (req, res) => {
         await client.query("COMMIT");
 
         res.json({
+            success: true,
             message: "Organization approved and created successfully",
-            org_id
+            data: { org_id }
         });
 
     } catch (error) {
-        await client.query("ROLLBACK");
+        if (client) {
+            await client.query("ROLLBACK");
+        }
         console.error("APPROVE ORG ERROR:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            data: null
+        });
     } finally {
-        client.release();
+        if (client) {
+            client.release();
+        }
     }
 };
 
@@ -250,15 +302,25 @@ exports.rejectOrgRequest = async (req, res) => {
 
         if (result.rowCount === 0) {
             return res.status(400).json({
-                message: "Request not found or already processed"
+                success: false,
+                message: "Request not found or already processed",
+                data: null
             });
         }
 
-        res.json({ message: "Organization request rejected" });
+        res.json({
+            success: true,
+            message: "Organization request rejected",
+            data: null
+        });
 
     } catch (error) {
         console.error("REJECT ORG ERROR:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            data: null
+        });
     }
 };
 
@@ -276,13 +338,25 @@ exports.deleteOrgRequest = async (req, res) => {
         );
 
         if (result.rowCount === 0) {
-            return res.status(404).json({ message: "Request not found" });
+            return res.status(404).json({
+                success: false,
+                message: "Request not found",
+                data: null
+            });
         }
 
-        res.json({ message: "Request deleted successfully" });
+        res.json({
+            success: true,
+            message: "Request deleted successfully",
+            data: null
+        });
 
     } catch (error) {
         console.error("DELETE REQUEST ERROR:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            data: null
+        });
     }
 };

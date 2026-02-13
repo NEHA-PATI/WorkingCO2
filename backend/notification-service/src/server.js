@@ -24,7 +24,7 @@ app.use(cors({
 }));
 
 // ==================== ROUTES ====================
-app.use('/api/notifications', notificationRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

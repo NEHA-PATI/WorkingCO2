@@ -27,8 +27,9 @@ class ImageController {
           body: req.body,
         });
         return res.status(400).json({
-          status: "error",
+          success: false,
           message: "No images provided. Please ensure files are sent with field name 'images'.",
+          data: null
         });
       }
 
@@ -43,8 +44,9 @@ class ImageController {
 
       if (validFiles.length === 0) {
         return res.status(400).json({
-          status: "error",
+          success: false,
           message: "No valid image files provided",
+          data: null
         });
       }
 
@@ -68,11 +70,13 @@ class ImageController {
       logger.info(`Uploaded ${imageUrls.length} images successfully`);
 
       res.status(200).json({
-        status: "success",
+        success: true,
         message: "Images uploaded successfully",
-        imageUrls: imageUrls,
-        images: imageData, // Include both URL and public_id for database storage
-        count: imageUrls.length,
+        data: {
+          imageUrls: imageUrls,
+          images: imageData, // Include both URL and public_id for database storage
+          count: imageUrls.length,
+        }
       });
     } catch (error) {
       logger.error("Error uploading images:", {
@@ -81,10 +85,12 @@ class ImageController {
         files: req.files?.map(f => ({ name: f.originalname, size: f.size })) || [],
       });
       res.status(500).json({
-        status: "error",
+        success: false,
         message: "Failed to upload images",
-        error: error.message,
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        data: {
+          error: error.message,
+          details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        }
       });
     }
   }

@@ -18,13 +18,21 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
   password: String(process.env.DB_PASSWORD),
+  ssl: process.env.DB_SSL === "true"
+    ? { rejectUnauthorized: false }
+    : false,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
 });
 
+
+pool.on('connect', () => {
+  console.log('✅ Database connected successfully');
+});
+
 pool.on('error', (err, client) => {
-  console.error('Unexpected error on idle client', err);
+  console.error('❌ Database pool error:', err.message);
 });
 
 const testConnection = async () => {

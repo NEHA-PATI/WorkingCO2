@@ -3,7 +3,11 @@ const Application = require("../models/Application");
 exports.getAllApplications = async (req, res, next) => {
   try {
     const apps = await Application.findAll();
-    res.json({ status: "success", count: apps.length, data: apps });
+    res.json({
+      success: true,
+      message: "Applications fetched successfully",
+      data: apps
+    });
   } catch (err) {
     next(err);
   }
@@ -12,7 +16,11 @@ exports.getAllApplications = async (req, res, next) => {
 exports.applyForJob = async (req, res, next) => {
   try {
     const newApp = await Application.create(req.body);
-    res.status(201).json({ status: "success", data: newApp });
+    res.status(201).json({
+      success: true,
+      message: "Application submitted successfully",
+      data: newApp
+    });
   } catch (err) {
     next(err);
   }
@@ -22,13 +30,25 @@ exports.updateApplicationStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
     if (!status) {
-      return res.status(400).json({ status: "fail", message: "Status is required" });
+      return res.status(400).json({
+        success: false,
+        message: "Status is required",
+        data: null
+      });
     }
     const updatedApp = await Application.updateStatus(req.params.id, status);
     if (!updatedApp) {
-      return res.status(404).json({ status: "fail", message: "Application not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Application not found",
+        data: null
+      });
     }
-    res.json({ status: "success", data: updatedApp });
+    res.json({
+      success: true,
+      message: "Application updated successfully",
+      data: updatedApp
+    });
   } catch (err) {
     next(err);
   }
