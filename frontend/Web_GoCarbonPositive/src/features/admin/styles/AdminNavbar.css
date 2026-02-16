@@ -2,17 +2,24 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.45rem;
+  gap: 0.2rem;
   background: #ffffff;
   width: 100%;
   height: 100%;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
   margin: 0;
-  padding: 0.9rem;
+  padding: 0.6rem;
   box-sizing: border-box;
   overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-navbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 /* Nav Items */
@@ -20,7 +27,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 0.9rem;
+  padding: 0.5rem 0.8rem;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;

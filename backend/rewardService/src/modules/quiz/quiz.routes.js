@@ -9,15 +9,22 @@ const upload = multer({ storage: multer.memoryStorage() });
    ADMIN QUIZ ROUTES
 ================================ */
 
-router.post('/api/v1/admin/quiz/upload-csv', auth, upload.single('file'), controller.uploadCsv);
-router.get('/api/v1/admin/quiz/status', auth, controller.getStatus);
-router.get('/api/v1/admin/quiz/preview', auth, controller.getPreview);
+/* ADMIN */
+router.post('/admin/upload-csv', auth, upload.single('file'), controller.uploadCsv);
+router.get('/admin/status', auth, controller.getStatus);
+router.get('/admin/preview', auth, controller.getPreview);
+
+
 
 /* ===============================
    USER QUIZ ROUTES
 ================================ */
 
-router.get('/api/v1/quiz/questions', controller.getQuestions);
-router.post('/api/v1/quiz/submit', controller.submitQuiz);
+// router.get('/api/v1/quiz/questions', controller.getQuestions);
+// router.post('/api/v1/quiz/submit', controller.submitQuiz);
+/* USER */
+router.get('/questions', auth, controller.getQuestions);
+router.post('/submit', auth, controller.submitQuiz);
+
 
 module.exports = router;

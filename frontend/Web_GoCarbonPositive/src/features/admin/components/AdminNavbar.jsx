@@ -141,14 +141,11 @@ const AdminNavbar = () => {
           <div
             className={`nav-item ${activeTab === item.id ? "active" : ""}`}
             onClick={() => {
-              setActiveTab(item.id);
               if (item.children) {
                 setIsOrgMenuOpen((prev) => !prev);
-                if (!location.pathname.includes("/admin/organization-management")) {
-                  navigate(item.path);
-                }
                 return;
               }
+              setActiveTab(item.id);
               navigate(item.path);
             }}
           >
