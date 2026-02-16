@@ -11,10 +11,7 @@ import { useModal } from "@contexts/ModalContext";
  * Pages where footer should NOT be shown
  * Add paths here as needed
  */
-const FOOTER_HIDDEN_PATHS = [
-  
-  "/settings",
-];
+const FOOTER_HIDDEN_PATHS = ["/settings"];
 
 const FOOTER_HIDDEN_PREFIXES = ["/admin"];
 
