@@ -30,10 +30,60 @@
   caret-color: transparent;
 }
 
+.nav-item-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
 .nav-item span {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.nav-chevron {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: #64748b;
+  transition: transform 0.2s ease;
+}
+
+.nav-chevron.open {
+  transform: rotate(180deg);
+}
+
+.nav-submenu {
+  margin: 0.35rem 0 0.45rem 2.25rem;
+  padding: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.nav-subitem {
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  transition: all 0.2s ease;
+}
+
+.nav-subitem:hover {
+  background: #eaf7ef;
+  color: #16a34a;
+}
+
+.nav-subitem.active {
+  background: #ecfdf5;
+  color: #15803d;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px #86efac;
 }
 
 .nav-item:hover {
@@ -73,6 +123,9 @@
 .security-icon {
   color: #ef4444;
 }
+.organization-icon {
+  color: #f97316;
+}
 
 /* HOVER EFFECTS */
 .nav-item:hover .overview-icon {
@@ -98,6 +151,10 @@
 .nav-item:hover .security-icon {
   color: #dc2626;
   filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.5));
+}
+.nav-item:hover .organization-icon {
+  color: #ea580c;
+  filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.5));
 }
 
 /* ACTIVE STATE ICON EFFECT */
