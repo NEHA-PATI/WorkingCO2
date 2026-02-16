@@ -1,6 +1,6 @@
-{
-  "api": {
-    "projectId": "wc1ubkix",
-    "dataset": "production"
-  }
+export default {
+  api: {
+    projectId: "wc1ubkix",
+    dataset: "production",
+  },
 }
