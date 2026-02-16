@@ -56,6 +56,7 @@ import AdminCareerManagement from "@features/admin/pages/CareerManagement";
 import AdminCaseStudyManagement from "@features/admin/pages/CaseStudyManagement";
 import AdminReports from "@features/admin/pages/Reports";
 import AdminAssetManagement from "@features/admin/pages/AssetManagement";
+import AdminContestManagement from "@features/admin/pages/ContestManagement";
 import AdminProfile from "@features/admin/components/AdminProfile";
 
 const RoleProfilePage = () => {
@@ -198,6 +199,7 @@ const AppRoutes = () => {
             path="case-study-management"
             element={<AdminCaseStudyManagement />}
           />
+          <Route path="contest" element={<AdminContestManagement />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="" element={<Navigate to="overview" replace />} />
