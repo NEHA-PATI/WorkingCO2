@@ -41,6 +41,7 @@ import ArenaStandalonePage from "@features/arena/pages/arenaStandalone";
 import ArenaRewardsPage from "@features/arena/pages/rewards";
 import ArenaHistoryPage from "@features/arena/pages/history";
 import ArenaLeaderboardPage from "@features/arena/pages/leaderboard";
+import ArenaQuizPage from "@features/arena/pages/quiz";
 
 
 import OrgDashboard, {
@@ -83,6 +84,7 @@ const AppRoutes = () => {
       <Route path="/arena/rewards" element={<ArenaRewardsPage />} />
       <Route path="/arena/history" element={<ArenaHistoryPage />} />
       <Route path="/arena/leaderboard" element={<ArenaLeaderboardPage />} />
+      <Route path="/arena/quiz" element={<ArenaQuizPage />} />
 
       <Route element={<BaseLayout />}>
         <Route path="/" element={<Home />} />
