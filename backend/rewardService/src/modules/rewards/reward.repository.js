@@ -108,11 +108,13 @@ const getDailyStreak = async (u_id) => {
 const getAllActiveRules = async () => {
   const { rows } = await pool.query(`
     SELECT 
+      rule_id,
       action_key,
       action_type,
       points,
       milestone_weeks,
-      max_points_per_day
+      max_points_per_day,
+      is_active
     FROM reward_rules
     WHERE is_active = TRUE
     ORDER BY action_key, action_type, milestone_weeks
@@ -217,6 +219,70 @@ const getUserRewardHistory = async (u_id, limit = 20, offset = 0) => {
   return rows;
 };
 
+const getContestStats = async () => {
+  const { rows } = await pool.query(`
+    SELECT action_key, COUNT(*) AS completions
+    FROM user_reward_events
+    GROUP BY action_key
+  `);
+
+  return rows;
+};
+
+/* ===============================
+   CREATE RULE
+================================ */
+const createRule = async ({
+  action_key,
+  action_type,
+  points,
+  milestone_weeks,
+  max_points_per_day
+}) => {
+
+  const { rows } = await pool.query(`
+    INSERT INTO reward_rules
+    (action_key, action_type, points, milestone_weeks, max_points_per_day, is_active)
+    VALUES ($1,$2,$3,$4,$5, TRUE)
+    RETURNING *
+  `, [
+    action_key,
+    action_type,
+    points,
+    milestone_weeks,
+    max_points_per_day
+  ]);
+
+  return rows[0];
+};
+
+
+/* ===============================
+   UPDATE RULE
+================================ */
+const updateRule = async (rule_id, {
+  points,
+  max_points_per_day,
+  is_active
+}) => {
+
+  const { rows } = await pool.query(`
+    UPDATE reward_rules
+    SET
+      points = COALESCE($1, points),
+      max_points_per_day = COALESCE($2, max_points_per_day),
+      is_active = COALESCE($3, is_active)
+    WHERE rule_id = $4
+    RETURNING *
+  `, [
+    points,
+    max_points_per_day,
+    is_active,
+    rule_id
+  ]);
+
+  return rows[0];
+};
 
 
 module.exports = {
@@ -231,5 +297,8 @@ module.exports = {
   getLifetimeLeaderboard,
   getUserMonthlyRank,
   getTodayStatus,
-  getUserRewardHistory
+  getUserRewardHistory,
+  getContestStats,
+createRule,
+  updateRule
 };

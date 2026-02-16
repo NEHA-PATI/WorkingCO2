@@ -69,7 +69,7 @@ export default function Navbar() {
     logout();
     fireToast("AUTH.LOGOUT_SUCCESS", "success");
     localStorage.removeItem("authUser");
-
+localStorage.removeItem("token");
     localStorage.removeItem("userId");
     navigate("/");
   };

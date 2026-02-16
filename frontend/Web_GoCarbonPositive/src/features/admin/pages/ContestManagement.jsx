@@ -10,6 +10,9 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { uploadQuizCSV ,getContestStats,createContest ,updateRule} from "../services/ContestApi";
+import { getContests } from "../services/ContestApi";
+import { useEffect } from "react";
 
 const seed = [
   {
@@ -93,9 +96,10 @@ const emptyContest = () => ({
 
 export default function ContestManagement() {
   const [activeTab, setActiveTab] = useState("all");
-  const [contests, setContests] = useState(seed);
+  const [contests, setContests] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
-  const [selectedContestId, setSelectedContestId] = useState(seed[0]?.id || null);
+  const [selectedContestId, setSelectedContestId] = useState(null);
+const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState(emptyContest());
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [quizFileName, setQuizFileName] = useState("");
@@ -105,6 +109,72 @@ export default function ContestManagement() {
     daily: "all",
     taskType: "all",
   });
+
+const loadContests = async () => {
+  try {
+    setLoading(true);
+
+    const res = await getContests();
+    const raw = res.data || {};
+
+    const statsRes = await getContestStats();
+    const statsArray = statsRes.data || [];
+
+    const statsMap = {};
+    statsArray.forEach(item => {
+      statsMap[item.action_key] = Number(item.completions);
+    });
+
+    const contestsArray = Object.entries(raw).map(([key, value], index) => {
+      let points = 0;
+      let isDailyTask = false;
+
+      if (value.one_time?.points) {
+        points = value.one_time.points;
+      }
+
+      if (value.daily?.points_per_action) {
+        points = value.daily.points_per_action;
+        isDailyTask = true;
+      }
+
+      return {
+  id: Number(value.rule_id), // ✅ FIX , // 🔥 IMPORTANT FIX
+        title: key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
+        description: "",
+        points,
+        taskType: key,
+        isDailyTask,
+        buttonText: "Start",
+        color: "from-slate-500 to-slate-700",
+        bgColor: "bg-slate-50",
+        borderColor: "border-slate-200",
+        rules: [],
+        rewards: [`${points} points`],
+        status: value.is_active ? "active" : "draft",
+        completions: statsMap[key] || 0,
+        lastUpdated: new Date().toISOString().slice(0, 10),
+      };
+    });
+
+    setContests(contestsArray);
+
+    if (contestsArray.length > 0) {
+      setSelectedContestId(contestsArray[0].id);
+    }
+
+  } catch (err) {
+    console.error("Failed to load contests:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+ useEffect(() => {
+  loadContests();
+}, []);
+
+
 
   const selectedContest = useMemo(
     () => contests.find((c) => c.id === selectedContestId) || null,
@@ -161,29 +231,44 @@ export default function ContestManagement() {
     setActiveTab("preview");
   };
 
-  const saveDraft = () => {
-    const today = new Date().toISOString().slice(0, 10);
-    const payload = {
-      ...draft,
-      title: draft.title.trim(),
-      taskType: draft.taskType.trim(),
-      rules: draft.rules.map((x) => x.trim()).filter(Boolean),
-      rewards: draft.rewards.map((x) => x.trim()).filter(Boolean),
-      lastUpdated: today,
-    };
-
-    if (!payload.id) {
-      const nextId = contests.length ? Math.max(...contests.map((c) => c.id)) + 1 : 1;
-      const created = { ...payload, id: nextId };
-      setContests([created, ...contests]);
-      setSelectedContestId(nextId);
-    } else {
-      setContests(contests.map((c) => (c.id === payload.id ? payload : c)));
-      setSelectedContestId(payload.id);
+  const saveDraft = async () => {
+  try {
+    if (!draft.taskType) {
+      alert("Task type required");
+      return;
     }
+
+    if (draft.id) {
+      // 🟡 UPDATE EXISTING RULE
+      await updateRule(draft.id, {
+        points: draft.points,
+        is_active: draft.status === "active"
+      });
+
+      alert("Contest updated successfully ✅");
+
+    } else {
+      // 🟢 CREATE NEW RULE
+      await createContest({
+        taskType: draft.taskType,
+        points: draft.points,
+        isDailyTask: draft.isDailyTask,
+      });
+
+      alert("Contest created successfully ✅");
+    }
+
     setIsFormOpen(false);
     setActiveTab("all");
-  };
+
+    // reload data
+    loadContests();
+
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
 
   const deleteContest = (id) => {
     setContests(contests.filter((c) => c.id !== id));
@@ -199,13 +284,23 @@ export default function ContestManagement() {
     if (selectedContestId && set.has(selectedContestId)) setSelectedContestId(null);
   };
 
-  const setStatus = (id, status) => {
-    setContests(
-      contests.map((c) =>
-        c.id === id ? { ...c, status, lastUpdated: new Date().toISOString().slice(0, 10) } : c
+  const setStatus = async (id, status) => {
+  try {
+    await updateRule(id, {
+      is_active: status === "active"
+    });
+
+    setContests(prev =>
+      prev.map(c =>
+        c.id === id ? { ...c, status } : c
       )
     );
-  };
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   const handleExportCsv = () => {
     const generatedAt = new Date();
@@ -857,11 +952,22 @@ function AnalyticsPanel({ contests, selected }) {
 }
 
 function QuizUploadPanel({ contest, fileName, onFileNameChange }) {
-  const enabled = contest?.taskType === "quiz";
-  const pickFile = (event) => {
-    const file = event.target.files?.[0];
-    onFileNameChange(file ? file.name : "");
-  };
+  const enabled = contest?.taskType === "daily_quiz";
+  const pickFile = async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  onFileNameChange(file.name);
+
+  try {
+    const res = await uploadQuizCSV(file);
+    alert("Quiz uploaded successfully!");
+    console.log(res);
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
   return (
     <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center">
       <p className="text-sm text-slate-600">
