@@ -393,3 +393,62 @@ exports.getRewardHistory = async (req, res, next) => {
     next(err);
   }
 };
+exports.getContestStats = async (req, res, next) => {
+  try {
+    const data = await service.getContestStats();
+
+
+    res.json({
+      success: true,
+      data
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+exports.createRule = async (req, res) => {
+  try {
+    const data = await service.createRule(req.body);
+
+    return res.status(201).json({
+      success: true,
+      data
+    });
+
+  } catch (error) {
+    console.error("Create rule error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+exports.updateRule = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      points,
+      max_points_per_day,
+      is_active
+    } = req.body;
+
+    const updated = await service.updateRule(id, {
+      points,
+      max_points_per_day,
+      is_active
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Rule updated",
+      data: updated
+    });
+
+  } catch (error) {
+    console.error("Update rule error:", error);
+    return res.status(500).json({
+      message: "Internal server error"
+    });
+  }
+};

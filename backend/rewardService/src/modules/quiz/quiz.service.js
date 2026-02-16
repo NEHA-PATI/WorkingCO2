@@ -192,20 +192,28 @@ const previewQuizService = async () => {
    USER - GET DAILY QUESTIONS
 ================================ */
 const getDailyQuestionsService = async (day) => {
-  const parsedDay = Number(day);
+
+  let parsedDay = Number(day);
+
+  // If day not provided, auto-detect from date
+  if (!parsedDay) {
+    parsedDay = new Date().getDate();
+  }
 
   if (!Number.isInteger(parsedDay) || parsedDay < 1 || parsedDay > 30) {
-    throw new Error('day must be an integer between 1 and 30');
+    throw new Error('day must be between 1 and 30');
   }
 
   const quizData = await getCachedQuiz();
+
   if (!quizData || !Array.isArray(quizData.questions)) {
     throw new Error('Active quiz not found');
   }
+
   const start = (parsedDay - 1) * 10;
   const end = start + 10;
 
-  const questions = (quizData.questions || [])
+  const questions = quizData.questions
     .slice(start, end)
     .map(question => ({
       id: question.id,
@@ -219,6 +227,7 @@ const getDailyQuestionsService = async (day) => {
     questions
   };
 };
+
 
 /* ===============================
    USER - SUBMIT QUIZ ANSWERS
@@ -239,29 +248,46 @@ const submitQuizAnswersService = async (userId, answers) => {
   let totalCorrect = 0;
   let totalQuestionsAttempted = 0;
 
-  submittedAnswers.forEach(item => {
-    const questionId = Number(item && item.id);
-    const selectedOption = String(item && item.selectedOption ? item.selectedOption : '')
-      .trim()
-      .toUpperCase();
+  const processed = new Set();
 
-    const question = questionsById.get(questionId);
-    if (!question) {
-      return;
-    }
+submittedAnswers.forEach(item => {
 
-    totalQuestionsAttempted += 1;
+  const questionId = Number(item && item.id);
+  const selectedOption = String(item && item.selectedOption ? item.selectedOption : '')
+    .trim()
+    .toUpperCase();
 
-    if (selectedOption === String(question.answer).toUpperCase()) {
-      totalCorrect += 1;
-    }
-  });
+  if (!questionId || processed.has(questionId)) {
+    return;
+  }
+
+  processed.add(questionId);
+
+  const question = questionsById.get(questionId);
+  if (!question) {
+    return;
+  }
+
+  totalQuestionsAttempted += 1;
+
+  if (selectedOption === String(question.answer).toUpperCase()) {
+    totalCorrect += 1;
+  }
+});
+
 
   if (typeof rewardService.addPoints !== 'function') {
     throw new Error('Rewards addPoints function is not available');
   }
 
-  let pointsAdded = await rewardService.addPoints(userId, totalCorrect);
+ let rewardResult = await rewardService.addPoints(
+  userId,
+  'daily_quiz',
+  totalCorrect
+);
+
+let pointsAdded = rewardResult?.pointsAdded || 0;
+
 
   if (pointsAdded && typeof pointsAdded === 'object' && 'pointsAdded' in pointsAdded) {
     pointsAdded = pointsAdded.pointsAdded;

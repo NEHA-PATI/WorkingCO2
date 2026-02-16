@@ -1,10 +1,27 @@
-module.exports = (req, res, next) => {
-  const u_id = req.headers['x-user-id'];
+const jwt = require('jsonwebtoken');
 
-  if (!u_id) {
-    return res.status(401).json({ message: 'Unauthorized: u_id missing' });
+module.exports = (req, res, next) => {
+
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({
+      message: 'Unauthorized: Bearer token required'
+    });
   }
 
-  req.u_id = u_id;
-  next();
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    req.u_id = decoded.u_id || decoded.id;
+    req.role = decoded.role;
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      message: 'Unauthorized: Invalid or expired token'
+    });
+  }
 };

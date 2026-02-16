@@ -11,10 +11,9 @@ import { useModal } from "@contexts/ModalContext";
  * Pages where footer should NOT be shown
  * Add paths here as needed
  */
-const FOOTER_HIDDEN_PATHS = [
-  
-  "/settings",
-];
+const FOOTER_HIDDEN_PATHS = ["/settings"];
+
+const FOOTER_HIDDEN_PREFIXES = ["/admin"];
 
 export default function BaseLayout() {
   const location = useLocation();
@@ -26,7 +25,11 @@ export default function BaseLayout() {
    * - Exact match
    * - Also supports nested paths later if needed
    */
-  const hideFooter = FOOTER_HIDDEN_PATHS.includes(location.pathname);
+  const hideFooter =
+    FOOTER_HIDDEN_PATHS.includes(location.pathname) ||
+    FOOTER_HIDDEN_PREFIXES.some((prefix) =>
+      location.pathname.startsWith(prefix)
+    );
 
   return (
     <div className="app-container">

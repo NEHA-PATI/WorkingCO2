@@ -136,6 +136,48 @@ export default function UserManagementPage() {
     setConfirmSuspendUser(null)
   }
 
+  const handleExportCsv = () => {
+    const reportUsers = users
+    const generatedAt = new Date()
+    const fileName = `user-status-report-${generatedAt
+      .toISOString()
+      .slice(0, 10)}.csv`
+
+    const toRoleLabel = (roleId) => {
+      if (roleId === 1) return "User"
+      if (roleId === 2) return "Admin"
+      if (roleId === 3) return "Super Admin"
+      return "No Role"
+    }
+
+    const escapeCsv = (value) => {
+      const text = String(value ?? "")
+      return `"${text.replace(/"/g, '""')}"`
+    }
+
+    const headers = ["Full Name", "Email", "User Id", "Status", "Role", "Joined Date"]
+    const rows = reportUsers.map((user) => [
+      user.username || "-",
+      user.email || "-",
+      user.u_id || "-",
+      user.status || "-",
+      toRoleLabel(user.role_id),
+      user.created_at ? new Date(user.created_at).toLocaleDateString() : "-",
+    ])
+
+    const csvLines = [headers, ...rows].map((row) => row.map(escapeCsv).join(","))
+    const csvContent = csvLines.join("\n")
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
   function buildPageNumbers() {
     const pages = []
     if (totalPages <= 7) {
@@ -212,7 +254,7 @@ export default function UserManagementPage() {
 
           <div className="um-toolbar-spacer" />
 
-          <button className="um-export-btn" type="button">
+          <button className="um-export-btn" type="button" onClick={handleExportCsv}>
             <Upload size={16} />
             <span>Export</span>
           </button>

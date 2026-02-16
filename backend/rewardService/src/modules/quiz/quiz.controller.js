@@ -53,7 +53,9 @@ exports.previewQuiz = async (req, res, next) => {
 ================================ */
 exports.getDailyQuestions = async (req, res, next) => {
   try {
-    const data = await service.getDailyQuestions(req.u_id);
+    const { day } = req.query;   // get from query param
+
+    const data = await service.getDailyQuestions(day);
 
     res.json({
       success: true,
@@ -63,6 +65,7 @@ exports.getDailyQuestions = async (req, res, next) => {
     next(err);
   }
 };
+
 
 /* ===============================
    USER - SUBMIT QUIZ ANSWERS
