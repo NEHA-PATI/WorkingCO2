@@ -207,21 +207,87 @@ export default function ContestManagement() {
     );
   };
 
+  const handleExportCsv = () => {
+    const generatedAt = new Date();
+    const fileName = `contest-management-${generatedAt.toISOString().slice(0, 10)}.csv`;
+
+    const escapeCsv = (value) => {
+      const text = String(value ?? "");
+      return `"${text.replace(/"/g, '""')}"`;
+    };
+
+    const headers = [
+      "Id",
+      "Title",
+      "Description",
+      "Points",
+      "Task Type",
+      "Is Daily Task",
+      "Button Text",
+      "Gradient",
+      "Bg Color",
+      "Border Color",
+      "Rules",
+      "Rewards",
+      "Status",
+      "Completions",
+      "Last Updated",
+      "Publish Start",
+      "Publish End",
+    ];
+
+    const rows = contests.map((contest) => [
+      contest.id,
+      contest.title,
+      contest.description,
+      contest.points,
+      contest.taskType,
+      contest.isDailyTask ? "Yes" : "No",
+      contest.buttonText,
+      contest.color,
+      contest.bgColor,
+      contest.borderColor,
+      (contest.rules || []).join(" | "),
+      (contest.rewards || []).join(" | "),
+      contest.status,
+      contest.completions,
+      contest.lastUpdated,
+      contest.publishStartAt,
+      contest.publishEndAt,
+    ]);
+
+    const csvLines = [headers, ...rows].map((row) => row.map(escapeCsv).join(","));
+    const csvContent = csvLines.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50/50 p-8 space-y-6">
+    <div
+      className="min-h-screen bg-slate-50/50 p-8 space-y-6"
+      style={{ fontFamily: "Poppins, sans-serif" }}
+    >
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Contest Management</h1>
           <p className="text-slate-500 mt-1">Manage and monitor user-side contests</p>
+          <ContestAuditTimeline contest={selectedContest} />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 self-start">
           <button onClick={openCreate} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm">
             <Plus className="w-4 h-4" /> New Contest
           </button>
           <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm">
             <RefreshCw className="w-4 h-4" /> Refresh
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+          <button onClick={handleExportCsv} className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm">
             <Download className="w-4 h-4" /> Export
           </button>
         </div>
@@ -260,22 +326,15 @@ export default function ContestManagement() {
             <>
               <ContestFiltersBar filters={filters} setFilters={setFilters} taskTypes={taskTypes} />
               <BulkActionBar selectedCount={selectedRows.length} onClear={() => setSelectedRows([])} onDelete={bulkDelete} />
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-                <div className="xl:col-span-9">
-                  <ContestTableV2
-                    rows={filteredContests}
-                    selectedRows={selectedRows}
-                    onSelectRows={setSelectedRows}
-                    onView={openPreview}
-                    onEdit={openEdit}
-                    onDelete={deleteContest}
-                    onStatusChange={setStatus}
-                  />
-                </div>
-                <div className="xl:col-span-3">
-                  <ContestAuditTimeline contest={selectedContest} />
-                </div>
-              </div>
+              <ContestTableV2
+                rows={filteredContests}
+                selectedRows={selectedRows}
+                onSelectRows={setSelectedRows}
+                onView={openPreview}
+                onEdit={openEdit}
+                onDelete={deleteContest}
+                onStatusChange={setStatus}
+              />
             </>
           )}
 
@@ -368,10 +427,10 @@ function BulkActionBar({ selectedCount, onClear, onDelete }) {
     <div className="bg-slate-900 text-white rounded-lg px-4 py-2 flex justify-between items-center">
       <span className="text-sm">{selectedCount} contests selected</span>
       <div className="flex gap-2">
-        <button onClick={onDelete} className="text-xs px-2 py-1 rounded bg-white/15 hover:bg-white/25">
+        <button onClick={onDelete} className="text-sm px-2 py-1 rounded bg-white/15 hover:bg-white/25">
           Delete Selected
         </button>
-        <button onClick={onClear} className="text-xs px-2 py-1 rounded bg-white/15 hover:bg-white/25">
+        <button onClick={onClear} className="text-sm px-2 py-1 rounded bg-white/15 hover:bg-white/25">
           Clear
         </button>
       </div>
@@ -384,7 +443,7 @@ function ContestStatusToggle({ value, onChange }) {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="px-2 py-1 text-xs border border-slate-200 rounded-md bg-white"
+      className="px-2 py-1 text-sm border border-slate-200 rounded-md bg-white"
     >
       <option value="draft">Draft</option>
       <option value="active">Active</option>
@@ -492,14 +551,14 @@ function ContestFormDrawer({ isOpen, value, allContests, onChange, onClose, onSa
   return (
     <div className="fixed inset-0 z-50">
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <div className="absolute right-0 top-0 h-full w-full max-w-2xl bg-white shadow-2xl flex flex-col">
+      <div className="absolute inset-0 bg-white shadow-2xl flex flex-col">
         <div className="p-4 border-b border-slate-200 flex justify-between items-center">
           <h2 className="text-lg font-semibold">{value.id ? "Edit Contest" : "Create Contest"}</h2>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-md">
             <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="p-4 space-y-4 overflow-y-auto">
+        <div className="flex-1 p-4 space-y-4 overflow-y-auto">
           <div className="grid grid-cols-2 gap-3">
             <Input label="Title" value={value.title} onChange={(v) => onChange((p) => ({ ...p, title: v }))} />
             <Input
@@ -537,7 +596,7 @@ function ContestFormDrawer({ isOpen, value, allContests, onChange, onClose, onSa
 
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
-              <span className="text-xs text-slate-600">Status</span>
+              <span className="text-sm text-slate-600">Status</span>
               <select
                 value={value.status}
                 onChange={(e) => onChange((p) => ({ ...p, status: e.target.value }))}
@@ -550,7 +609,7 @@ function ContestFormDrawer({ isOpen, value, allContests, onChange, onClose, onSa
               </select>
             </label>
             <label className="block">
-              <span className="text-xs text-slate-600">Daily Task</span>
+              <span className="text-sm text-slate-600">Daily Task</span>
               <div className="mt-3">
                 <label className="inline-flex items-center gap-2 text-sm">
                   <input
@@ -643,7 +702,7 @@ function ContestHealthAlerts({ contest }) {
 function Input({ label, value, onChange, type = "text", textarea = false, hint, hintError = false }) {
   return (
     <label className="block">
-      <span className="text-xs text-slate-600">{label}</span>
+      <span className="text-sm text-slate-600">{label}</span>
       {textarea ? (
         <textarea
           value={value}
@@ -662,7 +721,7 @@ function Input({ label, value, onChange, type = "text", textarea = false, hint, 
         />
       )}
       {hint ? (
-        <p className={`text-xs mt-1 ${hintError ? "text-red-600" : "text-slate-500"}`}>{hint}</p>
+        <p className={`text-sm mt-1 ${hintError ? "text-red-600" : "text-slate-500"}`}>{hint}</p>
       ) : null}
     </label>
   );
@@ -673,7 +732,7 @@ function ListEditor({ label, values, onAdd, onRemove, onEdit }) {
     <div className="border border-slate-200 rounded-lg p-3">
       <div className="flex justify-between items-center mb-2">
         <h3 className="text-sm font-semibold">{label}</h3>
-        <button onClick={onAdd} className="text-xs px-2 py-1 border border-slate-200 rounded-md">
+        <button onClick={onAdd} className="text-sm px-2 py-1 border border-slate-200 rounded-md">
           Add
         </button>
       </div>
@@ -701,7 +760,7 @@ function ListEditor({ label, values, onAdd, onRemove, onEdit }) {
 function Stat({ label, value }) {
   return (
     <div className="bg-white border border-slate-200 rounded-lg p-4">
-      <p className="text-xs text-slate-500">{label}</p>
+      <p className="text-sm text-slate-500">{label}</p>
       <p className="text-xl font-bold text-slate-900 mt-1">{value}</p>
     </div>
   );
@@ -710,7 +769,7 @@ function Stat({ label, value }) {
 function ContestAuditTimeline({ contest }) {
   if (!contest) {
     return (
-      <div className="border border-slate-200 rounded-lg p-4 text-sm text-slate-500">
+      <div className="mt-2 text-sm text-slate-500">
         Select a contest to view audit timeline.
       </div>
     );
@@ -721,13 +780,13 @@ function ContestAuditTimeline({ contest }) {
     "Synced to user Arena page",
   ];
   return (
-    <div className="border border-slate-200 rounded-lg p-4">
-      <h3 className="text-sm font-semibold text-slate-900">Audit Timeline</h3>
-      <div className="mt-3 space-y-2">
+    <div className="mt-2">
+      <p className="text-sm font-semibold text-slate-700">Audit Timeline</p>
+      <div className="mt-1 space-y-1">
         {events.map((e) => (
-          <div key={e} className="text-sm text-slate-600 border-l-2 border-slate-200 pl-2">
+          <p key={e} className="text-sm text-slate-500">
             {e}
-          </div>
+          </p>
         ))}
       </div>
     </div>
@@ -739,7 +798,7 @@ function ContestPreview({ contest }) {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
       <div className="border border-slate-200 rounded-xl p-5">
-        <p className="text-xs text-slate-500 mb-2">Card Preview</p>
+        <p className="text-sm text-slate-500 mb-2">Card Preview</p>
         <div className={`${contest.bgColor || "bg-slate-50"} ${contest.borderColor || "border-slate-200"} border rounded-xl p-4`}>
           <h3 className="font-semibold text-slate-900">{contest.title}</h3>
           <p className="text-sm text-slate-600 mt-1">{contest.description}</p>
@@ -749,7 +808,7 @@ function ContestPreview({ contest }) {
         </div>
       </div>
       <div className="border border-slate-200 rounded-xl p-5">
-        <p className="text-xs text-slate-500 mb-2">Modal Preview</p>
+        <p className="text-sm text-slate-500 mb-2">Modal Preview</p>
         <h3 className="font-semibold">{contest.title}</h3>
         <p className="text-sm text-slate-600 mt-1">{contest.description}</p>
         <p className="text-sm font-medium mt-3">Rules</p>
@@ -778,7 +837,7 @@ function AnalyticsPanel({ contests, selected }) {
         <div className="space-y-3">
           {contests.map((c) => (
             <div key={c.id}>
-              <div className="flex justify-between text-xs text-slate-600 mb-1">
+              <div className="flex justify-between text-sm text-slate-600 mb-1">
                 <span>{c.title}</span>
                 <span>{c.completions}</span>
               </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useModal } from "@contexts/ModalContext";
 import { FaBars, FaChevronDown } from "react-icons/fa";
 import { GiWallet } from "react-icons/gi";
@@ -12,8 +12,8 @@ import {
   FaLeaf,
 } from "react-icons/fa";
 import { fireToast } from "@shared/utils/toastService";
-
 import HamburgerMenu from "./HamburgerMenu";
+
 import useAuth from "@contexts/AuthContext";
 
 import "@shared/ui/styles/userNavbar.css";
@@ -26,16 +26,20 @@ import "@shared/ui/styles/userNavbar.css";
  */
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, role, isAuthenticated, authLoading, logout } = useAuth();
 
   const { openLogin, openSignup, showLogin, showSignup } = useModal();
 
   /* ================= STATE ================= */
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  const sidebarRef = useRef(null);
+  const menuDropdownRef = useRef(null);
   const profileDropdownRef = useRef(null);
+  const hideHamburgerOnRoute =
+    location.pathname === "/admin/overview" ||
+    location.pathname === "/admin/users";
 
   /* ================= HELPERS ================= */
 
@@ -74,9 +78,13 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-        setSidebarOpen(false);
+      if (
+        menuDropdownRef.current &&
+        !menuDropdownRef.current.contains(event.target)
+      ) {
+        setMenuOpen(false);
       }
+
       if (
         profileDropdownRef.current &&
         !profileDropdownRef.current.contains(event.target)
@@ -89,19 +97,35 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
   /* ================= RENDER ================= */
   if (authLoading) return null;
   if (showLogin || showSignup) return null;
 
   return (
     <>
-      <div className="user-navbar">
-        {/* ================= LEFT ================= */}
-        <div className="user-left-section">
-          <FaBars
-            className="user-menu-icon"
-            onClick={() => setSidebarOpen((s) => !s)}
-          />
+    <div className="user-navbar">
+      {/* ================= LEFT ================= */}
+      <div className="user-left-section">
+          {!hideHamburgerOnRoute && (
+            <div ref={menuDropdownRef} style={{ position: "relative" }}>
+              <FaBars
+                className="user-menu-icon"
+                onClick={() => setMenuOpen((prev) => !prev)}
+              />
+
+              {menuOpen && (
+                <HamburgerMenu
+                  role={isAuthenticated ? role : "guest"}
+                  close={() => setMenuOpen(false)}
+                  handleLogout={handleLogout}
+                />
+              )}
+            </div>
+          )}
 
           <div
             className="user-logo"
@@ -115,16 +139,6 @@ export default function Navbar() {
             />
             <span className="user-logo-text">Carbon Positive</span>
           </div>
-
-          {sidebarOpen && (
-            <div ref={sidebarRef}>
-              <HamburgerMenu
-                role={isAuthenticated ? role : "guest"}
-                close={() => setSidebarOpen(false)}
-                handleLogout={handleLogout}
-              />
-            </div>
-          )}
         </div>
 
         {/* ================= CENTER (WALLET) ================= */}
