@@ -1,11 +1,7 @@
 const express = require('express');
-<<<<<<< HEAD
-const cors = require('cors');
-=======
-
->>>>>>> 1021fdad658f8f1746659193dd88ed9a7a987ae7
 const rewardRoutes = require('./modules/rewards/reward.routes');
 const quizRoutes = require('./modules/quiz/quiz.routes');
+const cors = require("cors");
 
 const errorMiddleware = require('./middlewares/error.middleware');
 

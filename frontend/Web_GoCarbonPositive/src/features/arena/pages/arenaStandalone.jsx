@@ -16,9 +16,9 @@ import { ENV } from '@config/env';
 import arenaApi from '@features/arena/services/arenaApi';
 import { useCountdown } from '@features/arena/hooks/useCountdown';
 import a4 from "@features/arena/components/photos/a4.jpeg";
-import a5 from "@features/arena/components/photos/a5.jpeg";
-import a6 from "@features/arena/components/photos/a6.jpeg";
-import a7 from "@features/arena/components/photos/a7.jpeg";
+import a5 from "@features/arena/components/photos/a5.jpg";
+import a6 from "@features/arena/components/photos/a6.jpg";
+import a7 from "@features/arena/components/photos/a7.jpg";
 
 // Inline Styles
 const styles = `
@@ -260,7 +260,7 @@ const CONTEST_UI_CONFIG = {
         title: "Daily Quiz",
         description: "Submit your correct answers to earn points",
         icon: "Brain",
-        buttonText: "Submit Score",
+        buttonText: "Play Quiz",
         rules: ["Enter number of correct answers", "Daily cap is from backend"],
         rewards: ["Points from reward_rules table"],
         theme: {
@@ -1198,6 +1198,14 @@ export default function ArenaStandalone() {
         completeTaskMutation.mutate({ contest, score: payload.score });
     };
 
+    const handleContestClick = useCallback((taskType) => {
+        if (taskType === QUIZ_TASK_KEY) {
+            navigate('/arena/quiz');
+            return;
+        }
+        setSelectedContestTask(taskType);
+    }, [navigate]);
+
     const handleCooldownExpired = useCallback(() => {
         queryClient.invalidateQueries({ queryKey: ['arenaContestStatus'] });
     }, [queryClient]);
@@ -1282,7 +1290,7 @@ export default function ArenaStandalone() {
                                             contest={contest}
                                             index={index}
                                             state={getContestState(contest)}
-                                            onClick={setSelectedContestTask}
+                                            onClick={handleContestClick}
                                             onCooldownExpired={handleCooldownExpired}
                                         />
                                     </div>
