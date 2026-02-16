@@ -61,6 +61,7 @@ const Overview = () => {
   ];
 
   const COLORS = ["#4ade80", "#60a5fa", "#facc15", "#fca5a5"];
+localStorage.setItem("token", adminJwtToken);
 
   return (
     <div className="admin-overview-scope">

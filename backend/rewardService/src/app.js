@@ -1,4 +1,6 @@
 const express = require('express');
+require('dotenv').config();
+
 const rewardRoutes = require('./modules/rewards/reward.routes');
 const quizRoutes = require('./modules/quiz/quiz.routes');
 const cors = require("cors");
@@ -49,11 +51,8 @@ app.use(express.json());
 // Rewards
 app.use('/api/v1/rewards', rewardRoutes);
 
-// Quiz USER routes
 app.use('/api/v1/quiz', quizRoutes);
 
-// Quiz ADMIN routes
-app.use('/api/v1/admin/quiz', quizRoutes);
 
 app.use(errorMiddleware);
 

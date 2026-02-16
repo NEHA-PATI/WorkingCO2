@@ -95,7 +95,7 @@ const { login } = useAuth();
       display: "flex",
       alignItems: isMobile ? "flex-end" : "center",
       justifyContent: "center",
-      zIndex: 999,
+      zIndex: 2000,
       padding: isMobile ? "0" : "20px",
     },
     modal: {

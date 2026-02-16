@@ -2,7 +2,7 @@
   min-height: 100vh;
   background-color: #f8f9fb;
   padding: 40px 24px 60px;
-  font-family: var(--font-poppins), sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 /* ── Header ── */
@@ -59,7 +59,7 @@
   border: 1px solid #e2e5ea;
   border-radius: 8px;
   font-size: 13px;
-  font-family: var(--font-poppins), sans-serif;
+  font-family: "Poppins", sans-serif;
   color: #1a1d26;
   background: #fff;
   outline: none;
@@ -85,7 +85,7 @@
   border-radius: 8px;
   background: #fff;
   font-size: 13px;
-  font-family: var(--font-poppins), sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 500;
   color: #4b5563;
   cursor: pointer;
@@ -129,7 +129,7 @@
   outline: none;
   background: transparent;
   font-size: 13px;
-  font-family: var(--font-poppins), sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 500;
   color: #4b5563;
   cursor: pointer;
@@ -149,7 +149,7 @@
   border-radius: 8px;
   background: #fff;
   font-size: 13px;
-  font-family: var(--font-poppins), sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 500;
   color: #4b5563;
   cursor: pointer;
@@ -176,7 +176,7 @@
   border-radius: 8px;
   background: #1a1d26;
   font-size: 13px;
-  font-family: var(--font-poppins), sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 500;
   color: #fff;
   cursor: pointer;
@@ -425,7 +425,7 @@
   background: #fef2f2;
   color: #b91c1c;
   font-size: 12px;
-  font-family: var(--font-poppins), sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
@@ -490,7 +490,7 @@
   border-radius: 8px;
   padding: 0 14px;
   font-size: 13px;
-  font-family: var(--font-poppins), sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
@@ -540,7 +540,7 @@
   border: 1px solid #e2e5ea;
   border-radius: 6px;
   font-size: 13px;
-  font-family: var(--font-poppins), sans-serif;
+  font-family: "Poppins", sans-serif;
   color: #374151;
   background: #fff;
   cursor: pointer;
@@ -564,7 +564,7 @@
   border-radius: 6px;
   background: transparent;
   font-size: 13px;
-  font-family: var(--font-poppins), sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 500;
   color: #6b7280;
   cursor: pointer;

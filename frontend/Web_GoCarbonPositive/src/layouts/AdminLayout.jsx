@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 import AdminNavbar from "@features/admin/components/AdminNavbar";
+import { FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
 import "./AdminLayout.css";
 
 const MIN_SIDEBAR_WIDTH = 220;
@@ -21,10 +22,11 @@ export default function AdminLayout() {
   const layoutRef = useRef(null);
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const handleResizeMove = useCallback(
     (event) => {
-      if (!isResizing || !layoutRef.current) return;
+      if (!isResizing || !isSidebarOpen || !layoutRef.current) return;
 
       const bounds = layoutRef.current.getBoundingClientRect();
       const nextWidth = event.clientX - bounds.left;
@@ -33,7 +35,7 @@ export default function AdminLayout() {
         Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, nextWidth))
       );
     },
-    [isResizing]
+    [isResizing, isSidebarOpen]
   );
 
   const stopResizing = useCallback(() => {
@@ -57,7 +59,7 @@ export default function AdminLayout() {
   }, [handleResizeMove, isResizing, stopResizing]);
 
   const startResizing = (event) => {
-    if (window.innerWidth <= MOBILE_BREAKPOINT) return;
+    if (window.innerWidth <= MOBILE_BREAKPOINT || !isSidebarOpen) return;
     event.preventDefault();
     setIsResizing(true);
   };
@@ -76,19 +78,32 @@ export default function AdminLayout() {
       className={`admin-layout-shell ${isResizing ? "is-resizing" : ""}`}
       style={{ "--admin-sidebar-width": `${sidebarWidth}px` }}
     >
-      <aside className="admin-layout-sidebar">
-        <AdminNavbar />
-      </aside>
+      <button
+        type="button"
+        className="admin-layout-toggle-btn"
+        onClick={() => setIsSidebarOpen((prev) => !prev)}
+        aria-label={isSidebarOpen ? "Hide sidebar" : "Show sidebar"}
+        title={isSidebarOpen ? "Hide sidebar" : "Show sidebar"}
+      >
+        {isSidebarOpen ? <FiChevronsLeft /> : <FiChevronsRight />}
+      </button>
 
-      <div
-        className="admin-layout-resizer"
-        role="separator"
-        tabIndex={0}
-        aria-orientation="vertical"
-        aria-label="Resize admin sidebar"
-        onMouseDown={startResizing}
-        onKeyDown={handleResizerKeyDown}
-      />
+      {isSidebarOpen && (
+        <>
+          <aside className="admin-layout-sidebar">
+            <AdminNavbar />
+          </aside>
+          <div
+            className="admin-layout-resizer"
+            role="separator"
+            tabIndex={0}
+            aria-orientation="vertical"
+            aria-label="Resize admin sidebar"
+            onMouseDown={startResizing}
+            onKeyDown={handleResizerKeyDown}
+          />
+        </>
+      )}
 
       <section className="admin-layout-content">
         <Outlet />

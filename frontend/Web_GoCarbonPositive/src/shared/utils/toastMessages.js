@@ -2,6 +2,7 @@ export const TOAST_MSG = {
   AUTH: {
     LOGIN_SUCCESS: "Welcome back. You are now signed in.",
     LOGIN_ERROR: "Sign-in failed. Check your email and password and try again.",
+    LOGIN_REQUIRED_REDIRECT: "You are not logged in. Redirecting to login...",
     NOT_VERIFIED: "Please verify your email to continue.",
     INACTIVE: "Your account is not active. Contact support for help.",
     RESET_LINK_SENT: "Reset link sent. Check your email for next steps.",
