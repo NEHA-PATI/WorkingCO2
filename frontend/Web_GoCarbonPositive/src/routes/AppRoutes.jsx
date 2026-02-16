@@ -33,12 +33,14 @@ import BlogDetailPage from "@features/blog/pages/blog-detail";
 import Careers from "@features/careers/pages/Careers";
 
 import MarketplacePage from "@features/marketplace/pages/MarketplacePage";
-import ViewAssets from "@features/marketplace/pages/ViewAssets";
-import WalletPage from "@features/marketplace/components/WalletUI";
-import Upload from "@features/marketplace/components/upload";
+import ViewAssets from "@shared/pages/ViewAssets";
+import WalletPage from "@shared/pages/wallet";
+import Upload from "@shared/pages/upload";
 
-import ArenaPage from "@features/arena/pages/Arena";
 import ArenaStandalonePage from "@features/arena/pages/arenaStandalone";
+import ArenaRewardsPage from "@features/arena/pages/rewards";
+import ArenaHistoryPage from "@features/arena/pages/history";
+import ArenaLeaderboardPage from "@features/arena/pages/leaderboard";
 
 
 import OrgDashboard, {
@@ -79,8 +81,11 @@ const getOrgTabElement = (tabId) => {
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/arena" element={<ArenaPage />} />
+      <Route path="/arena" element={<Navigate to="/arena-standalone" replace />} />
       <Route path="/arena-standalone" element={<ArenaStandalonePage />} />
+      <Route path="/arena/rewards" element={<ArenaRewardsPage />} />
+      <Route path="/arena/history" element={<ArenaHistoryPage />} />
+      <Route path="/arena/leaderboard" element={<ArenaLeaderboardPage />} />
 
       <Route element={<BaseLayout />}>
         <Route path="/" element={<Home />} />
