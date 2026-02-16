@@ -57,6 +57,11 @@ yarn-error.log*
 .idea/
 .DS_Store
 Thumbs.db
+<<<<<<< HEAD
+
+backup.sql
+*.sql
+=======
 # Root level node modules (you have a root folder too)
 node_modules/
 package-lock.json
@@ -68,3 +73,4 @@ frontend/**/.cache/
 
 # Sanity / PortableText temp
 **/.sanity/
+>>>>>>> 91003e7bc6042acc8c14b1ed8e453e09d3a15626
