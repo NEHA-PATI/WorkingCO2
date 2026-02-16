@@ -74,6 +74,15 @@ export default function Navbar() {
     navigate("/");
   };
 
+  const handleIconicArenaClick = () => {
+    if (!isAuthenticated) {
+      fireToast("AUTH.LOGIN_REQUIRED_REDIRECT", "error", {}, { autoClose: 2500 });
+      setTimeout(() => navigate("/login"), 2500);
+      return;
+    }
+    navigate("/arena-standalone");
+  };
+
   /* ================= CLICK OUTSIDE ================= */
 
   useEffect(() => {
@@ -162,7 +171,7 @@ export default function Navbar() {
           {/* <ArenaButton /> */}
           <button
             className="iconic-arena-button"
-            onClick={() => navigate("/arena-standalone")}
+            onClick={handleIconicArenaClick}
           >
             <video
               src="/arena-animation.mp4.webm"

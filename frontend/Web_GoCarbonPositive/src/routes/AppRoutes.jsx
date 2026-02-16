@@ -57,6 +57,9 @@ import AdminCaseStudyManagement from "@features/admin/pages/CaseStudyManagement"
 import AdminReports from "@features/admin/pages/Reports";
 import AdminAssetManagement from "@features/admin/pages/AssetManagement";
 import AdminContestManagement from "@features/admin/pages/ContestManagement";
+import AdminOrganizationManagement from "@features/admin/pages/OrganizationManagement";
+import AdminOrgRequest from "@features/admin/pages/OrgRequest";
+import AdminOrganizationList from "@features/admin/pages/OrganizationList";
 import AdminProfile from "@features/admin/components/AdminProfile";
 
 const RoleProfilePage = () => {
@@ -194,6 +197,18 @@ const AppRoutes = () => {
           <Route path="configuration" element={<AdminConfiguration />} />
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="asset-management" element={<AdminAssetManagement />} />
+          <Route
+            path="organization-management"
+            element={<AdminOrganizationManagement />}
+          />
+          <Route
+            path="organization-management/org-request"
+            element={<AdminOrgRequest />}
+          />
+          <Route
+            path="organization-management/organization"
+            element={<AdminOrganizationList />}
+          />
           <Route path="career-management" element={<AdminCareerManagement />} />
           <Route
             path="case-study-management"
