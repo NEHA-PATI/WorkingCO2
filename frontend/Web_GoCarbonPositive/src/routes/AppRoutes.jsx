@@ -42,13 +42,14 @@ import ArenaRewardsPage from "@features/arena/pages/rewards";
 import ArenaHistoryPage from "@features/arena/pages/history";
 import ArenaLeaderboardPage from "@features/arena/pages/leaderboard";
 
+
 import OrgDashboard, {
   ORG_DASHBOARD_TAB_COMPONENTS,
 } from "@features/org/pages/OrgDashboard";
 import OrgProfile from "@features/org/components/OrgProfile";
 
 import AdminOverview from "@features/admin/pages/Overview";
-import AdminUsers from "@features/admin/pages/Users";
+import AdminUsers from "@features/admin/pages/User Management";
 import AdminSupport from "@features/admin/pages/Support";
 import AdminSecurity from "@features/admin/pages/Security";
 import AdminConfiguration from "@features/admin/pages/Configuration";
@@ -57,6 +58,7 @@ import AdminCareerManagement from "@features/admin/pages/CareerManagement";
 import AdminCaseStudyManagement from "@features/admin/pages/CaseStudyManagement";
 import AdminReports from "@features/admin/pages/Reports";
 import AdminAssetManagement from "@features/admin/pages/AssetManagement";
+import AdminContestManagement from "@features/admin/pages/ContestManagement";
 import AdminProfile from "@features/admin/components/AdminProfile";
 
 const RoleProfilePage = () => {
@@ -202,6 +204,7 @@ const AppRoutes = () => {
             path="case-study-management"
             element={<AdminCaseStudyManagement />}
           />
+          <Route path="contest" element={<AdminContestManagement />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="" element={<Navigate to="overview" replace />} />

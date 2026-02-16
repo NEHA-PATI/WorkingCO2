@@ -6,8 +6,6 @@ const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 const mailRoutes = require("./routes/mailRoutes");
 
-const sendOTP = require("../authentication/utils/sendOTP"); // adjust path if needed
-
 const app = express();
 
 /* ==================== IMPORTANT FOR AWS + DOCKER ==================== */

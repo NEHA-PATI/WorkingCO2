@@ -1,6 +1,5 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useModal } from "@contexts/ModalContext";
 import "@features/user/styles/Home.css";
 
 const features = [
@@ -26,7 +25,9 @@ const features = [
 
 const Home = () => {
   const navigate = useNavigate();
-  const { switchToLogin } = useModal(); // ✅ modal trigger
+  const handleGetStarted = () => {
+    navigate("/user/dashboard");
+  };
 
   return (
     <>
@@ -46,8 +47,7 @@ const Home = () => {
 
               {/* PRIMARY ACTIONS */}
               <div className="home-primary-actions">
-                {/* ✅ OPEN LOGIN POPUP */}
-                <button className="home-btn" onClick={switchToLogin}>
+                <button className="home-btn" onClick={handleGetStarted}>
                   Get Started
                 </button>
 

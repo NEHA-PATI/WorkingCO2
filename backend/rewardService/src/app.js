@@ -1,6 +1,12 @@
 const express = require('express');
+<<<<<<< HEAD
 const cors = require('cors');
+=======
+
+>>>>>>> 1021fdad658f8f1746659193dd88ed9a7a987ae7
 const rewardRoutes = require('./modules/rewards/reward.routes');
+const quizRoutes = require('./modules/quiz/quiz.routes');
+
 const errorMiddleware = require('./middlewares/error.middleware');
 
 const app = express();
@@ -40,17 +46,18 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json());
 
-// ✅ Versioned API
-app.get('/health', (_req, res) => {
-  res.json({
-    success: true,
-    service: 'reward-service',
-    status: 'ok',
-    timestamp: new Date().toISOString()
-  });
-});
+/* ===============================
+   API ROUTES
+================================ */
 
+// Rewards
 app.use('/api/v1/rewards', rewardRoutes);
+
+// Quiz USER routes
+app.use('/api/v1/quiz', quizRoutes);
+
+// Quiz ADMIN routes
+app.use('/api/v1/admin/quiz', quizRoutes);
 
 app.use(errorMiddleware);
 

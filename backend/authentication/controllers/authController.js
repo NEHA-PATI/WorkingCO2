@@ -160,7 +160,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
 const generateUID = require("../utils/generateUID");
-const sendOTP = require("../utils/sendOTP");
+const { sendMail, MAIL_TYPES } = require("../services/mail");
 const axios = require("axios");
 
 // ✅ Validation helpers
@@ -238,7 +238,11 @@ exports.register = async (req, res) => {
       { expiresIn: "10m" }
     );
 
-    await sendOTP(email, otp);
+    await sendMail({
+      type: MAIL_TYPES.OTP,
+      to: email,
+      data: { otp },
+    });
 
     return res.status(200).json({
       success: true,
@@ -571,7 +575,11 @@ exports.resendOTP = async (req, res) => {
       { expiresIn: "10m" }
     );
 
-    await sendOTP(payload.email, newOtp);
+    await sendMail({
+      type: MAIL_TYPES.OTP,
+      to: payload.email,
+      data: { otp: newOtp },
+    });
 
     return res.status(200).json({
       success: true,
