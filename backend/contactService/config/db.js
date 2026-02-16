@@ -3,11 +3,10 @@ require("dotenv").config();
 
 const isProduction = process.env.NODE_ENV === "production";
 
-// ✅ Choose between DATABASE_URL and individual credentials
 const connectionConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
-      ssl: { require: true, rejectUnauthorized: false }, // Render requires SSL
+      ssl: isProduction ? { rejectUnauthorized: false } : false,
     }
   : {
       user: process.env.DB_USER,
@@ -15,15 +14,14 @@ const connectionConfig = process.env.DATABASE_URL
       database: process.env.DB_NAME,
       password: process.env.DB_PASSWORD,
       port: process.env.DB_PORT || 5432,
-      ssl: false, // local dev (no SSL)
+      ssl: isProduction ? { rejectUnauthorized: false } : false,
     };
 
-// ✅ Connection pool setup
 const pool = new Pool({
   ...connectionConfig,
   max: 20, // max clients in pool
   idleTimeoutMillis: 30000, // close idle clients after 30s
-  connectionTimeoutMillis: 2000, // return error after 2s if cannot connect
+  connectionTimeoutMillis: 5000, // wait 5s before timeout
 });
 
 pool.on("connect", () => {
@@ -32,14 +30,30 @@ pool.on("connect", () => {
 
 pool.on("error", (err) => {
   console.error("❌ Unexpected database error:", err.message);
-  setTimeout(() => {
-    console.log("♻️ Reconnecting to database...");
-  }, 2000);
 });
 
-// ✅ Test connection on startup
-pool.query("SELECT NOW()")
-  .then((res) => console.log("🕐 DB time:", res.rows[0].now))
-  .catch((err) => console.error("❌ PostgreSQL connection error:", err));
+
+const testConnection = async () => {
+  try {
+    const res = await pool.query("SELECT NOW()");
+    console.log("🕐 DB time:", res.rows[0].now);
+    console.log("🚀 Database ready");
+    return true;
+  } catch (err) {
+    console.error("❌ PostgreSQL connection error:", err.message);
+    return false;
+  }
+};
+
+testConnection();
+
+const shutdown = async () => {
+  console.log("🔌 Closing database pool...");
+  await pool.end();
+  process.exit(0);
+};
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
 
 module.exports = pool;

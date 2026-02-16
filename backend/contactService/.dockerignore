@@ -1,8 +1,10 @@
 node_modules
 npm-debug.log
-.env
-.git
-.gitignore
 Dockerfile
 .dockerignore
-README.md
+.git
+.gitignore
+.env
+tests
+coverage
+logs

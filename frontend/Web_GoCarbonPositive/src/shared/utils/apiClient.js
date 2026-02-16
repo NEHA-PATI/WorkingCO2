@@ -5,13 +5,20 @@ import { ENV } from "@config/env";
 // Get base URLs from environment or use defaults
 const API_CONFIG = {
   // Asset Service (port 5000)
-  ASSET_API: `${ENV.ASSET_SERVICE_URL}/api/v1`,
+  ASSET_API:
+    (import.meta.env.VITE_ASSET_SERVICE_URL || "http://15.206.213.50:5000") +
+    "/api/v1",
 
   // Auth Service (port 5002)
-  AUTH_API: ENV.AUTH_SERVICE_URL,
+  AUTH_API: import.meta.env.VITE_AUTH_SERVICE_URL || "http://15.206.213.50:5002",
 
   // Notification Service (port 5001)
-  NOTIFICATION_API: ENV.NOTIFICATION_SERVICE_URL,
+  NOTIFICATION_API:
+    import.meta.env.VITE_NOTIFICATION_SERVICE_URL || "http://localhost:5001",
+
+
+    CONTACT_API:
+import.meta.env.VITE_CONTACT_API,
 };
 
 /**
@@ -136,9 +143,20 @@ export const careerApiClient = createApiClient(
 
 // Blog Service (port 4000)
 export const blogApiClient = createApiClient(
-  ENV.BLOG_API_URL,
+  import.meta.env.VITE_BLOG_API_URL || "http://15.206.213.50:4000/api/blog",
   "Blog Service",
 );
+
+export const contactApiClient = createApiClient(
+  API_CONFIG.CONTACT_API ,
+  "Contact Service",
+);
+
+export const ticketApiClient = createApiClient(
+  import.meta.env.VITE_TICKET_API || "http://15.206.213.50:5004/ticket",
+  "Ticket Service",
+);
+
 
 // Default export
 export default assetApiClient;

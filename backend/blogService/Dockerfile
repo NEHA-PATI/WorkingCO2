@@ -14,7 +14,7 @@ RUN npm install --omit=dev
 COPY . .
 
 # 6️⃣ Expose blog service port
-EXPOSE 5004
+EXPOSE 4000
 
 # 7️⃣ Start server
-CMD ["node", "server.js"]
+CMD ["node", "src/server.js"]

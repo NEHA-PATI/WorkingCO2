@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import "@features/user/styles/contact.css";
-import { fireToast } from "@shared/utils/toastService";
-
+import { fireToast } from "@shared/utils/toastService.js";
+import { contactApiClient,ticketApiClient } from "@shared/utils/apiClient.js";
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
@@ -10,6 +10,7 @@ export default function Contact() {
     subject: "",
     message: "",
   });
+  
 
   const [showQueryModal, setShowQueryModal] = useState(false);
 
@@ -41,34 +42,28 @@ export default function Contact() {
       subject: formData.subject,
       message: formData.message,
     };
+try {
+  const res = await contactApiClient.post("/api/contact", payload);
 
-    try {
-      const res = await fetch("http://localhost:5005/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+  const data = res.data;
 
-      const data = await res.json();
+  fireToast("CONTACT.MESSAGE_SENT", "success", {
+    id: data.contact_id,
+  });
 
-      if (res.ok) {
-        fireToast("CONTACT.MESSAGE_SENT", "success", {
-          id: data.contact_id,
-        });
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          subject: "",
-          message: "",
-        });
-      } else {
-        fireToast("CONTACT.MESSAGE_FAILED", "error");
-      }
-    } catch (error) {
-      console.error("CONTACT ERROR:", error);
-      fireToast("API.NETWORK", "error");
-    } finally {
+  setFormData({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
+
+} catch (error) {
+  console.error("CONTACT ERROR:", error);
+  fireToast("API.NETWORK", "error");
+}
+ finally {
       setIsSubmitting(false);
     }
   };
@@ -84,58 +79,59 @@ export default function Contact() {
     }
   };
 
-  const handleQuerySubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+const handleQuerySubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
-    try {
-      const storedUser = getAuthUser();
-      const u_id = storedUser?.u_id ?? null;
+  try {
+    const storedUser = getAuthUser();
+    const u_id = storedUser?.u_id ?? null;
 
-      if (!u_id) {
-        fireToast("CONTACT.LOGIN_REQUIRED", "warning");
-        return;
-      }
+    if (!u_id) {
+      fireToast("CONTACT.LOGIN_REQUIRED", "warning");
+      setIsSubmitting(false);
+      return;
+    }
 
-      const payload = {
-        subject: queryData.subject,
-        message: queryData.issue,
-        category: queryData.category,
-        priority: queryData.priority,
-      };
+    const payload = {
+      subject: queryData.subject,
+      message: queryData.issue,
+      category: queryData.category,
+      priority: queryData.priority,
+    };
 
-      const res = await fetch("http://localhost:5004/api/tickets", {
-        method: "POST",
+    const res = await ticketApiClient.post(
+      "/api/tickets",
+      payload,
+      {
         headers: {
-          "Content-Type": "application/json",
           "x-user-id": u_id,
         },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        fireToast("TICKET.SUBMITTED", "success", {
-          id: data.ticket_id,
-        });
-        setShowQueryModal(false);
-        setQueryData({
-          subject: "",
-          issue: "",
-          category: "",
-          priority: "",
-        });
-      } else {
-        fireToast("TICKET.SUBMIT_FAILED", "error");
       }
-    } catch (error) {
-      console.error("RAISE QUERY ERROR:", error);
-      fireToast("API.NETWORK", "error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    );
+
+    const data = res.data;
+
+    fireToast("TICKET.SUBMITTED", "success", {
+      id: data.ticket_id,
+    });
+
+    setShowQueryModal(false);
+    setQueryData({
+      subject: "",
+      issue: "",
+      category: "",
+      priority: "",
+    });
+
+  } catch (error) {
+    console.error("RAISE QUERY ERROR:", error);
+    fireToast("API.NETWORK", "error");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
 
 
