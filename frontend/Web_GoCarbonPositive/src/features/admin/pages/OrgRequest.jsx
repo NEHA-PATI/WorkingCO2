@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   FiSearch,
   FiEye,
@@ -21,69 +21,31 @@ import {
 } from "react-icons/fa";
 import "@features/admin/styles/orgrequest.css";
 
-const ORGRQ_ROWS = [
-  {
-    id: "r1",
-    organizationName: "Digital Skills Foundation",
-    type: "NGO",
-    personName: "Rahul Mehta",
-    designation: "Program Manager",
-    country: "India",
-    state: "Karnataka",
-    city: "Bangalore",
-    status: "Pending",
-    email: "rahul@digitalskills.org",
-    phone: "+91 9988776655",
-    location: "Bangalore, Karnataka, India",
-    description:
-      "Providing digital literacy training to underprivileged youth across India.",
-  },
-  {
-    id: "r2",
-    organizationName: "GreenFuture Foundation",
-    type: "NGO",
-    personName: "Ananya Sharma",
-    designation: "Director",
-    country: "India",
-    state: "Maharashtra",
-    city: "Mumbai",
-    status: "Rejected",
-    email: "ananya@greenfuture.org",
-    phone: "+91 9876500011",
-    location: "Mumbai, Maharashtra, India",
-    description: "Environmental awareness and sustainable city campaigns.",
-  },
-  {
-    id: "r3",
-    organizationName: "TechNova Inc.",
-    type: "Corporate",
-    personName: "James Carter",
-    designation: "CEO",
-    country: "United States",
-    state: "California",
-    city: "San Francisco",
-    status: "Approved",
-    email: "james@technova.com",
-    phone: "+1 415 998 7766",
-    location: "San Francisco, California, United States",
-    description: "Tech-driven carbon management platform for enterprises.",
-  },
-  {
-    id: "r4",
-    organizationName: "EduBridge Academy",
-    type: "Educational",
-    personName: "Priya Patel",
-    designation: "Principal",
-    country: "India",
-    state: "Gujarat",
-    city: "Ahmedabad",
-    status: "Approved",
-    email: "priya@edubridge.edu",
-    phone: "+91 9090909090",
-    location: "Ahmedabad, Gujarat, India",
-    description: "School-led sustainability and youth climate literacy program.",
-  },
-];
+const ORGRQ_API_BASE_URL = "http://localhost:8080/api/v1";
+
+const normalizeStatus = (rawStatus = "") => {
+  const value = String(rawStatus).trim().toLowerCase();
+  if (value === "approved") return "Approved";
+  if (value === "rejected") return "Rejected";
+  return "Pending";
+};
+
+const normalizeOrgRequest = (row) => ({
+  id: row.org_request_id,
+  organizationName: row.org_name || "-",
+  type: row.org_type || "-",
+  personName: row.org_contact_person || "-",
+  designation: row.org_designation || "-",
+  country: row.org_country || "-",
+  state: row.org_state || "-",
+  city: row.org_city || "-",
+  status: normalizeStatus(row.request_status),
+  email: row.org_mail || "-",
+  phone: row.org_contact_number || "-",
+  location: [row.org_city, row.org_state, row.org_country].filter(Boolean).join(", ") || "-",
+  description: "-",
+  createdAt: row.created_at,
+});
 
 const getStatusClass = (status) => {
   if (status === "Approved") return "orgrq-status-approved";
@@ -92,6 +54,9 @@ const getStatusClass = (status) => {
 };
 
 export default function OrgRequest() {
+  const [orgrqRows, setOrgrqRows] = useState([]);
+  const [orgrqLoading, setOrgrqLoading] = useState(true);
+  const [orgrqError, setOrgrqError] = useState("");
   const [orgrqSearch, setOrgrqSearch] = useState("");
   const [orgrqStatusFilter, setOrgrqStatusFilter] = useState("All Status");
   const [orgrqDate, setOrgrqDate] = useState("");
@@ -104,8 +69,32 @@ export default function OrgRequest() {
   const [orgrqCreateConfirmPassword, setOrgrqCreateConfirmPassword] =
     useState("");
 
+  useEffect(() => {
+    const fetchOrgRequests = async () => {
+      try {
+        setOrgrqLoading(true);
+        setOrgrqError("");
+
+        const response = await fetch(`${ORGRQ_API_BASE_URL}/org-requests`);
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || "Failed to fetch organization requests");
+        }
+
+        setOrgrqRows((result.data || []).map(normalizeOrgRequest));
+      } catch (error) {
+        setOrgrqError(error.message || "Failed to fetch organization requests");
+      } finally {
+        setOrgrqLoading(false);
+      }
+    };
+
+    fetchOrgRequests();
+  }, []);
+
   const orgrqFilteredRows = useMemo(() => {
-    return ORGRQ_ROWS.filter((row) => {
+    return orgrqRows.filter((row) => {
       const query = orgrqSearch.trim().toLowerCase();
       const matchSearch =
         !query ||
@@ -113,18 +102,20 @@ export default function OrgRequest() {
         row.personName.toLowerCase().includes(query);
       const matchStatus =
         orgrqStatusFilter === "All Status" || row.status === orgrqStatusFilter;
-      const matchDate = !orgrqDate || true;
+      const matchDate =
+        !orgrqDate ||
+        (row.createdAt && new Date(row.createdAt).toISOString().slice(0, 10) === orgrqDate);
       return matchSearch && matchStatus && matchDate;
     });
-  }, [orgrqSearch, orgrqStatusFilter, orgrqDate]);
+  }, [orgrqRows, orgrqSearch, orgrqStatusFilter, orgrqDate]);
 
   const orgrqStats = useMemo(() => {
-    const total = ORGRQ_ROWS.length;
-    const approved = ORGRQ_ROWS.filter((r) => r.status === "Approved").length;
-    const pending = ORGRQ_ROWS.filter((r) => r.status === "Pending").length;
-    const rejected = ORGRQ_ROWS.filter((r) => r.status === "Rejected").length;
+    const total = orgrqRows.length;
+    const approved = orgrqRows.filter((r) => r.status === "Approved").length;
+    const pending = orgrqRows.filter((r) => r.status === "Pending").length;
+    const rejected = orgrqRows.filter((r) => r.status === "Rejected").length;
     return { total, approved, pending, rejected };
-  }, []);
+  }, [orgrqRows]);
 
   return (
     <section className="orgrq-page-shell">
@@ -226,6 +217,21 @@ export default function OrgRequest() {
             </tr>
           </thead>
           <tbody>
+            {!orgrqLoading && !orgrqError && orgrqFilteredRows.length === 0 && (
+              <tr>
+                <td colSpan={9}>No organization requests found.</td>
+              </tr>
+            )}
+            {!orgrqLoading && orgrqError && (
+              <tr>
+                <td colSpan={9}>{orgrqError}</td>
+              </tr>
+            )}
+            {orgrqLoading && (
+              <tr>
+                <td colSpan={9}>Loading organization requests...</td>
+              </tr>
+            )}
             {orgrqFilteredRows.map((row) => (
               <tr key={row.id}>
                 <td className="orgrq-org-name">{row.organizationName}</td>
