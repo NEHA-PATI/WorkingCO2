@@ -6,7 +6,36 @@ const postFields = `
   title,
   slug,
   excerpt,
-  "content": content,
+  "content": content[]{
+    ...,
+    _type == "image" => {
+      ...,
+      "url": asset->url
+    },
+    _type == "imageText" => {
+      ...,
+      "image": {
+        "url": image.asset->url,
+        "alt": image.alt,
+        "caption": image.caption
+      }
+    },
+    _type == "gallery" => {
+      ...,
+      "images": images[]{
+        ...,
+        "url": asset->url
+      }
+    },
+    _type == "fullWidthImage" => {
+      ...,
+      "image": {
+        "url": image.asset->url,
+        "alt": image.alt,
+        "caption": image.caption
+      }
+    }
+  },
   "coverImage": coverImage.asset->url,
   "coverImageAlt": coverImage.alt,
   "author": author->{
@@ -27,8 +56,15 @@ const postFields = `
     title,
     slug
   },
-  seoTitle,
-  seoDescription,
+  "seo": coalesce(seo, {
+    "title": seoTitle,
+    "description": seoDescription,
+    "ogImage": null
+  }),
+  "seoOgImage": seo.ogImage.asset->url,
+  "seoOgImageAlt": seo.ogImage.alt,
+  "seoTitle": coalesce(seo.title, seoTitle),
+  "seoDescription": coalesce(seo.description, seoDescription),
   status,
   publishedAt,
   _createdAt,

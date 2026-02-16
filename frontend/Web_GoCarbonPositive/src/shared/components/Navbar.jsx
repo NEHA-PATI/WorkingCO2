@@ -158,7 +158,7 @@ export default function Navbar() {
               muted
               playsInline
             />
-            ICONIC ARENA
+            Iconic Arena
           </button>
 
           {/* ====== CHANGE STARTS HERE ONLY ====== */}

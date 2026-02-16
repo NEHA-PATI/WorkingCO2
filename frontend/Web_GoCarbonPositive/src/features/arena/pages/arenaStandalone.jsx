@@ -16,9 +16,9 @@ import { ENV } from '@config/env';
 import arenaApi from '@features/arena/services/arenaApi';
 import { useCountdown } from '@features/arena/hooks/useCountdown';
 import a4 from "@features/arena/components/photos/a4.jpeg";
-import a5 from "@features/arena/components/photos/a5.jpg";
-import a6 from "@features/arena/components/photos/a6.jpg";
-import a7 from "@features/arena/components/photos/a7.jpg";
+import a5 from "@features/arena/components/photos/a5.jpeg";
+import a6 from "@features/arena/components/photos/a6.jpeg";
+import a7 from "@features/arena/components/photos/a7.jpeg";
 
 // Inline Styles
 const styles = `

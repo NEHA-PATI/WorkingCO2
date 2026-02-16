@@ -1,6 +1,12 @@
 const express = require('express');
+<<<<<<< HEAD
 const cors = require('cors');
+=======
+
+>>>>>>> origin/soumik1
 const rewardRoutes = require('./modules/rewards/reward.routes');
+const quizRoutes = require('./modules/quiz/quiz.routes');
+
 const errorMiddleware = require('./middlewares/error.middleware');
 
 const app = express();
@@ -40,6 +46,7 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json());
 
+<<<<<<< HEAD
 // ✅ Versioned API
 app.get('/health', (_req, res) => {
   res.json({
@@ -50,7 +57,20 @@ app.get('/health', (_req, res) => {
   });
 });
 
+=======
+/* ===============================
+   API ROUTES
+================================ */
+
+// Rewards
+>>>>>>> origin/soumik1
 app.use('/api/v1/rewards', rewardRoutes);
+
+// Quiz USER routes
+app.use('/api/v1/quiz', quizRoutes);
+
+// Quiz ADMIN routes
+app.use('/api/v1/admin/quiz', quizRoutes);
 
 app.use(errorMiddleware);
 
