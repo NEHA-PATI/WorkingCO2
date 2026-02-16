@@ -1,12 +1,39 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, CalendarClock, ChevronLeft, ChevronRight, CircleDot } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, CalendarClock, ChevronLeft, ChevronRight, CircleDot, Flame, Shield, Trophy, Globe } from 'lucide-react';
 import '@features/arena/styles/arenaglobals.css';
 import '@features/arena/styles/history.css';
 import arenaApi from '@features/arena/services/arenaApi';
 
 const PAGE_SIZE = 12;
+const STREAK_BADGE_TIERS = [
+    {
+        days: 3,
+        label: 'Eco Starter',
+        icon: Flame,
+        gradient: 'from-emerald-500 to-teal-500'
+    },
+    {
+        days: 7,
+        label: 'Green Warrior',
+        icon: Shield,
+        gradient: 'from-teal-500 to-cyan-500'
+    },
+    {
+        days: 15,
+        label: 'Sustainability Champion',
+        icon: Trophy,
+        gradient: 'from-lime-500 to-emerald-500'
+    },
+    {
+        days: 30,
+        label: 'Carbon Hero',
+        icon: Globe,
+        gradient: 'from-emerald-600 to-green-500'
+    }
+];
 
 const formatTaskName = (actionKey) => {
     if (!actionKey) return 'Unknown task';
@@ -45,9 +72,22 @@ export default function ArenaHistoryPage() {
         queryFn: () => arenaApi.getRewardHistory({ page, limit: PAGE_SIZE })
     });
 
+    const streakQuery = useQuery({
+        queryKey: ['arenaStreakHistoryBadges'],
+        queryFn: () => arenaApi.getStreak()
+    });
+
     const items = historyQuery.data?.data || [];
     const totalPages = historyQuery.data?.totalPages || 1;
     const totalItems = historyQuery.data?.total || 0;
+    const currentStreak = Number(streakQuery.data?.current_streak || 0);
+    const longestStreak = Number(streakQuery.data?.longest_streak || 0);
+    const streakBadges = useMemo(() => (
+        STREAK_BADGE_TIERS.map((badge) => ({
+            ...badge,
+            unlocked: currentStreak >= badge.days
+        }))
+    ), [currentStreak]);
 
     const headerLabel = useMemo(() => {
         if (!totalItems) return 'No history found';
@@ -83,9 +123,51 @@ export default function ArenaHistoryPage() {
 
                 <div className="arena-history-layout">
                     <aside className="arena-history-left">
-                        <h2>Future Badges</h2>
-                        <p>This 40% panel is reserved for badge timeline and achievement integrations.</p>
-                        <div className="arena-history-badge-placeholder">Badge modules coming soon</div>
+                        <h2>Streak Badges</h2>
+                        <p>Consistency grows forests. Build daily check-ins to unlock sustainability milestones.</p>
+
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-2.5 py-1">
+                                <Flame className="w-3.5 h-3.5" />
+                                Current: {currentStreak}
+                            </span>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold px-2.5 py-1">
+                                <Trophy className="w-3.5 h-3.5" />
+                                Longest: {longestStreak}
+                            </span>
+                        </div>
+
+                        {streakQuery.isLoading ? (
+                            <div className="arena-history-badge-placeholder mt-4">Loading badges...</div>
+                        ) : streakQuery.isError ? (
+                            <div className="arena-history-badge-placeholder mt-4">Unable to load streak badges.</div>
+                        ) : (
+                            <div className="mt-4 grid grid-cols-2 gap-3">
+                                {streakBadges.map((badge, index) => {
+                                    const Icon = badge.icon;
+                                    return (
+                                        <motion.div
+                                            key={badge.days}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: index * 0.06 }}
+                                            whileHover={{ y: -2 }}
+                                            className={`group relative overflow-hidden rounded-xl border p-3 text-center ${badge.unlocked ? 'bg-white border-emerald-200 shadow-sm' : 'bg-slate-50 border-slate-200 opacity-85'}`}
+                                        >
+                                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/70 to-transparent -translate-x-[130%] group-hover:translate-x-[130%] transition-transform duration-700" />
+                                            <div className={`mx-auto mb-2 w-11 h-11 rounded-full flex items-center justify-center text-white bg-gradient-to-br ${badge.gradient}`}>
+                                                <Icon className="w-5 h-5" />
+                                            </div>
+                                            <p className="text-xs font-bold text-slate-800 leading-tight">{badge.label}</p>
+                                            <p className="text-[11px] text-slate-500 mt-1">{badge.days} days</p>
+                                            {!badge.unlocked && (
+                                                <p className="text-[10px] text-slate-400 mt-1">Locked</p>
+                                            )}
+                                        </motion.div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </aside>
 
                     <section className="arena-history-right">

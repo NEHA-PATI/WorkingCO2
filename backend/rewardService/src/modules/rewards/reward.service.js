@@ -403,58 +403,60 @@ const checkWeeklyMilestones = async (u_id) => {
 /* ===============================
    ARENA METADATA + STATUS
 ================================ */
-const getGroupedRules = async () => {
-  const rules = await repo.getAllActiveRules();
-
-  const grouped = {};
-
-  rules.forEach(rule => {
-    const {
-      rule_id,
-      action_key,
-      action_type,
-      points,
-      milestone_weeks,
-      max_points_per_day,
-      is_active
-    } = rule;
-
-    // 🔥 First time initialize object properly
-    if (!grouped[action_key]) {
-      grouped[action_key] = {
-        rule_id,       // ✅ add this
-        is_active      // ✅ add this
-      };
-    }
-
-    if (action_type === 'consistency') {
-
-      if (!grouped[action_key].consistency) {
-        grouped[action_key].consistency = {};
-      }
-
-      grouped[action_key].consistency[milestone_weeks] = points;
-
-    } else if (action_type === 'daily') {
-
-      grouped[action_key].daily = {
-        points_per_action: points,
-        max_per_day: max_points_per_day || null
-      };
-
-    } else {
-
-      grouped[action_key][action_type] = {
-        points
-      };
-    }
-  });
-
-  return grouped;
+const getArenaContestMetadata = async () => {
+  return await getTaskDefinitions();
 };
 
+const getArenaContestStatus = async (u_id) => {
+  const metadata = await getArenaContestMetadata();
+  const actionKeys = Array.from(new Set(metadata.map((task) => task.task_type)));
+  const completionRows = await repo.getContestTaskCompletions(u_id, actionKeys);
 
-const getLeaderboard = async (type = 'monthly') => {
+  return metadata.map((task) => {
+    const summary = getTaskSummaryFromCompletions(completionRows, task.task_type);
+
+    let completed = task.action_type === 'one_time' && summary.completionCount > 0;
+    let cooldownActive = false;
+    let nextAvailableAt = null;
+    let eligible = true;
+
+    if (task.task_type === DAILY_CHECKIN_KEY && summary.lastCompletedAt) {
+      const nextAvailableAtMs = new Date(summary.lastCompletedAt).getTime() + HOURS_24_MS;
+      if (Date.now() < nextAvailableAtMs) {
+        cooldownActive = true;
+        nextAvailableAt = new Date(nextAvailableAtMs).toISOString();
+      }
+
+      completed = false;
+      eligible = !cooldownActive;
+    }
+
+    return {
+      task_type: task.task_type,
+      action_type: task.action_type,
+      points: task.points,
+      required_score: task.required_score,
+      repeatable: task.repeatable,
+      completed,
+      cooldown_active: cooldownActive,
+      eligible,
+      last_completed_at: summary.lastCompletedAt,
+      next_available_at: nextAvailableAt
+    };
+  });
+};
+
+/* ===============================
+   LEADERBOARD
+================================ */
+const getLeaderboard = async (type = 'monthly', page = 1, limit = 10) => {
+  const safePage = Math.max(Number(page) || 1, 1);
+  const safeLimit = Math.min(Math.max(Number(limit) || 10, 1), 100);
+  const offset = (safePage - 1) * safeLimit;
+
+  let rows = [];
+  let total = 0;
+
   if (type === 'lifetime') {
     rows = await repo.getLifetimeLeaderboard(safeLimit, offset);
     total = await repo.getLifetimeLeaderboardCount();
@@ -466,7 +468,8 @@ const getLeaderboard = async (type = 'monthly') => {
   const items = rows.map((row) => ({
     rank: Number(row.rank),
     points: Number(row.total_points),
-    u_id: row.u_id
+    u_id: row.u_id,
+    username: row.username || row.u_id
   }));
 
   return {
@@ -478,7 +481,11 @@ const getLeaderboard = async (type = 'monthly') => {
   };
 };
 
-const getMyRank = async (u_id) => {
+const getMyRank = async (u_id, type = 'monthly') => {
+  if (type === 'lifetime') {
+    return await repo.getUserLifetimeRank(u_id);
+  }
+
   return await repo.getUserMonthlyRank(u_id);
 };
 
@@ -562,29 +569,85 @@ const getRewardHistory = async (u_id, page = 1, limit = 20) => {
   };
 };
 
-const getContestStats = async () => {
-  return await repo.getContestStats();
+/* ===============================
+   CATALOG + REDEEM
+================================ */
+const getRewardCatalog = async (page = 1, limit = 12) => {
+  const safePage = Math.max(Number(page) || 1, 1);
+  const safeLimit = Math.min(Math.max(Number(limit) || 12, 1), 50);
+  const offset = (safePage - 1) * safeLimit;
+
+  try {
+    const items = await repo.getRewardCatalogItems(safeLimit, offset);
+    const total = await repo.getRewardCatalogCount();
+
+    return {
+      items,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: Math.max(Math.ceil(total / safeLimit), 1)
+    };
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+
+    return {
+      items: [],
+      total: 0,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: 1
+    };
+  }
 };
 
-/* ===============================
-   CREATE RULE
-================================ */
-const createRule = async (data) => {
+const redeemReward = async (u_id, reward_id) => {
+  let reward;
+  try {
+    reward = await repo.getRewardById(reward_id);
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
 
-  // Optional validation logic
-  if (data.action_type === 'consistency' && !data.milestone_weeks) {
-    throw new Error("milestone_weeks required for consistency rule");
+    return {
+      redeemed: false,
+      reason: 'CATALOG_NOT_CONFIGURED'
+    };
   }
 
-  return await repo.createRule(data);
-};
+  if (!reward) {
+    return {
+      redeemed: false,
+      reason: 'REWARD_NOT_FOUND'
+    };
+  }
 
+  const availablePoints = await repo.getTotalPoints(u_id);
+  if (availablePoints < reward.points) {
+    return {
+      redeemed: false,
+      reason: 'INSUFFICIENT_POINTS',
+      required_points: reward.points,
+      current_points: availablePoints
+    };
+  }
 
-/* ===============================
-   UPDATE RULE
-================================ */
-const updateRule = async (rule_id, data) => {
-  return await repo.updateRule(rule_id, data);
+  await repo.insertRewardEvent({
+    u_id,
+    action_key: `redeem_${reward.reward_id}`,
+    action_type: 'one_time',
+    points: -Math.abs(toSafeNumber(reward.points, 0)),
+    activity_date: new Date()
+  });
+
+  return {
+    redeemed: true,
+    reward,
+    current_points: availablePoints - reward.points
+  };
 };
 
 module.exports = {
@@ -602,6 +665,8 @@ module.exports = {
   getStreakSummary,
   getTodayTaskStatus,
   getRewardHistory,
+  getRewardCatalog,
+  redeemReward,
   getContestStats,
   createRule,
   updateRule

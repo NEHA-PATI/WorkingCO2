@@ -19,16 +19,6 @@ app.get("/health", (req, res) => {
 
 const PORT = process.env.PORT || 5008;
 
-<<<<<<< HEAD
-app.listen(PORT, async () => {
-  console.log(`Reward service running on port ${PORT}`);
-
-  const dbConnected = await testConnection();
-  if (!dbConnected) {
-    console.warn('Reward service started, but database is not connected.');
-  }
-=======
 app.listen(PORT, () => {
   console.log(`🚀 Reward Service running on port ${PORT}`);
->>>>>>> 1ed5770f168d7936d2a29036dc5410d8e2f26d13
 });

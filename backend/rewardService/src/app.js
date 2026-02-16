@@ -1,9 +1,9 @@
 const express = require('express');
+const cors = require('cors');
 require('dotenv').config();
 
 const rewardRoutes = require('./modules/rewards/reward.routes');
 const quizRoutes = require('./modules/quiz/quiz.routes');
-const cors = require("cors");
 
 const errorMiddleware = require('./middlewares/error.middleware');
 
@@ -44,11 +44,16 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json());
 
-/* ===============================
-   API ROUTES
-================================ */
+// ✅ Versioned API
+app.get('/health', (_req, res) => {
+  res.json({
+    success: true,
+    service: 'reward-service',
+    status: 'ok',
+    timestamp: new Date().toISOString()
+  });
+});
 
-// Rewards
 app.use('/api/v1/rewards', rewardRoutes);
 
 app.use('/api/v1/quiz', quizRoutes);

@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Trophy, ChevronLeft, ChevronRight, Flame } from 'lucide-react';
 import '@features/arena/styles/arenaglobals.css';
-import arenaApi from '@features/arena/services/arenaApi';
+import arenaApi, { getArenaUserId } from '@features/arena/services/arenaApi';
 
 const PAGE_SIZE = 20;
 
-const toUserLabel = (uId, rank) => {
+const toUserLabel = (username, uId, rank) => {
+    if (username && String(username).trim()) return String(username).trim();
     if (!uId) return `User #${rank}`;
     return `User ${String(uId).slice(-8)}`;
 };
@@ -16,6 +17,7 @@ export default function ArenaLeaderboardPage() {
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const [type, setType] = useState('monthly');
+    const hasAuthUser = Boolean(getArenaUserId());
 
     const leaderboardQuery = useQuery({
         queryKey: ['arenaLeaderboardPage', type, page, PAGE_SIZE],
@@ -23,8 +25,9 @@ export default function ArenaLeaderboardPage() {
     });
 
     const myRankQuery = useQuery({
-        queryKey: ['arenaMyRank'],
-        queryFn: () => arenaApi.getMyRank()
+        queryKey: ['arenaMyRank', type],
+        queryFn: () => arenaApi.getMyRank({ type }),
+        enabled: hasAuthUser
     });
 
     const entries = leaderboardQuery.data?.data || [];
@@ -51,7 +54,7 @@ export default function ArenaLeaderboardPage() {
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div className="inline-flex items-center gap-2 text-slate-700 text-sm font-semibold">
                         <Trophy className="w-4 h-4 text-violet-600" />
-                        Your Rank: {myRankQuery.data ? `#${myRankQuery.data}` : '--'}
+                        Your Rank: {myRankQuery.data !== null && myRankQuery.data !== undefined ? `#${myRankQuery.data}` : '--'}
                     </div>
                     <div className="inline-flex rounded-lg border border-slate-200 overflow-hidden">
                         <button
@@ -98,7 +101,7 @@ export default function ArenaLeaderboardPage() {
                                     <span>#{entry.rank}</span>
                                     {entry.rank <= 3 && <Flame className="w-4 h-4 text-amber-500" />}
                                 </div>
-                                <div className="text-sm font-semibold text-slate-800">{toUserLabel(entry.u_id, entry.rank)}</div>
+                                <div className="text-sm font-semibold text-slate-800">{toUserLabel(entry.username, entry.u_id, entry.rank)}</div>
                                 <div className="text-right text-sm font-bold text-violet-700">
                                     {Number(entry.points || 0).toLocaleString()} pts
                                 </div>
