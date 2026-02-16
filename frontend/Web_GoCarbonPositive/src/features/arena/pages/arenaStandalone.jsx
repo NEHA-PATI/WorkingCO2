@@ -10,9 +10,9 @@ import {
 } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import a4 from "@features/arena/components/photos/a4.jpeg";
-import a5 from "@features/arena/components/photos/a5.jpeg";
-import a6 from "@features/arena/components/photos/a6.jpeg";
-import a7 from "@features/arena/components/photos/a7.jpeg";
+import a5 from "@features/arena/components/photos/a5.jpg";
+import a6 from "@features/arena/components/photos/a6.jpg";
+import a7 from "@features/arena/components/photos/a7.jpg";
 
 // Inline Styles
 const styles = `

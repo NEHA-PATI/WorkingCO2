@@ -121,15 +121,21 @@ const getGroupedRules = async () => {
 
   rules.forEach(rule => {
     const {
+      rule_id,
       action_key,
       action_type,
       points,
       milestone_weeks,
-      max_points_per_day
+      max_points_per_day,
+      is_active
     } = rule;
 
+    // 🔥 First time initialize object properly
     if (!grouped[action_key]) {
-      grouped[action_key] = {};
+      grouped[action_key] = {
+        rule_id,       // ✅ add this
+        is_active      // ✅ add this
+      };
     }
 
     if (action_type === 'consistency') {
@@ -157,6 +163,7 @@ const getGroupedRules = async () => {
 
   return grouped;
 };
+
 
 const getLeaderboard = async (type = 'monthly') => {
   if (type === 'lifetime') {
@@ -203,6 +210,30 @@ const getRewardHistory = async (u_id, page = 1, limit = 20) => {
   return await repo.getUserRewardHistory(u_id, limit, offset);
 };
 
+const getContestStats = async () => {
+  return await repo.getContestStats();
+};
+
+/* ===============================
+   CREATE RULE
+================================ */
+const createRule = async (data) => {
+
+  // Optional validation logic
+  if (data.action_type === 'consistency' && !data.milestone_weeks) {
+    throw new Error("milestone_weeks required for consistency rule");
+  }
+
+  return await repo.createRule(data);
+};
+
+
+/* ===============================
+   UPDATE RULE
+================================ */
+const updateRule = async (rule_id, data) => {
+  return await repo.updateRule(rule_id, data);
+};
 
 module.exports = {
   awardOneTime,
@@ -213,6 +244,9 @@ module.exports = {
   getMyRank,
   getCurrentStreak,
   getTodayTaskStatus,
-  getRewardHistory
+  getRewardHistory,
+  getContestStats,
+  createRule,
+  updateRule
 
 };
