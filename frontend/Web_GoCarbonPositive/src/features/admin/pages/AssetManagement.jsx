@@ -57,10 +57,11 @@ const getStatusUpdateUrl = (asset) => {
 
 const getDetailsUrl = (asset) => {
   if (asset.submittedByType === "organisation") {
-    return `/api/assets/tree/${asset.id}/details`; // temporary
+    return `/api/org-assets/${asset.id}/details`; // ✅ UUID safe
   }
-  return `/api/assets/${asset.assetType}/${asset.id}/details`;
+  return `/api/assets/${asset.assetType}/${asset.id}/details`; // user assets
 };
+
 
 
 
@@ -111,6 +112,9 @@ const getDetailsUrl = (asset) => {
       status,
       submittedBy: a.u_id,
       submittedOn: new Date(a.submitted_on).toLocaleDateString(),
+
+       // 🔥 THIS LINE IS MANDATORY
+  submittedByType: (a.submittedbytype || "individual").toLowerCase(),
     };
   })
 );
@@ -119,7 +123,7 @@ const getDetailsUrl = (asset) => {
         setApprovedAssets(
   approvedRes.data.map((a, index) => ({
     id: a.id,
-    _uiKey: `approved-${a.type}-${a.id}-${a.u_id}-${index}`, // ✅ ADD THIS
+    _uiKey: `approved-${a.type}-${a.id}-${a.u_id}-${index}`,
     assetType:
       a.type === "EV"
         ? "ev"
@@ -135,9 +139,13 @@ const getDetailsUrl = (asset) => {
     status: "Approved",
     submittedBy: a.u_id,
     submittedOn: new Date(a.created_at).toLocaleDateString(),
-    submittedByType: a.submittedByType || "individual",
+
+    // ✅ THIS IS THE KEY FIX
+    submittedByType:
+      (a.submittedByType || a.submittedbytype || "individual").toLowerCase(),
   }))
 );
+
 
 
 
@@ -178,49 +186,76 @@ const getDetailsUrl = (asset) => {
   };
 
   /* ---------- MODAL / WORKFLOW HANDLERS ---------- */
-  const openReviewModal = async (asset) => {
-    try {
-     const res = await axios.get(getDetailsUrl(asset));
+const openReviewModal = async (asset) => {
+  try {
+    const res = await axios.get(getDetailsUrl(asset));
+    const data = res.data;
 
+    // ✅ ORGANISATION TREE ASSET
+    if (asset.submittedByType === "organisation") {
       setSelectedAsset({
         ...asset,
 
-        // EV
-        vehicleCategory: res.data.category,
-        manufacturer: res.data.manufacturers,
-        model: res.data.model,
-        purchaseYear: res.data.purchase_year,
-        energyConsumed: res.data.energy_consumed,
-        primaryChargingType: res.data.primary_charging_type,
-        range: res.data.range,
-        gridEmissionFactor: res.data.grid_emission_factor,
-        topSpeed: res.data.top_speed,
-        chargingTime: res.data.charging_time,
-        motorPower: res.data.motor_power,
+        // Map org plantation → popup fields
+        treeName: data.species_name,
+        botanicalName: data.species_name, // (agar alag column nahi hai)
+        plantingDate: data.plantation_date
+          ? new Date(data.plantation_date).toLocaleDateString()
+          : "-",
+        height: data.avg_height,
+        dbh: data.avg_dbh,
+        location: `${data.location_lat}, ${data.location_long}`,
+        createdBy: data.u_id,
 
-        // Tree
-        treeName: res.data.treename,
-        botanicalName: res.data.botanicalname,
-        plantingDate: res.data.plantingdate,
-        height: res.data.height,
-        dbh: res.data.dbh,
-        location: res.data.location,
-        createdBy: res.data.created_by,
-        treeImages: res.data.images || res.data.tree_images || [],
-
-        // Solar
-        installedCapacity: res.data.installed_capacity,
-        installationDate: res.data.installation_date,
-        energyGenerationValue: res.data.energy_generation_value,
-        solarGridEmissionFactor: res.data.grid_emission_factor,
-        inverterType: res.data.inverter_type,
+        // org assets me images optional
+        treeImages: [],
       });
 
       setReviewModalOpen(true);
-    } catch (err) {
-      console.error("Failed to load asset details", err);
+      return;
     }
-  };
+
+    // ✅ USER ASSETS (EV / TREE / SOLAR)
+    setSelectedAsset({
+      ...asset,
+
+      // EV
+      vehicleCategory: data.category,
+      manufacturer: data.manufacturers,
+      model: data.model,
+      purchaseYear: data.purchase_year,
+      energyConsumed: data.energy_consumed,
+      primaryChargingType: data.primary_charging_type,
+      range: data.range,
+      gridEmissionFactor: data.grid_emission_factor,
+      topSpeed: data.top_speed,
+      chargingTime: data.charging_time,
+      motorPower: data.motor_power,
+
+      // Tree
+      treeName: data.treename,
+      botanicalName: data.botanicalname,
+      plantingDate: data.plantingdate,
+      height: data.height,
+      dbh: data.dbh,
+      location: data.location,
+      createdBy: data.created_by,
+      treeImages: data.images || data.tree_images || [],
+
+      // Solar
+      installedCapacity: data.installed_capacity,
+      installationDate: data.installation_date,
+      energyGenerationValue: data.energy_generation_value,
+      solarGridEmissionFactor: data.grid_emission_factor,
+      inverterType: data.inverter_type,
+    });
+
+    setReviewModalOpen(true);
+  } catch (err) {
+    console.error("Failed to load asset details", err);
+  }
+};
+
 
   const closeReviewModal = () => {
     setReviewModalOpen(false);

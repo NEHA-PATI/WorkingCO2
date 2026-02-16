@@ -1,0 +1,74 @@
+.admin-layout-shell {
+  --admin-sidebar-width: 280px;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: calc(100vh - var(--navbar-height, 72px));
+  padding: 1rem;
+  box-sizing: border-box;
+  background: #f8fafc;
+}
+
+.admin-layout-sidebar {
+  width: var(--admin-sidebar-width);
+  min-width: var(--admin-sidebar-width);
+  max-width: var(--admin-sidebar-width);
+  flex: 0 0 var(--admin-sidebar-width);
+}
+
+.admin-layout-resizer {
+  width: 10px;
+  flex: 0 0 10px;
+  cursor: col-resize;
+  position: relative;
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.admin-layout-resizer::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 4px;
+  width: 2px;
+  border-radius: 999px;
+  background: #cbd5e1;
+  transition: background-color 0.2s ease;
+}
+
+.admin-layout-resizer:hover::before,
+.admin-layout-shell.is-resizing .admin-layout-resizer::before,
+.admin-layout-resizer:focus-visible::before {
+  background: #16a34a;
+}
+
+.admin-layout-resizer:focus-visible {
+  outline: none;
+}
+
+.admin-layout-content {
+  flex: 1;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+@media (max-width: 1024px) {
+  .admin-layout-shell {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .admin-layout-sidebar {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .admin-layout-resizer {
+    display: none;
+  }
+}

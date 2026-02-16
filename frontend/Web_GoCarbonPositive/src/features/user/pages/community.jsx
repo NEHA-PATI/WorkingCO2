@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { 
   FaFire, 
   FaComments, 
@@ -24,10 +24,25 @@ import {
   FaChevronDown
 } from "react-icons/fa"
 
+
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedGroup, setSelectedGroup] = useState("all")
+  const [viewportWidth, setViewportWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1200
+  )
+
+  useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth)
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
+  const isMobile = viewportWidth <= 768
+  const isSmallMobile = viewportWidth <= 480
+  const isTablet = viewportWidth <= 1024
+  const communityJoinLink = "https://chat.whatsapp.com/Er0bkEnZG6O7WRjLu3AOBT"
 
   // Community Groups
   const communityGroups = [
@@ -189,11 +204,11 @@ export default function CommunityPage() {
   return (
     <div style={styles.container}>
       {/* Hero Section */}
-      <div style={styles.heroSection}>
-        <div style={styles.heroContainer}>
-          <div style={styles.heroContent}>
-            <h1 style={styles.heroTitle}>Carbon Positive Community</h1>
-            <p style={styles.heroDescription}>
+      <div style={{ ...styles.heroSection, ...(isMobile ? styles.heroSectionMobile : {}) }}>
+        <div style={{ ...styles.heroContainer, ...(isMobile ? styles.heroContainerMobile : {}) }}>
+          <div style={{ ...styles.heroContent, ...(isMobile ? styles.heroContentMobile : {}) }}>
+            <h1 style={{ ...styles.heroTitle, ...(isMobile ? styles.heroTitleMobile : {}) }}>Carbon Positive Community</h1>
+            <p style={{ ...styles.heroDescription, ...(isMobile ? styles.heroDescriptionMobile : {}) }}>
               Join our thriving global community to connect with like-minded members, share knowledge, 
               and discover sustainable solutions for a carbon-positive future.
             </p>
@@ -202,7 +217,7 @@ export default function CommunityPage() {
             <img 
               src="/GoCarbonPositive_LOGO.svg" 
               alt="Carbon Positive Logo" 
-              style={styles.heroLogo}
+              style={{ ...styles.heroLogo, ...(isMobile ? styles.heroLogoMobile : {}) }}
             />
           </div>
         </div>
@@ -215,14 +230,46 @@ export default function CommunityPage() {
             placeholder="Search discussions, topics, or members..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={styles.searchInput}
+            style={{ ...styles.searchInput, ...(isSmallMobile ? styles.searchInputSmallMobile : {}) }}
           />
         </div>
       </div>
 
+      {/* Join Community Banner */}
+      <div style={{ ...styles.joinBannerSection, ...(isMobile ? styles.joinBannerSectionMobile : {}) }}>
+        <div
+          style={{ ...styles.joinBannerCard, ...(isMobile ? styles.joinBannerCardMobile : {}) }}
+          onClick={() => window.open(communityJoinLink, "_blank", "noopener,noreferrer")}
+        >
+          <div style={styles.joinBannerContent}>
+            <h2 style={{ ...styles.joinBannerTitle, ...(isMobile ? styles.joinBannerTitleMobile : {}) }}>Join Our Community</h2>
+            <p style={{ ...styles.joinBannerDescription, ...(isMobile ? styles.joinBannerDescriptionMobile : {}) }}>
+              Be part of a growing network focused on sustainability, collaboration, and real climate impact.
+              Scan the QR code to join instantly.
+            </p>
+          </div>
+          <div style={styles.joinBannerQrSection}>
+            <div style={{ ...styles.joinBannerQrBox, ...(isMobile ? styles.joinBannerQrBoxMobile : {}) }}>
+              <img
+                src="/Join%20our%20community.jpg.jpeg"
+                alt="Community join QR code"
+                style={styles.joinBannerQrImage}
+                onError={(e) => {
+                  e.currentTarget.style.display = "none"
+                  const fallback = e.currentTarget.nextElementSibling
+                  if (fallback) fallback.style.display = "flex"
+                }}
+              />
+              <div style={styles.joinBannerQrFallback}>QR</div>
+            </div>
+            <span style={styles.joinBannerQrLabel}>Scan me</span>
+          </div>
+        </div>
+      </div>
+
       {/* Community Highlights */}
-      <div style={styles.summarySection}>
-        <div style={styles.summaryGrid}>
+      <div style={{ ...styles.summarySection, ...(isTablet ? styles.summarySectionTablet : {}), ...(isSmallMobile ? styles.summarySectionSmallMobile : {}) }}>
+        <div style={{ ...styles.summaryGrid, ...(isMobile ? styles.summaryGridMobile : {}) }}>
           <div style={styles.summaryCard}>
             <div style={styles.summaryHeader}>
               <FaChartLine style={styles.summaryHeaderIcon} />
@@ -326,12 +373,12 @@ export default function CommunityPage() {
       </div>
 
       {/* Community Groups Section */}
-      <div style={styles.groupsSection}>
+      <div style={{ ...styles.groupsSection, ...(isTablet ? styles.groupsSectionTablet : {}), ...(isSmallMobile ? styles.groupsSectionSmallMobile : {}) }}>
         <div style={styles.sectionHeader}>
           <h2 style={styles.sectionTitle}>Community Groups</h2>
           <p style={styles.sectionSubtitle}>Choose your community to connect with the right people</p>
         </div>
-        <div style={styles.groupsGrid}>
+        <div style={{ ...styles.groupsGrid, ...(isMobile ? styles.groupsGridMobile : {}) }}>
           {communityGroups.map((group) => (
             <div 
               key={group.id} 
@@ -347,12 +394,12 @@ export default function CommunityPage() {
               </div>
               <h3 style={styles.groupName}>{group.name}</h3>
               <p style={styles.groupDescription}>{group.description}</p>
-              <div style={styles.groupStats}>
-                <div style={styles.groupStat}>
+              <div style={{ ...styles.groupStats, ...(isSmallMobile ? styles.groupStatsSmallMobile : {}) }}>
+                <div style={{ ...styles.groupStat, ...(isSmallMobile ? styles.groupStatSmallMobile : {}) }}>
                   <FaUsers style={{color: group.color, fontSize: '16px'}} />
                   <span>{group.members.toLocaleString()} members</span>
                 </div>
-                <div style={styles.groupStat}>
+                <div style={{ ...styles.groupStat, ...(isSmallMobile ? styles.groupStatSmallMobile : {}) }}>
                   <FaComment style={{color: group.color, fontSize: '16px'}} />
                   <span>{group.posts} posts</span>
                 </div>
@@ -363,12 +410,12 @@ export default function CommunityPage() {
       </div>
 
       {/* Main Content Area */}
-      <div style={styles.mainContent}>
+      <div style={{ ...styles.mainContent, ...(isTablet ? styles.mainContentTablet : {}), ...(isSmallMobile ? styles.mainContentSmallMobile : {}) }}>
         <div style={styles.contentGrid}>
           {/* Left Content */}
           <div style={styles.leftContent}>
             {/* Navigation Tabs */}
-            <div style={styles.tabsContainer}>
+            <div style={{ ...styles.tabsContainer, ...(isMobile ? styles.tabsContainerMobile : {}) }}>
               {[
                 { id: "all", label: "All Discussions", icon: <FaFire /> },
                 { id: "trending", label: "Trending", icon: <FaFire /> },
@@ -381,6 +428,7 @@ export default function CommunityPage() {
                   onClick={() => setActiveTab(tab.id)}
                   style={{
                     ...styles.tabButton,
+                    ...(isMobile ? styles.tabButtonMobile : {}),
                     ...(activeTab === tab.id ? styles.tabButtonActive : {})
                   }}
                 >
@@ -388,8 +436,8 @@ export default function CommunityPage() {
                   <span style={styles.tabLabel}>{tab.label}</span>
                 </button>
               ))}
-              <details style={styles.categoryDropdown}>
-                <summary style={styles.categoryDropdownSummary}>
+              <details style={{ ...styles.categoryDropdown, ...(isMobile ? styles.categoryDropdownMobile : {}) }}>
+                <summary style={{ ...styles.categoryDropdownSummary, ...(isMobile ? styles.categoryDropdownSummaryMobile : {}) }}>
                   <FaBell />
                   <span style={styles.tabLabel}>Categories</span>
                   <FaChevronDown style={styles.dropdownIcon} />
@@ -423,15 +471,15 @@ export default function CommunityPage() {
             )}
 
             {/* Topics List */}
-            <div style={styles.topicsSection}>
-              <div style={styles.topicsHeader}>
-                <h2 style={styles.topicsTitle}>
+            <div style={{ ...styles.topicsSection, ...(isMobile ? styles.topicsSectionMobile : {}) }}>
+              <div style={{ ...styles.topicsHeader, ...(isSmallMobile ? styles.topicsHeaderSmallMobile : {}) }}>
+                <h2 style={{ ...styles.topicsTitle, ...(isSmallMobile ? styles.topicsTitleSmallMobile : {}) }}>
                   {activeTab === "all" ? "Latest Discussions" : 
                    activeTab === "trending" ? "Trending Topics" : 
                    activeTab === "discussions" ? "Active Discussions" :
                    activeTab === "questions" ? "Recent Questions" : "Knowledge Resources"}
                 </h2>
-                <button style={styles.newPostButton}>
+                <button style={{ ...styles.newPostButton, ...(isSmallMobile ? styles.newPostButtonSmallMobile : {}) }}>
                   <FaRocket style={{marginRight: '8px'}} />
                   Start Discussion
                 </button>
@@ -439,13 +487,13 @@ export default function CommunityPage() {
 
               <div style={styles.topicsList}>
                 {filteredTopics.map((topic) => (
-                  <div key={topic.id} style={styles.topicCard}>
+                  <div key={topic.id} style={{ ...styles.topicCard, ...(isSmallMobile ? styles.topicCardSmallMobile : {}) }}>
                     <div style={styles.topicAvatar}>{topic.authorAvatar}</div>
                     <div style={styles.topicContent}>
-                      <div style={styles.topicHeader}>
+                      <div style={{ ...styles.topicHeader, ...(isSmallMobile ? styles.topicHeaderSmallMobile : {}) }}>
                         <div style={styles.topicHeaderLeft}>
-                          <h3 style={styles.topicTitle}>{topic.title}</h3>
-                          <div style={styles.topicMeta}>
+                          <h3 style={{ ...styles.topicTitle, ...(isSmallMobile ? styles.topicTitleSmallMobile : {}) }}>{topic.title}</h3>
+                          <div style={{ ...styles.topicMeta, ...(isSmallMobile ? styles.topicMetaSmallMobile : {}) }}>
                             <span style={styles.topicAuthor}>{topic.author}</span>
                             <span style={styles.metaSeparator}>•</span>
                             <span style={styles.topicLevel}>{topic.level}</span>
@@ -459,7 +507,7 @@ export default function CommunityPage() {
                               {topic.date}
                             </span>
                           </div>
-                          <div style={styles.tagsContainer}>
+                          <div style={{ ...styles.tagsContainer, ...(isSmallMobile ? styles.tagsContainerSmallMobile : {}) }}>
                             <span style={styles.categoryBadge}>{topic.category}</span>
                             {topic.tags.map((tag, idx) => (
                               <span key={idx} style={styles.tag}>{tag}</span>
@@ -480,7 +528,7 @@ export default function CommunityPage() {
                           )}
                         </div>
                       </div>
-                      <div style={styles.topicStats}>
+                      <div style={{ ...styles.topicStats, ...(isSmallMobile ? styles.topicStatsSmallMobile : {}) }}>
                         <div style={styles.stat}>
                           <FaEye style={styles.statIconSmall} />
                           <span>{topic.views}</span>
@@ -525,6 +573,9 @@ const styles = {
     padding: '48px 24px',
     borderBottom: '2px solid #10b981',
   },
+  heroSectionMobile: {
+    padding: '28px 16px',
+  },
   heroContainer: {
     maxWidth: '1400px',
     margin: '0 auto 32px',
@@ -533,9 +584,18 @@ const styles = {
     alignItems: 'center',
     gap: '48px',
   },
+  heroContainerMobile: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '20px',
+    marginBottom: '20px',
+  },
   heroContent: {
     flex: '1',
     maxWidth: '700px',
+  },
+  heroContentMobile: {
+    maxWidth: '100%',
   },
   heroTitle: {
     fontSize: '3rem',
@@ -544,11 +604,18 @@ const styles = {
     marginBottom: '16px',
     lineHeight: '1.2',
   },
+  heroTitleMobile: {
+    fontSize: '2rem',
+  },
   heroDescription: {
     fontSize: '1.125rem',
     color: '#ffffff',
     marginBottom: '32px',
     lineHeight: '1.7',
+  },
+  heroDescriptionMobile: {
+    fontSize: '1rem',
+    marginBottom: '0',
   },
   heroStats: {
     display: 'flex',
@@ -580,6 +647,9 @@ const styles = {
     width: '160px',
     height: 'auto',
   },
+  heroLogoMobile: {
+    width: '120px',
+  },
   searchContainer: {
     maxWidth: '1400px',
     margin: '0 auto',
@@ -603,6 +673,102 @@ const styles = {
     backgroundColor: '#ffffff',
     transition: 'all 0.3s ease',
   },
+  searchInputSmallMobile: {
+    fontSize: '16px',
+  },
+  joinBannerSection: {
+    maxWidth: '1100px',
+    margin: '24px auto 8px',
+    padding: '0 24px',
+  },
+  joinBannerSectionMobile: {
+    margin: '18px auto 8px',
+    padding: '0 16px',
+  },
+  joinBannerCard: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    gap: '12px',
+    backgroundColor: '#ffffff',
+    border: '2px solid #10b981',
+    borderRadius: '16px',
+    padding: '22px 24px',
+  },
+  joinBannerCardMobile: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '16px',
+    padding: '20px',
+  },
+  joinBannerContent: {
+    flex: '1',
+  },
+  joinBannerTitle: {
+    fontSize: '1.5rem',
+    fontWeight: '800',
+    color: '#065f46',
+    marginBottom: '10px',
+  },
+  joinBannerTitleMobile: {
+    fontSize: '1.9rem',
+  },
+  joinBannerDescription: {
+    fontSize: '0.95rem',
+    color: '#4b5563',
+    lineHeight: '1.7',
+    maxWidth: '720px',
+  },
+  joinBannerDescriptionMobile: {
+    fontSize: '0.9rem',
+    maxWidth: '100%',
+  },
+  joinBannerQrSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '8px',
+    flexShrink: '0',
+  },
+  joinBannerQrBox: {
+    width: '156px',
+    height: '156px',
+    border: '2px solid #38b000',
+    borderRadius: '10px',
+    backgroundColor: '#ffffff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  joinBannerQrBoxMobile: {
+    width: '140px',
+    height: '140px',
+  },
+  joinBannerQrImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    display: 'block',
+  },
+  joinBannerQrFallback: {
+    display: 'none',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '1.4rem',
+    fontWeight: '700',
+    color: '#065f46',
+    backgroundColor: '#f0fdf4',
+  },
+  joinBannerQrLabel: {
+    fontSize: '0.875rem',
+    fontWeight: '700',
+    color: '#047857',
+    textTransform: 'uppercase',
+    letterSpacing: '0.4px',
+  },
 
   // Community Highlights
   summarySection: {
@@ -610,12 +776,22 @@ const styles = {
     margin: '32px auto 16px',
     padding: '0 24px',
   },
+  summarySectionTablet: {
+    padding: '0 16px',
+  },
+  summarySectionSmallMobile: {
+    padding: '0 12px',
+  },
   summaryGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
     gap: '24px',
     alignItems: 'stretch',
     gridAutoRows: '1fr',
+  },
+  summaryGridMobile: {
+    gridTemplateColumns: '1fr',
+    gap: '16px',
   },
   summaryCard: {
     backgroundColor: '#f9fafb',
@@ -679,6 +855,13 @@ const styles = {
     margin: '48px auto',
     padding: '0 24px',
   },
+  groupsSectionTablet: {
+    padding: '0 16px',
+    margin: '32px auto',
+  },
+  groupsSectionSmallMobile: {
+    padding: '0 12px',
+  },
   sectionHeader: {
     textAlign: 'center',
     marginBottom: '32px',
@@ -697,6 +880,9 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
     gap: '24px',
+  },
+  groupsGridMobile: {
+    gridTemplateColumns: '1fr',
   },
   groupCard: {
     backgroundColor: '#ffffff',
@@ -732,6 +918,10 @@ const styles = {
     display: 'flex',
     gap: '24px',
   },
+  groupStatsSmallMobile: {
+    flexDirection: 'column',
+    gap: '10px',
+  },
   groupStat: {
     display: 'flex',
     alignItems: 'center',
@@ -739,12 +929,21 @@ const styles = {
     fontSize: '0.875rem',
     color: '#4b5563',
   },
+  groupStatSmallMobile: {
+    width: '100%',
+  },
 
   // Main Content
   mainContent: {
     maxWidth: '100%',
     margin: '0 auto 48px',
     padding: '0 24px',
+  },
+  mainContentTablet: {
+    padding: '0 16px',
+  },
+  mainContentSmallMobile: {
+    padding: '0 12px',
   },
   contentGrid: {
     display: 'grid',
@@ -769,6 +968,12 @@ const styles = {
     overflow: 'visible',
     alignItems: 'center',
   },
+  tabsContainerMobile: {
+    display: 'flex',
+    overflowX: 'auto',
+    overflowY: 'hidden',
+    WebkitOverflowScrolling: 'touch',
+  },
   tabButton: {
     display: 'flex',
     alignItems: 'center',
@@ -787,6 +992,11 @@ const styles = {
     width: '100%',
     lineHeight: '1',
   },
+  tabButtonMobile: {
+    flex: '0 0 auto',
+    width: 'auto',
+    padding: '10px 14px',
+  },
   tabButtonActive: {
     backgroundColor: '#38b000',
     color: '#ffffff',
@@ -798,6 +1008,10 @@ const styles = {
   categoryDropdown: {
     position: 'relative',
     width: '100%',
+  },
+  categoryDropdownMobile: {
+    width: 'auto',
+    flex: '0 0 auto',
   },
   categoryDropdownSummary: {
     listStyle: 'none',
@@ -816,6 +1030,10 @@ const styles = {
     justifyContent: 'center',
     width: '100%',
     lineHeight: '1',
+  },
+  categoryDropdownSummaryMobile: {
+    width: 'auto',
+    padding: '10px 14px',
   },
   dropdownIcon: {
     fontSize: '12px',
@@ -877,6 +1095,9 @@ const styles = {
     border: '1px solid #e5e7eb',
     padding: '24px',
   },
+  topicsSectionMobile: {
+    padding: '16px',
+  },
   topicsHeader: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -885,10 +1106,17 @@ const styles = {
     flexWrap: 'wrap',
     gap: '16px',
   },
+  topicsHeaderSmallMobile: {
+    alignItems: 'flex-start',
+    gap: '10px',
+  },
   topicsTitle: {
     fontSize: '1.5rem',
     fontWeight: '700',
     color: '#111827',
+  },
+  topicsTitleSmallMobile: {
+    fontSize: '1.3rem',
   },
   newPostButton: {
     display: 'flex',
@@ -903,6 +1131,10 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.2s ease',
   },
+  newPostButtonSmallMobile: {
+    padding: '8px 14px',
+    fontSize: '0.8rem',
+  },
   topicsList: {
     display: 'flex',
     flexDirection: 'column',
@@ -916,6 +1148,9 @@ const styles = {
     border: '1px solid #e5e7eb',
     borderRadius: '12px',
     transition: 'all 0.2s ease',
+  },
+  topicCardSmallMobile: {
+    padding: '14px',
   },
   topicAvatar: {
     fontSize: '2.5rem',
@@ -932,6 +1167,11 @@ const styles = {
     marginBottom: '12px',
     gap: '16px',
   },
+  topicHeaderSmallMobile: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '10px',
+  },
   topicHeaderLeft: {
     flex: '1',
     minWidth: '0',
@@ -942,6 +1182,11 @@ const styles = {
     color: '#111827',
     marginBottom: '8px',
     lineHeight: '1.4',
+    wordBreak: 'break-word',
+    overflowWrap: 'anywhere',
+  },
+  topicTitleSmallMobile: {
+    fontSize: '1rem',
   },
   topicMeta: {
     display: 'flex',
@@ -951,6 +1196,10 @@ const styles = {
     fontSize: '0.813rem',
     color: '#6b7280',
     marginBottom: '12px',
+  },
+  topicMetaSmallMobile: {
+    fontSize: '0.76rem',
+    gap: '6px',
   },
   topicAuthor: {
     fontWeight: '600',
@@ -975,6 +1224,9 @@ const styles = {
     display: 'flex',
     flexWrap: 'wrap',
     gap: '8px',
+  },
+  tagsContainerSmallMobile: {
+    gap: '6px',
   },
   categoryBadge: {
     padding: '4px 10px',
@@ -1020,6 +1272,10 @@ const styles = {
   topicStats: {
     display: 'flex',
     gap: '20px',
+  },
+  topicStatsSmallMobile: {
+    flexWrap: 'wrap',
+    gap: '12px',
   },
   stat: {
     display: 'flex',

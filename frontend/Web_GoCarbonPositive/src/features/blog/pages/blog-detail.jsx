@@ -12,10 +12,10 @@ import {
   TrendingUp,
   Loader2,
 } from "lucide-react";
-import { PortableText } from "@portabletext/react";
-
+import BlogBlockRenderer from "@features/blog/components/content/BlogBlockRenderer";
 
 import "@features/blog/styles/blog-detail.css";
+import "@features/blog/styles/blog-content-blocks.css";
 import blogService from "@features/blog/services/blogService";
 import { fireToast } from "@shared/utils/toastService";
 
@@ -29,22 +29,6 @@ const CATEGORY_COLORS = {
 
 const getCategoryColor = (categoryName) => {
   return CATEGORY_COLORS[categoryName?.toUpperCase()] || "#2ecc71";
-};
-
-const portableTextComponents = {
-  block: {
-    h1: ({ children }) => <h2 className="blog-h2">{children}</h2>,
-    h2: ({ children }) => <h2 className="blog-h2">{children}</h2>,
-    h3: ({ children }) => <h3 className="blog-h3">{children}</h3>,
-    normal: ({ children }) => <p className="blog-paragraph">{children}</p>,
-    blockquote: ({ children }) => (
-      <blockquote className="blog-blockquote">{children}</blockquote>
-    ),
-  },
-  list: {
-    bullet: ({ children }) => <ul className="blog-list-bullet">{children}</ul>,
-    number: ({ children }) => <ol className="blog-list-number">{children}</ol>,
-  },
 };
 
 export default function BlogDetailPage() {
@@ -255,10 +239,7 @@ export default function BlogDetailPage() {
         <article className="blog-article">
           <div className="blog-article-content">
             {blog.content && (
-              <PortableText
-                value={blog.content}
-                components={portableTextComponents}
-              />
+              <BlogBlockRenderer content={blog.content} />
             )}
           </div>
         </article>

@@ -1,5 +1,5 @@
 const express = require("express");
-const sendOTP = require("../../authentication/utils/sendOTP");
+const { sendMail, MAIL_TYPES } = require("../services/mail");
 
 const router = express.Router();
 
@@ -15,11 +15,11 @@ router.post("/send-otp", async (req, res) => {
       });
     }
 
-    const result = await sendOTP(email, otp);
-
-    if (!result.success) {
-      return res.status(500).json(result);
-    }
+    await sendMail({
+      type: MAIL_TYPES.OTP,
+      to: email,
+      data: { otp },
+    });
 
     res.status(200).json({
       success: true,
