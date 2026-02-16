@@ -324,7 +324,8 @@ exports.getLeaderboard = async (req, res, next) => {
 ================================ */
 exports.getMyRank = async (req, res, next) => {
   try {
-    const rank = await service.getMyRank(req.u_id);
+    const { type } = req.query;
+    const rank = await service.getMyRank(req.u_id, type);
 
     res.json({
       success: true,

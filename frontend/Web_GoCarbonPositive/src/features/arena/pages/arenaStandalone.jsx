@@ -12,8 +12,7 @@ import {
     UserPlus, ClipboardList, Linkedin, Instagram, Users, CalendarCheck, Gamepad2, Brain, Clock
 } from 'lucide-react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { ENV } from '@config/env';
-import arenaApi from '@features/arena/services/arenaApi';
+import arenaApi, { getArenaUserId } from '@features/arena/services/arenaApi';
 import { useCountdown } from '@features/arena/hooks/useCountdown';
 import a4 from "@features/arena/components/photos/a4.jpeg";
 import a5 from "@features/arena/components/photos/a5.jpg";
@@ -146,7 +145,7 @@ const DEFAULT_THEME = {
 const CONTEST_UI_CONFIG = {
     sign_up: {
         title: "Sign Up Bonus",
-        description: "One-time signup reward from rewards configuration",
+        description: "One-time signup reward",
         icon: "UserPlus",
         buttonText: "Claim Bonus",
         rules: ["Configured from backend reward rules", "One-time task"],
@@ -278,16 +277,6 @@ const humanizeTaskType = (taskType) => taskType
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (char) => char.toUpperCase());
 
-const getStoredUserId = () => {
-    try {
-        const raw = localStorage.getItem('authUser');
-        const parsed = raw ? JSON.parse(raw) : null;
-        return parsed?.u_id || ENV.DEFAULT_USER_ID || null;
-    } catch {
-        return ENV.DEFAULT_USER_ID || null;
-    }
-};
-
 const getErrorMessage = (error, fallback = 'Something went wrong') => {
     const backendMessage = error?.response?.data?.message;
     const backendReason = error?.response?.data?.data?.reason;
@@ -298,11 +287,11 @@ const getErrorMessage = (error, fallback = 'Something went wrong') => {
 };
 
 const rankEmoji = (rank) => {
-    if (rank === 1) return '🏆';
-    if (rank === 2) return '🔥';
-    if (rank === 3) return '⚡';
-    if (rank <= 10) return '🌟';
-    return '✨';
+    if (rank === 1) return '\u{1F3C6}';
+    if (rank === 2) return '\u{1F525}';
+    if (rank === 3) return '\u26A1';
+    if (rank <= 10) return '\u{1F31F}';
+    return '\u2728';
 };
 
 const isScoreTask = (contest) => {
@@ -415,166 +404,194 @@ const HeroSlider = () => {
     );
 };
 
-// MilestoneTracker Component
-const MilestoneTracker = ({ currentStreak, longestStreak, lastCheckinDate }) => {
-    const today = new Date();
-    const currentDay = today.getDate();
-    const currentMonth = today.toLocaleString('default', { month: 'short' }).toUpperCase();
-    const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const STREAK_WINDOW_DAYS = 30;
+const STREAK_BONUS_TIERS = [
+    { days: 7, points: 75 },
+    { days: 14, points: 150 },
+    { days: 30, points: 250 }
+];
 
-    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
+const StreakProgressPanel = ({
+    currentStreak,
+    longestStreak,
+    lastCheckinDate,
+    isLoading,
+    isError,
+    errorMessage
+}) => {
+    const [days, setDays] = useState([]);
+    const safeCurrentStreak = Math.max(Number(currentStreak) || 0, 0);
+    const safeLongestStreak = Math.max(Number(longestStreak) || 0, 0);
+    const nextBonusTier = STREAK_BONUS_TIERS.find((tier) => safeCurrentStreak < tier.days) || null;
+    const progressTarget = nextBonusTier ? nextBonusTier.days : STREAK_BONUS_TIERS[STREAK_BONUS_TIERS.length - 1].days;
+    const progressValue = Math.min(safeCurrentStreak, progressTarget);
+    const progressPercent = Math.max(0, Math.min((progressValue / progressTarget) * 100, 100));
+    const earnedBonus = STREAK_BONUS_TIERS.reduce((sum, tier) => {
+        if (safeCurrentStreak >= tier.days) return tier.points;
+        return sum;
+    }, 0);
 
-    const calendarDays = [];
-    for (let i = 0; i < startingDayOfWeek; i++) {
-        calendarDays.push(null);
+    useEffect(() => {
+        const now = new Date();
+        const normalizedStreak = Math.max(0, Math.min(safeCurrentStreak, STREAK_WINDOW_DAYS));
+
+        const generated = Array.from({ length: STREAK_WINDOW_DAYS }, (_, index) => {
+            const dayOffset = STREAK_WINDOW_DAYS - 1 - index;
+            const date = new Date(now);
+            date.setHours(0, 0, 0, 0);
+            date.setDate(now.getDate() - dayOffset);
+
+            const isActive = index >= STREAK_WINDOW_DAYS - normalizedStreak;
+            const distanceFromToday = STREAK_WINDOW_DAYS - 1 - index;
+
+            let intensity = 'inactive';
+            if (isActive && distanceFromToday <= 1) intensity = 'bright';
+            else if (isActive && distanceFromToday <= 4) intensity = 'medium';
+            else if (isActive) intensity = 'soft';
+
+            return {
+                index,
+                date,
+                isActive,
+                isToday: index === STREAK_WINDOW_DAYS - 1,
+                intensity
+            };
+        });
+
+        setDays(generated);
+    }, [safeCurrentStreak]);
+
+    if (isLoading) {
+        return (
+            <div className="mb-8 bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
+                <p className="text-sm text-slate-500">Loading streak progress...</p>
+            </div>
+        );
     }
-    for (let day = 1; day <= daysInMonth; day++) {
-        calendarDays.push(day);
-    }
 
-    const checkedInDays = [];
-    for (let i = 0; i < currentStreak; i++) {
-        checkedInDays.push(currentDay - i);
+    if (isError) {
+        return (
+            <div className="mb-8 bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
+                <p className="text-sm text-rose-600">Unable to load streak right now.</p>
+                <p className="text-xs text-slate-500 mt-1">{errorMessage || 'Please try again in a moment.'}</p>
+            </div>
+        );
     }
-
-    const getDayStatus = (day) => {
-        if (day === null) return 'empty';
-        if (day === currentDay) return 'current';
-        if (checkedInDays.includes(day) && day < currentDay) return 'checked';
-        if (day < currentDay) return 'missed';
-        return 'future';
-    };
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6 mb-8">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="lg:w-[70%] bg-white rounded-2xl border border-slate-200 p-6 shadow-sm"
-            >
-                <div className="flex items-center gap-4 mb-6">
-                    <div className="relative">
-                        <div className="relative w-20 h-20">
-                            <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
-                                <defs>
-                                    <linearGradient id="arenaHexGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stopColor="#14b8a6" />
-                                        <stop offset="100%" stopColor="#0891b2" />
-                                    </linearGradient>
-                                </defs>
-                                <polygon points="50,5 90,27.5 90,72.5 50,95 10,72.5 10,27.5" fill="url(#arenaHexGradient)" className="drop-shadow-lg" />
-                                <polygon points="50,12 83,30 83,70 50,88 17,70 17,30" fill="#134e4a" />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <div className="text-2xl font-bold text-white">{currentDay}</div>
-                                <div className="text-xs text-teal-200 uppercase tracking-wider">{currentMonth}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h3 className="text-2xl font-bold text-slate-800">Day {currentDay}</h3>
-                            <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                                <Flame className="w-6 h-6 text-orange-500" />
-                            </motion.div>
-                        </div>
-                        <p className="text-sm text-slate-500 mt-1">
-                            {currentStreak > 0 ? `${currentStreak} day streak!` : 'Start your streak today'}
-                        </p>
-                        <p className="text-xs text-slate-400 mt-1">
-                            Longest: {longestStreak || 0} days
-                            {lastCheckinDate ? ` · Last check-in: ${lastCheckinDate}` : ''}
-                        </p>
-                    </div>
+        <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-10 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6"
+        >
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-4">
+                <div>
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-800">Streak Progress</h3>
+                    <p className="text-xs text-slate-500 mt-1">Daily action reduces carbon. Keep your run alive.</p>
                 </div>
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 px-2.5 py-1 text-xs font-semibold">
+                        <Flame className="w-3.5 h-3.5" />
+                        {safeCurrentStreak} days
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 px-2.5 py-1 text-xs font-semibold">
+                        <Crown className="w-3.5 h-3.5" />
+                        Best {safeLongestStreak}
+                    </span>
+                </div>
+            </div>
 
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 border-2 border-emerald-200">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                            <Flame className="w-5 h-5 text-orange-500" />
-                            <span className="font-bold text-slate-800">Streak Bonus</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Crown className="w-4 h-4 text-amber-500" />
-                            <span className="text-sm font-bold text-emerald-700">
-                                +{currentStreak >= 30 ? 250 : currentStreak >= 14 ? 150 : currentStreak >= 7 ? 75 : 0} pts
-                            </span>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-3">
-                        <div className={`rounded-lg p-3 text-center transition-all ${currentStreak >= 7 ? 'bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-md' : 'bg-white border border-emerald-200'
-                            }`}>
-                            <div className="text-xl font-bold mb-1">7</div>
-                            <div className="text-xs opacity-80">+75 pts</div>
-                        </div>
-                        <div className={`rounded-lg p-3 text-center transition-all ${currentStreak >= 14 ? 'bg-gradient-to-br from-blue-400 to-cyan-500 text-white shadow-md' : 'bg-white border border-emerald-200'
-                            }`}>
-                            <div className="text-xl font-bold mb-1">14</div>
-                            <div className="text-xs opacity-80">+150 pts</div>
-                        </div>
-                        <div className={`rounded-lg p-3 text-center transition-all ${currentStreak >= 30 ? 'bg-gradient-to-br from-purple-400 to-pink-500 text-white shadow-md' : 'bg-white border border-emerald-200'
-                            }`}>
-                            <div className="text-xl font-bold mb-1">30</div>
-                            <div className="text-xs opacity-80">+250 pts</div>
-                        </div>
-                    </div>
-                </div>
-            </motion.div>
+            {lastCheckinDate && (
+                <p className="text-[11px] text-slate-400 mb-3">Last check-in: {lastCheckinDate}</p>
+            )}
 
-            <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="lg:w-[30%] bg-white rounded-2xl border border-slate-200 p-4 shadow-sm"
-            >
-                <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-slate-800 text-sm">Daily Streak</h4>
-                    <div className="flex items-center gap-1">
-                        <button className="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
-                            <ChevronLeft className="w-3 h-3 text-slate-600" />
-                        </button>
-                        <button className="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
-                            <ChevronRight className="w-3 h-3 text-slate-600" />
-                        </button>
-                    </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+                {STREAK_BONUS_TIERS.map((tier) => {
+                    const unlocked = safeCurrentStreak >= tier.days;
+                    return (
+                        <div
+                            key={tier.days}
+                            className={`rounded-xl border px-3 py-2 text-center transition-all ${unlocked
+                                ? 'border-emerald-300 bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm'
+                                : 'border-slate-200 bg-slate-50 text-slate-600'}`}
+                        >
+                            <p className="text-xs font-semibold">Streak Bonus</p>
+                            <p className="text-sm font-bold mt-0.5">{tier.days} days - +{tier.points} pts</p>
+                        </div>
+                    );
+                })}
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs font-medium text-slate-600">
+                        {nextBonusTier
+                            ? `${safeCurrentStreak}/${nextBonusTier.days} days to +${nextBonusTier.points} points`
+                            : 'All streak rewards unlocked'}
+                    </p>
+                    <p className="text-xs font-semibold text-emerald-700">Active bonus: +{earnedBonus} pts</p>
                 </div>
-                <div className="grid grid-cols-7 gap-1 mb-2">
-                    {daysOfWeek.map((day, index) => (
-                        <div key={index} className="text-center text-xs font-medium text-slate-400">{day}</div>
-                    ))}
+                <div className="h-3 rounded-full bg-slate-200 overflow-hidden">
+                    <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progressPercent}%` }}
+                        transition={{ duration: 0.55, ease: 'easeOut' }}
+                        className="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-full"
+                    />
                 </div>
-                <div className="grid grid-cols-7 gap-1">
-                    {calendarDays.map((day, index) => {
-                        const status = getDayStatus(day);
+            </div>
+
+            <div className="mt-4 overflow-x-auto pb-1">
+                <div className="flex items-end gap-1.5 min-w-max">
+                    {days.map((day, index) => {
+                        const barBase = 'bg-slate-200 border border-slate-300';
+                        const barColor = day.intensity === 'bright'
+                            ? 'bg-gradient-to-t from-emerald-600 to-teal-400 border-emerald-500'
+                            : day.intensity === 'medium'
+                                ? 'bg-gradient-to-t from-emerald-500 to-teal-300 border-emerald-400'
+                                : day.intensity === 'soft'
+                                    ? 'bg-gradient-to-t from-emerald-400 to-emerald-300 border-emerald-300'
+                                    : barBase;
+
+                        const dateLabel = day.date.toLocaleDateString('en-IN', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                        });
+
                         return (
-                            <motion.div
-                                key={index}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: index * 0.01 }}
-                                className={`aspect-square flex items-center justify-center rounded-md transition-all relative ${status === 'empty' ? 'invisible' :
-                                    status === 'current' ? 'bg-gradient-to-br from-teal-500 to-cyan-600 text-white font-bold shadow-md' :
-                                        status === 'checked' ? 'bg-teal-50 text-teal-600 font-semibold' :
-                                            status === 'missed' ? 'text-slate-300' : 'text-slate-500'
-                                    }`}
-                            >
-                                <span className="text-xs">{day}</span>
-                                {status === 'checked' && (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <Check className="w-3 h-3 text-teal-600" strokeWidth={3} />
-                                    </div>
-                                )}
-                            </motion.div>
+                            <div key={dateLabel} className="group relative" title={dateLabel}>
+                                <motion.div
+                                    initial={{ opacity: 0, scaleY: 0.4 }}
+                                    animate={{
+                                        opacity: 1,
+                                        scaleY: day.isActive ? 1 : 0.65
+                                    }}
+                                    transition={{
+                                        delay: index * 0.015,
+                                        duration: 0.35
+                                    }}
+                                    className={`w-3 sm:w-3.5 h-10 sm:h-12 rounded-md origin-bottom ${barColor} ${day.isToday ? 'ring-2 ring-emerald-300 ring-offset-1' : ''}`}
+                                >
+                                    {day.isToday && (
+                                        <motion.div
+                                            className="w-full h-full rounded-md"
+                                            animate={{ opacity: [0.45, 0.95, 0.45] }}
+                                            transition={{ duration: 1.6, repeat: Infinity }}
+                                        />
+                                    )}
+                                </motion.div>
+                                <div className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] px-2 py-1 rounded-md bg-slate-900 text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {dateLabel}
+                                </div>
+                            </div>
                         );
                     })}
                 </div>
-            </motion.div>
-        </div>
+            </div>
+        </motion.div>
     );
 };
-
 // Leaderboard Component
 const Leaderboard = ({ leaderboardData, isLoading, myRank, onSeeMore }) => {
     const maxVisible = 7;
@@ -665,7 +682,7 @@ const Leaderboard = ({ leaderboardData, isLoading, myRank, onSeeMore }) => {
                             <span className="text-sm font-semibold text-slate-700">Your Rank</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="font-bold text-violet-600 text-lg">{myRank ? `#${myRank}` : '--'}</span>
+                            <span className="font-bold text-violet-600 text-lg">{myRank !== null && myRank !== undefined ? `#${myRank}` : '--'}</span>
                             <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                         </div>
                     </div>
@@ -937,6 +954,365 @@ const ContestModal = ({
     );
 };
 
+const pointsHistoryButtonStyles = `
+  .pts-btn-wrap * { box-sizing: border-box; }
+
+  .pts-btn {
+    font-family: "Outfit", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 14px;
+    border: 1.5px solid #6ee7b7;
+    background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+    color: #065f46;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 1px 3px rgba(16,185,129,0.12), 0 4px 16px rgba(16,185,129,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
+    letter-spacing: -0.01em;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+    white-space: nowrap;
+  }
+
+  .pts-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, rgba(255,255,255,0.6) 0%, transparent 60%);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  .pts-btn:hover {
+    transform: translateY(-2px) scale(1.01);
+    border-color: #34d399;
+    box-shadow: 0 2px 8px rgba(16,185,129,0.15), 0 12px 32px rgba(16,185,129,0.2), inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+
+  .pts-btn:active {
+    transform: translateY(-1px) scale(0.99);
+    transition-duration: 0.08s;
+  }
+
+  .pts-btn-shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform: skewX(-15deg);
+    pointer-events: none;
+  }
+
+  .pts-btn:hover .pts-btn-shine {
+    animation: shineSweep 0.5s ease forwards;
+  }
+
+  @keyframes shineSweep {
+    to { left: 160%; }
+  }
+
+  .pts-leaf {
+    display: inline-flex;
+    animation: leafSway 3.5s ease-in-out infinite;
+    transform-origin: bottom center;
+    filter: drop-shadow(0 1px 2px rgba(16,185,129,0.3));
+  }
+
+  @keyframes leafSway {
+    0%,100% { transform: rotate(-6deg); }
+    50% { transform: rotate(7deg); }
+  }
+
+  .pts-coin-icon {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  .pts-coin-icon .c {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid #34d399;
+  }
+
+  .pts-coin-icon .c1 {
+    width: 17px;
+    height: 17px;
+    top: 4px;
+    left: 2px;
+    background: radial-gradient(circle at 35% 30%, #a7f3d0, #34d399 60%, #059669);
+    box-shadow: 0 2px 4px rgba(5,150,105,0.4);
+    animation: coinBob 2s ease-in-out infinite;
+  }
+
+  .pts-coin-icon .c2 {
+    width: 15px;
+    height: 15px;
+    top: 1px;
+    left: 4px;
+    background: radial-gradient(circle at 35% 30%, #d1fae5, #6ee7b7 60%, #10b981);
+    box-shadow: 0 1px 3px rgba(5,150,105,0.3);
+    animation: coinBob 2s ease-in-out infinite 0.15s;
+  }
+
+  .pts-coin-icon .c-sym {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 800;
+    color: #065f46;
+    font-family: Georgia, serif;
+    z-index: 2;
+    animation: coinBob 2s ease-in-out infinite;
+  }
+
+  @keyframes coinBob {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+
+  .pts-arrow {
+    display: inline-flex;
+    transition: transform 0.2s cubic-bezier(.34,1.56,.64,1);
+    opacity: 0.7;
+  }
+
+  .pts-btn:hover .pts-arrow {
+    transform: translateX(4px);
+    opacity: 1;
+  }
+
+  .pts-particle {
+    position: fixed;
+    pointer-events: none;
+    border-radius: 50%;
+    z-index: 9999;
+    will-change: transform, opacity;
+  }
+
+  @keyframes particleUp {
+    0% { transform: translate(0,0) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--dr)); opacity: 0; }
+  }
+
+  .pts-ripple {
+    position: fixed;
+    border-radius: 50%;
+    border: 2px solid #34d399;
+    pointer-events: none;
+    z-index: 9998;
+    animation: rippleOut 0.7s ease-out forwards;
+  }
+
+  @keyframes rippleOut {
+    from { transform: scale(0.3); opacity: 0.9; }
+    to { transform: scale(3.5); opacity: 0; }
+  }
+`;
+
+const spawnPointsParticles = (x, y) => {
+    const coins = 12;
+    const sparks = 8;
+    const particles = [];
+
+    for (let i = 0; i < coins; i++) {
+        const angle = (i / coins) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+        const dist = 55 + Math.random() * 55;
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist - 25;
+        const size = 11 + Math.random() * 9;
+        const colors = [
+            'radial-gradient(circle at 35% 30%, #a7f3d0, #34d399 60%, #059669)',
+            'radial-gradient(circle at 35% 30%, #d1fae5, #6ee7b7 55%, #10b981)',
+            'radial-gradient(circle at 35% 30%, #fef9c3, #fde68a 55%, #d97706)'
+        ];
+
+        particles.push({
+            id: `${Date.now()}-c${i}`,
+            type: 'coin',
+            x,
+            y,
+            dx,
+            dy,
+            dr: `${(Math.random() - 0.5) * 600}deg`,
+            size,
+            bg: colors[i % 3],
+            delay: i * 28,
+            dur: 680 + Math.random() * 300,
+            sym: ['*', 'o', '+'][i % 3]
+        });
+    }
+
+    for (let i = 0; i < sparks; i++) {
+        const angle = (i / sparks) * Math.PI * 2;
+        const dist = 28 + Math.random() * 28;
+        particles.push({
+            id: `${Date.now()}-s${i}`,
+            type: 'spark',
+            x,
+            y,
+            dx: Math.cos(angle) * dist,
+            dy: Math.sin(angle) * dist - 8,
+            dr: '0deg',
+            size: 3 + Math.random() * 3,
+            bg: '#34d399',
+            delay: i * 18,
+            dur: 400 + Math.random() * 180,
+            sym: ''
+        });
+    }
+
+    return particles;
+};
+
+const PointsParticle = ({ particle, onDone }) => {
+    useEffect(() => {
+        const timer = setTimeout(() => onDone(particle.id), particle.delay + particle.dur + 60);
+        return () => clearTimeout(timer);
+    }, [particle.id, particle.delay, particle.dur, onDone]);
+
+    return (
+        <div
+            className="pts-particle"
+            style={{
+                left: particle.x - particle.size / 2,
+                top: particle.y - particle.size / 2,
+                width: particle.size,
+                height: particle.size,
+                background: particle.bg,
+                border: particle.type === 'coin' ? '1px solid rgba(52,211,153,0.5)' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: particle.size * 0.42,
+                color: '#065f46',
+                fontWeight: 800,
+                boxShadow: particle.type === 'coin' ? '0 1px 5px rgba(5,150,105,0.45)' : 'none',
+                '--dx': `${particle.dx}px`,
+                '--dy': `${particle.dy}px`,
+                '--dr': particle.dr,
+                animation: `particleUp ${particle.dur}ms cubic-bezier(.25,.46,.45,.94) ${particle.delay}ms both`
+            }}
+        >
+            {particle.sym}
+        </div>
+    );
+};
+
+const PointsRipple = ({ x, y, onDone }) => {
+    useEffect(() => {
+        const timer = setTimeout(onDone, 700);
+        return () => clearTimeout(timer);
+    }, [onDone]);
+
+    return (
+        <div
+            className="pts-ripple"
+            style={{ left: x - 20, top: y - 20, width: 40, height: 40 }}
+        />
+    );
+};
+
+const PointsHistoryButton = ({ onOpen }) => {
+    const [particles, setParticles] = useState([]);
+    const [ripples, setRipples] = useState([]);
+    const btnRef = useRef(null);
+    const navigateTimerRef = useRef(null);
+
+    useEffect(() => () => {
+        if (navigateTimerRef.current) {
+            clearTimeout(navigateTimerRef.current);
+        }
+    }, []);
+
+    const handleClick = () => {
+        const rect = btnRef.current?.getBoundingClientRect();
+        if (!rect) {
+            onOpen?.();
+            return;
+        }
+
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+
+        setParticles((prev) => [...prev, ...spawnPointsParticles(cx, cy)]);
+        setRipples((prev) => [...prev, { id: `${Date.now()}`, x: cx, y: cy }]);
+
+        navigateTimerRef.current = setTimeout(() => {
+            onOpen?.();
+        }, 220);
+    };
+
+    return (
+        <>
+            <style>{pointsHistoryButtonStyles}</style>
+            {particles.map((particle) => (
+                <PointsParticle
+                    key={particle.id}
+                    particle={particle}
+                    onDone={(id) => setParticles((prev) => prev.filter((item) => item.id !== id))}
+                />
+            ))}
+            {ripples.map((ripple) => (
+                <PointsRipple
+                    key={ripple.id}
+                    x={ripple.x}
+                    y={ripple.y}
+                    onDone={() => setRipples((prev) => prev.filter((item) => item.id !== ripple.id))}
+                />
+            ))}
+            <div className="pts-btn-wrap">
+                <button
+                    ref={btnRef}
+                    type="button"
+                    className="pts-btn"
+                    onClick={handleClick}
+                >
+                    <div className="pts-btn-shine" />
+                    <div className="pts-coin-icon">
+                        <div className="c c2" />
+                        <div className="c c1" />
+                        <div className="c-sym">*</div>
+                    </div>
+                    <span>View Points History</span>
+                    <span className="pts-leaf">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M12 2C6.5 2 2 8 2 13.5C2 17.09 4.24 20.14 7.4 21.5C7 19.5 7 17 8.5 15C10 13 12 13 12 13C12 13 14 13 15.5 15C17 17 17 19.5 16.6 21.5C19.76 20.14 22 17.09 22 13.5C22 8 17.5 2 12 2Z"
+                                fill="#34d399"
+                                stroke="#059669"
+                                strokeWidth="0.5"
+                            />
+                            <path d="M12 13 L12 22" stroke="#059669" strokeWidth="1.2" strokeLinecap="round" />
+                        </svg>
+                    </span>
+                    <span className="pts-arrow">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                            <path d="M3 8h10M9 4l4 4-4 4" stroke="#065f46" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </>
+    );
+};
+
 // RewardsShowcase Component
 // RewardsShowcase Component
 const RewardsShowcase = ({ rewards, isLoading, onSeeMore }) => {
@@ -1030,38 +1406,12 @@ const RewardsShowcase = ({ rewards, isLoading, onSeeMore }) => {
         </motion.div>
     );
 };
-const HistoryShortcut = ({ onOpen }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="mt-10"
-    >
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-                <h3 className="text-base font-semibold text-slate-800">Points Activity</h3>
-                <p className="text-sm text-slate-500">Track each task completion and points earned in your Arena history.</p>
-            </div>
-            <button
-                type="button"
-                onClick={onOpen}
-                className="arena-standalone-btn bg-slate-900 text-white hover:bg-slate-800"
-            >
-                View Points History
-            </button>
-        </div>
-    </motion.div>
-
-
-
-);
-
 // Main Arena Component// Main Arena Component
 export default function ArenaStandalone() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [selectedContestTask, setSelectedContestTask] = useState(null);
-    const userId = useMemo(() => getStoredUserId(), []);
+    const userId = useMemo(() => getArenaUserId(), []);
     const hasAuthUser = Boolean(userId);
 
     const contestMetadataQuery = useQuery({
@@ -1216,11 +1566,13 @@ export default function ArenaStandalone() {
     const leaderboardData = useMemo(() => {
         const items = leaderboardQuery.data?.data || [];
         return items.map((item) => {
+            const username = item.username ? String(item.username).trim() : '';
             const userIdLabel = item.u_id || `User-${item.rank}`;
+            const displayName = username || `User ${String(userIdLabel).slice(-6)}`;
             return {
                 ...item,
-                name: `User ${String(userIdLabel).slice(-6)}`,
-                avatar: String(userIdLabel).replace(/[^a-zA-Z0-9]/g, '').slice(-2).toUpperCase() || 'AR',
+                name: displayName,
+                avatar: displayName.replace(/[^a-zA-Z0-9]/g, '').slice(0, 2).toUpperCase() || 'AR',
                 emoji: rankEmoji(item.rank)
             };
         });
@@ -1259,15 +1611,27 @@ export default function ArenaStandalone() {
             <div className="arena-standalone-page arena-scope">
                 <HeroSlider />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <MilestoneTracker
+                    <StreakProgressPanel
                         currentStreak={currentStreak}
                         longestStreak={longestStreak}
                         lastCheckinDate={lastCheckinDate}
+                        isLoading={streakQuery.isLoading}
+                        isError={streakQuery.isError}
+                        errorMessage={streakQuery.error?.message}
                     />
                     <div>
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800">Earn Points</h2>
-                            <p className="text-slate-500 mt-1">Complete challenges to climb the leaderboard</p>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                        >
+                            <div>
+                                <h2 className="text-2xl font-bold text-slate-800">Earn Points</h2>
+                                <p className="text-slate-500 mt-1">Complete challenges to climb the leaderboard</p>
+                            </div>
+                            <PointsHistoryButton onOpen={() => navigate('/arena/history')} />
+
+
                         </motion.div>
                         <div className="relative overflow-hidden w-full mt-6">
                             <motion.div
@@ -1325,8 +1689,6 @@ export default function ArenaStandalone() {
                             />
                         </div>
                     </div>
-                    <HistoryShortcut onOpen={() => navigate('/arena/history')} />
-
                 </div>
                 <ContestModal
                     contest={selectedContest}
@@ -1341,3 +1703,4 @@ export default function ArenaStandalone() {
         </>
     );
 }
+
