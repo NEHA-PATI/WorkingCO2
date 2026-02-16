@@ -1,1 +1,1 @@
-export const schemaTypes = []
+export { schemaTypes } from "../schemas/index.js";
