@@ -40,13 +40,14 @@ import Upload from "@features/marketplace/components/upload";
 import ArenaPage from "@features/arena/pages/Arena";
 import ArenaStandalonePage from "@features/arena/pages/arenaStandalone";
 
+
 import OrgDashboard, {
   ORG_DASHBOARD_TAB_COMPONENTS,
 } from "@features/org/pages/OrgDashboard";
 import OrgProfile from "@features/org/components/OrgProfile";
 
 import AdminOverview from "@features/admin/pages/Overview";
-import AdminUsers from "@features/admin/pages/Users";
+import AdminUsers from "@features/admin/pages/User Management";
 import AdminSupport from "@features/admin/pages/Support";
 import AdminSecurity from "@features/admin/pages/Security";
 import AdminConfiguration from "@features/admin/pages/Configuration";
