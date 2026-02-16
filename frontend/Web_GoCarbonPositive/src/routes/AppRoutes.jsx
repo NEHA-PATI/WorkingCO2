@@ -32,7 +32,7 @@ import Blog from "@features/blog/pages/blog";
 import BlogDetailPage from "@features/blog/pages/blog-detail";
 import Careers from "@features/careers/pages/Careers";
 
-import MarketplacePage from "@features/marketplace/pages/MarketplacePage";
+// import MarketplacePage from "@features/marketplace/pages/MarketplacePage";
 import ViewAssets from "@shared/pages/ViewAssets";
 import WalletPage from "@shared/pages/wallet";
 import Upload from "@shared/pages/upload";
@@ -104,14 +104,14 @@ const AppRoutes = () => {
         <Route path="/industrial" element={<IndustrialSolutions />} />
         <Route path="/faq" element={<Faq />} />
 
-        <Route
+        {/* <Route
           path="/marketplace"
           element={
             <ProtectedRoute allowedRoles={["user", "organization", "admin"]}>
               <MarketplacePage />
             </ProtectedRoute>
           }
-        />
+        /> */}
         <Route
           path="/upload"
           element={

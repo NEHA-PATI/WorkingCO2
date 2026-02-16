@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import "@features/user/styles/contact.css";
-import { fireToast } from '../services/user/toastService.js';
-import { contactApiClient,ticketApiClient } from '../services/apiClient.js';
+import { fireToast } from "@shared/utils/toastService.js";
+import { contactApiClient,ticketApiClient } from "@shared/utils/apiClient.js";
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
