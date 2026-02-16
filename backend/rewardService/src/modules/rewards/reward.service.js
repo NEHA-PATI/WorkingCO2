@@ -666,5 +666,9 @@ module.exports = {
   getTodayTaskStatus,
   getRewardHistory,
   getRewardCatalog,
-  redeemReward
+  redeemReward,
+  getContestStats,
+  createRule,
+  updateRule
+
 };
