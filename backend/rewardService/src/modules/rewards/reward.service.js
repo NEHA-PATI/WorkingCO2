@@ -468,7 +468,8 @@ const getLeaderboard = async (type = 'monthly', page = 1, limit = 10) => {
   const items = rows.map((row) => ({
     rank: Number(row.rank),
     points: Number(row.total_points),
-    u_id: row.u_id
+    u_id: row.u_id,
+    username: row.username || row.u_id
   }));
 
   return {
@@ -480,7 +481,11 @@ const getLeaderboard = async (type = 'monthly', page = 1, limit = 10) => {
   };
 };
 
-const getMyRank = async (u_id) => {
+const getMyRank = async (u_id, type = 'monthly') => {
+  if (type === 'lifetime') {
+    return await repo.getUserLifetimeRank(u_id);
+  }
+
   return await repo.getUserMonthlyRank(u_id);
 };
 
