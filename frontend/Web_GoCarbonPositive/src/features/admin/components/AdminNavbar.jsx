@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { IoAnalyticsSharp, IoSettingsSharp } from "react-icons/io5";
-import { FaUserFriends } from "react-icons/fa";
+import { FaUserFriends, FaTrophy } from "react-icons/fa";
 import { MdSupportAgent } from "react-icons/md";
 import { GiSettingsKnobs } from "react-icons/gi";
 import { BsShieldCheck } from "react-icons/bs";
@@ -25,6 +25,7 @@ const AdminNavbar = () => {
     if (path.includes("/admin/career-management")) return "career-management";
     if (path.includes("/admin/case-study-management"))
       return "case-study-management";
+    if (path.includes("/admin/contest")) return "contest";
     if (path.includes("/admin/reports")) return "reports";
     return "overview"; // default
   };
@@ -90,6 +91,12 @@ const AdminNavbar = () => {
       label: "Case Studies",
       icon: <FaUserFriends className="icon case-study-icon" />,
       path: "/admin/case-study-management",
+    },
+    {
+      id: "contest",
+      label: "Contest Management",
+      icon: <FaTrophy className="icon contest-icon" />,
+      path: "/admin/contest",
     },
     {
       id: "reports",
