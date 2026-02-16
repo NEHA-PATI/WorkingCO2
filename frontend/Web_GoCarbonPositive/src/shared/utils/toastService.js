@@ -7,7 +7,7 @@ const config = {
   hideProgressBar: false,
 };
 
-export const fireToast = (key, type = "success", vars = {}) => {
+export const fireToast = (key, type = "success", vars = {}, options = {}) => {
   let message = key
     .split(".")
     .reduce((o, i) => o?.[i], TOAST_MSG);
@@ -23,5 +23,5 @@ export const fireToast = (key, type = "success", vars = {}) => {
     );
   }
 
-  toast[type](message, config);
+  toast[type](message, { ...config, ...options });
 };

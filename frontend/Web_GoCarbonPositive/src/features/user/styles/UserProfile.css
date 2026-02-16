@@ -25,9 +25,9 @@
 /* Main Container */
 .pf-wrapper {
   display: flex;
-  min-height: 100vh;
+  min-height: 100%;
   background-color: var(--pf-background);
-  overflow: hidden;
+  overflow: visible;
   align-items: flex-start;
 }
 
@@ -35,8 +35,8 @@
 /* Left Side - Scrollable Form */
 .pf-left-container {
   width: 50%;
-  max-height: 100vh;
-  overflow-y: auto;
+  max-height: none;
+  overflow-y: visible;
   background-color: var(--pf-white);
   border-right: 1px solid var(--pf-border);
 }
@@ -411,7 +411,7 @@
   position: sticky;
   top: 0;
   align-self: flex-start;
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;

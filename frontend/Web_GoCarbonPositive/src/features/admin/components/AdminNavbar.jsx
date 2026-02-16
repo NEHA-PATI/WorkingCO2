@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { IoAnalyticsSharp, IoSettingsSharp } from "react-icons/io5";
-import { FaUserFriends } from "react-icons/fa";
+import { FaUserFriends, FaTrophy } from "react-icons/fa";
 import { MdSupportAgent } from "react-icons/md";
 import { GiSettingsKnobs } from "react-icons/gi";
 import { BsShieldCheck } from "react-icons/bs";
+import { FaBoxesStacked } from "react-icons/fa6";
 
 import "@features/admin/styles/AdminNavbar.css";
 
@@ -16,6 +17,7 @@ const AdminNavbar = () => {
   const getActiveTab = () => {
     const path = location.pathname;
     if (path.includes("/admin/users")) return "users";
+    if (path.includes("/admin/asset-management")) return "asset-management";
     if (path.includes("/admin/support")) return "support";
     if (path.includes("/admin/configuration")) return "configuration";
     if (path.includes("/admin/security")) return "security";
@@ -23,6 +25,7 @@ const AdminNavbar = () => {
     if (path.includes("/admin/career-management")) return "career-management";
     if (path.includes("/admin/case-study-management"))
       return "case-study-management";
+    if (path.includes("/admin/contest")) return "contest";
     if (path.includes("/admin/reports")) return "reports";
     return "overview"; // default
   };
@@ -45,6 +48,12 @@ const AdminNavbar = () => {
       label: "Users",
       icon: <FaUserFriends className="icon users-icon" />,
       path: "/admin/users",
+    },
+    {
+      id: "asset-management",
+      label: "Asset Management",
+      icon: <FaBoxesStacked className="icon asset-icon" />,
+      path: "/admin/asset-management",
     },
 
     {
@@ -82,6 +91,12 @@ const AdminNavbar = () => {
       label: "Case Studies",
       icon: <FaUserFriends className="icon case-study-icon" />,
       path: "/admin/case-study-management",
+    },
+    {
+      id: "contest",
+      label: "Contest Management",
+      icon: <FaTrophy className="icon contest-icon" />,
+      path: "/admin/contest",
     },
     {
       id: "reports",
