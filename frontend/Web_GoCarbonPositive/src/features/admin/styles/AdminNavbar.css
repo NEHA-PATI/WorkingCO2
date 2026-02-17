@@ -133,6 +133,21 @@
 .organization-icon {
   color: #f97316;
 }
+.case-study-icon {
+  color: #06b6d4;
+}
+.contest-icon {
+  color: #a855f7;
+}
+.reports-icon {
+  color: #14b8a6;
+}
+.analytics-icon {
+  color: #f59e0b;
+}
+.career-icon {
+  color: #6366f1;
+}
 
 /* HOVER EFFECTS */
 .nav-item:hover .overview-icon {
@@ -162,6 +177,26 @@
 .nav-item:hover .organization-icon {
   color: #ea580c;
   filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.5));
+}
+.nav-item:hover .case-study-icon {
+  color: #0891b2;
+  filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.5));
+}
+.nav-item:hover .contest-icon {
+  color: #9333ea;
+  filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.5));
+}
+.nav-item:hover .reports-icon {
+  color: #0f766e;
+  filter: drop-shadow(0 0 6px rgba(20, 184, 166, 0.5));
+}
+.nav-item:hover .analytics-icon {
+  color: #d97706;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5));
+}
+.nav-item:hover .career-icon {
+  color: #4f46e5;
+  filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.5));
 }
 
 /* ACTIVE STATE ICON EFFECT */
