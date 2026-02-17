@@ -667,8 +667,8 @@ module.exports = {
   getRewardHistory,
   getRewardCatalog,
   redeemReward,
-  getContestStats,
-  createRule,
-  updateRule
+  // getContestStats,
+  // createRule,
+  // updateRule
 
 };
