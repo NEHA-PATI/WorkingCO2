@@ -649,6 +649,16 @@ const redeemReward = async (u_id, reward_id) => {
     current_points: availablePoints - reward.points
   };
 };
+const createRule = async (data) => {
+  return await repo.createRule(data);
+};
+
+const updateRule = async (id, data) => {
+  return await repo.updateRule(id, data);
+};
+const getContestStats = async () => {
+  return await repo.getContestStats();
+};
 
 module.exports = {
   awardOneTime,
