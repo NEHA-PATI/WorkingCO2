@@ -276,17 +276,17 @@ submittedAnswers.forEach(item => {
 });
 
 
-  if (typeof rewardService.addPoints !== 'function') {
-    throw new Error('Rewards addPoints function is not available');
-  }
+  if (typeof rewardService.awardDailyQuiz !== 'function') {
+  throw new Error('awardDailyQuiz function is not available');
+}
 
- let rewardResult = await rewardService.addPoints(
+const rewardResult = await rewardService.awardDailyQuiz(
   userId,
-  'daily_quiz',
   totalCorrect
 );
 
-let pointsAdded = rewardResult?.pointsAdded || 0;
+let pointsAdded = rewardResult?.points || 0;
+
 
 
   if (pointsAdded && typeof pointsAdded === 'object' && 'pointsAdded' in pointsAdded) {
@@ -295,11 +295,11 @@ let pointsAdded = rewardResult?.pointsAdded || 0;
 
   pointsAdded = Number(pointsAdded) || 0;
 
-  return {
-    totalCorrect,
-    totalQuestionsAttempted,
-    pointsAdded
-  };
+ return {
+  totalCorrect,
+  totalQuestionsAttempted,
+  pointsAdded
+};
 };
 
 module.exports = {

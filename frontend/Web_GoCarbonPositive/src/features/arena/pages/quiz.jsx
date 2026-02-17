@@ -25,118 +25,46 @@ const GreenTechQuiz = () => {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const questions = [
-    {
-      id: 1,
-      question: "Which renewable energy source generates electricity using photovoltaic cells?",
-      options: [
-        { id: 'A', text: 'Wind Energy' },
-        { id: 'B', text: 'Solar Energy' },
-        { id: 'C', text: 'Hydropower' },
-        { id: 'D', text: 'Geothermal Energy' }
-      ],
-      correctAnswer: 'B'
-    },
-    {
-      id: 2,
-      question: "What does the term 'carbon footprint' refer to?",
-      options: [
-        { id: 'A', text: 'The amount of carbon dioxide emitted by a person or organization' },
-        { id: 'B', text: 'The physical imprint of carbon atoms' },
-        { id: 'C', text: 'The density of carbon in soil' },
-        { id: 'D', text: 'A measurement of carbon monoxide in air' }
-      ],
-      correctAnswer: 'A'
-    },
-    {
-      id: 3,
-      question: "Which gas is primarily responsible for the greenhouse effect?",
-      options: [
-        { id: 'A', text: 'Oxygen' },
-        { id: 'B', text: 'Nitrogen' },
-        { id: 'C', text: 'Carbon Dioxide' },
-        { id: 'D', text: 'Hydrogen' }
-      ],
-      correctAnswer: 'C'
-    },
-    {
-      id: 4,
-      question: "What is the most efficient way to reduce energy consumption at home?",
-      options: [
-        { id: 'A', text: 'Using LED bulbs' },
-        { id: 'B', text: 'Improving insulation' },
-        { id: 'C', text: 'Installing solar panels' },
-        { id: 'D', text: 'Using smart thermostats' }
-      ],
-      correctAnswer: 'B'
-    },
-    {
-      id: 5,
-      question: "Which material takes the longest to decompose in a landfill?",
-      options: [
-        { id: 'A', text: 'Paper' },
-        { id: 'B', text: 'Plastic bottles' },
-        { id: 'C', text: 'Food waste' },
-        { id: 'D', text: 'Glass' }
-      ],
-      correctAnswer: 'D'
-    },
-    {
-      id: 6,
-      question: "What percentage of Earth's water is fresh water?",
-      options: [
-        { id: 'A', text: '1%' },
-        { id: 'B', text: '2.5%' },
-        { id: 'C', text: '10%' },
-        { id: 'D', text: '25%' }
-      ],
-      correctAnswer: 'B'
-    },
-    {
-      id: 7,
-      question: "Which technology captures and stores carbon dioxide from the atmosphere?",
-      options: [
-        { id: 'A', text: 'Carbon sequestration' },
-        { id: 'B', text: 'Carbon trading' },
-        { id: 'C', text: 'Carbon offsetting' },
-        { id: 'D', text: 'Carbon neutrality' }
-      ],
-      correctAnswer: 'A'
-    },
-    {
-      id: 8,
-      question: "What is the primary benefit of electric vehicles over traditional cars?",
-      options: [
-        { id: 'A', text: 'Lower cost' },
-        { id: 'B', text: 'Zero direct emissions' },
-        { id: 'C', text: 'Faster acceleration' },
-        { id: 'D', text: 'Longer range' }
-      ],
-      correctAnswer: 'B'
-    },
-    {
-      id: 9,
-      question: "Which sustainable practice helps reduce water usage in agriculture?",
-      options: [
-        { id: 'A', text: 'Flood irrigation' },
-        { id: 'B', text: 'Drip irrigation' },
-        { id: 'C', text: 'Sprinkler systems' },
-        { id: 'D', text: 'Manual watering' }
-      ],
-      correctAnswer: 'B'
-    },
-    {
-      id: 10,
-      question: "What does 'biodegradable' mean?",
-      options: [
-        { id: 'A', text: 'Can be broken down by living organisms' },
-        { id: 'B', text: 'Made from biological materials' },
-        { id: 'C', text: 'Safe for human consumption' },
-        { id: 'D', text: 'Recyclable material' }
-      ],
-      correctAnswer: 'A'
+  const [questions, setQuestions] = useState([]);
+const [loading, setLoading] = useState(true);
+const [backendResult, setBackendResult] = useState(null);
+
+
+useEffect(() => {
+  const fetchQuestions = async () => {
+    try {
+      const res = await fetch("http://localhost:5008/api/v1/quiz/questions", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`
+        }
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Convert backend format to frontend format
+        const formatted = data.data.questions.map(q => ({
+          id: q.id,
+          question: q.question,
+          options: Object.entries(q.options).map(([key, value]) => ({
+            id: key,
+            text: value
+          }))
+        }));
+
+        setQuestions(formatted);
+      }
+    } catch (err) {
+      console.error("Failed to fetch quiz:", err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  fetchQuestions();
+}, []);
+
+
 
   useEffect(() => {
     if (quizStarted && !quizCompleted && timeLeft > 0) {
@@ -144,10 +72,16 @@ const GreenTechQuiz = () => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && !quizCompleted) {
-      handleNext();
-    }
-  }, [timeLeft, quizStarted, quizCompleted]);
+    }else if (timeLeft === 0 && !quizCompleted) {
+  if (currentQuestion === questions.length - 1) {
+    handleSubmit();
+  } else {
+    handleNext();
+  }
+}
+
+  }, [timeLeft, quizStarted, quizCompleted, currentQuestion, questions.length]);
+
 
   useEffect(() => {
     if (quizStarted || quizCompleted) {
@@ -173,11 +107,37 @@ const GreenTechQuiz = () => {
     }
   };
 
-  const handleSubmit = () => {
-    setQuizCompleted(true);
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 5000);
-  };
+ const handleSubmit = async () => {
+  try {
+    const formattedAnswers = Object.entries(selectedAnswers).map(
+      ([index, selectedOption]) => ({
+        id: questions[index].id,
+        selectedOption
+      })
+    );
+
+    const res = await fetch("http://localhost:5008/api/v1/quiz/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`
+      },
+      body: JSON.stringify(formattedAnswers)
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      setBackendResult(data.data);
+      setQuizCompleted(true);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000);
+    }
+
+  } catch (err) {
+    console.error("Submit failed:", err);
+  }
+};
 
   const handleNavigate = (index) => {
     if (index <= currentQuestion) {
@@ -189,23 +149,9 @@ const GreenTechQuiz = () => {
     }
   };
 
-  const calculateScore = () => {
-    let correct = 0;
-    let wrong = 0;
-    let skipped = 0;
-
-    questions.forEach((question, index) => {
-      if (selectedAnswers[index] === undefined) {
-        skipped++;
-      } else if (selectedAnswers[index] === question.correctAnswer) {
-        correct++;
-      } else {
-        wrong++;
-      }
-    });
-
-    return { correct, wrong, skipped, total: correct * 4 };
-  };
+  if (loading) {
+  return <div className="quiz-container">Loading quiz...</div>;
+}
 
   if (!quizStarted) {
     return (
@@ -220,18 +166,21 @@ const GreenTechQuiz = () => {
           <div className="quiz-stats">
             <div className="stat-card">
               <FaBook className="stat-icon" />
-              <div className="stat-number">10</div>
+              <div className="stat-number">{questions.length}
+</div>
               <div className="stat-label">Questions</div>
             </div>
             <div className="stat-card">
               <FaTrophy className="stat-icon" />
-              <div className="stat-number">40</div>
-              <div className="stat-label">Total Marks</div>
+              <div className="stat-number">{questions.length}</div>
+<div className="stat-label">Total Marks</div>
+
             </div>
             <div className="stat-card">
               <FaBolt className="stat-icon" />
-              <div className="stat-number">+4</div>
-              <div className="stat-label">Per Question</div>
+              <div className="stat-number">+1</div>
+<div className="stat-label">Per Question</div>
+
             </div>
             <div className="stat-card">
               <FaClock className="stat-icon" />
@@ -253,7 +202,8 @@ const GreenTechQuiz = () => {
             <div className="rules-grid">
               <div className="rule-item">
                 <FaCheckCircle className="rule-check" />
-                <span>Each question carries equal marks (4 marks each).</span>
+                <span>Each question carries equal marks (1 point each).</span>
+
               </div>
               <div className="rule-item">
                 <FaCheckCircle className="rule-check" />
@@ -292,8 +242,14 @@ const GreenTechQuiz = () => {
   }
 
   if (quizCompleted) {
-    const score = calculateScore();
-    const scorePercentage = Math.round((score.total / 40) * 100);
+    const score = backendResult;
+    const totalQuestions = questions.length;
+const correct = score.totalCorrect;
+const attempted = score.totalQuestionsAttempted;
+const skipped = totalQuestions - attempted;
+const totalMarks = correct;
+const scorePercentage = Math.round((correct / totalQuestions) * 100);
+
     return (
       <div className="quiz-container results-page">
         {showConfetti && (
@@ -325,37 +281,42 @@ const GreenTechQuiz = () => {
           <p className="results-subtitle">Congratulations! Here's your performance summary</p>
 
           <div className="score-circle" style={{ '--score-progress': `${scorePercentage}%` }}>
-            <div className="score-number">{score.total}</div>
-            <div className="score-total">out of 40</div>
+            <div className="score-number">{totalMarks}</div>
+            <div className="score-total">out of {questions.length}</div>
+
             <div className="score-percentage">{scorePercentage}%</div>
           </div>
 
           <div className="score-breakdown">
-            <div className="score-item correct">
-              <FaCheckCircle className="score-icon" />
-              <div className="score-value">{score.correct}</div>
-              <div className="score-label">Correct</div>
-            </div>
-            <div className="score-item wrong">
-              <FaTimesCircle className="score-icon" />
-              <div className="score-value">{score.wrong}</div>
-              <div className="score-label">Wrong</div>
-            </div>
-            <div className="score-item skipped">
-              <FaMinusCircle className="score-icon" />
-              <div className="score-value">{score.skipped}</div>
-              <div className="score-label">Skipped</div>
-            </div>
+          <div className="score-item correct">
+  <FaCheckCircle className="score-icon" />
+  <div className="score-value">{correct}</div>
+  <div className="score-label">Correct</div>
+</div>
+
+<div className="score-item wrong">
+  <FaTimesCircle className="score-icon" />
+  <div className="score-value">{attempted - correct}</div>
+  <div className="score-label">Wrong</div>
+</div>
+
+<div className="score-item skipped">
+  <FaMinusCircle className="score-icon" />
+  <div className="score-value">{skipped}</div>
+  <div className="score-label">Skipped</div>
+</div>
+
           </div>
 
           <div className="coins-earned">
             <div className="coins-header">✨ 🎊 Coins Earned! ✨</div>
             <div className="coins-amount">
               <FaCoins className="coins-icon" />
-              <span className="coins-value">+{score.correct * 10}</span>
+              <span className="coins-value">+{score.pointsAdded}
+</span>
             </div>
             <div className="coins-calculation">
-              {score.correct} correct answers × 10 coins each
+              {correct} correct answers × 1 coins each
             </div>
           </div>
 
@@ -379,7 +340,9 @@ const GreenTechQuiz = () => {
       <div className="quiz-header">
         <h2 className="quiz-header-title">Green Tech Awareness Quiz</h2>
         <p className="quiz-header-subtitle">Answer all questions carefully</p>
-        <div className="answered-count">{answeredCount} / 10 answered</div>
+        <div className="answered-count">
+  {answeredCount} / {questions.length} answered
+</div>
       </div>
 
       <div className="quiz-content">
@@ -388,7 +351,8 @@ const GreenTechQuiz = () => {
             <div className="question-badge">
               Question {currentQuestion + 1}
             </div>
-            <span className="question-total">of 10</span>
+            <span className="question-total">of {questions.length}</span>
+
             <div className="timer-badge">
               <FaClock className="timer-icon" />
               <span className="timer-text">{timeLeft}s</span>
@@ -484,11 +448,13 @@ const GreenTechQuiz = () => {
             </div>
             <div className="legend-item">
               <div className="legend-box attempted"></div>
-              <span>Attempted (0)</span>
+              <span>Attempted ({answeredCount})</span>
+
             </div>
             <div className="legend-item">
               <div className="legend-box not-attempted"></div>
-              <span>Not Attempted (10)</span>
+              <span>Not Attempted ({questions.length - answeredCount})</span>
+
             </div>
           </div>
         </div>

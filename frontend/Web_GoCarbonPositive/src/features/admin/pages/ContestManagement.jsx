@@ -139,7 +139,7 @@ const loadContests = async () => {
       }
 
       return {
-  id: Number(value.rule_id), // ✅ FIX , // 🔥 IMPORTANT FIX
+ id: value.rule_id || `${key}-${index}`,
         title: key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
         description: "",
         points,
@@ -951,8 +951,7 @@ function AnalyticsPanel({ contests, selected }) {
   );
 }
 
-function QuizUploadPanel({ contest, fileName, onFileNameChange }) {
-  const enabled = contest?.taskType === "daily_quiz";
+function QuizUploadPanel({ fileName, onFileNameChange }) {
   const pickFile = async (event) => {
   const file = event.target.files?.[0];
   if (!file) return;
@@ -960,26 +959,36 @@ function QuizUploadPanel({ contest, fileName, onFileNameChange }) {
   onFileNameChange(file.name);
 
   try {
-    const res = await uploadQuizCSV(file);
-    alert("Quiz uploaded successfully!");
-    console.log(res);
+    await uploadQuizCSV(file);
+    alert("CSV uploaded and saved to active.json ✅");
   } catch (err) {
-    alert(err.message);
+    alert("Upload failed ❌");
+    console.error(err);
   }
 };
+
 
   return (
     <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center">
       <p className="text-sm text-slate-600">
-        {enabled
-          ? "CSV upload is enabled for this quiz contest."
-          : "Select contest with taskType = quiz to enable CSV upload."}
+        Upload quiz CSV file (will be converted to JSON)
       </p>
-      <label className="inline-flex mt-3 px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white">
+
+      <label className="inline-flex mt-3 px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white cursor-pointer">
         Browse CSV
-        <input type="file" accept=".csv" className="hidden" disabled={!enabled} onChange={pickFile} />
+        <input
+          type="file"
+          accept=".csv"
+          className="hidden"
+          onChange={pickFile}
+        />
       </label>
-      {fileName ? <p className="mt-3 text-sm text-emerald-700">{fileName}</p> : null}
+
+      {fileName && (
+        <p className="mt-3 text-sm text-emerald-700">
+          {fileName}
+        </p>
+      )}
     </div>
   );
 }
