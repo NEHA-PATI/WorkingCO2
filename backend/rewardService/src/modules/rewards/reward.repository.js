@@ -220,7 +220,8 @@ const getAllActiveRules = async () => {
       points,
       milestone_weeks,
       max_points_per_day,
-      is_active
+      is_active,
+      rules              -- 👈 ADD THIS LINE
     FROM reward_rules
     WHERE is_active = TRUE
     ORDER BY action_key, action_type, milestone_weeks
@@ -228,6 +229,7 @@ const getAllActiveRules = async () => {
 
   return rows;
 };
+
 
 /* ===============================
    LEADERBOARD
@@ -508,24 +510,27 @@ const createRule = async ({
   action_type,
   points,
   milestone_weeks,
-  max_points_per_day
+  max_points_per_day,
+  rules = []
 }) => {
 
   const { rows } = await pool.query(`
     INSERT INTO reward_rules
-    (action_key, action_type, points, milestone_weeks, max_points_per_day, is_active)
-    VALUES ($1,$2,$3,$4,$5, TRUE)
+    (action_key, action_type, points, milestone_weeks, max_points_per_day, is_active, rules)
+    VALUES ($1,$2,$3,$4,$5, TRUE, $6)
     RETURNING *
   `, [
     action_key,
     action_type,
     points,
     milestone_weeks,
-    max_points_per_day
+    max_points_per_day,
+    JSON.stringify(rules)   // 👈 IMPORTANT
   ]);
 
   return rows[0];
 };
+
 
 
 /* ===============================
@@ -534,7 +539,8 @@ const createRule = async ({
 const updateRule = async (rule_id, {
   points,
   max_points_per_day,
-  is_active
+  is_active,
+  rules
 }) => {
 
   const { rows } = await pool.query(`
@@ -542,18 +548,21 @@ const updateRule = async (rule_id, {
     SET
       points = COALESCE($1, points),
       max_points_per_day = COALESCE($2, max_points_per_day),
-      is_active = COALESCE($3, is_active)
-    WHERE rule_id = $4
+      is_active = COALESCE($3, is_active),
+      rules = COALESCE($4::jsonb, rules)
+    WHERE rule_id = $5
     RETURNING *
   `, [
     points,
     max_points_per_day,
     is_active,
+    rules ? JSON.stringify(rules) : null,
     rule_id
   ]);
 
   return rows[0];
 };
+
 
 module.exports = {
   getMonthlyPoints,
