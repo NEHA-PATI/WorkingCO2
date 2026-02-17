@@ -174,7 +174,7 @@ localStorage.removeItem("token");
             onClick={handleIconicArenaClick}
           >
             <video
-              src="/arena-animation.mp4.webm"
+              src="/arena-animation.mp4"
               className="iconic-arena-video"
               autoPlay
               loop
