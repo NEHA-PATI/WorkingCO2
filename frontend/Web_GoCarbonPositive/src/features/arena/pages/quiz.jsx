@@ -25,6 +25,10 @@ const GreenTechQuiz = () => {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, []);
+
   const questions = [
     {
       id: 1,
