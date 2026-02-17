@@ -584,7 +584,7 @@ module.exports = {
   getRewardCatalogItems,
   getRewardCatalogCount,
   getRewardById,
-  getContestStats,
-createRule,
-  updateRule
+  // getContestStats,
+// createRule,
+//   updateRule
 };
