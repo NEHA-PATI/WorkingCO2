@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 import AdminNavbar from "@features/admin/components/AdminNavbar";
-import { FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
 import "./AdminLayout.css";
 
 const MIN_SIDEBAR_WIDTH = 220;
@@ -80,12 +79,16 @@ export default function AdminLayout() {
     >
       <button
         type="button"
-        className="admin-layout-toggle-btn"
+        className={`admin-layout-toggle-btn ${
+          isSidebarOpen ? "is-open" : "is-closed"
+        }`}
         onClick={() => setIsSidebarOpen((prev) => !prev)}
         aria-label={isSidebarOpen ? "Hide sidebar" : "Show sidebar"}
         title={isSidebarOpen ? "Hide sidebar" : "Show sidebar"}
       >
-        {isSidebarOpen ? <FiChevronsLeft /> : <FiChevronsRight />}
+        <span className="admin-layout-toggle-btn-icon" aria-hidden="true">
+          {isSidebarOpen ? ">>" : "<<"}
+        </span>
       </button>
 
       {isSidebarOpen && (
