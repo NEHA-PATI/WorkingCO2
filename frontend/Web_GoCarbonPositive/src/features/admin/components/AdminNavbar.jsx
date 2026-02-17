@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { IoAnalyticsSharp, IoSettingsSharp } from "react-icons/io5";
-import { FaUserFriends, FaTrophy } from "react-icons/fa";
+import { FaUserFriends, FaTrophy, FaBriefcase } from "react-icons/fa";
 import { MdSupportAgent } from "react-icons/md";
 import { GiSettingsKnobs } from "react-icons/gi";
 import { BsShieldCheck } from "react-icons/bs";
@@ -93,7 +93,7 @@ const AdminNavbar = () => {
     {
       id: "career-management",
       label: "Careers",
-      icon: <FaUserFriends className="icon career-icon" />,
+      icon: <FaBriefcase className="icon career-icon" />,
       path: "/admin/career-management",
     },
     {
