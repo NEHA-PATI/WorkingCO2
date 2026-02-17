@@ -441,6 +441,8 @@ const getUserRewardHistoryCount = async (u_id) => {
     FROM user_reward_events
     WHERE u_id = $1
   `, [u_id]);
+  return Number(rows[0].total);
+};
 const getContestStats = async () => {
   const { rows } = await pool.query(`
     SELECT action_key, COUNT(*) AS completions
@@ -450,7 +452,54 @@ const getContestStats = async () => {
 
   return rows;
 };
+/* ===============================
+   REWARD CATALOG
+================================ */
+const getRewardCatalogItems = async (limit = 12, offset = 0) => {
+  const { rows } = await pool.query(`
+    SELECT
+      reward_id,
+      name,
+      description,
+      points,
+      price_inr,
+      image_url
+    FROM reward_catalog
+    WHERE is_active = TRUE
+    ORDER BY points ASC, reward_id ASC
+    LIMIT $1 OFFSET $2
+  `, [limit, offset]);
 
+  return rows;
+};
+
+const getRewardCatalogCount = async () => {
+  const { rows } = await pool.query(`
+    SELECT COUNT(*) AS total
+    FROM reward_catalog
+    WHERE is_active = TRUE
+  `);
+
+  return Number(rows[0].total);
+};
+
+const getRewardById = async (reward_id) => {
+  const { rows } = await pool.query(`
+    SELECT
+      reward_id,
+      name,
+      description,
+      points,
+      price_inr,
+      image_url
+    FROM reward_catalog
+    WHERE reward_id = $1
+      AND is_active = TRUE
+    LIMIT 1
+  `, [reward_id]);
+
+  return rows[0] || null;
+};
 /* ===============================
    CREATE RULE
 ================================ */
@@ -504,58 +553,6 @@ const updateRule = async (rule_id, {
   ]);
 
   return rows[0];
-};
-
-  return Number(rows[0].total);
-};
-
-/* ===============================
-   REWARD CATALOG
-================================ */
-const getRewardCatalogItems = async (limit = 12, offset = 0) => {
-  const { rows } = await pool.query(`
-    SELECT
-      reward_id,
-      name,
-      description,
-      points,
-      price_inr,
-      image_url
-    FROM reward_catalog
-    WHERE is_active = TRUE
-    ORDER BY points ASC, reward_id ASC
-    LIMIT $1 OFFSET $2
-  `, [limit, offset]);
-
-  return rows;
-};
-
-const getRewardCatalogCount = async () => {
-  const { rows } = await pool.query(`
-    SELECT COUNT(*) AS total
-    FROM reward_catalog
-    WHERE is_active = TRUE
-  `);
-
-  return Number(rows[0].total);
-};
-
-const getRewardById = async (reward_id) => {
-  const { rows } = await pool.query(`
-    SELECT
-      reward_id,
-      name,
-      description,
-      points,
-      price_inr,
-      image_url
-    FROM reward_catalog
-    WHERE reward_id = $1
-      AND is_active = TRUE
-    LIMIT 1
-  `, [reward_id]);
-
-  return rows[0] || null;
 };
 
 module.exports = {
