@@ -66,6 +66,7 @@ export default function Navbar() {
   /* ================= ACTIONS ================= */
 
   const handleLogout = () => {
+    setProfileOpen(false);
     logout();
     fireToast("AUTH.LOGOUT_SUCCESS", "success");
     localStorage.removeItem("authUser");
