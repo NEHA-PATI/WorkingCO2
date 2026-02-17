@@ -3,14 +3,20 @@ const multer = require('multer');
 const auth = require('../../middlewares/auth.middleware');
 const controller = require('./quiz.controller');
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  }
+});
+
 
 /* ===============================
    ADMIN QUIZ ROUTES
 ================================ */
 
 /* ADMIN */
-router.post('/admin/upload-csv', auth, upload.single('file'), controller.uploadCsv);
+router.post('/admin/upload-csv', upload.single('file'), controller.uploadCsv);
 router.get('/admin/status', auth, controller.getStatus);
 router.get('/admin/preview', auth, controller.getPreview);
 
