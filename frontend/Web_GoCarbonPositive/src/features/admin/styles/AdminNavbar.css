@@ -2,19 +2,19 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.2rem;
-  background: #ffffff;
+  gap: 0.14rem;
+  background: transparent;
   width: 100%;
   height: 100%;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
+  border: 0;
+  border-radius: 0;
   margin: 0;
-  padding: 0.6rem;
+  padding: 0.9rem 0.6rem 0.6rem;
   box-sizing: border-box;
   overflow-y: auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
 }
 
 .admin-navbar::-webkit-scrollbar {
@@ -27,7 +27,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem 0.8rem;
+  padding: 0.44rem 0.8rem;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
