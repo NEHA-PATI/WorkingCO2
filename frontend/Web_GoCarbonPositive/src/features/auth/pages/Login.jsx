@@ -9,7 +9,7 @@ import { fireToast } from "@shared/utils/toastService";
 import { ENV } from "@config/env";
 
 const Login = ({ onClose, onSwitchToSignup }) => {
-  const API_URL =  import.meta.env.VITE_AUTH_API || "http://15.206.213.50:5002";
+  const API_URL = import.meta.env.VITE_AUTH_API || "http://localhost:5002";
 
   const [formData, setFormData] = useState({
     email: "",

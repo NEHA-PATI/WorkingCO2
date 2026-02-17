@@ -24,8 +24,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
-  "http://15.206.213.50",          // ✅ EC2 frontend
-  "http://15.206.213.50:5173",     // optional
+  "http://localhost",
   "https://www.gocarbonpositive.com",
   process.env.FRONTEND_URL,
 ].filter(Boolean);

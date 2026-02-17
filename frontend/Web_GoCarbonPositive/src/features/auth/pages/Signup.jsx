@@ -9,7 +9,7 @@ import { ENV } from "@config/env";
 
 
 const Signup = ({ onClose, onSwitchToLogin }) => {
-  const API_URL = import.meta.env.VITE_AUTH_API || "http://15.206.213.50:5002";
+  const API_URL = import.meta.env.VITE_AUTH_API || "http://localhost:5002";
 
   const [formData, setFormData] = useState({
     fullName: "",
