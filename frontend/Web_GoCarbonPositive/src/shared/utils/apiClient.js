@@ -6,19 +6,19 @@ import { ENV } from "@config/env";
 const API_CONFIG = {
   // Asset Service (port 5000)
   ASSET_API:
-    (import.meta.env.VITE_ASSET_SERVICE_URL || "http://15.206.213.50:5000") +
+    (import.meta.env.VITE_ASSET_SERVICE_URL || "http://localhost:5000") +
     "/api/v1",
 
   // Auth Service (port 5002)
-  AUTH_API: import.meta.env.VITE_AUTH_SERVICE_URL || "http://15.206.213.50:5002",
+  AUTH_API: import.meta.env.VITE_AUTH_SERVICE_URL || "http://localhost:5002",
 
   // Notification Service (port 5001)
   NOTIFICATION_API:
     import.meta.env.VITE_NOTIFICATION_SERVICE_URL || "http://localhost:5001",
 
 
-    CONTACT_API:
-import.meta.env.VITE_CONTACT_API,
+  // Contact Service (port 5005)
+  CONTACT_API: import.meta.env.VITE_CONTACT_API || "http://localhost:5005",
 };
 
 /**
@@ -143,7 +143,7 @@ export const careerApiClient = createApiClient(
 
 // Blog Service (port 4000)
 export const blogApiClient = createApiClient(
-  import.meta.env.VITE_BLOG_API_URL || "http://15.206.213.50:4000/api/blog",
+  import.meta.env.VITE_BLOG_API_URL || "http://localhost:4000/api/blog",
   "Blog Service",
 );
 
@@ -153,7 +153,7 @@ export const contactApiClient = createApiClient(
 );
 
 export const ticketApiClient = createApiClient(
-  import.meta.env.VITE_TICKET_API || "http://15.206.213.50:5004/ticket",
+  import.meta.env.VITE_TICKET_API || "http://localhost:5004",
   "Ticket Service",
 );
 
