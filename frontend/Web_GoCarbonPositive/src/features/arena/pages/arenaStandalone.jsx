@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom';
 import "@features/arena/styles/arenaglobals.css";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { AnimatePresence, useMotionValue, useAnimationFrame } from 'framer-motion';
@@ -128,10 +128,110 @@ const styles = `
 `;
 
 const iconMap = {
-    UserPlus, ClipboardList, Linkedin, Instagram, Users, CalendarCheck, Gamepad2, Brain
+    UserPlus, ClipboardList, Linkedin, Instagram, Users, CalendarCheck, Gamepad2, Brain, Gift, Star, Flame, Trophy, Sparkles
+};
+
+const TASK_ICON_MAP = {
+    sign_up: 'UserPlus',
+    complete_profile: 'ClipboardList',
+    take_survey: 'Brain',
+    connect_linkedin: 'Linkedin',
+    connect_instagram: 'Instagram',
+    join_community: 'Users',
+    daily_checkin: 'CalendarCheck',
+    daily_quiz: 'Gamepad2'
 };
 
 const QUIZ_TASK_KEY = 'daily_quiz';
+const QUIZ_COOLDOWN_GLOBAL_KEY = 'arena_daily_quiz_cooldown_until';
+const INSTAGRAM_CONNECT_URL = 'https://www.instagram.com/gocarbonpositive/';
+const LINKEDIN_CONNECT_URL = 'https://www.linkedin.com/company/gocarbonpositive/';
+const COMMUNITY_CONNECT_URL = 'https://chat.whatsapp.com/Er0bkEnZG6O7WRjLu3AOBT';
+const PENDING_SOCIAL_TASK_KEY = 'arena_pending_social_task';
+const PENDING_PROFILE_TASK_KEY = 'arena_pending_profile_task';
+
+const getQuizCooldownStorageKey = (userId) => `arena_daily_quiz_cooldown_until:${userId || 'guest'}`;
+
+const readQuizCooldownUntil = (userId) => {
+    if (typeof window === 'undefined') return null;
+    try {
+        const scopedRawValue = window.localStorage.getItem(getQuizCooldownStorageKey(userId));
+        const globalRawValue = window.localStorage.getItem(QUIZ_COOLDOWN_GLOBAL_KEY);
+        const scopedValue = Number(scopedRawValue);
+        const globalValue = Number(globalRawValue);
+        const maxValue = Math.max(
+            Number.isFinite(scopedValue) ? scopedValue : 0,
+            Number.isFinite(globalValue) ? globalValue : 0
+        );
+        return maxValue > 0 ? maxValue : null;
+    } catch {
+        return null;
+    }
+};
+
+const writeQuizCooldownUntil = (userId, untilTimestamp) => {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.setItem(getQuizCooldownStorageKey(userId), String(untilTimestamp));
+        window.localStorage.setItem(QUIZ_COOLDOWN_GLOBAL_KEY, String(untilTimestamp));
+    } catch {
+        // Ignore storage failures and keep UI functional.
+    }
+};
+
+const readPendingSocialTask = () => {
+    if (typeof window === 'undefined') return null;
+    try {
+        return window.localStorage.getItem(PENDING_SOCIAL_TASK_KEY);
+    } catch {
+        return null;
+    }
+};
+
+const writePendingSocialTask = (taskType) => {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.setItem(PENDING_SOCIAL_TASK_KEY, taskType);
+    } catch {
+        // Ignore storage failures and keep UI functional.
+    }
+};
+
+const clearPendingSocialTask = () => {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.removeItem(PENDING_SOCIAL_TASK_KEY);
+    } catch {
+        // Ignore storage failures and keep UI functional.
+    }
+};
+
+const readPendingProfileTask = () => {
+    if (typeof window === 'undefined') return null;
+    try {
+        return window.localStorage.getItem(PENDING_PROFILE_TASK_KEY);
+    } catch {
+        return null;
+    }
+};
+
+const writePendingProfileTask = (taskType) => {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.setItem(PENDING_PROFILE_TASK_KEY, taskType);
+    } catch {
+        // Ignore storage failures and keep UI functional.
+    }
+};
+
+const clearPendingProfileTask = () => {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.removeItem(PENDING_PROFILE_TASK_KEY);
+    } catch {
+        // Ignore storage failures and keep UI functional.
+    }
+};
 
 const DEFAULT_THEME = {
     gradient: "from-slate-500 to-slate-700",
@@ -587,7 +687,7 @@ const ContestCard = ({ contest, index, onClick, state, onCooldownExpired }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             whileHover={{ y: isUnavailable ? 0 : -4, transition: { duration: 0.2 } }}
-            onClick={() => onClick(contest.taskType)}
+            onClick={() => onClick(contest)}
             className={`group relative border ${cardTheme.border} rounded-2xl p-4 sm:p-4 cursor-pointer overflow-hidden transition-all min-h-[245px] flex flex-col bg-white ${isCompleted ? 'opacity-75 hover:shadow-sm' : 'hover:shadow-lg shadow-sm'}`}
         >
             <div className={`absolute inset-x-0 bottom-0 h-1.5 bg-gradient-to-r ${cardTheme.badge}`} />
@@ -652,6 +752,7 @@ const ContestModal = ({
     const contestUsesScoreInput = isScoreTask(contest);
     const effectiveState = state === 'COOLDOWN' && isExpired ? 'AVAILABLE' : state;
     const hasValidScore = scoreInput.trim() !== '' && Number.isFinite(Number(scoreInput));
+    const isTaskDone = effectiveState === 'COMPLETED' || effectiveState === 'COOLDOWN';
 
     const canComplete = () => {
         if (isSubmitting) return false;
@@ -793,12 +894,14 @@ const ContestModal = ({
                                 <button
                                     onClick={handleAction}
                                     disabled={!canComplete()}
-                                    className={`arena-standalone-btn w-full bg-gradient-to-r ${contest.theme.button} hover:opacity-90 text-white border-0 shadow-lg h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed`}
+                                    className={`arena-standalone-btn w-full bg-gradient-to-r ${isTaskDone ? 'from-slate-300 to-slate-400' : 'from-slate-800 to-slate-900'} text-white border-0 shadow-lg h-12 text-base font-semibold ${isTaskDone ? 'opacity-60' : 'hover:opacity-90'} disabled:cursor-not-allowed`}
                                 >
                                     {effectiveState === 'COMPLETED'
                                         ? 'Completed'
                                         : effectiveState === 'COOLDOWN'
                                             ? `Available in ${cooldownText}`
+                                            : contest.taskType === 'sign_up'
+                                                ? 'Redeem Signup Bonus'
                                             : contestUsesScoreInput
                                                 ? 'Complete & Claim Points'
                                                 : contest.buttonText}
@@ -1269,6 +1372,8 @@ export default function ArenaStandalone() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [selectedContestTask, setSelectedContestTask] = useState(null);
+    const [pendingSocialTask, setPendingSocialTask] = useState(() => readPendingSocialTask());
+    const [pendingProfileTask, setPendingProfileTask] = useState(() => readPendingProfileTask());
     const userId = useMemo(() => getArenaUserId(), []);
     const hasAuthUser = Boolean(userId);
 
@@ -1331,7 +1436,8 @@ export default function ArenaStandalone() {
             toast.success('Task completed! Points added.');
             setSelectedContestTask(null);
         },
-        onError: (error) => {
+        onError: (error, variables) => {
+            if (variables?.suppressErrorToast) return;
             toast.error(getErrorMessage(error, 'Unable to complete task right now.'));
         },
         onSettled: () => {
@@ -1352,6 +1458,12 @@ export default function ArenaStandalone() {
 
   return metadataList.map((metadata, index) => {
     const backend = statusByTask[metadata.task_type] || {};
+    const backendNextAvailableAt = backend.next_available_at ? new Date(backend.next_available_at).getTime() : null;
+    const localQuizCooldownUntil = metadata.task_type === QUIZ_TASK_KEY ? readQuizCooldownUntil(userId) : null;
+    const effectiveNextAvailableAt = Math.max(
+      backendNextAvailableAt || 0,
+      localQuizCooldownUntil || 0
+    ) || null;
 
     const configuredActionType =
       metadata.action_type ||
@@ -1374,10 +1486,7 @@ export default function ArenaStandalone() {
         "Complete the task and earn points ",
 
       // ✅ Icon logic
-      icon:
-        configuredActionType === "daily"
-          ? "CalendarCheck"
-          : "Zap",
+      icon: TASK_ICON_MAP[metadata.task_type] || "Sparkles",
 
       // ✅ Use theme from your theme map
       theme: {
@@ -1411,6 +1520,7 @@ export default function ArenaStandalone() {
 
       backend: {
         ...backend,
+        next_available_at: effectiveNextAvailableAt ? new Date(effectiveNextAvailableAt).toISOString() : null,
         action_type: configuredActionType,
         repeatable:
           metadata.repeatable ??
@@ -1421,7 +1531,18 @@ export default function ArenaStandalone() {
       }
     };
   });
-}, [contestMetadataQuery.data, statusByTask]);
+}, [contestMetadataQuery.data, statusByTask, userId]);
+
+    useEffect(() => {
+        const quizContest = mergedContests.find((contest) => contest.taskType === QUIZ_TASK_KEY);
+        const nextAvailableAt = quizContest?.backend?.next_available_at
+            ? new Date(quizContest.backend.next_available_at).getTime()
+            : null;
+
+        if (nextAvailableAt && nextAvailableAt > Date.now()) {
+            writeQuizCooldownUntil(userId, nextAvailableAt);
+        }
+    }, [mergedContests, userId]);
 
 
     const getContestState = useCallback((contest) => {
@@ -1429,6 +1550,7 @@ export default function ArenaStandalone() {
         const nextAvailableAt = backend.next_available_at ? new Date(backend.next_available_at).getTime() : null;
         const cooldownActive = Boolean(nextAvailableAt && nextAvailableAt > Date.now());
         if (cooldownActive) return 'COOLDOWN';
+        if (contest?.taskType === QUIZ_TASK_KEY) return 'AVAILABLE';
         if (backend.completed) return 'COMPLETED';
         return 'AVAILABLE';
     }, []);
@@ -1448,17 +1570,193 @@ export default function ArenaStandalone() {
         [selectedContest, getContestState]
     );
 
+    useEffect(() => {
+        const syncPendingTasks = () => {
+            const storedPendingTask = readPendingSocialTask();
+            if (storedPendingTask !== pendingSocialTask) {
+                setPendingSocialTask(storedPendingTask);
+            }
+
+            const storedPendingProfileTask = readPendingProfileTask();
+            if (storedPendingProfileTask !== pendingProfileTask) {
+                setPendingProfileTask(storedPendingProfileTask);
+            }
+        };
+
+        syncPendingTasks();
+        window.addEventListener('focus', syncPendingTasks);
+        window.addEventListener('pageshow', syncPendingTasks);
+
+        return () => {
+            window.removeEventListener('focus', syncPendingTasks);
+            window.removeEventListener('pageshow', syncPendingTasks);
+        };
+    }, [pendingSocialTask, pendingProfileTask]);
+
+    const isUserProfileCompleted = useCallback(async () => {
+        try {
+            const authHeaders = (() => {
+                const token = localStorage.getItem('authToken');
+                const headers = {
+                    'x-user-id': userId
+                };
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
+                return headers;
+            })();
+
+            const response = await fetch('http://localhost:5006/api/profiles/complete', {
+                headers: authHeaders
+            });
+
+            if (!response.ok) return false;
+
+            const data = await response.json();
+            const profile = data?.profile || {};
+            const addresses = Array.isArray(data?.addresses) ? data.addresses : [];
+
+            const hasBasicProfile =
+                Boolean(String(profile.first_name || '').trim()) &&
+                Boolean(String(profile.last_name || '').trim()) &&
+                Boolean(String(profile.email || '').trim());
+
+            const hasPrimaryAddress = addresses.some((address) =>
+                Boolean(String(address?.address_line || '').trim()) &&
+                (Boolean(String(address?.country_code || '').trim()) || Boolean(String(address?.country || '').trim()))
+            );
+
+            return hasBasicProfile && hasPrimaryAddress;
+        } catch {
+            return false;
+        }
+    }, [userId]);
+
+    useEffect(() => {
+        if (!pendingSocialTask || completeTaskMutation.isPending) return;
+
+        const pendingContest = mergedContests.find((contest) => contest.taskType === pendingSocialTask);
+        if (!pendingContest) return;
+
+        if (getContestState(pendingContest) !== 'AVAILABLE') {
+            clearPendingSocialTask();
+            setPendingSocialTask(null);
+            return;
+        }
+
+        completeTaskMutation.mutate(
+            { contest: pendingContest, score: undefined },
+            {
+                onSettled: () => {
+                    clearPendingSocialTask();
+                    setPendingSocialTask(null);
+                }
+            }
+        );
+    }, [pendingSocialTask, mergedContests, getContestState, completeTaskMutation]);
+
+    useEffect(() => {
+        if (!pendingProfileTask || completeTaskMutation.isPending) return;
+
+        const run = async () => {
+            const pendingContest = mergedContests.find((contest) => contest.taskType === pendingProfileTask);
+            if (!pendingContest) return;
+
+            if (getContestState(pendingContest) !== 'AVAILABLE') {
+                clearPendingProfileTask();
+                setPendingProfileTask(null);
+                return;
+            }
+
+            const completed = await isUserProfileCompleted();
+            if (!completed) return;
+
+            completeTaskMutation.mutate(
+                { contest: pendingContest, score: undefined, suppressErrorToast: true },
+                {
+                    onSuccess: () => {
+                        clearPendingProfileTask();
+                        setPendingProfileTask(null);
+                    }
+                }
+            );
+        };
+
+        run();
+    }, [pendingProfileTask, mergedContests, getContestState, completeTaskMutation, isUserProfileCompleted]);
+
     const handleTaskComplete = (contest, payload = {}) => {
+        if (contest?.taskType === 'complete_profile') {
+            (async () => {
+                const completed = await isUserProfileCompleted();
+
+                if (!completed) {
+                    writePendingProfileTask('complete_profile');
+                    setPendingProfileTask('complete_profile');
+                    setSelectedContestTask(null);
+                    navigate('/profile');
+                    return;
+                }
+
+                completeTaskMutation.mutate({ contest, score: payload.score });
+            })();
+            return;
+        }
+        if (contest?.taskType === 'connect_linkedin') {
+            if (typeof window !== 'undefined') {
+                writePendingSocialTask('connect_linkedin');
+                setSelectedContestTask(null);
+                window.location.href = LINKEDIN_CONNECT_URL;
+            }
+            return;
+        }
+        if (contest?.taskType === 'connect_instagram') {
+            if (typeof window !== 'undefined') {
+                writePendingSocialTask('connect_instagram');
+                setSelectedContestTask(null);
+                window.location.href = INSTAGRAM_CONNECT_URL;
+            }
+            return;
+        }
+        if (contest?.taskType === 'join_community') {
+            if (typeof window !== 'undefined') {
+                writePendingSocialTask('join_community');
+                setSelectedContestTask(null);
+                window.location.href = COMMUNITY_CONNECT_URL;
+            }
+            return;
+        }
         completeTaskMutation.mutate({ contest, score: payload.score });
     };
 
-    const handleContestClick = useCallback((taskType) => {
+    const handleContestClick = useCallback((contest) => {
+        const taskType = contest?.taskType;
+        if (!taskType) return;
+
         if (taskType === QUIZ_TASK_KEY) {
-            navigate('/arena/quiz');
+            const quizState = getContestState(contest);
+            const quizCooldownUntil = contest?.backend?.next_available_at
+                ? new Date(contest.backend.next_available_at).getTime()
+                : null;
+            const isQuizLocked = quizState === 'COOLDOWN' || Boolean(quizCooldownUntil && quizCooldownUntil > Date.now());
+
+            if (isQuizLocked) {
+                writeQuizCooldownUntil(userId, quizCooldownUntil);
+                toast.error('Come back tomorrow', { duration: 1000 });
+                return;
+            }
+
+            const quizPath = quizCooldownUntil
+                ? `/arena/quiz?cooldownUntil=${quizCooldownUntil}`
+                : '/arena/quiz';
+
+            navigate(quizPath, {
+                state: { quizCooldownUntil }
+            });
             return;
         }
         setSelectedContestTask(taskType);
-    }, [navigate]);
+    }, [getContestState, navigate, userId]);
 
     const handleCooldownExpired = useCallback(() => {
         queryClient.invalidateQueries({ queryKey: ['arenaContestStatus'] });
@@ -1511,6 +1809,7 @@ export default function ArenaStandalone() {
 
     return (
         <>
+            <Toaster position="top-center" duration={1000} richColors closeButton={false} />
             <style>{styles}</style>
             <div className="arena-standalone-page arena-scope">
                 <HeroSlider />
