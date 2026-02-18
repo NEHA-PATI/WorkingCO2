@@ -212,6 +212,21 @@ body {
   box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
 }
 
+.start-button:disabled {
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+}
+
+.quiz-lock-note {
+  margin-top: 12px;
+  text-align: center;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 .ready-text {
   text-align: center;
   margin-top: 16px;
