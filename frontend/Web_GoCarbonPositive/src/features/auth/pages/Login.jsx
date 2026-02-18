@@ -369,12 +369,13 @@ const Login = ({ onClose, onSwitchToSignup }) => {
       fireToast("AUTH.LOGIN_SUCCESS");
 
       const role =
-        data.user.role?.toLowerCase() || data.user.role_name?.toLowerCase();
+        data.data.user.role?.toLowerCase() ||
+        data.data.user.role_name?.toLowerCase();
 
       if (role === "admin") {
         navigate("/admin/dashboard", { replace: true });
       } else if (role === "organization") {
-        navigate("/org/dashboard", { replace: true });
+        navigate("/organization/dashboard", { replace: true });
       } else {
         navigate("/user/dashboard", { replace: true });
       }
