@@ -375,7 +375,7 @@ const Login = ({ onClose, onSwitchToSignup }) => {
       if (role === "admin") {
         navigate("/admin/dashboard", { replace: true });
       } else if (role === "organization") {
-        navigate("/org/dashboard", { replace: true });
+        navigate("/organization/dashboard", { replace: true });
       } else {
         navigate("/user/dashboard", { replace: true });
       }
