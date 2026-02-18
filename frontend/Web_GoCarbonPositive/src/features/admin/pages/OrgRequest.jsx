@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   FiSearch,
   FiEye,
+  FiEyeOff,
   FiCheckCircle,
   FiXCircle,
   FiX,
@@ -68,6 +69,9 @@ export default function OrgRequest() {
   const [orgrqCreatePassword, setOrgrqCreatePassword] = useState("");
   const [orgrqCreateConfirmPassword, setOrgrqCreateConfirmPassword] =
     useState("");
+  const [orgrqShowCreatePassword, setOrgrqShowCreatePassword] = useState(false);
+  const [orgrqShowCreateConfirmPassword, setOrgrqShowCreateConfirmPassword] =
+    useState(false);
   const [orgrqActionError, setOrgrqActionError] = useState("");
 
   useEffect(() => {
@@ -111,6 +115,8 @@ export default function OrgRequest() {
     setOrgrqCreateEmail("");
     setOrgrqCreatePassword("");
     setOrgrqCreateConfirmPassword("");
+    setOrgrqShowCreatePassword(false);
+    setOrgrqShowCreateConfirmPassword(false);
     setOrgrqActionError("");
   };
 
@@ -517,7 +523,7 @@ export default function OrgRequest() {
         <div
           className="orgrq-overlay"
           role="presentation"
-          onClick={() => setOrgrqApproveModal(null)}
+          onClick={resetApproveModalState}
         >
           <div
             className="orgrq-modal-card orgrq-create-modal"
@@ -527,7 +533,7 @@ export default function OrgRequest() {
           >
             <button
               className="orgrq-close-xplain"
-              onClick={() => setOrgrqApproveModal(null)}
+              onClick={resetApproveModalState}
               type="button"
             >
               <FiX />
@@ -559,12 +565,26 @@ export default function OrgRequest() {
               <div className="orgrq-pass-wrap">
                 <input
                   className="orgrq-input"
-                  type="password"
+                  type={orgrqShowCreatePassword ? "text" : "password"}
                   value={orgrqCreatePassword}
                   onChange={(e) => setOrgrqCreatePassword(e.target.value)}
                   disabled={orgrqActionLoading}
                 />
-                <FiEye className="orgrq-pass-eye" />
+                <button
+                  type="button"
+                  className="orgrq-pass-eye-btn"
+                  onClick={() => setOrgrqShowCreatePassword((prev) => !prev)}
+                  aria-label={
+                    orgrqShowCreatePassword ? "Hide password" : "Show password"
+                  }
+                  disabled={orgrqActionLoading}
+                >
+                  {orgrqShowCreatePassword ? (
+                    <FiEyeOff className="orgrq-pass-eye" />
+                  ) : (
+                    <FiEye className="orgrq-pass-eye" />
+                  )}
+                </button>
               </div>
             </label>
 
@@ -573,12 +593,30 @@ export default function OrgRequest() {
               <div className="orgrq-pass-wrap">
                 <input
                   className="orgrq-input"
-                  type="password"
+                  type={orgrqShowCreateConfirmPassword ? "text" : "password"}
                   value={orgrqCreateConfirmPassword}
                   onChange={(e) => setOrgrqCreateConfirmPassword(e.target.value)}
                   disabled={orgrqActionLoading}
                 />
-                <FiEye className="orgrq-pass-eye" />
+                <button
+                  type="button"
+                  className="orgrq-pass-eye-btn"
+                  onClick={() =>
+                    setOrgrqShowCreateConfirmPassword((prev) => !prev)
+                  }
+                  aria-label={
+                    orgrqShowCreateConfirmPassword
+                      ? "Hide password"
+                      : "Show password"
+                  }
+                  disabled={orgrqActionLoading}
+                >
+                  {orgrqShowCreateConfirmPassword ? (
+                    <FiEyeOff className="orgrq-pass-eye" />
+                  ) : (
+                    <FiEye className="orgrq-pass-eye" />
+                  )}
+                </button>
               </div>
             </label>
 
