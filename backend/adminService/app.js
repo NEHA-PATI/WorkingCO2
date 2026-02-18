@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+require("./src/config/env");
 
 const app = express();
 

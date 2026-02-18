@@ -1,13 +1,14 @@
 const pool = require("../config/db");
 const bcrypt = require("bcryptjs");
-const { Resend } = require("resend");
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 const PURPOSE = "ORG_EMAIL_VERIFY";
 const OTP_EXPIRY_MINUTES = 5;
 const RESEND_COOLDOWN_SECONDS = 30;
 const MAX_ATTEMPTS = 5;
+const AUTH_SERVICE_BASE_URL =
+  process.env.AUTH_SERVICE_BASE_URL || "http://localhost:5002";
+const AUTH_OTP_ENDPOINT =
+  process.env.AUTH_OTP_ENDPOINT || "/api/v1/mail/send-otp";
 
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -18,25 +19,43 @@ const generateOtp = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-const sendOtpEmail = async (email, otp) => {
-  const htmlContent = `
-    <div style="font-family:Arial, sans-serif; padding:20px;">
-      <h2>Your OTP Code</h2>
-      <p>Hello,</p>
-      <p>Your One-Time Password (OTP) is:</p>
-      <h3 style="color:#2b6cb0;">${otp}</h3>
-      <p>This code will expire in ${OTP_EXPIRY_MINUTES} minutes.</p>
-      <br/>
-      <p>— The Team</p>
-    </div>
-  `;
+const getAuthOtpUrl = () => {
+  const base = AUTH_SERVICE_BASE_URL.endsWith("/")
+    ? AUTH_SERVICE_BASE_URL.slice(0, -1)
+    : AUTH_SERVICE_BASE_URL;
+  const endpoint = AUTH_OTP_ENDPOINT.startsWith("/")
+    ? AUTH_OTP_ENDPOINT
+    : `/${AUTH_OTP_ENDPOINT}`;
 
-  await resend.emails.send({
-    from: "Carbon Positive <onboarding@resend.dev>",
-    to: email,
-    subject: "Your OTP Code",
-    html: htmlContent
+  return `${base}${endpoint}`;
+};
+
+const sendOtpEmail = async (email, otp) => {
+  const response = await fetch(getAuthOtpUrl(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      otp,
+    }),
   });
+
+  if (!response.ok) {
+    let details = "Unknown error";
+
+    try {
+      const body = await response.json();
+      details = body?.message || details;
+    } catch (_) {
+      details = response.statusText || details;
+    }
+
+    throw new Error(
+      `Central OTP service failed (${response.status}): ${details}`
+    );
+  }
 };
 
 /**
@@ -50,7 +69,7 @@ exports.sendOrgEmailOtp = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Please provide a valid email",
-        data: null
+        data: null,
       });
     }
 
@@ -71,7 +90,7 @@ exports.sendOrgEmailOtp = async (req, res) => {
         return res.status(429).json({
           success: false,
           message: `Please wait ${RESEND_COOLDOWN_SECONDS - diffSeconds}s before requesting another OTP`,
-          data: null
+          data: null,
         });
       }
     }
@@ -119,14 +138,14 @@ exports.sendOrgEmailOtp = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "OTP sent successfully",
-      data: null
+      data: null,
     });
   } catch (error) {
     console.error("SEND ORG EMAIL OTP ERROR:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to send OTP",
-      data: null
+      data: null,
     });
   }
 };
@@ -142,14 +161,14 @@ exports.verifyOrgEmailOtp = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Please provide a valid email",
-        data: null
+        data: null,
       });
     }
     if (!otp || String(otp).length !== 6) {
       return res.status(400).json({
         success: false,
         message: "Please provide a valid OTP",
-        data: null
+        data: null,
       });
     }
 
@@ -166,7 +185,7 @@ exports.verifyOrgEmailOtp = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "OTP not found. Please request a new one.",
-        data: null
+        data: null,
       });
     }
 
@@ -176,7 +195,7 @@ exports.verifyOrgEmailOtp = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "OTP already verified",
-        data: null
+        data: null,
       });
     }
 
@@ -184,7 +203,7 @@ exports.verifyOrgEmailOtp = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "OTP expired. Please request a new one.",
-        data: null
+        data: null,
       });
     }
 
@@ -192,7 +211,7 @@ exports.verifyOrgEmailOtp = async (req, res) => {
       return res.status(429).json({
         success: false,
         message: "Too many attempts. Please request a new OTP.",
-        data: null
+        data: null,
       });
     }
 
@@ -206,26 +225,25 @@ exports.verifyOrgEmailOtp = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Invalid OTP. Please try again.",
-        data: null
+        data: null,
       });
     }
 
-    await pool.query(
-      `UPDATE otp_logs SET verified = true WHERE id = $1`,
-      [record.id]
-    );
+    await pool.query(`UPDATE otp_logs SET verified = true WHERE id = $1`, [
+      record.id,
+    ]);
 
     return res.status(200).json({
       success: true,
       message: "OTP verified successfully",
-      data: null
+      data: null,
     });
   } catch (error) {
     console.error("VERIFY ORG EMAIL OTP ERROR:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to verify OTP",
-      data: null
+      data: null,
     });
   }
 };
