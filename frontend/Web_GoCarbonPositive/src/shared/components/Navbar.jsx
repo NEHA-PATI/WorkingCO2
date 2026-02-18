@@ -37,9 +37,8 @@ export default function Navbar() {
 
   const menuDropdownRef = useRef(null);
   const profileDropdownRef = useRef(null);
-  const hideHamburgerOnRoute =
-    location.pathname === "/admin/overview" ||
-    location.pathname === "/admin/users";
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  const showHamburger = !isAdminRoute;
 
   /* ================= HELPERS ================= */
 
@@ -120,7 +119,7 @@ localStorage.removeItem("token");
     <div className="user-navbar">
       {/* ================= LEFT ================= */}
       <div className="user-left-section">
-          {!hideHamburgerOnRoute && (
+          {showHamburger && (
             <div ref={menuDropdownRef} style={{ position: "relative" }}>
               <FaBars
                 className="user-menu-icon"

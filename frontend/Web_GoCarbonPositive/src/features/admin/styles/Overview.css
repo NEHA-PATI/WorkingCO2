@@ -12,6 +12,8 @@
   padding: 1.5rem 2rem;
   background-color: #f9fafb;
   margin-top: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* KPI Cards */
@@ -82,6 +84,7 @@
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
+  min-width: 0;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); /* ✅ light blue shadow */
 }
 
@@ -102,6 +105,7 @@
 .admin-overview-scope .system-metrics,
 .admin-overview-scope .recent-alerts {
   flex: 1;
+  min-width: 0;
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
@@ -194,4 +198,104 @@
 .admin-overview-scope .action:hover {
   transform: scale(1.05);
   background: #f1f5f9;
+}
+
+@media (max-width: 1100px) {
+  .admin-overview-scope .overview-container {
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+
+  .admin-overview-scope .overview-card {
+    flex: 1 1 calc(50% - 0.6rem);
+  }
+
+  .admin-overview-scope .chart-card,
+  .admin-overview-scope .user-distribution,
+  .admin-overview-scope .system-metrics,
+  .admin-overview-scope .recent-alerts {
+    flex: 1 1 calc(50% - 0.75rem);
+    min-width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-overview-scope .overview-container {
+    padding: 1rem 0.9rem 1.25rem;
+  }
+
+  .admin-overview-scope .overview-cards,
+  .admin-overview-scope .chart-section,
+  .admin-overview-scope .stats-section,
+  .admin-overview-scope .actions-grid {
+    gap: 0.9rem;
+  }
+
+  .admin-overview-scope .overview-card,
+  .admin-overview-scope .chart-card,
+  .admin-overview-scope .user-distribution,
+  .admin-overview-scope .system-metrics,
+  .admin-overview-scope .recent-alerts,
+  .admin-overview-scope .action {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .admin-overview-scope .quick-actions,
+  .admin-overview-scope .chart-card,
+  .admin-overview-scope .user-distribution,
+  .admin-overview-scope .system-metrics,
+  .admin-overview-scope .recent-alerts {
+    padding: 1.1rem;
+  }
+
+  .admin-overview-scope .overview-card h1 {
+    font-size: 1.35rem;
+  }
+
+  .admin-overview-scope .user-distribution .recharts-responsive-container {
+    height: 280px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-overview-scope .overview-card {
+    text-align: left;
+    padding: 0.95rem;
+  }
+
+  .admin-overview-scope .overview-card h2 {
+    justify-content: flex-start;
+    font-size: 0.95rem;
+  }
+
+  .admin-overview-scope .overview-card h1 {
+    font-size: 1.2rem;
+  }
+
+  .admin-overview-scope .overview-card p {
+    font-size: 0.82rem;
+  }
+
+  .admin-overview-scope .chart-card h2,
+  .admin-overview-scope .quick-actions h2,
+  .admin-overview-scope .user-distribution h2,
+  .admin-overview-scope .system-metrics h2,
+  .admin-overview-scope .recent-alerts h2 {
+    font-size: 1rem;
+  }
+
+  .admin-overview-scope .metric {
+    float: none;
+    display: block;
+    margin-top: 0.2rem;
+  }
+
+  .admin-overview-scope .action {
+    justify-content: flex-start;
+    padding: 0.9rem;
+  }
+
+  .admin-overview-scope .user-distribution .recharts-responsive-container {
+    height: 250px !important;
+  }
 }

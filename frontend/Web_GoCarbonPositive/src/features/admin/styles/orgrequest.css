@@ -499,12 +499,26 @@
 }
 
 .orgrq-pass-eye {
+  color: #a3aab6;
+  font-size: 20px;
+}
+
+.orgrq-pass-eye-btn {
   position: absolute;
   right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #a3aab6;
-  font-size: 20px;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.orgrq-pass-eye-btn:disabled {
+  cursor: not-allowed;
 }
 
 .orgrq-modal-btn-row {
