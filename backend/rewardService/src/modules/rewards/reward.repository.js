@@ -53,7 +53,8 @@ const hasEventToday = async (u_id, action_key, action_type) => {
     WHERE u_id = $1
       AND action_key = $2
       AND action_type = $3
-      AND activity_date = CURRENT_DATE
+      AND DATE(activity_date AT TIME ZONE 'Asia/Kolkata')
+    = DATE(NOW() AT TIME ZONE 'Asia/Kolkata')
     LIMIT 1
   `, [u_id, action_key, action_type]);
 
@@ -149,25 +150,33 @@ const getContestTaskCompletions = async (u_id, actionKeys = []) => {
 ================================ */
 const getDailyStreak = async (u_id) => {
   const { rows } = await pool.query(`
-    WITH ordered AS (
+    WITH days AS (
+      SELECT DISTINCT
+        DATE(activity_date AT TIME ZONE 'Asia/Kolkata') AS activity_day
+      FROM user_reward_events
+      WHERE u_id = $1
+        AND action_key = 'daily_checkin'
+        AND action_type = 'daily'
+    ),
+    last_day AS (
+      SELECT MAX(activity_day) AS max_date FROM days
+    ),
+    ordered AS (
       SELECT
-        activity_date,
-        ROW_NUMBER() OVER (ORDER BY activity_date DESC) - 1 AS rn
-      FROM (
-        SELECT DISTINCT activity_date
-        FROM user_reward_events
-        WHERE u_id = $1
-          AND action_key = 'daily_checkin'
-          AND action_type = 'daily'
-      ) dedup
+        activity_day,
+        ROW_NUMBER() OVER (ORDER BY activity_day DESC) - 1 AS rn
+      FROM days
     )
     SELECT COUNT(*) AS streak
-    FROM ordered
-    WHERE activity_date = CURRENT_DATE - rn::INT
+    FROM ordered, last_day
+    WHERE
+      last_day.max_date >= DATE(NOW() AT TIME ZONE 'Asia/Kolkata') - INTERVAL '1 day'
+      AND activity_day = last_day.max_date - rn::INT;
   `, [u_id]);
 
   return Number(rows[0].streak);
 };
+
 
 const getLongestDailyStreak = async (u_id) => {
   const { rows } = await pool.query(`
@@ -408,7 +417,8 @@ const getTodayStatus = async (u_id) => {
       SUM(points) AS points
     FROM user_reward_events
     WHERE u_id = $1
-      AND activity_date = CURRENT_DATE
+      AND DATE(activity_date AT TIME ZONE 'Asia/Kolkata')
+    = DATE(NOW() AT TIME ZONE 'Asia/Kolkata')
     GROUP BY action_key
   `, [u_id]);
 
@@ -464,7 +474,6 @@ const getRewardCatalogItems = async (limit = 12, offset = 0) => {
       name,
       description,
       points,
-      price_inr,
       image_url
     FROM reward_catalog
     WHERE is_active = TRUE
