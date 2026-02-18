@@ -228,6 +228,7 @@ const AppRoutes = () => {
         </Route>
 
         <Route path="/adminDashboard" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/organization/dashboard" element={<Navigate to="/org/dashboard" replace />} />
         <Route path="/orgDashboard" element={<Navigate to="/org/dashboard" replace />} />
         <Route path="/userDashboard" element={<Navigate to="/user/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
