@@ -7,7 +7,10 @@
 
 /* ── Header ── */
 .um-header {
-  text-align: center;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   margin-bottom: 32px;
 }
 
@@ -25,6 +28,7 @@
   color: #6b7280;
   margin: 0;
   line-height: 1.6;
+  max-width: 760px;
 }
 
 /* ── Toolbar ── */
@@ -606,6 +610,34 @@
   margin: 0 auto;
 }
 
+/* Sidebar closed: expand and make content slightly bigger */
+.admin-layout-toggle-btn.is-closed ~ .admin-layout-content .um-container {
+  max-width: 100%;
+}
+
+.admin-layout-toggle-btn.is-closed ~ .admin-layout-content .um-header h1 {
+  font-size: 36px;
+}
+
+.admin-layout-toggle-btn.is-closed ~ .admin-layout-content .um-header p {
+  font-size: 16px;
+}
+
+.admin-layout-toggle-btn.is-closed ~ .admin-layout-content .um-search input,
+.admin-layout-toggle-btn.is-closed ~ .admin-layout-content .um-filter-select-wrap,
+.admin-layout-toggle-btn.is-closed ~ .admin-layout-content .um-export-btn,
+.admin-layout-toggle-btn.is-closed ~ .admin-layout-content .um-add-btn {
+  height: 44px;
+}
+
+.admin-layout-toggle-btn.is-closed ~ .admin-layout-content .um-table thead th {
+  font-size: 13px;
+}
+
+.admin-layout-toggle-btn.is-closed ~ .admin-layout-content .um-table tbody td {
+  font-size: 14px;
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .um-wrapper {
@@ -635,5 +667,57 @@
   .um-pagination {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+.um-org-modal {
+  max-width: 860px;
+  width: 100%;
+}
+
+.um-org-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.um-org-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 12px;
+}
+
+.um-org-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: #374151;
+}
+
+.um-org-grid input {
+  height: 36px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  color: #111827;
+}
+
+.um-org-grid input:disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.um-org-error {
+  margin: 0 0 10px;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .um-org-grid {
+    grid-template-columns: 1fr;
   }
 }

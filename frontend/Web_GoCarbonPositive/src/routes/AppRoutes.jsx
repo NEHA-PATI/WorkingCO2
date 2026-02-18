@@ -196,7 +196,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         >
-          <Route path="dashboard" element={<Navigate to="overview" replace />} />
+          <Route path="dashboard" element={<Navigate to="/admin/overview" replace />} />
           <Route path="overview" element={<AdminOverview />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="support" element={<AdminSupport />} />
@@ -228,6 +228,7 @@ const AppRoutes = () => {
         </Route>
 
         <Route path="/adminDashboard" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/organization/dashboard" element={<Navigate to="/org/dashboard" replace />} />
         <Route path="/orgDashboard" element={<Navigate to="/org/dashboard" replace />} />
         <Route path="/userDashboard" element={<Navigate to="/user/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
