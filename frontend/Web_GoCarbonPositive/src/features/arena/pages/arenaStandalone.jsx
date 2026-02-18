@@ -147,6 +147,7 @@ const QUIZ_COOLDOWN_GLOBAL_KEY = 'arena_daily_quiz_cooldown_until';
 const INSTAGRAM_CONNECT_URL = 'https://www.instagram.com/gocarbonpositive/';
 const LINKEDIN_CONNECT_URL = 'https://www.linkedin.com/company/gocarbonpositive/';
 const COMMUNITY_CONNECT_URL = 'https://chat.whatsapp.com/Er0bkEnZG6O7WRjLu3AOBT';
+const SURVEY_TASK_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdNvw4VpMCI7Q3ttZ2vir8cv_w7gRv7VUyoUcAgQbEcf0oLvQ/viewform?usp=publish-editor';
 const PENDING_SOCIAL_TASK_KEY = 'arena_pending_social_task';
 const PENDING_PROFILE_TASK_KEY = 'arena_pending_profile_task';
 
@@ -1723,6 +1724,14 @@ export default function ArenaStandalone() {
                 writePendingSocialTask('join_community');
                 setSelectedContestTask(null);
                 window.location.href = COMMUNITY_CONNECT_URL;
+            }
+            return;
+        }
+        if (contest?.taskType === 'take_survey') {
+            if (typeof window !== 'undefined') {
+                writePendingSocialTask('take_survey');
+                setSelectedContestTask(null);
+                window.location.href = SURVEY_TASK_URL;
             }
             return;
         }
