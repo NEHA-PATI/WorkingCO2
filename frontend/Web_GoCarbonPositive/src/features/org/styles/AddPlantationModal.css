@@ -259,6 +259,75 @@
   cursor: pointer;
 }
 
+.soil-select {
+  position: relative;
+  width: 100%;
+}
+
+.soil-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1f2937;
+  background: #f9fafb;
+  cursor: pointer;
+}
+
+.soil-select.open .soil-select-trigger {
+  border-color: #16a34a;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.soil-select-caret {
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.soil-select-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.soil-select-option {
+  width: 100%;
+  border: 0;
+  background: #ffffff;
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.soil-select-option:hover {
+  background: #f3f4f6;
+}
+
+.soil-select-option.active {
+  background: #ecfdf5;
+  color: #15803d;
+  font-weight: 600;
+}
+
 .field-row {
   display: flex;
   gap: 14px;
@@ -823,4 +892,109 @@
   color: #9a3412;
   font-size: 13px;
   font-weight: 600;
+}
+
+/* Mobile fixes for modal header */
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 8px;
+  }
+
+  .modal-container {
+    border-radius: 12px;
+    max-height: 96vh;
+  }
+
+  .modal-header {
+    padding: 10px 12px;
+    justify-content: flex-start;
+  }
+
+  .header-left {
+    justify-content: flex-start;
+    gap: 8px;
+    padding-right: 44px;
+  }
+
+  .header-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .header-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .header-text {
+    text-align: left;
+    min-width: 0;
+  }
+
+  .modal-title {
+    font-size: 17px;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .modal-subtitle {
+    font-size: 12px;
+    margin-top: 1px;
+  }
+
+  .close-btn {
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .modal-body {
+    padding: 16px;
+    overflow-x: hidden;
+  }
+
+  .field-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .field-group,
+  .field-group.half {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .field-input,
+  .field-select,
+  .soil-select,
+  .soil-select-trigger,
+  select.field-input {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .soil-select-menu {
+    left: 0;
+    right: 0;
+    max-width: 100%;
+  }
+
+  .map-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .use-location-btn {
+    width: 100%;
+    justify-content: center;
+    white-space: nowrap;
+    font-size: 14px;
+    padding: 10px 12px;
+  }
 }
