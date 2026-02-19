@@ -126,41 +126,60 @@ const loadContests = async () => {
     });
 
     const contestsArray = Object.entries(raw).map(([key, value], index) => {
-      let points = 0;
-      let isDailyTask = false;
+  let points = 0;
+  let isDailyTask = false;
+  let rules = [];
 
-      if (value.one_time?.points) {
-        points = value.one_time.points;
-      }
+  // ONE TIME
+  if (value.one_time) {
+    points = value.one_time.points || 0;
+    rules = value.one_time.rules || [];
+  }
 
-      if (value.daily?.points_per_action) {
-        points = value.daily.points_per_action;
-        isDailyTask = true;
-      }
+  // DAILY
+  if (value.daily) {
+    points = value.daily.points_per_action || 0;
+    isDailyTask = true;
+    rules = value.daily.rules || [];
+  }
 
-      return {
-  id: Number(value.rule_id), // ✅ FIX , // 🔥 IMPORTANT FIX
-        title: key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
-        description: "",
-        points,
-        taskType: key,
-        isDailyTask,
-        buttonText: "Start",
-        color: "from-slate-500 to-slate-700",
-        bgColor: "bg-slate-50",
-        borderColor: "border-slate-200",
-        rules: [],
-        rewards: [`${points} points`],
-        status: value.is_active ? "active" : "draft",
-        completions: statsMap[key] || 0,
-        lastUpdated: new Date().toISOString().slice(0, 10),
-      };
-    });
+  // CONSISTENCY (optional: take first milestone rules)
+  if (value.consistency) {
+    const firstKey = Object.keys(value.consistency)[0];
+    if (value.consistency[firstKey]?.rules?.length) {
+      rules = value.consistency[firstKey].rules;
+    }
+  }
+
+  return {
+    id: value.rule_id ?? null,
+    uiId: value.rule_id ?? `${key}-${index}`,
+
+    title: key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
+    description: "",
+    points,
+    taskType: key,
+    isDailyTask,
+    buttonText: "Start",
+    color: "from-slate-500 to-slate-700",
+    bgColor: "bg-slate-50",
+    borderColor: "border-slate-200",
+
+    rules: rules.length ? rules : [""],  // 👈 IMPORTANT FIX
+    rewards: [`${points} points`],
+
+    status: value.is_active ? "active" : "draft",
+    completions: statsMap[key] || 0,
+    lastUpdated: new Date().toISOString().slice(0, 10),
+  };
+});
+
 
     setContests(contestsArray);
 
     if (contestsArray.length > 0) {
-      setSelectedContestId(contestsArray[0].id);
+     setSelectedContestId(contestsArray[0].uiId);
+
     }
 
   } catch (err) {
@@ -177,7 +196,7 @@ const loadContests = async () => {
 
 
   const selectedContest = useMemo(
-    () => contests.find((c) => c.id === selectedContestId) || null,
+    () => contests.find((c) => c.uiId === selectedContestId) || null,
     [contests, selectedContestId]
   );
 
@@ -220,40 +239,83 @@ const loadContests = async () => {
       rules: contest.rules?.length ? contest.rules : [""],
       rewards: contest.rewards?.length ? contest.rewards : [""],
     });
-    setSelectedContestId(contest.id);
+    setSelectedContestId(contest.uiId);
     setIsFormOpen(true);
     setActiveTab("edit");
   };
 
   const openPreview = (contest) => {
-    setSelectedContestId(contest.id);
+    setSelectedContestId(contest.uiId);
     setDraft(contest);
     setActiveTab("preview");
   };
 
-  const saveDraft = async () => {
-  try {
-    if (!draft.taskType) {
-      alert("Task type required");
-      return;
-    }
+//   const saveDraft = async () => {
+//   try {
 
-    if (draft.id) {
-      // 🟡 UPDATE EXISTING RULE
-      await updateRule(draft.id, {
-        points: draft.points,
-        is_active: draft.status === "active"
-      });
+//   if (draft.id && Number.isInteger(Number(draft.id))) {
+
+//     // 🟡 UPDATE EXISTING RULE (only if real DB id)
+//     await updateRule(Number(draft.id), {
+//       points: draft.points,
+//       is_active: draft.status === "active"
+//     });
+
+//     alert("Contest updated successfully ✅");
+
+//   } else {
+
+//     // 🟢 CREATE NEW RULE
+//    await createContest({
+//   action_key: draft.taskType,
+//   action_type: draft.isDailyTask ? "daily" : "one_time",
+//   points: draft.points,
+//   milestone_weeks: null,
+//   max_points_per_day: draft.isDailyTask ? draft.points : null
+// });
+
+
+//     alert("Contest created successfully ✅");
+//   }
+
+//   setIsFormOpen(false);
+//   setActiveTab("all");
+
+//   // reload data
+//   loadContests();
+
+// } catch (err) {
+//   alert(err.message);
+// }};
+
+const saveDraft = async () => {
+  try {
+
+    if (draft.id && Number.isInteger(Number(draft.id))) {
+
+      // ✅ UPDATE EXISTING RULE
+     await updateRule(Number(draft.id), {
+  points: draft.points,
+  max_points_per_day: draft.isDailyTask ? draft.points : null,
+  is_active: draft.status === "active",
+  rules: draft.rules.filter(Boolean)
+});
+
 
       alert("Contest updated successfully ✅");
 
     } else {
-      // 🟢 CREATE NEW RULE
-      await createContest({
-        taskType: draft.taskType,
-        points: draft.points,
-        isDailyTask: draft.isDailyTask,
-      });
+
+      // ✅ CREATE NEW RULE (PROPER BACKEND FORMAT)
+     await createContest({
+  action_key: draft.taskType,
+  action_type: draft.isDailyTask ? "daily" : "one_time",
+  points: draft.points,
+  milestone_weeks: null,
+  max_points_per_day: draft.isDailyTask ? draft.points : null,
+  rules: draft.rules.filter(Boolean)   // 👈 THIS IS IMPORTANT
+});
+
 
       alert("Contest created successfully ✅");
     }
@@ -261,17 +323,17 @@ const loadContests = async () => {
     setIsFormOpen(false);
     setActiveTab("all");
 
-    // reload data
-    loadContests();
+    await loadContests();
 
   } catch (err) {
-    alert(err.message);
+    console.error(err);
+    alert("Something went wrong ❌");
   }
 };
 
 
   const deleteContest = (id) => {
-    setContests(contests.filter((c) => c.id !== id));
+    setContests(contests.filter((c) => c.uiId !== id));
     setSelectedRows(selectedRows.filter((v) => v !== id));
     if (selectedContestId === id) setSelectedContestId(null);
   };
@@ -279,14 +341,20 @@ const loadContests = async () => {
   const bulkDelete = () => {
     if (!selectedRows.length) return;
     const set = new Set(selectedRows);
-    setContests(contests.filter((c) => !set.has(c.id)));
+    setContests(contests.filter((c) => !set.has(c.uiId)));
     setSelectedRows([]);
     if (selectedContestId && set.has(selectedContestId)) setSelectedContestId(null);
   };
 
   const setStatus = async (id, status) => {
   try {
-    await updateRule(id, {
+    // Only update if id is a valid number
+    if (!id || isNaN(Number(id))) {
+      console.warn("Invalid DB id, skipping update:", id);
+      return;
+    }
+
+    await updateRule(Number(id), {
       is_active: status === "active"
     });
 
@@ -300,6 +368,7 @@ const loadContests = async () => {
     console.error(err);
   }
 };
+
 
 
   const handleExportCsv = () => {
@@ -558,8 +627,8 @@ function ContestTableV2({
   onStatusChange,
 }) {
   const selectedSet = new Set(selectedRows);
-  const allChecked = rows.length > 0 && rows.every((r) => selectedSet.has(r.id));
-  const toggleAll = () => onSelectRows(allChecked ? [] : rows.map((r) => r.id));
+  const allChecked = rows.length > 0 && rows.every((r) => selectedSet.has(r.uiId));
+  const toggleAll = () => onSelectRows(allChecked ? [] : rows.map((r) => r.uiId));
   const toggleRow = (id) =>
     onSelectRows(selectedSet.has(id) ? selectedRows.filter((v) => v !== id) : [...selectedRows, id]);
 
@@ -583,9 +652,9 @@ function ContestTableV2({
         </thead>
         <tbody className="divide-y divide-slate-200">
           {rows.map((row) => (
-            <tr key={row.id} className="hover:bg-slate-50/60">
+            <tr key={row.uiId} className="hover:bg-slate-50/60">
               <td className="px-4 py-3">
-                <input type="checkbox" checked={selectedSet.has(row.id)} onChange={() => toggleRow(row.id)} />
+                <input type="checkbox" checked={selectedSet.has(row.uiId)} onChange={() => toggleRow(row.uiId)} />
               </td>
               <td className="px-4 py-3 font-medium text-slate-900">{row.title}</td>
               <td className="px-4 py-3 text-slate-600">{row.taskType}</td>
@@ -613,7 +682,7 @@ function ContestTableV2({
                     <Edit className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => onDelete(row.id)}
+                    onClick={() => onDelete(row.uiId)}
                     className="p-1.5 border border-red-200 rounded-md text-red-600"
                     title="Delete"
                   >
@@ -951,8 +1020,7 @@ function AnalyticsPanel({ contests, selected }) {
   );
 }
 
-function QuizUploadPanel({ contest, fileName, onFileNameChange }) {
-  const enabled = contest?.taskType === "daily_quiz";
+function QuizUploadPanel({ fileName, onFileNameChange }) {
   const pickFile = async (event) => {
   const file = event.target.files?.[0];
   if (!file) return;
@@ -960,26 +1028,36 @@ function QuizUploadPanel({ contest, fileName, onFileNameChange }) {
   onFileNameChange(file.name);
 
   try {
-    const res = await uploadQuizCSV(file);
-    alert("Quiz uploaded successfully!");
-    console.log(res);
+    await uploadQuizCSV(file);
+    alert("CSV uploaded and saved to active.json ✅");
   } catch (err) {
-    alert(err.message);
+    alert("Upload failed ❌");
+    console.error(err);
   }
 };
+
 
   return (
     <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center">
       <p className="text-sm text-slate-600">
-        {enabled
-          ? "CSV upload is enabled for this quiz contest."
-          : "Select contest with taskType = quiz to enable CSV upload."}
+        Upload quiz CSV file (will be converted to JSON)
       </p>
-      <label className="inline-flex mt-3 px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white">
+
+      <label className="inline-flex mt-3 px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white cursor-pointer">
         Browse CSV
-        <input type="file" accept=".csv" className="hidden" disabled={!enabled} onChange={pickFile} />
+        <input
+          type="file"
+          accept=".csv"
+          className="hidden"
+          onChange={pickFile}
+        />
       </label>
-      {fileName ? <p className="mt-3 text-sm text-emerald-700">{fileName}</p> : null}
+
+      {fileName && (
+        <p className="mt-3 text-sm text-emerald-700">
+          {fileName}
+        </p>
+      )}
     </div>
   );
 }
