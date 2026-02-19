@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import "@features/org/styles/QuickActions.css";
 import {
   FaPlus,
@@ -20,6 +21,7 @@ import {
 } from 'react-icons/fa';
 
 const QuickActions = ({ isVisible = true }) => {
+  const navigate = useNavigate();
   const [selectedAction, setSelectedAction] = useState(null);
   const [recentActions, setRecentActions] = useState([
     {
@@ -225,6 +227,14 @@ const QuickActions = ({ isVisible = true }) => {
     },
   };
 
+  const handleActionClick = (action) => {
+    setSelectedAction(action.id);
+
+    if (action.title === 'Add New Asset') {
+      navigate('/org/dashboard/add-asset');
+    }
+  };
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -283,7 +293,7 @@ const QuickActions = ({ isVisible = true }) => {
                     exit="exit"
                     whileHover="hover"
                     whileTap="tap"
-                    onClick={() => setSelectedAction(action.id)}
+                    onClick={() => handleActionClick(action)}
                     className={`org-quickactions-card ${selectedAction === action.id ? 'org-quickactions-card--selected' : ''}`}
                   >
                     <motion.div

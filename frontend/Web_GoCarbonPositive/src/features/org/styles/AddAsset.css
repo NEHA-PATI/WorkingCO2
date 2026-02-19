@@ -7,13 +7,20 @@
     padding: 2rem;
   }
   
-  .dashboard-container .card {
+.dashboard-container .card {
+    --card-tint: #eef4ff;
+    --card-border: #c7d8ff;
+    --card-icon: #2563eb;
+    --btn-from: #93c5fd;
+    --btn-to: #60a5fa;
     background: #ffffff; /* white background */
     border-radius: 20px;
     padding: 1.5rem;
     color: #000000; /* text black */
     width: 320px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--card-border);
+    background-image: linear-gradient(160deg, #ffffff 0%, var(--card-tint) 100%);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     text-align: center; /* center text */
     transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
@@ -27,7 +34,7 @@
   
   .dashboard-container .card-icon {
     font-size: 1.9rem;
-    color: #2563eb !important; /* fallback */
+    color: var(--card-icon) !important; /* fallback */
     opacity: 1 !important;
     visibility: visible !important;
     display: inline-flex;
@@ -42,20 +49,7 @@
     z-index: 1;
   }
 
-  .dashboard-container .card.electric-vehicle .card-icon {
-    color: #3b82f6 !important;
-    fill: currentColor;
-    stroke: currentColor;
-  }
-
-  .dashboard-container .card.trees .card-icon {
-    color: #10b981 !important;
-    fill: currentColor;
-    stroke: currentColor;
-  }
-
-  .dashboard-container .card.solar-panel .card-icon {
-    color: #f59e0b !important;
+  .dashboard-container .card .card-icon {
     fill: currentColor;
     stroke: currentColor;
   }
@@ -90,8 +84,8 @@
   }
   
   .dashboard-container .add-button {
-    background-color: #2563eb; /* soft blue */
-    color: #382f2f;
+    background: linear-gradient(135deg, var(--btn-from) 0%, var(--btn-to) 100%);
+    color: #0f172a;
     padding: 0.6rem 1.4rem;
     border-radius: 14px;
     font-weight: 600;
@@ -101,7 +95,7 @@
   }
   
   .dashboard-container .add-button:hover {
-    background-color: #1e4fcb; /* slightly darker on hover */
+    filter: brightness(0.95);
     transform: scale(1.05);
   }
   
@@ -122,34 +116,64 @@
     margin-left: -1em;
   }
   
-  .dashboard-container .add-button.blue {
-    background-color: #93c5fd; /* light blue */
+  .dashboard-container .ev-card {
+    --card-tint: #eaf3ff;
+    --card-border: #c9dcff;
+    --card-icon: #3b82f6;
+    --btn-from: #bfdbfe;
+    --btn-to: #60a5fa;
   }
-  
-  .dashboard-container .add-button.blue:hover {
-    background-color: #60a5fa;
+
+  .dashboard-container .plantation-card {
+    --card-tint: #ecfff4;
+    --card-border: #b7f0d1;
+    --card-icon: #10b981;
+    --btn-from: #bbf7d0;
+    --btn-to: #34d399;
   }
-  
-  .dashboard-container .add-button.green {
-    background-color: #86efac; /* light green */
+
+  .dashboard-container .solar-card {
+    --card-tint: #fff6e9;
+    --card-border: #fed7aa;
+    --card-icon: #f59e0b;
+    --btn-from: #fde68a;
+    --btn-to: #fb923c;
   }
-  
-  .dashboard-container .add-button.green:hover {
-    background-color: #4ade80;
+
+  .dashboard-container .wind-card {
+    --card-tint: #f0f7ff;
+    --card-border: #bfdbfe;
+    --card-icon: #0ea5e9;
+    --btn-from: #bae6fd;
+    --btn-to: #38bdf8;
   }
-  
-  .dashboard-container .add-button.orange {
-    background-color: #fdba74; /* light orange */
+
+  .dashboard-container .hydro-card {
+    --card-tint: #ebfbff;
+    --card-border: #a5f3fc;
+    --card-icon: #06b6d4;
+    --btn-from: #99f6e4;
+    --btn-to: #2dd4bf;
   }
-  
-  .dashboard-container .add-button.orange:hover {
-    background-color: #fb923c;
+
+  .dashboard-container .capture-card {
+    --card-tint: #f4f1ff;
+    --card-border: #ddd6fe;
+    --card-icon: #8b5cf6;
+    --btn-from: #c4b5fd;
+    --btn-to: #8b5cf6;
   }
-  
-  .dashboard-container .add-button.purple {
-    background-color: #c4b5fd; /* light purple */
+
+  .dashboard-container .thermal-card {
+    --card-tint: #fff0ea;
+    --card-border: #fdba74;
+    --card-icon: #f97316;
+    --btn-from: #fdba74;
+    --btn-to: #fb923c;
   }
-  
-  .dashboard-container .add-button.purple:hover {
-    background-color: #a78bfa;
+
+  .dashboard-container .btn-hydro,
+  .dashboard-container .btn-capture,
+  .dashboard-container .btn-thermal {
+    color: #ffffff;
   }

@@ -35,18 +35,18 @@
 .btn {
   display: flex;
   align-items: center;
-  padding: clamp(8px, 1.8vw, 10px) clamp(14px, 2.8vw, 18px);
+  padding: clamp(6px, 1.4vw, 8px) clamp(12px, 2.4vw, 15px);
   border: 1px solid #d1d5db; /* gray-300 */
   border-radius: clamp(4px, 1vw, 6px);
   background-color: white;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+  font-size: clamp(0.88rem, 2vw, 1rem);
   user-select: none;
 }
 
 .btn:hover {
-  background-color: #21bd13;
+  background-color: #86efac;
   border-color: #e5e7eb;
   transform: scale(1.02); /* removed translateY(-7px) */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -59,9 +59,118 @@
 
 /* Bigger icons */
 .btn .icon {
-  width: clamp(26px, 3.5vw, 32px);
-  height: clamp(26px, 3.5vw, 32px);
-  margin-right: clamp(8px, 2vw, 10px);
+  width: clamp(20px, 2.6vw, 24px);
+  height: clamp(20px, 2.6vw, 24px);
+  margin-right: clamp(6px, 1.2vw, 8px);
+}
+
+.btn .icon-refresh {
+  color: #0ea5e9;
+}
+
+.btn .icon-map {
+  color: #3b82f6;
+}
+
+.btn .icon-upload {
+  color: #f59e0b;
+}
+
+.btn .icon-export {
+  color: #6366f1;
+}
+
+.btn .icon-add {
+  color: #ffffff;
+}
+
+/* ================= Topbar Mobile Layout ================= */
+@media (max-width: 768px) {
+  .asset-topbar {
+    align-items: flex-start;
+    padding: 8px 10px;
+    gap: 10px;
+  }
+
+  .topbar-left {
+    width: 100%;
+  }
+
+  .topbar-left .title {
+    font-size: 1.05rem;
+    line-height: 1.2;
+  }
+
+  .topbar-left .subtitle {
+    margin-top: 4px;
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .topbar-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .topbar-actions .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 7px 10px;
+    font-size: 0.92rem;
+    border-radius: 8px;
+  }
+
+  .topbar-actions .btn .icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+  }
+
+  .topbar-actions .btn-primary {
+    grid-column: 1 / -1;
+    justify-content: center;
+    padding: 10px 12px;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 480px) {
+  .asset-topbar {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+
+  .topbar-left .title {
+    font-size: 1rem;
+  }
+
+  .topbar-left .subtitle {
+    font-size: 0.78rem;
+  }
+
+  .topbar-actions {
+    gap: 6px;
+  }
+
+  .topbar-actions .btn {
+    padding: 6px 8px;
+    font-size: 0.86rem;
+  }
+
+  .topbar-actions .btn .icon {
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+  }
+
+  .topbar-actions .btn-primary {
+    padding: 9px 10px;
+    font-size: 0.95rem;
+  }
 }
 
 
@@ -78,25 +187,25 @@
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  padding: 20px;
-  overflow-y: auto; /* allow scroll if content overflows */
+  padding: 10px;
+  overflow: hidden;
   box-sizing: border-box;
 }
 
 /* Modal Box */
 .bulk-upload-box {
   background: #fff;
-  border-radius: 12px;
-  padding: 30px;
+  border-radius: 10px;
+  padding: 14px;
   width: 100%;
-  max-width: 650px;
+  max-width: 480px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   position: relative;
   text-align: center;
   box-sizing: border-box;
   animation: fadeInScale 0.25s ease-in-out;
-  max-height: 90vh; /* prevent modal from exceeding viewport height */
-  overflow-y: auto; /* scroll inside modal if content is too tall */
+  max-height: calc(100vh - 90px);
+  overflow: hidden;
 }
 
 /* Animation */
@@ -114,8 +223,8 @@
 /* Close Button */
 .close-btn {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 8px;
+  right: 8px;
   background: none;
   border: none;
   cursor: pointer;
@@ -125,41 +234,43 @@
 
 /* Titles */
 .bulk-title {
-  font-size: clamp(1.5rem, 2vw, 1.8rem);
+  font-size: clamp(1.7rem, 2vw, 2rem);
   color: #16a34a;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   font-weight: 700;
+  line-height: 1.1;
 }
 
 .bulk-subtitle {
   color: #555;
-  font-size: 0.95rem;
-  margin-bottom: 20px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  margin-bottom: 10px;
 }
 
 /* Upload Section */
 .upload-section h3 {
-  font-size: 1.2rem;
-  margin-bottom: 6px;
+  font-size: 1.02rem;
+  margin-bottom: 4px;
   color: #222;
 }
 
 .upload-section p {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #666;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 /* Drop Zone */
 .drop-zone {
   border: 2px dashed #16a34a;
-  border-radius: 10px;
-  padding: 30px 20px;
+  border-radius: 8px;
+  padding: 12px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   background: #f9fffb;
   transition: background 0.2s;
 }
@@ -168,31 +279,37 @@
   background: #f0fff4;
 }
 
+.drop-zone--active {
+  background: #ecfdf5;
+  border-color: #15803d;
+}
+
 .upload-icon {
   color: #16a34a;
-  margin-bottom: 8px;
-  font-size: 2rem;
+  margin-bottom: 4px;
+  font-size: 1.3rem;
 }
 
 .drop-zone p {
   font-weight: 500;
   color: #222;
-  margin: 4px 0;
+  margin: 2px 0;
 }
 
 .drop-zone span {
-  margin: 6px 0;
-  font-size: 0.9rem;
+  margin: 3px 0;
+  font-size: 0.8rem;
   color: #666;
 }
 
 .browse-btn {
   background: #16a34a;
   color: #fff;
-  padding: 8px 16px;
+  padding: 6px 12px;
   border-radius: 6px;
   border: none;
   cursor: pointer;
+  font-size: 0.88rem;
   transition: background 0.2s;
 }
 
@@ -202,28 +319,29 @@
 
 /* File Info */
 .file-info {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: #444;
-  margin-bottom: 18px;
+  margin-bottom: 8px;
   word-break: break-word;
 }
 
 /* Buttons */
 .action-buttons {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
 .secondary-btn {
   background: #f5f5f5;
   color: #333;
   border: 1px solid #ccc;
-  padding: 8px 14px;
+  padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 0.82rem;
   transition: background 0.2s;
 }
 
@@ -235,10 +353,11 @@
   background: #16a34a;
   color: #fff;
   border: none;
-  padding: 9px 16px;
+  padding: 7px 12px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 0.84rem;
   transition: background 0.2s;
 }
 
@@ -254,13 +373,14 @@
 /* Notes */
 .notes {
   text-align: left;
-  font-size: 0.85rem;
+  font-size: 0.74rem;
   color: #555;
-  line-height: 1.6;
+  line-height: 1.35;
+  padding-left: 16px;
 }
 
 .notes li {
-  margin-bottom: 6px;
+  margin-bottom: 2px;
 }
 
 /* Responsive */
@@ -268,25 +388,27 @@
   .bulk-upload-modal {
     top: 50px; /* adjust to mobile navbar height */
     height: calc(100% - 50px);
-    padding: 15px;
+    padding: 8px;
   }
 
   .bulk-upload-box {
-    padding: 20px;
-    width: 95%;
+    padding: 12px;
+    width: 100%;
+    max-width: 440px;
+    max-height: calc(100vh - 72px);
   }
 
   .drop-zone {
-    padding: 20px 12px;
+    padding: 10px;
   }
 
   .action-buttons {
-    flex-direction: column;
+    flex-direction: row;
   }
 
   .secondary-btn,
   .primary-btn {
-    width: 100%;
+    width: auto;
   }
 }
 
@@ -309,9 +431,10 @@
   animation: fadeIn 0.2s ease-in-out;
 }
 
-.dropdown-menu button {
+.dropdown-item {
   display: flex;
   align-items: center;
+  flex-direction: row;
   gap: 10px;
   padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
   font-size: clamp(14px, 2vw, 16px);
@@ -320,17 +443,20 @@
   border: none;
   width: 100%;
   text-align: left;
+  white-space: nowrap;
   cursor: pointer;
   box-sizing: border-box;
   transition: background 0.2s ease;
 }
 
-.dropdown-menu button:hover { background-color: #f5f5f5; }
+.dropdown-item:hover { background-color: #f5f5f5; }
 
 /* Radix Export Dropdown */
-.dropdown-menu .icon {
-  font-size: clamp(24px, 4vw, 32px); /* larger icons */
-  color: #21bd13;
+.dropdown-item .icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #16a34a;
   flex-shrink: 0;
 }
 
@@ -342,15 +468,15 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .bulk-upload-modal { top: 50px; height: calc(100% - 50px); padding: 15px; }
-  .bulk-upload-box { padding: 20px; width: 95%; }
-  .drop-zone { padding: 20px 12px; }
-  .action-buttons { flex-direction: column; }
-  .secondary-btn, .primary-btn { width: 100%; }
+  .bulk-upload-modal { top: 50px; height: calc(100% - 50px); padding: 8px; }
+  .bulk-upload-box { padding: 12px; width: 100%; max-width: 440px; max-height: calc(100vh - 72px); }
+  .drop-zone { padding: 10px; }
+  .action-buttons { flex-direction: row; }
+  .secondary-btn, .primary-btn { width: auto; }
 }
 
 @media (max-width: 480px) {
   .dropdown-menu { right: auto; left: 0; min-width: 150px; }
-  .dropdown-menu button { padding: 8px 12px; font-size: 14px; gap: 8px; }
-  .dropdown-menu .icon { font-size: 16px; }
+  .dropdown-item { padding: 8px 12px; font-size: 14px; gap: 8px; }
+  .dropdown-item .icon { font-size: 16px; width: 16px; height: 16px; }
 }

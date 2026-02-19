@@ -1,7 +1,10 @@
 // PopupForms.js - React component file with all three popup forms
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import "@features/org/styles/popupforms.css";
-import { assetAPI } from "@shared/utils/api";
+import { assetAPI } from "@features/org/services/assetApi";
+import { MdElectricCar, MdSolarPower } from "react-icons/md";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import AddPlantationModal from "@features/org/components/AddPlantationModal";
 const PopupForms = ({
   activeEVPopup,
   setActiveEVPopup,
@@ -16,22 +19,9 @@ const PopupForms = ({
   setSolarCount // ✅ Add this line!
 }) => {
 
-
-
-
-
   // State for managing popups
 
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
-
-  // List state for fetched data
-  const [evList, setEvList] = useState([]);      // All EVs from backend
-  const [plantationList, setPlantationList] = useState([]);  // All plantations from backend
-  const [solarPanels, setSolarPanels] = useState([]); // All solar panels from backend
-
-
-
-
 
   const [solarPanelData, setSolarPanelData] = useState({
     Installed_Capacity: '',
@@ -58,26 +48,6 @@ const PopupForms = ({
     chargingTime: '', // ✅ Fixed: Added to state
     motorpower: '', // ✅ Fixed: Added to state
   });
-
-
-  const [plantationData, setPlantationData] = useState({
-    location_lat: '',
-    location_long: '',
-    area_hactare: '',
-    species_Name: '',
-    trees_planted: '',
-    avg_height: '',
-    avg_dbh: '',
-    survival_rate: '',
-    plantation_date: '',
-    Base_line_Land: '',
-    photos: [],
-  });
-
-
-
-
-
 
 
   // Toast notification handler
@@ -209,120 +179,17 @@ const PopupForms = ({
       console.error("EV submit error:", error);
       showToast('Server error! ' + error.message, 'error');
     }
-  };
-
-
-
-
-
-  const handlePlantationSubmit = async (e) => {
-    e.preventDefault();
-
-    const u_id = localStorage.getItem("userId");
-    if (!u_id) {
-      showToast("User not logged in", "error");
-      return;
-    }
-
-    try {
-      let image_id = null;
-
-      // 1️⃣ Upload image (take FIRST image only)
-      if (plantationData.photos?.length > 0) {
-        const formData = new FormData();
-
-        const blob = dataURLtoBlob(plantationData.photos[0]);
-        formData.append("images", blob);
-
-        const imageRes = await assetAPI.uploadImage(formData);
-
-        if (imageRes.status !== "success") {
-          showToast("Image upload failed", "error");
-          return;
-        }
-
-        image_id = imageRes.imageIds[0]; // ✅ SINGLE image_id
-      }
-
-      // 2️⃣ Build ORG ASSET payload
-      const payload = {
-        plantationId: crypto.randomUUID(),   // ✅ REQUIRED
-        t_oid: `TREE-${Date.now()}`,          // ✅ REQUIRED
-        u_id,                                // ✅ MATCH DB
-        location_lat: Number(plantationData.location_lat),
-        location_long: Number(plantationData.location_long),
-        area_hactare: Number(plantationData.area_hactare),
-        species_Name: plantationData.species_Name,
-        trees_planted: Number(plantationData.trees_planted),
-        avg_height: Number(plantationData.avg_height),
-        avg_dbh: Number(plantationData.avg_dbh),
-        survival_rate: Number(plantationData.survival_rate),
-        plantation_date: plantationData.plantation_date,
-        Base_line_Land: plantationData.Base_line_Land,
-        ImageId: image_id,
-      };
-
-      console.log("🌱 ORG ASSET PAYLOAD:", payload);
-
-      // 3️⃣ Call ORG ASSET backend (PORT 5000)
-      const result = await assetAPI.createOrgAsset(payload);
-
-      if (result.success) {
-        showToast("Plantation saved successfully!", "success");
-        handleSavePlantation?.(result.data);
-        setActivePlantationPopup(false);
-      } else {
-        showToast(result.error || "Failed to save plantation", "error");
-      }
-
-    } catch (err) {
-      console.error(err);
-      showToast("Server error", "error");
-    }
-  };
-
-
-  // ✅ Helper function: dataURL to Blob
-  function dataURLtoBlob(dataURL) {
-    const byteString = atob(dataURL.split(',')[1]);
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-    const blob = new Blob([ab], { type: 'image/jpeg' });
-    return blob;
-  }
-
-
-  // File upload handler for tree photos
-
-
-
-
-
-  const removePlantationPhoto = (index) => {
-    setPlantationData((prev) => ({
-      ...prev,
-      photos: prev.photos.filter((_, i) => i !== index),
-    }));
-  };
+  };
 
   return (
     <div>
       {/* EV Popup */}
+      {activeEVPopup && (
       <div className={`popup-overlay ${activeEVPopup ? 'active' : ''}`} onClick={() => setActiveEVPopup(false)}>
         <div className={`popup ${activeEVPopup ? 'active' : ''}`} onClick={e => e.stopPropagation()}>
           <div className="popup-header">
             <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2196F3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="9" width="20" height="10" rx="2" ry="2"></rect>
-                <circle cx="7" cy="19" r="2"></circle>
-                <circle cx="17" cy="19" r="2"></circle>
-                <path d="M5 9V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"></path>
-                <path d="M15 13h2"></path>
-                <path d="M7 13h2"></path>
-              </svg>
+              <MdElectricCar size={28} color="#3b82f6" />
               Electric Vehicle Details
             </h2>
             <button className="popup-close" onClick={() => setActiveEVPopup(false)}>×</button>
@@ -529,253 +396,26 @@ const PopupForms = ({
           </form>
         </div>
       </div>
-      {/* Plantation Popup (using activePlantationPopup prop) */}
-      <div className={`popup-overlay ${activePlantationPopup ? 'active' : ''}`} onClick={() => setActivePlantationPopup(false)}>
-        <div className={`popup ${activePlantationPopup ? 'active' : ''}`} onClick={e => e.stopPropagation()}>
-          <div className="popup-header">
-            <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 14l-5-5-5 5"></path>
-                <path d="M12 9v12"></path>
-                <path d="M12 3a5 5 0 0 1 5 5c0 2-3 3-5 3s-5-1-5-3a5 5 0 0 1 5-5z"></path>
-              </svg>
-              Plantation Details
-            </h2>
-            <button className="popup-close" onClick={() => setActivePlantationPopup(false)}>×</button>
-          </div>
-          <form onSubmit={handlePlantationSubmit}>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="location_lat">Location Latitude</label>
-                <input
-                  type="number"
-                  id="location_lat"
-                  className="form-control"
-                  placeholder="e.g., 28.6139"
-                  step="any"
-                  value={plantationData.location_lat}
-                  onChange={(e) => setPlantationData({ ...plantationData, location_lat: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="location_long">Location Longitude</label>
-                <input
-                  type="number"
-                  id="location_long"
-                  className="form-control"
-                  placeholder="e.g., 77.2090"
-                  step="any"
-                  value={plantationData.location_long}
-                  onChange={(e) => setPlantationData({ ...plantationData, location_long: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="area_hactare">Area in Hectares</label>
-                <input
-                  type="number"
-                  id="area_hactare"
-                  className="form-control"
-                  placeholder="e.g., 2.5"
-                  step="0.01"
-                  value={plantationData.area_hactare}
-                  onChange={(e) => setPlantationData({ ...plantationData, area_hactare: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="species_Name">Species Name</label>
-                <input
-                  type="text"
-                  id="species_Name"
-                  className="form-control"
-                  placeholder="e.g., Teak, Mango, Neem"
-                  value={plantationData.species_Name}
-                  onChange={(e) => setPlantationData({ ...plantationData, species_Name: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="trees_planted">Number of Trees Planted</label>
-                <input
-                  type="number"
-                  id="trees_planted"
-                  className="form-control"
-                  placeholder="e.g., 500"
-                  min="1"
-                  value={plantationData.trees_planted}
-                  onChange={(e) => setPlantationData({ ...plantationData, trees_planted: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="avg_height">Average Height (cm)</label>
-                <input
-                  type="number"
-                  id="avg_height"
-                  className="form-control"
-                  placeholder="e.g., 150"
-                  step="0.1"
-                  value={plantationData.avg_height}
-                  onChange={(e) => setPlantationData({ ...plantationData, avg_height: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="avg_dbh">Average DBH (cm)</label>
-                <input
-                  type="number"
-                  id="avg_dbh"
-                  className="form-control"
-                  placeholder="e.g., 15"
-                  step="0.1"
-                  value={plantationData.avg_dbh}
-                  onChange={(e) => setPlantationData({ ...plantationData, avg_dbh: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="survival_rate">Survival Rate (%)</label>
-                <input
-                  type="number"
-                  id="survival_rate"
-                  className="form-control"
-                  placeholder="e.g., 85"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={plantationData.survival_rate}
-                  onChange={(e) => setPlantationData({ ...plantationData, survival_rate: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="plantation_date">Date of Plantation</label>
-                <input
-                  type="date"
-                  id="plantation_date"
-                  className="form-control"
-                  value={plantationData.plantation_date}
-                  onChange={(e) => setPlantationData({ ...plantationData, plantation_date: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="Base_line_Land">Base line Land</label>
-                <select
-                  id="Base_line_Land"
-                  className="form-control"
-                  value={plantationData.Base_line_Land}
-                  onChange={(e) => setPlantationData({ ...plantationData, Base_line_Land: e.target.value })}
-                  required
-                >
-                  <option value="" disabled hidden>-- Select Base line Land --</option>
-                  <option value="Crop">Crop</option>
-                  <option value="Grass">Grass</option>
-                  <option value="Barren">Barren</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Upload Images Here (Up to 5)</label>
-              <label className="file-upload">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => {
-                    const files = e.target.files;
-                    if (!files || files.length === 0) return;
-
-                    const updatedPhotos = Array.from(files).slice(0, 5);
-                    const fileReaders = [];
-                    const base64Images = [];
-
-                    updatedPhotos.forEach((file) => {
-                      const reader = new FileReader();
-                      fileReaders.push(reader);
-
-                      reader.onload = (event) => {
-                        base64Images.push(event.target.result);
-                        if (base64Images.length === updatedPhotos.length) {
-                          setPlantationData((prev) => ({
-                            ...prev,
-                            photos: [...(prev.photos || []), ...base64Images].slice(0, 5),
-                          }));
-                        }
-                      };
-
-                      reader.readAsDataURL(file);
-                    });
-                  }}
-                  disabled={(plantationData.photos || []).length >= 5}
-                />
-                <svg className="file-upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="17 8 12 3 7 8"></polyline>
-                  <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <div className="file-upload-text">
-                  <strong>Click to upload photos</strong>
-                  <p>Install GPS MAP CAMERA and upload the picture</p>
-                  <p>PER IMAGE LIMIT 1 Mb</p>
-                  <p>{(plantationData.photos || []).length}/5 photos uploaded</p>
-                </div>
-              </label>
-              {(plantationData.photos || []).length > 0 && (
-                <div className="photo-preview">
-                  {plantationData.photos.map((photo, index) => (
-                    <div key={index} className="photo-item">
-                      <img src={photo} alt={`Plantation photo ${index + 1}`} />
-                      <button
-                        type="button"
-                        className="remove-photo"
-                        onClick={() => removePlantationPhoto(index)}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="form-actions">
-              <button type="button" className="btn-primary btn-cancel" onClick={() => setActivePlantationPopup(false)}>Cancel</button>
-              <button type="submit" className="btn-primary btn-submit">Save Details</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
+      )}
+      {/* Plantation Popup */}
+      {activePlantationPopup && (
+      <AddPlantationModal
+        onClose={() => setActivePlantationPopup(false)}
+        onSubmit={(payload) => {
+          handleSavePlantation?.(payload);
+          showToast("Plantation details added successfully", "success");
+        }}
+      />
+      )}
 
 
       {/* Solar Panel Popup */}
+      {activeSolarPopup && (
       <div className={`popup-overlay ${activeSolarPopup ? 'active' : ''}`} onClick={() => setActiveSolarPopup(false)}>
         <div className={`popup ${activeSolarPopup ? 'active' : ''}`} onClick={e => e.stopPropagation()}>
           <div className="popup-header">
             <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF9800" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="7" width="18" height="12" rx="2" ry="2"></rect>
-                <line x1="3" y1="13" x2="21" y2="13"></line>
-                <line x1="9" y1="7" x2="9" y2="19"></line>
-                <line x1="15" y1="7" x2="15" y2="19"></line>
-              </svg>
+              <MdSolarPower size={28} color="#f59e0b" />
               Solar Panel Details
             </h2>
             <button className="popup-close" onClick={() => setActiveSolarPopup(false)}>×</button>
@@ -877,26 +517,23 @@ const PopupForms = ({
           </form>
         </div>
       </div>
+      )}
 
 
 
       {/* Toast Notification */}
-      <div className={`toast ${toast.show ? 'show' : ''} ${toast.type}`}>
+      {toast.show && (
+      <div className={`org-popup-toast show ${toast.type}`}>
         {toast.type === 'error' ? (
-          <svg className="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="15" y1="9" x2="9" y2="15"></line>
-            <line x1="9" y1="9" x2="15" y2="15"></line>
-          </svg>
+          <FaTimesCircle className="org-popup-toast-icon" size={24} color="#fecaca" />
         ) : (
-          <svg className="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
+          <FaCheckCircle className="org-popup-toast-icon" size={24} color="#bbf7d0" />
         )}
-        <span className="toast-message">{toast.message}</span>
+        <span className="org-popup-toast-message">{toast.message}</span>
       </div>
+      )}
     </div>
   );
 };
 export default PopupForms;
+
