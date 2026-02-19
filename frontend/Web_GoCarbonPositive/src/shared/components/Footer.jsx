@@ -13,7 +13,7 @@ const Footer = () => {
         {/* About Section */}
         <div className="footer_section footer_about">
           <h2 className="footer__logo">
-            <span className="footer__logo-icon">🌿</span> Carbon Credit
+            <span className="footer__logo-icon">🌿</span> Carbon Positive
           </h2>
           <p className="footer__text">
             Empowering individuals and organizations to track, reduce, and earn
