@@ -31,7 +31,7 @@ const Overview = () => {
     {
       id: 1,
       title: 'Total Carbon Credits',
-      value: '2,847',
+      value: '0',
       trend: '+12.5%',
       icon: FaLeaf,
       color: '#10b981',
@@ -39,7 +39,7 @@ const Overview = () => {
     {
       id: 2,
       title: 'CO₂ Reduced (Tons)',
-      value: '1,423.5',
+      value: '0',
       trend: '+8.2%',
       icon: FaCloud,
       color: '#3b82f6',
@@ -47,7 +47,7 @@ const Overview = () => {
     {
       id: 3,
       title: 'Active Assets',
-      value: '156',
+      value: '0',
       trend: '+3',
       icon: FaBox,
       color: '#8b5cf6',
@@ -55,7 +55,7 @@ const Overview = () => {
     {
       id: 4,
       title: 'Verified Credits',
-      value: '2,203',
+      value: '0',
       trend: '+77.4%',
       icon: FaStar,
       color: '#f97316',
@@ -63,7 +63,7 @@ const Overview = () => {
     {
       id: 5,
       title: 'Monthly Growth',
-      value: '18.7%',
+      value: '0',
       trend: '+2.3%',
       icon: FaChartLine,
       color: '#06b6d4',
@@ -71,7 +71,7 @@ const Overview = () => {
     {
       id: 6,
       title: 'Active Projects',
-      value: '24',
+      value: '0',
       trend: '+2',
       icon: FaFolderOpen,
       color: '#a855f7',
@@ -79,7 +79,7 @@ const Overview = () => {
     {
       id: 7,
       title: 'Revenue Generated',
-      value: '$847K',
+      value: '0',
       trend: '+15.2%',
       icon: FaDollarSign,
       color: '#10b981',
@@ -87,7 +87,7 @@ const Overview = () => {
     {
       id: 8,
       title: 'Team Members',
-      value: '42',
+      value: '0',
       trend: '+5',
       icon: FaUsers,
       color: '#ef4444',
@@ -99,27 +99,27 @@ const Overview = () => {
     {
       id: 1,
       title: 'Carbon Neutral Goal 2024',
-      progress: 57,
-      current: '2,847',
-      target: '5,000',
+      progress: 0,
+      current: '0',
+      target: '0',
       date: 'Dec 31, 2024',
       icon: FaBullseye,
     },
     {
       id: 2,
       title: 'EU Compliance Target',
-      progress: 80,
-      current: '1,200',
-      target: '1,500',
+      progress: 0,
+      current: '0',
+      target: '0',
       date: 'Mar 15, 2024',
       icon: FaShieldAlt,
     },
     {
       id: 3,
       title: 'Asset Diversification',
-      progress: 70,
-      current: '7',
-      target: '10',
+      progress: 0,
+      current: '0',
+      target: '0',
       date: 'Jun 30, 2024',
       icon: FaArrowUp,
     },
@@ -130,7 +130,7 @@ const Overview = () => {
     {
       id: 1,
       region: 'European Union',
-      score: 92,
+      score: 0,
       status: 'COMPLIANT',
       statusColor: '#10b981',
       trend: '+5',
@@ -138,7 +138,7 @@ const Overview = () => {
     {
       id: 2,
       region: 'United States',
-      score: 88,
+      score: 0,
       status: 'COMPLIANT',
       statusColor: '#10b981',
       trend: '+3',
@@ -146,7 +146,7 @@ const Overview = () => {
     {
       id: 3,
       region: 'Asia Pacific',
-      score: 76,
+      score: 0,
       status: 'MONITOR',
       statusColor: '#f59e0b',
       trend: '+2',
@@ -154,7 +154,7 @@ const Overview = () => {
     {
       id: 4,
       region: 'Global South',
-      score: 82,
+      score: 0,
       status: 'COMPLIANT',
       statusColor: '#10b981',
       trend: '+4',
@@ -165,19 +165,19 @@ const Overview = () => {
   const additionalMetrics = [
     {
       label: 'Certifications',
-      value: '12',
+      value: '0',
       icon: FaCheckCircle,
       color: '#10b981',
     },
     {
       label: 'Pending Reviews',
-      value: '3',
+      value: '0',
       icon: FaExclamationTriangle,
       color: '#f59e0b',
     },
     {
       label: 'Global Reach',
-      value: '24',
+      value: '0',
       icon: FaGlobe,
       color: '#3b82f6',
     },
@@ -212,12 +212,7 @@ const Overview = () => {
               }}
             >
               <div className="org-overview-stat-header">
-                <div
-                  className="org-overview-stat-icon"
-                  style={{
-                    backgroundColor: `${card.color}20`,
-                  }}
-                >
+                <div className="org-overview-stat-icon">
                   <IconComponent size={24} color={card.color} />
                 </div>
                 <span className="org-overview-stat-trend">{card.trend}</span>
@@ -356,7 +351,7 @@ const Overview = () => {
       <div className="org-overview-summary">
         <div className="org-overview-summary-item">
           <div className="org-overview-summary-icon org-overview-summary-positive">
-            <FaArrowUp size={20} />
+            <FaArrowUp size={20} color="#10b981" />
           </div>
           <div className="org-overview-summary-content">
             <h3>Performance</h3>
@@ -365,7 +360,7 @@ const Overview = () => {
         </div>
         <div className="org-overview-summary-item">
           <div className="org-overview-summary-icon org-overview-summary-neutral">
-            <FaCheckCircle size={20} />
+            <FaCheckCircle size={20} color="#3b82f6" />
           </div>
           <div className="org-overview-summary-content">
             <h3>Compliance</h3>

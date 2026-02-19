@@ -32,7 +32,7 @@ const OrgDashboard = () => {
       style={{
         background: "linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%)",
         fontFamily:
-          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+          '"Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
 

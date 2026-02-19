@@ -62,85 +62,85 @@ const AddAsset = () => {
     <div className="dashboard-container">
 
       {/* EV */}
-      <div className="card electric-vehicle">
+      <div className="card ev-card">
         <h2 className="card-title">
-          <MdElectricCar className="card-icon" style={{ color: "#3b82f6" }} />
+          <MdElectricCar className="card-icon" />
           Electric Vehicle
         </h2>
         <p className="subtitle">Smart mobility tracking</p>
-        <button className="add-button blue" onClick={() => setActiveEVPopup(true)}>
+        <button className="add-button btn-ev" onClick={() => setActiveEVPopup(true)}>
           + Add EV Details
         </button>
       </div>
 
       {/* 🌱 Plantation */}
-      <div className="card trees">
+      <div className="card plantation-card">
         <h2 className="card-title">
-          <LuTreePine className="card-icon" style={{ color: "#10b981" }} />
+          <LuTreePine className="card-icon" />
           Plantation
         </h2>
         <p className="subtitle">Afforestation & land restoration</p>
-        <button className="add-button green" onClick={() => setActivePlantationPopup(true)}>
+        <button className="add-button btn-plantation" onClick={() => setActivePlantationPopup(true)}>
           + Add Plantation Details
         </button>
       </div>
 
       {/* Solar */}
-      <div className="card solar-panel">
+      <div className="card solar-card">
         <h2 className="card-title">
-          <MdSolarPower className="card-icon" style={{ color: "#f59e0b" }} />
+          <MdSolarPower className="card-icon" />
           Solar Panel
         </h2>
         <p className="subtitle">Renewable energy</p>
-        <button className="add-button orange" onClick={() => setActiveSolarPopup(true)}>
+        <button className="add-button btn-solar" onClick={() => setActiveSolarPopup(true)}>
           + Add Solar Details
         </button>
       </div>
 
       {/* Wind */}
-      <div className="card solar-panel">
+      <div className="card wind-card">
         <h2 className="card-title">
-          <GiWindmill className="card-icon" style={{ color: "#D3F3FF" }} />
+          <GiWindmill className="card-icon" />
           Wind Mill
         </h2>
         <p className="subtitle">Renewable energy</p>
-        <button className="add-button orange">
+        <button className="add-button btn-wind">
           + Add WindMill Details
         </button>
       </div>
 
       {/* Hydro */}
-      <div className="card solar-panel">
+      <div className="card hydro-card">
         <h2 className="card-title">
-          <GiWaterMill className="card-icon" style={{ color: "#8ed1e3" }} />
+          <GiWaterMill className="card-icon" />
           Hydro Power
         </h2>
         <p className="subtitle">Renewable energy</p>
-        <button className="add-button d4f1f9" style={{ color: "white" }}>
+        <button className="add-button btn-hydro">
           + Add HydroPower Details
         </button>
       </div>
 
       {/* Carbon Capture */}
-      <div className="card solar-panel">
+      <div className="card capture-card">
         <h2 className="card-title">
-          <GiPowder className="card-icon" style={{ color: "#32454D" }} />
+          <GiPowder className="card-icon" />
           Carbon Capture
         </h2>
         <p className="subtitle">Negative emission tech</p>
-        <button className="add-button" style={{ color: "white" }}>
+        <button className="add-button btn-capture">
           + Add CarbonCapture Details
         </button>
       </div>
 
       {/* Thermal */}
-      <div className="card solar-panel">
+      <div className="card thermal-card">
         <h2 className="card-title">
-          <FaFire className="card-icon" style={{ color: "#e25822" }} />
+          <FaFire className="card-icon" />
           Thermal Power
         </h2>
         <p className="subtitle">Energy production</p>
-        <button className="add-button orange" style={{ color: "white" }}>
+        <button className="add-button btn-thermal">
           + Add Thermal Details
         </button>
       </div>
