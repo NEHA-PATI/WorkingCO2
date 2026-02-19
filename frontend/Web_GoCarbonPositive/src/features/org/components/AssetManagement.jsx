@@ -38,8 +38,20 @@ import {
   FiCalendar,
   FiSettings,
 } from "react-icons/fi";
-import { FaTree, FaCar, FaIndustry, FaLeaf } from "react-icons/fa";
+import {
+  FaTree,
+  FaCar,
+  FaIndustry,
+  FaLeaf,
+  FaLayerGroup,
+  FaCheckCircle,
+  FaClock,
+  FaTools,
+} from "react-icons/fa";
 import AssetTopBar from "@features/org/components/AssetTopBar";
+import { jsPDF } from "jspdf";
+import * as XLSX from "xlsx";
+import "@features/org/styles/AssetManagementLayout.css";
 
 // SVG Icons
 const GridIcon = (props) => (
@@ -826,69 +838,131 @@ const AssetManagement = () => {
     }
   };
 
+  const handleExport = (format) => {
+    const exportRows = filteredAssets.map((asset) => ({
+      "Asset ID": asset.id,
+      Name: asset.name,
+      Type: asset.type,
+      Location: asset.location || "-",
+      Credits: asset.creditsGenerated ?? 0,
+      Status: asset.status,
+      Verified: asset.verified ? "Yes" : "No",
+      "Last Updated": asset.lastUpdated || "-",
+    }));
+
+    if (exportRows.length === 0) {
+      showToast("No assets available to export.", "error");
+      return;
+    }
+
+    const dateSuffix = new Date().toISOString().slice(0, 10);
+
+    if (format === "pdf") {
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text("Asset Export", 14, 18);
+      doc.setFontSize(10);
+      doc.text(`Date: ${dateSuffix}`, 14, 25);
+
+      let y = 34;
+      exportRows.forEach((row, index) => {
+        const line = `${index + 1}. ${row.Name} | ${row.Type} | Credits: ${row.Credits} | Status: ${row.Status}`;
+        doc.text(line, 14, y);
+        y += 7;
+        if (y > 280) {
+          doc.addPage();
+          y = 18;
+        }
+      });
+
+      doc.save(`assets_${dateSuffix}.pdf`);
+      showToast("PDF exported successfully!", "success");
+      return;
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Assets");
+
+    if (format === "csv") {
+      XLSX.writeFile(workbook, `assets_${dateSuffix}.csv`, { bookType: "csv" });
+      showToast("CSV exported successfully!", "success");
+      return;
+    }
+
+    if (format === "excel") {
+      XLSX.writeFile(workbook, `assets_${dateSuffix}.xlsx`);
+      showToast("Excel exported successfully!", "success");
+    }
+  };
+
   return (
     <motion.div
-      className="space-y-6"
+      className="space-y-6 asset-management-page"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
       {/* Page Header with AssetTopBar */}
-      <AssetTopBar fetchAssets={fetchAssets} filteredAssets={filteredAssets} />
+      <AssetTopBar
+        fetchAssets={fetchAssets}
+        filteredAssets={filteredAssets}
+        onExport={handleExport}
+      />
 
       {/* Summary Cards */}
-      <div className="grid-4 md-grid-4">
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-secondary">Total Assets</p>
-                <p className="text-2xl font-bold">
+      <div className="asset-summary-grid">
+        <Card className="asset-summary-card asset-summary-total">
+          <CardContent className="asset-summary-content">
+            <div className="asset-summary-row">
+              <div className="asset-summary-text">
+                <p className="asset-summary-label">Total Assets</p>
+                <p className="asset-summary-value">
                   {loading ? "..." : assets.length}
                 </p>
               </div>
-              <LayersIcon style={{ color: "#3b82f6" }} />
+              <FaLayerGroup className="asset-summary-icon" />
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-secondary">Verified</p>
-                <p className="text-2xl font-bold text-green">
+        <Card className="asset-summary-card asset-summary-verified">
+          <CardContent className="asset-summary-content">
+            <div className="asset-summary-row">
+              <div className="asset-summary-text">
+                <p className="asset-summary-label">Verified</p>
+                <p className="asset-summary-value">
                   {loading ? "..." : assets.filter((a) => a.verified).length}
                 </p>
               </div>
-              <CheckCircleIcon style={{ color: "#10b981" }} />
+              <FaCheckCircle className="asset-summary-icon" />
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-secondary">Pending</p>
-                <p className="text-2xl font-bold text-yellow">
+        <Card className="asset-summary-card asset-summary-pending">
+          <CardContent className="asset-summary-content">
+            <div className="asset-summary-row">
+              <div className="asset-summary-text">
+                <p className="asset-summary-label">Pending</p>
+                <p className="asset-summary-value">
                   {loading ? "..." : assets.filter((a) => !a.verified).length}
                 </p>
               </div>
-              <ClockIcon style={{ color: "#f59e0b" }} />
+              <FaClock className="asset-summary-icon" />
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-secondary">Maintenance</p>
-                <p className="text-2xl font-bold text-orange">
+        <Card className="asset-summary-card asset-summary-maintenance">
+          <CardContent className="asset-summary-content">
+            <div className="asset-summary-row">
+              <div className="asset-summary-text">
+                <p className="asset-summary-label">Maintenance</p>
+                <p className="asset-summary-value">
                   {loading
                     ? "..."
                     : assets.filter((a) => a.status === "Maintenance").length}
                 </p>
               </div>
-              <AlertCircleIcon style={{ color: "#f97316" }} />
+              <FaTools className="asset-summary-icon" />
             </div>
           </CardContent>
         </Card>
@@ -902,9 +976,9 @@ const AssetManagement = () => {
       />
 
       {/* View Toggle and Results */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-secondary">
+      <div className="asset-results-toolbar">
+        <div className="asset-results-info">
+          <span className="asset-results-count">
             Showing {filteredAssets.length} of {loading ? "..." : assets.length}{" "}
             assets
           </span>
@@ -912,7 +986,7 @@ const AssetManagement = () => {
             <Badge variant="outline">{activeFiltersCount} filters active</Badge>
           )}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="asset-view-toggle">
           <Button
             variant={viewMode === "grid" ? "default" : "outline"}
             size="sm"
@@ -939,19 +1013,19 @@ const AssetManagement = () => {
           </div>
         </div>
       ) : error ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <p className="text-red-500 mb-4">{error}</p>
-            <button onClick={fetchAssets} className="button">
+        <div className="asset-feedback-wrap">
+          <div className="asset-feedback-card">
+            <p className="asset-feedback-error">{error}</p>
+            <button onClick={fetchAssets} className="asset-retry-btn">
               Try Again
             </button>
           </div>
         </div>
       ) : filteredAssets.length === 0 ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <p className="text-secondary mb-4">No assets found</p>
-            <button onClick={() => navigate("/add-asset")} className="button">
+        <div className="asset-feedback-wrap">
+          <div className="asset-feedback-card">
+            <p className="asset-feedback-empty">No assets found</p>
+            <button onClick={() => navigate("/org/dashboard/add-asset")} className="asset-retry-btn">
               Add Your First Asset
             </button>
           </div>
