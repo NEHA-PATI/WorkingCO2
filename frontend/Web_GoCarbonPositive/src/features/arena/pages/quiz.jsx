@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import "../styles/quiz.css";
+import arenaApi, { getArenaUserId } from '@features/arena/services/arenaApi';
+import { useCountdown } from '@features/arena/hooks/useCountdown';
 import { 
   FaBook, 
   FaTrophy, 
@@ -16,8 +18,40 @@ import {
 } from 'react-icons/fa';
 import { GiPartyPopper } from 'react-icons/gi';
 
+const QUIZ_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const QUIZ_COOLDOWN_GLOBAL_KEY = 'arena_daily_quiz_cooldown_until';
+
+const getQuizCooldownStorageKey = (userId) => `arena_daily_quiz_cooldown_until:${userId || 'guest'}`;
+
+const readQuizCooldownUntil = (userId) => {
+  try {
+    const scopedRawValue = window.localStorage.getItem(getQuizCooldownStorageKey(userId));
+    const globalRawValue = window.localStorage.getItem(QUIZ_COOLDOWN_GLOBAL_KEY);
+    const scopedValue = Number(scopedRawValue);
+    const globalValue = Number(globalRawValue);
+    const maxValue = Math.max(
+      Number.isFinite(scopedValue) ? scopedValue : 0,
+      Number.isFinite(globalValue) ? globalValue : 0
+    );
+    return maxValue > 0 ? maxValue : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeQuizCooldownUntil = (userId, untilTimestamp) => {
+  try {
+    window.localStorage.setItem(getQuizCooldownStorageKey(userId), String(untilTimestamp));
+    window.localStorage.setItem(QUIZ_COOLDOWN_GLOBAL_KEY, String(untilTimestamp));
+  } catch {
+    // Ignore storage failures and keep flow usable.
+  }
+};
+
 const GreenTechQuiz = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const userId = useMemo(() => getArenaUserId(), []);
   const [quizStarted, setQuizStarted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -25,9 +59,70 @@ const GreenTechQuiz = () => {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const [questions, setQuestions] = useState([]);
+const [questions, setQuestions] = useState([]);
 const [loading, setLoading] = useState(true);
 const [backendResult, setBackendResult] = useState(null);
+const [quizCooldownUntil, setQuizCooldownUntil] = useState(null);
+const quizCooldownTarget = quizCooldownUntil ? new Date(quizCooldownUntil).toISOString() : null;
+const { formatted: quizCooldownText, isExpired: isQuizCooldownExpired } = useCountdown(quizCooldownTarget);
+const isQuizStartLocked = Boolean(quizCooldownUntil && !isQuizCooldownExpired);
+
+useEffect(() => {
+  const localCooldownUntil = readQuizCooldownUntil(userId);
+  const navCooldownUntil = Number(location.state?.quizCooldownUntil || 0);
+  const searchParams = new URLSearchParams(location.search || '');
+  const queryCooldownUntil = Number(searchParams.get('cooldownUntil') || 0);
+  const nextCooldownUntil = Math.max(
+    Number(localCooldownUntil || 0),
+    Number(navCooldownUntil || 0),
+    Number(queryCooldownUntil || 0)
+  ) || null;
+
+  setQuizCooldownUntil(nextCooldownUntil);
+  if (nextCooldownUntil) {
+    writeQuizCooldownUntil(userId, nextCooldownUntil);
+  }
+}, [userId, location.state, location.search]);
+
+useEffect(() => {
+  let isMounted = true;
+
+  const syncCooldownFromBackend = async () => {
+    try {
+      const statusList = await arenaApi.getContestStatus();
+      const quizStatus = Array.isArray(statusList)
+        ? statusList.find((item) => item?.task_type === 'daily_quiz')
+        : null;
+
+      const backendCooldownUntil = quizStatus?.next_available_at
+        ? new Date(quizStatus.next_available_at).getTime()
+        : null;
+
+      if (!isMounted || !backendCooldownUntil || backendCooldownUntil <= Date.now()) return;
+
+      setQuizCooldownUntil((current) => {
+        const currentValue = Number(current || 0);
+        const nextValue = Math.max(currentValue, backendCooldownUntil);
+        writeQuizCooldownUntil(userId, nextValue);
+        return nextValue;
+      });
+    } catch {
+      // Keep UI functional even if status sync fails.
+    }
+  };
+
+  syncCooldownFromBackend();
+
+  return () => {
+    isMounted = false;
+  };
+}, [userId]);
+
+useEffect(() => {
+  if (quizCooldownUntil && isQuizCooldownExpired) {
+    setQuizCooldownUntil(null);
+  }
+}, [quizCooldownUntil, isQuizCooldownExpired]);
 
 
 useEffect(() => {
@@ -90,6 +185,10 @@ useEffect(() => {
   }, [quizStarted, currentQuestion, quizCompleted]);
 
   const handleStartQuiz = () => {
+    if (isQuizStartLocked) return;
+    const lockUntil = Date.now() + QUIZ_COOLDOWN_MS;
+    writeQuizCooldownUntil(userId, lockUntil);
+    setQuizCooldownUntil(lockUntil);
     setQuizStarted(true);
   };
 
@@ -232,9 +331,12 @@ useEffect(() => {
             </div>
           </div>
 
-          <button className="start-button" onClick={handleStartQuiz}>
-            <FaBolt /> Start Quiz Now
+          <button className="start-button" onClick={handleStartQuiz} disabled={isQuizStartLocked}>
+            <FaBolt /> {isQuizStartLocked ? `Start in ${quizCooldownText}` : 'Start Quiz Now'}
           </button>
+          {isQuizStartLocked && (
+            <p className="quiz-lock-note">You can start the daily quiz again after {quizCooldownText}.</p>
+          )}
           <p className="ready-text">Ready to test your knowledge? Let's begin! 🚀</p>
         </div>
       </div>
@@ -464,3 +566,4 @@ const scorePercentage = Math.round((correct / totalQuestions) * 100);
 };
 
 export default GreenTechQuiz;
+
