@@ -100,7 +100,7 @@ const AssetTopBar = ({ fetchAssets, onBulkUpload, onExport, onMapView }) => {
             </DropdownMenu.Content>
           </DropdownMenu.Root>
 
-          <button className="btn btn-primary" onClick={handleAddAsset}>
+          <button type="button" className="btn btn-primary" onClick={handleAddAsset}>
             <FiPlus className="icon" />
             <span>Add Asset</span>
           </button>
