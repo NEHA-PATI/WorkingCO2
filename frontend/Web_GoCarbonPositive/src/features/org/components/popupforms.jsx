@@ -1,7 +1,7 @@
 // PopupForms.js - React component file with all three popup forms
 import React, { useState, useEffect } from 'react';
 import "@features/org/styles/popupforms.css";
-import { assetAPI } from "@shared/utils/api";
+import { assetAPI } from "@features/org/services/assetApi";
 const PopupForms = ({
   activeEVPopup,
   setActiveEVPopup,
@@ -15,10 +15,6 @@ const PopupForms = ({
   setEvCount,
   setSolarCount // ✅ Add this line!
 }) => {
-
-
-
-
 
   // State for managing popups
 
