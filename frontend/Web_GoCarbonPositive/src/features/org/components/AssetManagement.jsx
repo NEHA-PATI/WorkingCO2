@@ -37,6 +37,8 @@ import {
   FiTrendingUp,
   FiCalendar,
   FiSettings,
+  FiMapPin,
+  FiPlus
 } from "react-icons/fi";
 import {
   FaTree,
@@ -431,55 +433,19 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
         </div>
 
         {/* Action Buttons */}
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            marginTop: "1rem",
-          }}
-        >
+        <div className="asset-actions">
           <motion.button
-            style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: "transparent",
-              color: "#6366f1",
-              border: "1px solid #6366f1",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-              fontWeight: "500",
-              transition: "all 0.2s ease",
-            }}
+            className="asset-action-btn asset-action-view"
             onClick={() => onClick(asset)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <EyeIcon />
+            <EyeIcon className="asset-action-icon" />
             <span>View Details</span>
           </motion.button>
 
           <motion.button
-            style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: "transparent",
-              color: "#10b981",
-              border: "1px solid #10b981",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-              fontWeight: "500",
-              transition: "all 0.2s ease",
-            }}
+            className="asset-action-btn asset-action-add"
             onClick={(e) => {
               e.stopPropagation();
               console.log("Add button clicked for", asset.type, asset.name);
@@ -487,27 +453,12 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <FiPlus size={16} />
+            <FiPlus size={16} className="asset-action-icon" />
             <span>Add</span>
           </motion.button>
 
           <motion.button
-            style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: "transparent",
-              color: "#ef4444",
-              border: "1px solid #ef4444",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-              fontWeight: "500",
-              transition: "all 0.2s ease",
-            }}
+            className="asset-action-btn asset-action-delete"
             onClick={(e) => {
               e.stopPropagation();
               if (
@@ -519,7 +470,7 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <TrashIcon />
+            <TrashIcon className="asset-action-icon" />
             <span>Delete</span>
           </motion.button>
         </div>
@@ -695,16 +646,21 @@ const AssetManagement = () => {
         );
       } else if (selectedAsset.type === "Solar") {
         response = await assetAPI.updateSolar(
-          updateFormData.Solar_ID,
+          updateFormData.solar_id || updateFormData.Solar_ID || updateFormData.suid,
           updateFormData
         );
       } else if (selectedAsset.type === "Trees") {
         response = await assetAPI.updateTree(
-          updateFormData.Tree_ID,
+          updateFormData.tree_id || updateFormData.Tree_ID || updateFormData.tid,
+          updateFormData
+        );
+      } else if (selectedAsset.type === "Carbon Capture") {
+        response = await assetAPI.updateCarbonCapture(
+          updateFormData.capture_id,
           updateFormData
         );
       }
-      if (response.status === "success") {
+      if (response?.status === "success" || response?.success === true) {
         showToast("Asset updated successfully!", "success");
         setShowUpdateModal(false);
         fetchAssets();
@@ -726,15 +682,26 @@ const AssetManagement = () => {
     }, 3000);
   };
 
-  // Hardcoded user ID for demo purposes
-  const DEMO_USER_ID = "DEMO_USER_001";
-
   // Fetch assets from backend
   const fetchAssets = async () => {
     try {
       setLoading(true);
       setError(null);
-      const fetchedAssets = await assetAPI.getAllAssets(DEMO_USER_ID);
+      const authUserRaw = localStorage.getItem("authUser");
+      const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
+      const orgId =
+        authUser?.org_id ||
+        authUser?.u_id ||
+        localStorage.getItem("orgId") ||
+        localStorage.getItem("userId");
+
+      if (!orgId) {
+        setError("Organization ID not found. Please login again.");
+        setAssets([]);
+        return;
+      }
+
+      const fetchedAssets = await assetAPI.getAllAssets(orgId, orgId);
       setAssets(fetchedAssets);
     } catch (err) {
       console.error("Error fetching assets:", err);
@@ -822,11 +789,16 @@ const AssetManagement = () => {
         case "Trees":
           response = await assetAPI.deleteTree(asset.originalData.tree_id);
           break;
+        case "Carbon Capture":
+          response = await assetAPI.deleteCarbonCapture(
+            asset.originalData.capture_id
+          );
+          break;
         default:
           throw new Error("Unknown asset type");
       }
 
-      if (response.status === "success") {
+      if (response?.status === "success" || response?.success === true) {
         setAssets((prevAssets) => prevAssets.filter((a) => a.id !== asset.id));
         showToast(`${asset.name} deleted successfully!`, "success");
       } else {
