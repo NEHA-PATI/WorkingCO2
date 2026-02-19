@@ -37,6 +37,13 @@ import {
   FiTrendingUp,
   FiCalendar,
   FiSettings,
+  FiMapPin,
+  FiPlus,
+  FiUser,
+  FiPhone,
+  FiMap,
+  FiLayers,
+  FiX,
 } from "react-icons/fi";
 import {
   FaTree,
@@ -319,8 +326,363 @@ const STATUS_COLORS = {
   Offline: { bg: "bg-red-light", text: "var(--color-red)" },
 };
 
+const DUMMY_PLANTATION_ASSET = {
+  id: "TREE-DEMO-001",
+  name: "Coastal Mangrove Project",
+  type: "Trees",
+  location: "9.9579, 76.2566",
+  creditsGenerated: 1890,
+  verified: false,
+  lastUpdated: "03/10/2025",
+  status: "Active",
+  region: "Asia Pacific",
+  originalData: {
+    t_uid: "PLT-2025-004",
+    treename: "Coastal Mangrove Project",
+    botanicalname: "Rhizophora mucronata",
+    plantingdate: "2025-03-10",
+    height: "1.8",
+    dbh: "3.2",
+    location: "9.9579, 76.2566",
+    area: "56.7",
+    trees_planted: "31000",
+    manager_name: "Meera Nair",
+    manager_contact: "+91 65432 10987",
+    soil_type: "Saline Clay",
+    soil_ph: "7.8",
+    plant_age: "1",
+  },
+};
+
+const getPlantationMapData = (asset) => {
+  const raw = asset?.originalData || {};
+  const locationText = String(raw.location || asset.location || "");
+  const match = locationText.match(/(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)/);
+
+  let center = [20.5937, 78.9629];
+  if (match) {
+    const lat = Number(match[1]);
+    const lng = Number(match[2]);
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      center = [lat, lng];
+    }
+  }
+
+  const dLat = 0.0035;
+  const dLng = 0.005;
+  const polygonCoords = [
+    [center[0] + dLat, center[1] - dLng],
+    [center[0] + dLat, center[1] + dLng],
+    [center[0] - dLat, center[1] + dLng],
+    [center[0] - dLat, center[1] - dLng],
+  ];
+
+  return { center, polygonCoords };
+};
+
+const PlantationAssetCard = ({ asset }) => {
+  const [showDetails, setShowDetails] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+
+  const modalId = String(asset.id || "plantation")
+    .replace(/[^a-zA-Z0-9_-]/g, "")
+    .toLowerCase();
+  const mapElementId = `leaflet-map-${modalId}`;
+
+  const details = {
+    name: asset.name || asset.originalData?.treename || "Plantation",
+    id: asset.id || asset.originalData?.t_uid || "N/A",
+    status: asset.verified ? "Accepted" : "Pending",
+    totalArea: asset.originalData?.area
+      ? `${asset.originalData.area} ha`
+      : "N/A",
+    plantationDate: asset.originalData?.plantingdate
+      ? new Date(asset.originalData.plantingdate).toLocaleDateString()
+      : "N/A",
+    manager: asset.originalData?.manager_name || "N/A",
+    contact: asset.originalData?.manager_contact || "N/A",
+    estimatedCredits: Number(asset.creditsGenerated || 0).toLocaleString(),
+    vegetation: {
+      species: asset.originalData?.botanicalname || "N/A",
+      treesPlanted: asset.originalData?.trees_planted || "N/A",
+      avgHeight: asset.originalData?.height ? `${asset.originalData.height} m` : "N/A",
+      avgDBH: asset.originalData?.dbh ? `${asset.originalData.dbh} cm` : "N/A",
+      plantAge: asset.originalData?.plant_age ? `${asset.originalData.plant_age} years` : "N/A",
+    },
+    soil: {
+      soilType: asset.originalData?.soil_type || "N/A",
+      soilPH: asset.originalData?.soil_ph || "N/A",
+    },
+  };
+
+    const statusTimeline = [
+    {
+      label: "Pending",
+      icon: <FaClock style={{ color: "#f59e0b" }} size={14} />,
+      current: !asset.verified,
+    },
+    {
+      label: "Accepted",
+      icon: <FaCheckCircle style={{ color: "#16a34a" }} size={14} />,
+      current: !!asset.verified,
+    },
+    {
+      label: "Drone Assigned",
+      icon: <FiMapPin style={{ color: "#3b82f6" }} size={14} />,
+      current: false,
+    },
+    {
+      label: "Scanned",
+      icon: <UpdateIcon style={{ color: "#6366f1" }} />,
+      current: false,
+    },
+    {
+      label: "Under Analysis",
+      icon: <FiTrendingUp style={{ color: "#10b981" }} size={14} />,
+      current: false,
+    },
+    {
+      label: "Report Generated",
+      icon: <FiLayers style={{ color: "#8b5cf6" }} size={14} />,
+      current: false,
+    },
+  ];
+
+  React.useEffect(() => {
+    if (!showMap || typeof window === "undefined" || !window.L) return;
+
+    const mapEl = document.getElementById(mapElementId);
+    if (!mapEl || mapEl._leaflet_id) return;
+
+    const L = window.L;
+    const { center, polygonCoords } = getPlantationMapData(asset);
+    const map = L.map(mapElementId).setView(center, 14);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "Leaflet | © OpenStreetMap",
+    }).addTo(map);
+
+    const polygon = L.polygon(polygonCoords, {
+      color: "#2d7a3a",
+      fillColor: "#4caf7d",
+      fillOpacity: 0.35,
+      weight: 2,
+    }).addTo(map);
+
+    map.fitBounds(polygon.getBounds());
+
+    return () => {
+      map.remove();
+    };
+  }, [asset, mapElementId, showMap]);
+
+  return (
+    <>
+      <div className="pc-card">
+        <div className="pc-card-header">
+          <div className="pc-title-row">
+            <span className="pc-tree-icon"><FaLeaf color="#2d7a3a" size={20} /></span>
+            <div>
+              <h2 className="pc-project-name">{details.name}</h2>
+              <p className="pc-project-id">ID: {details.id}</p>
+            </div>
+          </div>
+          <span className="pc-badge pc-badge--pending">{details.status}</span>
+        </div>
+
+        <div className="pc-card-body">
+          <div className="pc-info-grid">
+            <div className="pc-info-item">
+              <span className="pc-info-label"><FiMap color="#f59e0b" size={12} /> TOTAL AREA</span>
+              <span className="pc-info-value">{details.totalArea}</span>
+            </div>
+            <div className="pc-info-item">
+              <span className="pc-info-label"><FiCalendar color="#6366f1" size={12} /> PLANTATION DATE</span>
+              <span className="pc-info-value">{details.plantationDate}</span>
+            </div>
+            <div className="pc-info-item">
+              <span className="pc-info-label"><FiUser color="#10b981" size={12} /> MANAGER</span>
+              <span className="pc-info-value">{details.manager}</span>
+            </div>
+            <div className="pc-info-item">
+              <span className="pc-info-label"><FiPhone color="#0ea5e9" size={12} /> CONTACT</span>
+              <span className="pc-info-value">{details.contact}</span>
+            </div>
+          </div>
+
+          <div className="pc-credits-row">
+            <span className="pc-credits-label">Estimated Credits</span>
+            <span className="pc-credits-value">
+              {details.estimatedCredits}{" "}
+              <span className="pc-credits-unit">
+                tCO<sub>2</sub>e
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div className="pc-card-footer">
+          <button
+            className="pc-btn-primary"
+            onClick={() => {
+              setShowDetails(true);
+            }}
+          >
+            View More Details ></button>
+          <button className="pc-btn-map" onClick={() => setShowMap(true)}><FiMapPin size={14} style={{ marginRight: "6px" }} />Map</button>
+        </div>
+      </div>
+
+      {showDetails && (
+        <div className="pc-overlay" onClick={() => setShowDetails(false)}>
+          <div className="pc-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="pc-modal-header">
+              <div>
+                <div className="pc-modal-title-row">
+                  <span className="pc-tree-icon-white"><FaLeaf color="#ffffff" size={20} /></span>
+                  <h2 className="pc-modal-title">{details.name}</h2>
+                </div>
+                <p className="pc-modal-id">ID: {details.id}</p>
+              </div>
+              <div className="pc-modal-header-right">
+                <span className="pc-badge pc-badge--pending">{details.status}</span>
+                <button className="pc-close-btn" onClick={() => setShowDetails(false)}>
+                  <FiX size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="pc-modal-body">
+              <h3 className="pc-section-title">PLANTATION DETAILS</h3>
+              <div className="pc-info-grid pc-modal-grid">
+                <div className="pc-detail-box">
+                  <span className="pc-info-label"><FiMap color="#f59e0b" size={12} /> TOTAL AREA</span>
+                  <span className="pc-info-value">{details.totalArea}</span>
+                </div>
+                <div className="pc-detail-box">
+                  <span className="pc-info-label"><FiCalendar color="#6366f1" size={12} /> PLANTATION DATE</span>
+                  <span className="pc-info-value">{details.plantationDate}</span>
+                </div>
+                <div className="pc-detail-box">
+                  <span className="pc-info-label"><FiUser color="#10b981" size={12} /> MANAGER</span>
+                  <span className="pc-info-value">{details.manager}</span>
+                </div>
+                <div className="pc-detail-box">
+                  <span className="pc-info-label"><FiPhone color="#0ea5e9" size={12} /> CONTACT</span>
+                  <span className="pc-info-value">{details.contact}</span>
+                </div>
+              </div>
+
+              <h3 className="pc-section-title">VEGETATION DETAILS</h3>
+              <div className="pc-info-grid pc-modal-grid">
+                <div className="pc-detail-box">
+                  <span className="pc-info-label">SPECIES</span>
+                  <span className="pc-info-value">{details.vegetation.species}</span>
+                </div>
+                <div className="pc-detail-box">
+                  <span className="pc-info-label">TREES PLANTED</span>
+                  <span className="pc-info-value">{details.vegetation.treesPlanted}</span>
+                </div>
+                <div className="pc-detail-box">
+                  <span className="pc-info-label">AVG HEIGHT</span>
+                  <span className="pc-info-value">{details.vegetation.avgHeight}</span>
+                </div>
+                <div className="pc-detail-box">
+                  <span className="pc-info-label">AVG DBH</span>
+                  <span className="pc-info-value">{details.vegetation.avgDBH}</span>
+                </div>
+                <div className="pc-detail-box">
+                  <span className="pc-info-label">PLANT AGE</span>
+                  <span className="pc-info-value">{details.vegetation.plantAge}</span>
+                </div>
+              </div>
+
+              <h3 className="pc-section-title">SOIL INFORMATION</h3>
+              <div className="pc-info-grid pc-modal-grid">
+                <div className="pc-detail-box">
+                  <span className="pc-info-label">SOIL TYPE</span>
+                  <span className="pc-info-value">{details.soil.soilType}</span>
+                </div>
+                <div className="pc-detail-box">
+                  <span className="pc-info-label">SOIL PH</span>
+                  <span className="pc-info-value">{details.soil.soilPH}</span>
+                </div>
+              </div>
+
+              <div className="pc-credits-box">
+                <span className="pc-credits-label">Estimated Carbon Credits</span>
+                <span className="pc-credits-value-lg">
+                  {details.estimatedCredits}{" "}
+                  <span className="pc-credits-unit">
+                    tCO<sub>2</sub>e
+                  </span>
+                </span>
+              </div>
+
+              <h3 className="pc-section-title">STATUS TIMELINE</h3>
+              <div className="pc-timeline">
+                {statusTimeline.map((step, i) => (
+                  <div
+                    key={i}
+                    className={`pc-timeline-item ${step.current ? "pc-timeline-item--active" : ""}`}
+                  >
+                    <div className={`pc-timeline-dot ${step.current ? "pc-timeline-dot--active" : ""}`}>
+                      {step.icon}
+                    </div>
+                    <span className={`pc-timeline-label ${step.current ? "pc-timeline-label--active" : ""}`}>
+                      {step.label}
+                    </span>
+                    {step.current && <span className="pc-current-badge">CURRENT</span>}
+                  </div>
+                ))}
+              </div>
+
+              <button
+                className="pc-btn-primary pc-btn-full"
+                onClick={() => {
+                  setShowDetails(false);
+                  setShowMap(true);
+                }}
+              >
+                <FiMapPin size={16} style={{ marginRight: "6px" }} />
+                View on Map
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showMap && (
+        <div className="pc-overlay" onClick={() => setShowMap(false)}>
+          <div className="pc-map-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="pc-map-modal-header">
+              <div className="pc-map-title-row">
+                <span className="pc-map-pin-icon"><FiMapPin color="#ffffff" size={16} /></span>
+                <div>
+                  <h3 className="pc-map-title">{details.name} - Map View</h3>
+                  <p className="pc-map-subtitle">Polygon boundary area</p>
+                </div>
+              </div>
+              <div className="pc-map-header-right">
+                <button className="pc-close-btn pc-close-dark" onClick={() => setShowMap(false)}>
+                  <FiX size={16} />
+                </button>
+              </div>
+            </div>
+            <div id={mapElementId} className="pc-leaflet-map"></div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
 // Improved Asset Card Component with better structure
 const AssetCard = ({ asset, onClick, onDelete }) => {
+  if (asset.type === "Trees") {
+    return <PlantationAssetCard asset={asset} />;
+  }
+
   const Icon = ASSET_ICONS[asset.type] || LeafIcon;
   const { bg: statusBg, color: statusText } = STATUS_COLORS[asset.status] || {};
 
@@ -735,11 +1097,12 @@ const AssetManagement = () => {
       setLoading(true);
       setError(null);
       const fetchedAssets = await assetAPI.getAllAssets(DEMO_USER_ID);
-      setAssets(fetchedAssets);
+      const hasPlantation = fetchedAssets.some((asset) => asset.type === "Trees");
+      setAssets(hasPlantation ? fetchedAssets : [DUMMY_PLANTATION_ASSET, ...fetchedAssets]);
     } catch (err) {
       console.error("Error fetching assets:", err);
-      setError("Failed to load assets. Please try again.");
-      setAssets([]);
+      setError(null);
+      setAssets([DUMMY_PLANTATION_ASSET]);
     } finally {
       setLoading(false);
     }
@@ -1887,3 +2250,5 @@ const AssetManagement = () => {
 };
 
 export default AssetManagement;
+
+

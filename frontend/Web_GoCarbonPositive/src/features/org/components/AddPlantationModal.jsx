@@ -313,7 +313,34 @@ function Step1({ data, onChange, points, onPointAdd, onPointRemove }) {
 
 function Step2({ data, onChange }) {
   const fileInputRef = useRef(null);
+  const soilSelectRef = useRef(null);
   const [preview, setPreview] = useState(null);
+  const [soilMenuOpen, setSoilMenuOpen] = useState(false);
+
+  const soilOptions = [
+    { value: "clay", label: "Clay" },
+    { value: "sandy", label: "Sandy" },
+    { value: "loamy", label: "Loamy" },
+    { value: "silt", label: "Silt" },
+    { value: "peaty", label: "Peaty" },
+    { value: "chalky", label: "Chalky" },
+  ];
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (!soilSelectRef.current) return;
+      if (!soilSelectRef.current.contains(event.target)) {
+        setSoilMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  const selectedSoilLabel =
+    soilOptions.find((opt) => opt.value === data.soilType)?.label ||
+    "Select soil type";
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -359,15 +386,37 @@ function Step2({ data, onChange }) {
         <label className="field-label">
           Soil Type <span className="required">*</span>
         </label>
-        <select className="field-input field-select" value={data.soilType} onChange={(e) => onChange("soilType", e.target.value)}>
-          <option value="">Select soil type</option>
-          <option value="clay">Clay</option>
-          <option value="sandy">Sandy</option>
-          <option value="loamy">Loamy</option>
-          <option value="silt">Silt</option>
-          <option value="peaty">Peaty</option>
-          <option value="chalky">Chalky</option>
-        </select>
+        <div className={`soil-select ${soilMenuOpen ? "open" : ""}`} ref={soilSelectRef}>
+          <button
+            type="button"
+            className="soil-select-trigger"
+            onClick={() => setSoilMenuOpen((prev) => !prev)}
+            aria-expanded={soilMenuOpen}
+          >
+            <span>{selectedSoilLabel}</span>
+            <span className="soil-select-caret">{soilMenuOpen ? "^" : "v"}</span>
+          </button>
+
+          {soilMenuOpen && (
+            <div className="soil-select-menu" role="listbox">
+              {soilOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`soil-select-option ${
+                    data.soilType === option.value ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    onChange("soilType", option.value);
+                    setSoilMenuOpen(false);
+                  }}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="field-row">
@@ -592,3 +641,4 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
     </div>
   );
 }
+
