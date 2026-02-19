@@ -65,7 +65,7 @@ export default function ArenaRewardsPage() {
                         Back to Arena
                     </button>
                     <div>
-                        <h1 className="arena-rewards-title">Rewards Catalog</h1>
+                        <h1 className="arena-rewards-title">Rewards</h1>
                         <p className="arena-rewards-subtitle">Redeem points for curated rewards.</p>
                     </div>
                 </div>
