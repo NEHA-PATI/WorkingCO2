@@ -220,23 +220,67 @@
   }
 }
 
-/* Close Button */
+/* Bulk Upload Header + Close */
+.bulk-upload-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  margin-bottom: 6px;
+}
+
 .close-btn {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: none;
-  border: none;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
   cursor: pointer;
-  color: #333;
-  font-size: 1.2rem;
+  color: #000000 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #f3f4f6;
+  color: #000000 !important;
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.close-btn:active {
+  transform: translateY(-50%) scale(0.98);
+}
+
+.close-btn-icon {
+  color: #000000 !important;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.close-btn:hover .close-btn-icon {
+  color: #000000 !important;
 }
 
 /* Titles */
 .bulk-title {
-  font-size: clamp(1.7rem, 2vw, 2rem);
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: #16a34a;
-  margin-bottom: 4px;
+  margin: 0;
   font-weight: 700;
   line-height: 1.1;
 }
@@ -250,9 +294,10 @@
 
 /* Upload Section */
 .upload-section h3 {
-  font-size: 1.02rem;
+  font-size: 1.35rem;
   margin-bottom: 4px;
   color: #222;
+  font-weight: 600;
 }
 
 .upload-section p {
@@ -416,19 +461,18 @@
 /*------------- Export Dropdown------------- */
 /* ================= Export Dropdown (Radix) ================= */
 .dropdown-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-width: 180px;
+  min-width: 172px;
+  max-width: min(90vw, 260px);
   display: flex;
   flex-direction: column;
   padding: 6px 0;
-  z-index: 1000;
+  z-index: 3000;
   animation: fadeIn 0.2s ease-in-out;
+  overflow: hidden;
 }
 
 .dropdown-item {
@@ -476,7 +520,10 @@
 }
 
 @media (max-width: 480px) {
-  .dropdown-menu { right: auto; left: 0; min-width: 150px; }
+  .dropdown-menu {
+    min-width: 150px;
+    max-width: calc(100vw - 20px);
+  }
   .dropdown-item { padding: 8px 12px; font-size: 14px; gap: 8px; }
   .dropdown-item .icon { font-size: 16px; width: 16px; height: 16px; }
 }
