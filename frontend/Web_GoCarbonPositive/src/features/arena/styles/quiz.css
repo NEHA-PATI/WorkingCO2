@@ -189,19 +189,20 @@ body {
 }
 
 .start-button {
-  width: 100%;
-  padding: 18px 32px;
+  width: min(100%, 420px);
+  margin: 0 auto;
+  padding: 14px 24px;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   border: none;
-  border-radius: 12px;
-  font-size: 18px;
+  border-radius: 10px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
   transition: all 0.3s ease;
 }
@@ -209,6 +210,21 @@ body {
 .start-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4);
+}
+
+.start-button:disabled {
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+}
+
+.quiz-lock-note {
+  margin-top: 12px;
+  text-align: center;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .ready-text {

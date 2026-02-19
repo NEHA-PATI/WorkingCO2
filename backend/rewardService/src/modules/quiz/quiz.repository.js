@@ -1,8 +1,9 @@
 const fs = require('fs/promises');
 const path = require('path');
 
-const QUIZ_DIR = path.join(__dirname, '../../data/quiz');
-const CONFIG_PATH = path.join(__dirname, '../../config/config.json');
+const QUIZ_DIR = path.join(__dirname, '../../../data/quiz');
+const CONFIG_PATH = path.join(__dirname, '../../../data/config.json');
+
 
 /* ===============================
    SAVE QUIZ JSON
@@ -86,8 +87,16 @@ const readActiveQuiz = async () => {
    FILE HELPERS
 ================================ */
 const readCSVFromUpload = async (file) => {
-  return file.buffer.toString('utf8');
+  let text = file.buffer.toString('utf8');
+
+  // Remove UTF-8 BOM if present
+  if (text.charCodeAt(0) === 0xFEFF) {
+    text = text.slice(1);
+  }
+
+  return text;
 };
+
 
 module.exports = {
   saveQuizJSON,
