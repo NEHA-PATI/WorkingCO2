@@ -16,8 +16,8 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 28px;
-  gap: 20px;
+  margin-bottom: 14px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -27,16 +27,16 @@
 }
 
 .org-overview-title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   letter-spacing: -0.5px;
 }
 
 .org-overview-subtitle {
-  font-size: 14px;
+  font-size: 12px;
   color: #64748b;
   margin: 0;
   font-weight: 500;
@@ -138,9 +138,10 @@
 }
 
 .org-overview-stat-card:hover {
-  transform: translateY(-6px);
-  border-color: #cbd5e1;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-6px) scale(1.01);
+  border-color: #bfdbfe;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.14);
 }
 
 .org-overview-stat-card::before {
@@ -319,14 +320,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #c8e0f2;
+  background: transparent;
   flex-shrink: 0;
   transition: all 0.3s ease;
 }
 
 .org-overview-section:hover .org-overview-section-icon {
   transform: scale(1.1);
-  background: #e0f2fe;
+  background: transparent;
 }
 
 .org-overview-section-title h2 {
@@ -577,12 +578,12 @@
 }
 
 .org-overview-summary-positive {
-  background: #ecfdf5;
+  background: transparent;
   color: #10b981;
 }
 
 .org-overview-summary-neutral {
-  background: #eff6ff;
+  background: transparent;
   color: #3b82f6;
 }
 
@@ -653,62 +654,11 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .org-overview-container {
-    padding: 16px;
-  }
-
-  .org-overview-title {
-    font-size: 24px;
-  }
-
-  .org-overview-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .org-overview-stat-card {
-    padding: 14px;
-  }
-
-  .org-overview-stat-icon {
-    width: 40px;
-    height: 40px;
-  }
-
-  .org-overview-stat-value {
-    font-size: 22px;
-  }
-
-  .org-overview-section {
-    padding: 16px;
-  }
-
-  .org-overview-content-grid {
-    gap: 16px;
-    margin-bottom: 16px;
-  }
-
-  .org-overview-additional-metrics {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .org-overview-header {
-    flex-direction: column;
-    margin-bottom: 16px;
-  }
-}
-
-@media (max-width: 480px) {
-  .org-overview-container {
     padding: 12px;
   }
 
   .org-overview-title {
     font-size: 20px;
-  }
-
-  .org-overview-subtitle {
-    font-size: 12px;
   }
 
   .org-overview-stats-grid {
@@ -720,12 +670,103 @@
     padding: 12px;
   }
 
+  .org-overview-stat-icon {
+    width: 36px;
+    height: 36px;
+  }
+
   .org-overview-stat-value {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   .org-overview-stat-label {
     font-size: 11px;
+  }
+
+  .org-overview-stat-trend {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+
+  .org-overview-section {
+    padding: 14px;
+  }
+
+  .org-overview-content-grid {
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .org-overview-additional-metrics {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .org-overview-header {
+    flex-direction: column;
+    margin-bottom: 12px;
+  }
+
+  .org-overview-metric-mini {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .org-overview-metric-value {
+    font-size: 16px;
+  }
+
+  .org-overview-section-header {
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+  }
+
+  .org-overview-section-title h2 {
+    font-size: 16px;
+  }
+
+  .org-overview-section-title p {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .org-overview-container {
+    padding: 10px;
+  }
+
+  .org-overview-title {
+    font-size: 18px;
+  }
+
+  .org-overview-subtitle {
+    font-size: 11px;
+  }
+
+  .org-overview-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .org-overview-stat-card {
+    padding: 10px;
+  }
+
+  .org-overview-stat-value {
+    font-size: 18px;
+  }
+
+  .org-overview-stat-label {
+    font-size: 10px;
+  }
+
+  .org-overview-stat-header {
+    margin-bottom: 10px;
+  }
+
+  .org-overview-section {
+    padding: 12px;
   }
 
   .org-overview-summary {

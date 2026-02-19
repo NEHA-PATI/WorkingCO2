@@ -275,17 +275,16 @@ export default function ComplianceReports() {
   return (
     <div className="org-compliance-root">
       {/* Header */}
-
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold">ESG Dashboard</h1>
-          <p className="text-secondary mt-1">
+      <div className="compliance-header">
+        <div className="compliance-header-main">
+          <h1 className="compliance-page-title">ESG Dashboard</h1>
+          <p className="compliance-page-subtitle">
             Environmental, Social & Governance Performance
           </p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="compliance-header-controls">
           <select
-            className="input p-2 border border-gray-300 rounded-lg"
+            className="input compliance-period-select"
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
           >
@@ -294,13 +293,13 @@ export default function ComplianceReports() {
             <option value="12months">Last 12 Months</option>
             <option value="2years">Last 2 Years</option>
           </select>
-          <button className="button button-outline flex items-center p-2">
-            <FaDownload className="btn-icon" />{" "}
-            <span className="ml-2">Export</span>
+          <button className="button button-outline compliance-action-btn">
+            <FaDownload className="btn-icon" />
+            <span>Export</span>
           </button>
-          <button className="button button-outline flex items-center p-2">
-            <FaFilter className="btn-icon" />{" "}
-            <span className="ml-2">Filter</span>
+          <button className="button button-outline compliance-action-btn">
+            <FaFilter className="btn-icon" />
+            <span>Filter</span>
           </button>
         </div>
       </div>
@@ -377,234 +376,236 @@ export default function ComplianceReports() {
         </div>
       </div>
 
-      {/* Charts Section */}
-      <div className="chart-section">
-        <div className="chart-tabs">
-          <button
-            className={`tab ${chartType === "line" ? "active" : ""}`}
-            onClick={() => setChartType("line")}
-          >
-            <FaChartLine className="tab-icon" /> Trends
-          </button>
-          <button
-            className={`tab ${chartType === "bar" ? "active" : ""}`}
-            onClick={() => setChartType("bar")}
-          >
-            <FaChartBar className="tab-icon" /> Compare
-          </button>
-          <button
-            className={`tab ${chartType === "pie" ? "active" : ""}`}
-            onClick={() => setChartType("pie")}
-          >
-            <FaChartPie className="tab-icon" /> Overview
-          </button>
-        </div>
-
-        <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">ESG Performance Analytics</h3>
-            <p className="card-description">
-              Track your ESG metrics over time and identify trends
-            </p>
+      <div className="compliance-content-grid">
+        {/* Charts Section */}
+        <div className="chart-section">
+          <div className="chart-tabs">
+            <button
+              className={`tab ${chartType === "line" ? "active" : ""}`}
+              onClick={() => setChartType("line")}
+            >
+              <FaChartLine className="tab-icon" /> Trends
+            </button>
+            <button
+              className={`tab ${chartType === "bar" ? "active" : ""}`}
+              onClick={() => setChartType("bar")}
+            >
+              <FaChartBar className="tab-icon" /> Compare
+            </button>
+            <button
+              className={`tab ${chartType === "pie" ? "active" : ""}`}
+              onClick={() => setChartType("pie")}
+            >
+              <FaChartPie className="tab-icon" /> Overview
+            </button>
           </div>
-          <div className="card-content">
-            {chartType === "line" && (
-              <ResponsiveContainer width="100%" height={400}>
-                <LineChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="month" stroke="#666" />
-                  <YAxis stroke="#666" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "white",
-                      border: "1px solid #e2e8f0",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="sustainability"
-                    stroke="#86efac"
-                    strokeWidth={2}
-                    name="Sustainability"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="environmental"
-                    stroke="#93c5fd"
-                    strokeWidth={2}
-                    name="Environmental"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="responsibility"
-                    stroke="#c4b5fd"
-                    strokeWidth={2}
-                    name="Responsibility"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="ethics"
-                    stroke="#a5b4fc"
-                    strokeWidth={2}
-                    name="Ethics"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="humanRights"
-                    stroke="#fca5a5"
-                    strokeWidth={2}
-                    name="Human Rights"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="stakeholder"
-                    stroke="#fdba74"
-                    strokeWidth={2}
-                    name="Stakeholder"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="inclusive"
-                    stroke="#7dd3fc"
-                    strokeWidth={2}
-                    name="Inclusive"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="consumer"
-                    stroke="#f9a8d4"
-                    strokeWidth={2}
-                    name="Consumer"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
 
-            {chartType === "bar" && (
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart data={[monthlyData[monthlyData.length - 1]]}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="month" stroke="#666" />
-                  <YAxis stroke="#666" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "white",
-                      border: "1px solid #e2e8f0",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <Bar
-                    dataKey="sustainability"
-                    fill="#86efac"
-                    name="Sustainability"
-                  />
-                  <Bar
-                    dataKey="environmental"
-                    fill="#93c5fd"
-                    name="Environmental"
-                  />
-                  <Bar
-                    dataKey="responsibility"
-                    fill="#c4b5fd"
-                    name="Responsibility"
-                  />
-                  <Bar dataKey="ethics" fill="#a5b4fc" name="Ethics" />
-                  <Bar
-                    dataKey="humanRights"
-                    fill="#fca5a5"
-                    name="Human Rights"
-                  />
-                  <Bar
-                    dataKey="stakeholder"
-                    fill="#fdba74"
-                    name="Stakeholder"
-                  />
-                  <Bar dataKey="inclusive" fill="#7dd3fc" name="Inclusive" />
-                  <Bar dataKey="consumer" fill="#f9a8d4" name="Consumer" />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-
-            {chartType === "pie" && (
-              <div className="pie-chart-container">
-                <ResponsiveContainer width={400} height={400}>
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) =>
-                        `${name} ${(percent * 100).toFixed(0)}%`
-                      }
-                      outerRadius={120}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Metrics Grid */}
-      <div className="metrics-grid">
-        {metrics.map((metric, index) => {
-          const IconComponent = metric.icon;
-          return (
-            <div key={index} className="card metric-card">
-              <div className="card-header">
-                <div className="metric-header">
-                  <div
-                    className="icon-container"
-                    style={{
-                      backgroundColor: metric.backgroundColor,
-                      color: metric.color,
-                    }}
-                  >
-                    <IconComponent className="metric-icon" />
-                  </div>
-                  <span className={`badge ${getBadgeClass(metric.value)}`}>
-                    {getScoreBadge(metric.value)}
-                  </span>
-                </div>
-                <h3 className="metric-title">{metric.name}</h3>
-              </div>
-              <div className="card-content">
-                <div className="metric-content">
-                  <div className="metric-score-row">
-                    <span
-                      className="metric-score"
-                      style={{ color: getScoreColor(metric.value) }}
-                    >
-                      {metric.value}
-                    </span>
-                    <span className="metric-trend">{metric.trend}</span>
-                  </div>
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{
-                        width: `${metric.value}%`,
-                        backgroundColor: metric.color,
-                      }}
-                    ></div>
-                  </div>
-                  <p className="metric-description">{metric.description}</p>
-                </div>
-              </div>
+          <div className="card compliance-chart-card">
+            <div className="card-header">
+              <h3 className="card-title">ESG Performance Analytics</h3>
+              <p className="card-description">
+                Track your ESG metrics over time and identify trends
+              </p>
             </div>
-          );
-        })}
+            <div className="card-content">
+              {chartType === "line" && (
+                <ResponsiveContainer width="100%" height={400}>
+                  <LineChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="month" stroke="#666" />
+                    <YAxis stroke="#666" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "white",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="sustainability"
+                      stroke="#86efac"
+                      strokeWidth={2}
+                      name="Sustainability"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="environmental"
+                      stroke="#93c5fd"
+                      strokeWidth={2}
+                      name="Environmental"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="responsibility"
+                      stroke="#c4b5fd"
+                      strokeWidth={2}
+                      name="Responsibility"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="ethics"
+                      stroke="#a5b4fc"
+                      strokeWidth={2}
+                      name="Ethics"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="humanRights"
+                      stroke="#fca5a5"
+                      strokeWidth={2}
+                      name="Human Rights"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="stakeholder"
+                      stroke="#fdba74"
+                      strokeWidth={2}
+                      name="Stakeholder"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="inclusive"
+                      stroke="#7dd3fc"
+                      strokeWidth={2}
+                      name="Inclusive"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="consumer"
+                      stroke="#f9a8d4"
+                      strokeWidth={2}
+                      name="Consumer"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+
+              {chartType === "bar" && (
+                <ResponsiveContainer width="100%" height={400}>
+                  <BarChart data={[monthlyData[monthlyData.length - 1]]}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="month" stroke="#666" />
+                    <YAxis stroke="#666" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "white",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Bar
+                      dataKey="sustainability"
+                      fill="#86efac"
+                      name="Sustainability"
+                    />
+                    <Bar
+                      dataKey="environmental"
+                      fill="#93c5fd"
+                      name="Environmental"
+                    />
+                    <Bar
+                      dataKey="responsibility"
+                      fill="#c4b5fd"
+                      name="Responsibility"
+                    />
+                    <Bar dataKey="ethics" fill="#a5b4fc" name="Ethics" />
+                    <Bar
+                      dataKey="humanRights"
+                      fill="#fca5a5"
+                      name="Human Rights"
+                    />
+                    <Bar
+                      dataKey="stakeholder"
+                      fill="#fdba74"
+                      name="Stakeholder"
+                    />
+                    <Bar dataKey="inclusive" fill="#7dd3fc" name="Inclusive" />
+                    <Bar dataKey="consumer" fill="#f9a8d4" name="Consumer" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+
+              {chartType === "pie" && (
+                <div className="pie-chart-container">
+                  <ResponsiveContainer width={400} height={400}>
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) =>
+                          `${name} ${(percent * 100).toFixed(0)}%`
+                        }
+                        outerRadius={120}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Metrics Grid */}
+        <div className="metrics-grid">
+          {metrics.map((metric, index) => {
+            const IconComponent = metric.icon;
+            return (
+              <div key={index} className="card metric-card">
+                <div className="card-header">
+                  <div className="metric-header">
+                    <div
+                      className="icon-container"
+                      style={{
+                        backgroundColor: metric.backgroundColor,
+                        color: metric.color,
+                      }}
+                    >
+                      <IconComponent className="metric-icon" />
+                    </div>
+                    <span className={`badge ${getBadgeClass(metric.value)}`}>
+                      {getScoreBadge(metric.value)}
+                    </span>
+                  </div>
+                  <h3 className="metric-title">{metric.name}</h3>
+                </div>
+                <div className="card-content">
+                  <div className="metric-content">
+                    <div className="metric-score-row">
+                      <span
+                        className="metric-score"
+                        style={{ color: getScoreColor(metric.value) }}
+                      >
+                        {metric.value}
+                      </span>
+                      <span className="metric-trend">{metric.trend}</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill"
+                        style={{
+                          width: `${metric.value}%`,
+                          backgroundColor: metric.color,
+                        }}
+                      ></div>
+                    </div>
+                    <p className="metric-description">{metric.description}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Additional Insights */}
