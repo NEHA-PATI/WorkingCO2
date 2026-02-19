@@ -3,18 +3,35 @@ const service = require('./quiz.service');
 /* ===============================
    ADMIN - UPLOAD QUIZ CSV
 ================================ */
-exports.uploadQuizCSV = async (req, res, next) => {
+exports.uploadQuizCSV = async (req, res) => {
   try {
+    console.log("UPLOAD HIT");
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No CSV file uploaded"
+      });
+    }
+
     const data = await service.uploadQuizCSV(req.file);
 
-    res.json({
+    return res.json({
       success: true,
       data
     });
+
   } catch (err) {
-    next(err);
+    console.error("UPLOAD ERROR:", err);
+
+    return res.status(400).json({
+      success: false,
+      message: err.message || "Upload failed"
+    });
   }
 };
+
+
 
 /* ===============================
    ADMIN - GET QUIZ STATUS
