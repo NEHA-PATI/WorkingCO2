@@ -6,7 +6,6 @@ import {
   FiPlus,
   FiDownload,
   FiUpload,
-  FiX,
 } from "react-icons/fi";
 import { FaFilePdf, FaFileExcel, FaFileCsv } from "react-icons/fa";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
@@ -175,7 +174,13 @@ const AssetTopBar = ({ fetchAssets, onBulkUpload, onExport, onMapView }) => {
               </button>
             </DropdownMenu.Trigger>
 
-            <DropdownMenu.Content className="dropdown-menu" sideOffset={6}>
+            <DropdownMenu.Content
+              className="dropdown-menu"
+              side="bottom"
+              align="end"
+              sideOffset={6}
+              collisionPadding={10}
+            >
               <DropdownMenu.Item
                 onSelect={() => handleExport("pdf")}
                 className="dropdown-item"
@@ -209,17 +214,22 @@ const AssetTopBar = ({ fetchAssets, onBulkUpload, onExport, onMapView }) => {
 
       {/* Bulk Upload Modal */}
       {showBulkUpload && (
-        <div className="bulk-upload-modal">
-          <div className="bulk-upload-box">
-            <button className="close-btn" onClick={closeBulkUpload}>
-              <FiX size={22} />
-            </button>
-
-            <h2 className="bulk-title">Bulk Upload</h2>
-            <p className="bulk-subtitle">
-              Upload many records at once with a clean CSV. Enjoy clear
-              validation, progress, and an accessible, responsive experience.
-            </p>
+        <div className="bulk-upload-modal" onClick={closeBulkUpload}>
+          <div
+            className="bulk-upload-box"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="bulk-upload-header">
+              <h2 className="bulk-title">Bulk Upload</h2>
+              <button
+                type="button"
+                className="close-btn"
+                aria-label="Close bulk upload modal"
+                onClick={closeBulkUpload}
+              >
+                <span className="close-btn-icon" aria-hidden="true">&times;</span>
+              </button>
+            </div>
 
             <div className="upload-section">
               <h3>Upload CSV</h3>
@@ -269,19 +279,6 @@ const AssetTopBar = ({ fetchAssets, onBulkUpload, onExport, onMapView }) => {
                 </button>
               </div>
             </div>
-
-            <ul className="notes">
-              <li>File type must be .csv encoded in UTF-8.</li>
-              <li>
-                Include a header row. Recommended columns:{" "}
-                <b>name, email, asset_id, amount</b>.
-              </li>
-              <li>
-                Maximum file size: 10MB. Split large files for better
-                performance.
-              </li>
-              <li>We validate and show errors before any data is committed.</li>
-            </ul>
           </div>
         </div>
       )}
