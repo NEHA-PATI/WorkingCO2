@@ -2,7 +2,7 @@
 
 import React from "react";
 import { BsInstagram } from "react-icons/bs";
-import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
+import { FaFacebookF, FaTwitter, FaLinkedinIn, FaSeedling } from "react-icons/fa";
 import "@shared/ui/styles/Footer.css";
 import { Link } from "react-router-dom";
 
@@ -101,3 +101,4 @@ const Footer = () => {
 };
 
 export default Footer;
+
