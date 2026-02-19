@@ -48,6 +48,7 @@ import OrgDashboard, {
   ORG_DASHBOARD_TAB_COMPONENTS,
 } from "@features/org/pages/OrgDashboard";
 import OrgProfile from "@features/org/components/OrgProfile";
+import AddAsset from "@features/org/components/AddAsset";
 
 import AdminOverview from "@features/admin/pages/Overview";
 import AdminUsers from "@features/admin/pages/User Management";
@@ -144,6 +145,14 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="/add-asset"
+          element={
+            <ProtectedRoute requiredRole="organization">
+              <AddAsset />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/profile"
           element={
             <ProtectedRoute>
@@ -175,6 +184,7 @@ const AppRoutes = () => {
         >
           <Route path="dashboard" element={<OrgDashboard />}>
             <Route index element={<Navigate to={ORG_DEFAULT_TAB_ID} replace />} />
+            <Route path="add-asset" element={<AddAsset />} />
             {ORG_TAB_CONFIG.map((tab) => (
               <Route
                 key={tab.id}

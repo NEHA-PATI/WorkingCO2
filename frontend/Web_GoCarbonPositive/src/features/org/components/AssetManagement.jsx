@@ -951,7 +951,7 @@ const AssetManagement = () => {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <p className="text-secondary mb-4">No assets found</p>
-            <button onClick={() => navigate("/add-asset")} className="button">
+            <button onClick={() => navigate("/org/dashboard/add-asset")} className="button">
               Add Your First Asset
             </button>
           </div>
