@@ -362,7 +362,7 @@ select.form-control {
 }
 
 /* Toast Notification */
-.toast {
+.org-popup-toast {
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -383,28 +383,28 @@ select.form-control {
     font-size: 14px;
 }
 
-.toast.show {
+.org-popup-toast.show {
     transform: translateY(0);
     opacity: 1;
 }
 
-.toast.success {
+.org-popup-toast.success {
     background: var(--primary-dark);
     border-left: 4px solid var(--primary);
 }
 
-.toast.error {
+.org-popup-toast.error {
     background: #d32f2f;
     border-left: 4px solid #f44336;
 }
 
-.toast-icon {
+.org-popup-toast-icon {
     width: 24px;
     height: 24px;
     flex-shrink: 0;
 }
 
-.toast-message {
+.org-popup-toast-message {
     font-weight: 500;
     line-height: 1.4;
 }
