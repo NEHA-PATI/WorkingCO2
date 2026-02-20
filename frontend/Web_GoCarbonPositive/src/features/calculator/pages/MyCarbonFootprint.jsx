@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import {
   FaCar,
   FaPlaneDeparture,
@@ -11,10 +12,17 @@ import {
 } from "react-icons/fa6";
 import CarbonDashboard from "@features/calculator/components/CarbonDashboard";
 import FlightCalculatorForm from "@features/calculator/components/FlightCalculatorForm";
+import { calculateCarbonFootprint } from "@shared/utils/apiClient";
+
+
+
 
 export default function FootprintCalculatorStep() {
   const [vehicle, setVehicle] = useState("vehicles");
   const [activeTab, setActiveTab] = useState("housing");
+  const [maxUnlockedTabIndex, setMaxUnlockedTabIndex] = useState(0);
+  const [resultData, setResultData] = useState(null);
+const [loading, setLoading] = useState(false);
   const [vehicleEntries, setVehicleEntries] = useState([
     { vehicleType: "", fuelType: "", distanceTravelled: "", mileage: "" },
   ]);
@@ -66,7 +74,64 @@ export default function FootprintCalculatorStep() {
   const removeVehicleEntry = (index) => {
     setVehicleEntries((prev) => prev.filter((_, i) => i !== index));
   };
+const handleFinalSubmit = async () => {
+  try {
+    setLoading(true);
+if (
+  !housingForm.electricityKwh &&
+  !housingForm.lpgCylinders &&
+  foodEntries.every(f => !f.category) &&
+  vehicleEntries.every(v => !v.vehicleType)
+) {
+  toast.error("Please enter at least one data point.");
+   setLoading(false); // 👈 ADD THIS
+  return;
+}
+    const payload = {
+      calculation_month: new Date().toISOString().slice(0, 7),
 
+      housing: {
+        electricity_kwh: Number(housingForm.electricityKwh || 0),
+        lpg_cylinders: Number(housingForm.lpgCylinders || 0),
+      },
+
+      food: foodEntries
+        .filter(f => f.category)
+        .map(f => ({
+          category: f.category,
+          avg_quantity_per_day_kg: Number(f.avgConsumptionPerDay || 0) / 1000,
+          days_consumed: Number(f.daysConsumed || 0),
+        })),
+
+      transport: {
+        vehicles:
+          vehicle === "vehicles"
+            ? vehicleEntries
+                .filter(v => v.vehicleType)
+                .map(v => ({
+                  vehicle_type:
+                    v.vehicleType === "2-wheelers" ? "2w" : "4w",
+                  fuel_type: v.fuelType,
+                  distance_km: Number(v.distanceTravelled || 0),
+                  mileage_kmpl: Number(v.mileage || 0),
+                }))
+            : [],
+        flights: [] // for now (we connect flight form next)
+      }
+    };
+
+    const result = await calculateCarbonFootprint(payload);
+
+    setResultData(result);
+
+    setActiveTab("results");
+
+  } catch (error) {
+    toast.error("Calculation failed. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
   const tabs = [
     {
       id: "housing",
@@ -94,6 +159,49 @@ export default function FootprintCalculatorStep() {
     },
   ];
 
+  const getTabIndex = (tabId) => tabs.findIndex((tab) => tab.id === tabId);
+
+  const handleTabChange = (tabId) => {
+  if (tabId === "results" && !resultData) {
+    toast.info("Please calculate first.");
+    return;
+  }
+
+  const targetIndex = getTabIndex(tabId);
+  if (targetIndex <= maxUnlockedTabIndex) {
+    setActiveTab(tabId);
+    return;
+  }
+
+  toast.info("Please fill details here first.", {
+    toastId: "calculator-step-lock",
+  });
+};
+
+  const goToNextTab = () => {
+    const currentIndex = getTabIndex(activeTab);
+    const nextIndex = Math.min(currentIndex + 1, tabs.length - 1);
+    const nextTabId = tabs[nextIndex].id;
+
+    setMaxUnlockedTabIndex((prev) => Math.max(prev, nextIndex));
+    setActiveTab(nextTabId);
+  };
+
+  const handleSubmit = async (formData) => {
+  try {
+    setLoading(true);
+
+    const result = await calculateCarbonFootprint(formData);
+
+    setResultData(result);
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
     <div className="bg-white text-slate-900 min-h-screen flex flex-col font-['Poppins'] overflow-x-hidden">
       {/* Top Tabs Navigation */}
@@ -104,7 +212,7 @@ export default function FootprintCalculatorStep() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`group flex items-center justify-center gap-1 px-2 py-1.5 rounded-xl border transition-all duration-200 ease-out min-h-[46px] sm:min-h-[56px] ${
                   activeTab === tab.id
                     ? "bg-slate-100/90 border-slate-300 text-slate-900 shadow-md ring-1 ring-slate-300/80 scale-[1.01]"
@@ -133,16 +241,32 @@ export default function FootprintCalculatorStep() {
 
       {activeTab === "results" ? (
         <main className="flex-1 w-full px-3 sm:px-4 lg:px-6 py-2 sm:py-3">
-          <CarbonDashboard />
+          {resultData ? (
+  <CarbonDashboard resultData={resultData} />
+) : (
+  <p className="text-center mt-10">No results yet.</p>
+)}
         </main>
       ) : activeTab === "travel" ? (
         <>
           <main className="flex-1 w-full px-3 sm:px-6 lg:px-8 pb-6 sm:pb-8">
             <section className="mt-1 sm:mt-2">
-              <h2 className="text-xl sm:text-2xl font-bold mb-0.5">Transportation</h2>
-              <p className="text-slate-600 text-sm sm:text-base mb-2.5 sm:mb-3">
-                How do you get around on a daily basis?
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold mb-0.5">Transportation</h2>
+                  <p className="text-slate-600 text-sm sm:text-base mb-2.5 sm:mb-3">
+                    How do you get around on a daily basis?
+                  </p>
+                </div>
+               <button
+  type="button"
+  onClick={handleFinalSubmit}
+  disabled={loading}
+  className="shrink-0 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors"
+>
+  {loading ? "Calculating..." : "Submit Details"}
+</button>
+              </div>
             </section>
 
             <section className="space-y-4">
@@ -281,8 +405,15 @@ export default function FootprintCalculatorStep() {
         <main className="flex-1 w-full px-3 sm:px-6 lg:px-8 pb-6 sm:pb-10">
           <div className="w-full min-h-full bg-slate-50 p-3 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl font-['Poppins']">
             <div className="w-full bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-3.5 sm:p-5 md:p-6 lg:p-8">
-              <div className="mb-4 sm:mb-6">
+              <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3">
                 <h2 className="text-xl sm:text-[30px] font-bold">Housing Carbon Calculator</h2>
+                <button
+                  type="button"
+                  onClick={goToNextTab}
+                  className="shrink-0 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors"
+                >
+                  Next
+                </button>
               </div>
 
               <div className="w-full space-y-3">
@@ -323,8 +454,15 @@ export default function FootprintCalculatorStep() {
         <main className="flex-1 w-full px-3 sm:px-6 lg:px-8 pb-6 sm:pb-10">
           <div className="w-full min-h-full bg-slate-50 p-3 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl font-['Poppins']">
             <div className="w-full bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-3.5 sm:p-5 md:p-6 lg:p-8">
-              <div className="mb-4 sm:mb-6">
+              <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3">
                 <h2 className="text-xl sm:text-[30px] font-bold">Food Carbon Calculator</h2>
+                <button
+                  type="button"
+                  onClick={goToNextTab}
+                  className="shrink-0 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors"
+                >
+                  Next
+                </button>
               </div>
 
               <div className="w-full space-y-3">
@@ -382,13 +520,13 @@ export default function FootprintCalculatorStep() {
 
                       <div>
                         <label className="block text-sm font-semibold mb-1.5">
-                          Average consumption per day
+                          Average consumption per day (in grams)
                         </label>
                         <input
                           type="number"
                           name="avgConsumptionPerDay"
                           min="0"
-                          placeholder="e.g. 2"
+                          placeholder="e.g. 200 (grams)"
                           value={entry.avgConsumptionPerDay}
                           onChange={(e) => handleFoodChange(index, e)}
                           className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
