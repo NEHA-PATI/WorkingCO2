@@ -1,4 +1,33 @@
-.asset-management-page .asset-summary-grid {
+
+/* Asset grid layout (explicit, so mixed card types stay aligned) */
+.asset-management-page .grid-3.lg-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(280px, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.asset-management-page .grid-3.lg-grid-4 > * {
+  min-width: 0;
+}
+
+@media (max-width: 1280px) {
+  .asset-management-page .grid-3.lg-grid-4 {
+    grid-template-columns: repeat(3, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .asset-management-page .grid-3.lg-grid-4 {
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .asset-management-page .grid-3.lg-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}.asset-management-page .asset-summary-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(220px, 1fr));
   gap: 16px;
@@ -437,6 +466,10 @@
   gap: 10px;
 }
 
+.asset-management-page .asset-actions.asset-actions-cc {
+  display: flex;
+}
+
 .asset-management-page .asset-action-btn {
   display: inline-flex;
   align-items: center;
@@ -487,6 +520,75 @@
   box-shadow: 0 8px 16px rgba(220, 38, 38, 0.16);
 }
 
+/* Asset details modal */
+.asset-management-page .dialog-content-medium {
+  width: min(760px, 95vw);
+  max-height: 88vh;
+  overflow: auto;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+  padding: 20px;
+}
+
+.asset-management-page .asset-details-modal-content {
+  margin-top: 8px;
+}
+
+.asset-management-page .grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.asset-management-page .text-sm {
+  font-size: 0.82rem;
+}
+
+.asset-management-page .text-secondary {
+  color: #64748b;
+}
+
+.asset-management-page .text-lg {
+  font-size: 1.1rem;
+}
+
+.asset-management-page .font-semibold {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.asset-management-page .text-green {
+  color: #16a34a;
+}
+
+.asset-management-page .button-row {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.asset-management-page .update-asset-btn,
+.asset-management-page .view-fleet-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  padding: 10px 14px;
+  background: #ffffff;
+  color: #1e293b;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.asset-management-page .update-asset-btn:hover,
+.asset-management-page .view-fleet-btn:hover {
+  background: #f8fafc;
+}
+
 @media (max-width: 1024px) {
   .asset-management-page .filterbar-row {
     grid-template-columns: 1fr;
@@ -511,13 +613,19 @@
   .asset-management-page .asset-action-btn {
     min-height: 42px;
   }
+
+  .asset-management-page .grid-2 {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Plantation card (Trees only) */
 .pc-card {
-  width: min(460px, 100%);
-  justify-self: start;
-  margin-left: 14px;
+  width: 100%;
+  margin-left: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
   background: #fff;
@@ -714,11 +822,7 @@
   padding: 16px 18px;
 }
 
-@media (max-width: 640px) {
-  .pc-card {
-    margin-left: 0;
-  }
-}
+
 
 .pc-btn-full {
   width: 100%;
@@ -982,4 +1086,7 @@
   height: 420px;
   width: 100%;
 }
+
+
+
 
