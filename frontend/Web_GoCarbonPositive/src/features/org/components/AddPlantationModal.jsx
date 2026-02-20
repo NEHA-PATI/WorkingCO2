@@ -78,7 +78,7 @@ function StepIndicator({ currentStep }) {
   );
 }
 
-function MapComponent({ points, onPointAdd, onPointRemove }) {
+function MapComponent({ points, onPointAdd, onPointRemove, onPointUpdate }) {
   const mapRef = useRef(null);
   const leafletMap = useRef(null);
   const markersRef = useRef([]);
@@ -157,7 +157,13 @@ brandControl.addTo(map);
         iconSize: [36, 36],
         iconAnchor: [18, 18],
       });
-      const marker = L.marker([pt.lat, pt.lng], { icon }).addTo(leafletMap.current);
+      const marker = L.marker([pt.lat, pt.lng], { icon, draggable: true }).addTo(
+        leafletMap.current
+      );
+      marker.on("dragend", (e) => {
+        const { lat, lng } = e.target.getLatLng();
+        onPointUpdate(i, { lat, lng });
+      });
       markersRef.current.push(marker);
     });
 
@@ -247,7 +253,7 @@ brandControl.addTo(map);
       </div>
 
       <div className="map-container" ref={mapRef} />
-      <p className="map-hint">Click on the map to add points directly</p>
+      <p className="map-hint">Click to add points and drag markers to adjust location</p>
 
       {points.length > 0 && (
         <div className="confirmed-points-card">
@@ -269,7 +275,16 @@ brandControl.addTo(map);
   );
 }
 
-function Step1({ data, step2, onChange, onStep2Change, points, onPointAdd, onPointRemove }) {
+function Step1({
+  data,
+  step2,
+  onChange,
+  onStep2Change,
+  points,
+  onPointAdd,
+  onPointRemove,
+  onPointUpdate,
+}) {
   const isOtherSpecies = step2.speciesName === "Other";
 
   return (
@@ -288,7 +303,12 @@ function Step1({ data, step2, onChange, onStep2Change, points, onPointAdd, onPoi
         <input className="field-input" type="date" value={data.date} onChange={(e) => onChange("date", e.target.value)} />
       </div>
 
-      <MapComponent points={points} onPointAdd={onPointAdd} onPointRemove={onPointRemove} />
+      <MapComponent
+        points={points}
+        onPointAdd={onPointAdd}
+        onPointRemove={onPointRemove}
+        onPointUpdate={onPointUpdate}
+      />
 
       <div className="field-group">
         <label className="field-label">
@@ -480,6 +500,8 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
   const handleStep2Change = (key, val) => setStep2((p) => ({ ...p, [key]: val }));
   const handlePointAdd = (pt) => setPoints((p) => [...p, pt]);
   const handlePointRemove = (idx) => setPoints((p) => p.filter((_, i) => i !== idx));
+  const handlePointUpdate = (idx, pt) =>
+    setPoints((prev) => prev.map((point, i) => (i === idx ? pt : point)));
 
   useEffect(() => {
     const areaSqm = calculatePolygonAreaSqm(points);
@@ -574,6 +596,7 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
               points={points}
               onPointAdd={handlePointAdd}
               onPointRemove={handlePointRemove}
+              onPointUpdate={handlePointUpdate}
             />
           )}
           {step === 2 && <Step3 step1={step1} step2={step2} points={points} />}
