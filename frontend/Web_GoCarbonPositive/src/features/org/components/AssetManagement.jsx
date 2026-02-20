@@ -316,6 +316,7 @@ const ASSET_COLORS = {
 // Status colors
 const STATUS_COLORS = {
   Active: { bg: "bg-green-light", text: "var(--color-green-dark)" },
+  Pending: { bg: "bg-yellow-light", text: "var(--color-yellow-dark)" },
   Maintenance: { bg: "bg-yellow-light", text: "var(--color-yellow-dark)" },
   Offline: { bg: "bg-red-light", text: "var(--color-red)" },
 };
@@ -660,6 +661,7 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
   const Icon = ASSET_ICONS[asset.type] || LeafIcon;
   const { bg: statusBg, color: statusText } = STATUS_COLORS[asset.status] || {};
   const isCarbonCapture = asset.type === "Carbon Capture";
+  const isFleetEntry = asset.type === "EV" && !!asset.originalData?.ev_input_id;
 
   return (
     <motion.div
@@ -731,7 +733,7 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
         <div className="asset-info-row">
           <div className="asset-info-label">
             <TrendingUpIcon />
-            <span>{isCarbonCapture ? "Estimated Credits" : "Credits Generated"}</span>
+            <span>{isCarbonCapture || isFleetEntry ? "Estimated Credits" : "Credits Generated"}</span>
           </div>
           <motion.span
             className="asset-credits-value"
@@ -744,7 +746,7 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
         </div>
 
         {/* Verification Status */}
-        {!isCarbonCapture && (
+        {!isCarbonCapture && !isFleetEntry && (
           <div className="asset-info-row">
             <span className="asset-info-label">Verification</span>
             <motion.span
@@ -772,7 +774,7 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
         )}
 
         {/* Last Updated */}
-        {!isCarbonCapture && (
+        {!isCarbonCapture && !isFleetEntry && (
           <div className="asset-updated">
             <CalendarIcon />
             <span>Updated {asset.lastUpdated}</span>

@@ -39,19 +39,31 @@ const PopupForms = ({
 
 
 
-  const [evData, setEVData] = useState({
-    manufacturer: '',
-    model: '',
-    year: '',
-    batteryconsumed: '', // ✅ Fixed: Was batteryCapacity, caused uncontrolled input
-    range: '',
-    EVCategory: '',
-    chargingType: '',
-    gridEmissionFactor: '', // ✅ Fixed: Added to state
-    topSpeed: '', // ✅ Fixed: Added to state
-    chargingTime: '', // ✅ Fixed: Added to state
-    motorpower: '', // ✅ Fixed: Added to state
+    const [evData, setEVData] = useState({
+    vehicleCategory: "",
+    subCategory: "",
+    powertrainType: "",
+    manufacturer: "",
+    model: "",
+    purchaseYear: "",
+    isFleet: "No",
+    averageDistancePerDay: "",
+    workingDaysPerYear: "",
+    numberOfVehicles: "",
+    averageDistancePerVehiclePerYear: "",
+    fuelType: "",
+    fuelEfficiency: "",
+    totalFuelConsumedPerYear: "",
+    batteryCapacity: "",
+    energyConsumedPerMonth: "",
+    chargingType: "",
+    gridEmissionFactor: "",
+    vehicleWeight: "",
+    engineCapacity: "",
+    motorPower: "",
+    chargingTime: "",
   });
+  const [evTouched, setEVTouched] = useState({});
   const [captureData, setCaptureData] = useState({
     industryType: "",
     totalEmission: "",
@@ -253,7 +265,6 @@ const PopupForms = ({
 
     };
 
-    // ✅ Debug log
     console.log('Submitting Solar Panel Payload:', payload);
 
     // ✅ Quick client-side validation
@@ -283,281 +294,427 @@ const PopupForms = ({
     }
   };
 
-
-
   const handleEVSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ 1. Auth Validation (Robust)
-    const U_ID = localStorage.getItem("userId");
-    if (!U_ID || U_ID === "undefined" || U_ID === "null") {
-      showToast("Session invalid. Please log in again.", "error");
+    const requiredFields = [
+      "vehicleCategory",
+      "subCategory",
+      "powertrainType",
+      "manufacturer",
+      "model",
+      "purchaseYear",
+      "fuelType",
+      "fuelEfficiency",
+      "totalFuelConsumedPerYear",
+      "batteryCapacity",
+      "energyConsumedPerMonth",
+      "chargingType",
+      "gridEmissionFactor",
+    ];
+
+    if (evData.isFleet === "Yes") {
+      requiredFields.push("numberOfVehicles", "averageDistancePerVehiclePerYear");
+    } else {
+      requiredFields.push("averageDistancePerDay", "workingDaysPerYear");
+    }
+
+    const nextTouched = {};
+    requiredFields.forEach((key) => {
+      nextTouched[key] = true;
+    });
+    setEVTouched(nextTouched);
+
+    const hasMissing = requiredFields.some((key) => {
+      const value = evData[key];
+      return value === "" || value === null || value === undefined;
+    });
+
+    if (hasMissing) {
+      showToast("Please fill all required EV fields.", "error");
       return;
     }
 
-    // 📦 2. Payload Construction (Aligned with State & Backend)
+    const authUserRaw = localStorage.getItem("authUser");
+    const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
+    const orgId =
+      authUser?.org_id ||
+      authUser?.u_id ||
+      localStorage.getItem("orgId") ||
+      localStorage.getItem("userId");
+
+    if (!orgId) {
+      showToast("Organization ID not found. Please login again.", "error");
+      return;
+    }
+
     const payload = {
-      VUID: crypto.randomUUID(),
-      U_ID, // Backend expects u_id
-      Category: evData.EVCategory,
-      Manufacturers: evData.manufacturer,
-      Model: evData.model,
-      Purchase_Year: Number(evData.year),
-      Energy_Consumed: Number(evData.batteryconsumed), // ✅ Fixed key mapping
-      Primary_Charging_Type: evData.chargingType,
-      Range: Number(evData.range),
-      Grid_Emission_Factor: Number(evData.gridEmissionFactor),
-      // ✅ Optional fields validation: valid number or null
-      Top_Speed: evData.topSpeed ? Number(evData.topSpeed) : null,
-      Charging_Time: evData.chargingTime ? Number(evData.chargingTime) : null,
-      Motor_Power: evData.motorpower ? String(evData.motorpower) : null // Backend might expect string or number, safely handling
+      org_id: orgId,
+      vehicleCategory: evData.vehicleCategory,
+      subCategory: evData.subCategory,
+      powertrainType: evData.powertrainType,
+      manufacturer: evData.manufacturer,
+      model: evData.model,
+      purchaseYear: evData.purchaseYear,
+      isFleet: evData.isFleet,
+      averageDistancePerDay: evData.averageDistancePerDay,
+      workingDaysPerYear: evData.workingDaysPerYear,
+      numberOfVehicles: evData.numberOfVehicles,
+      averageDistancePerVehiclePerYear: evData.averageDistancePerVehiclePerYear,
+      fuelType: evData.fuelType,
+      fuelEfficiency: evData.fuelEfficiency,
+      totalFuelConsumedPerYear: evData.totalFuelConsumedPerYear,
+      batteryCapacity: evData.batteryCapacity,
+      energyConsumedPerMonth: evData.energyConsumedPerMonth,
+      chargingType: evData.chargingType,
+      gridEmissionFactor: evData.gridEmissionFactor,
+      vehicleWeight: evData.vehicleWeight,
+      engineCapacity: evData.engineCapacity,
+      motorPower: evData.motorPower,
+      chargingTime: evData.chargingTime,
     };
 
-    // ✅ Debug log
-    console.log('🔍 Submitting EV Payload:', payload);
-
     try {
-      const result = await assetAPI.createEV(payload);
-
-      if (result.status === 'success') {
-        const { data: savedEV, evCount } = result;
-
-        // ✅ Only call if it's a valid function
-        if (typeof setEvCount === 'function') {
-          setEvCount(evCount);
-        }
-
-        showToast(`EV saved! Total EVs: ${evCount}`, 'success');
-
-        // ✅ Save new activity to localStorage
-        const newActivity = {
-          title: "EV Added",
-          detail: `${evData.manufacturer} ${evData.model} - ${evData.range} km range`,
-          time: "Just now",
-          credits: 20,            // Adjust as per logic
-          color: "bg-blue-100"
-        };
-
-        localStorage.setItem("latestActivity", JSON.stringify(newActivity));
-
-        // Let AddAsset.jsx handle the popup closing and navigation
-        handleSaveEV(savedEV);
+      const result = await assetAPI.createFleet(payload);
+      if (result?.success) {
+        showToast("Fleet details saved successfully.", "success");
+        setActiveEVPopup(false);
       } else {
-        showToast('Failed to save EV: ' + (result.message || 'Unknown error'), 'error');
+        showToast(result?.message || "Failed to save fleet details.", "error");
       }
     } catch (error) {
-      console.error("EV submit error:", error);
-      showToast('Server error! ' + error.message, 'error');
+      showToast(error?.message || "Server error while saving fleet details.", "error");
     }
-  };
+  };
 
   return (
     <div>
-      {/* EV Popup */}
+            {/* EV Popup */}
       {activeEVPopup && (
       <div className={`popup-overlay ${activeEVPopup ? 'active' : ''}`} onClick={() => setActiveEVPopup(false)}>
         <div className={`popup ${activeEVPopup ? 'active' : ''}`} onClick={e => e.stopPropagation()}>
           <div className="popup-header">
             <h2>
-              <MdElectricCar size={28} color="#3b82f6" />
-              Electric Vehicle Details
+              <MdElectricCar size={30} color="#2563eb" />
+              EV Emissions Input Form
             </h2>
-            <button className="popup-close" onClick={() => setActiveEVPopup(false)}>×</button>
+            <button className="popup-close" onClick={() => setActiveEVPopup(false)}>X</button>
           </div>
-          <form onSubmit={handleEVSubmit}>
+
+          <form onSubmit={handleEVSubmit} className="ev-form-ui">
+            <div className="ev-section-title">1. Basic Information</div>
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="EVCategory">Vehicle Category</label>
+                <label>Vehicle Category *</label>
                 <select
-                  id="EVCategory"
-                  className="form-control"
-                  value={evData.EVCategory}
-                  onChange={(e) => setEVData({ ...evData, EVCategory: e.target.value })}
-                  required
+                  className={`form-control ${evTouched.vehicleCategory && !evData.vehicleCategory ? 'form-control-error' : ''}`}
+                  value={evData.vehicleCategory}
+                  onChange={(e) => setEVData({ ...evData, vehicleCategory: e.target.value })}
                 >
-                  <option value="" disabled hidden>
-                    -- Select Vehicle Category --
-                  </option>
-                  <option value="Two-Wheelers">Two-Wheelers</option>
-                  <option value="Three-Wheeler">Three-Wheeler </option>
-                  <option value="Hatchbacks">Hatchbacks</option>
-                  <option value="Sedans">Sedans</option>
-                  <option value="SUVs">SUVs</option>
-                  <option value="MPVs">MPVs</option>
-                  <option value="Buses">Buses</option>
-                  <option value="Trucks">Trucks</option>
-                  <option value="Vans">Vans</option>
-                  <option value="Tractors">Tractors</option>
-                  <option value="nForklifts">Forklifts</option>
-                  <option value="NEVs">NEVs</option>
-                  <option value="Golf Carts">Golf Carts</option>
+                  <option value="">-- Select Vehicle Category --</option>
+                  <option value="Two-Wheeler">Two-Wheeler</option>
+                  <option value="Three-Wheeler">Three-Wheeler</option>
+                  <option value="Passenger Car">Passenger Car</option>
+                  <option value="Commercial Vehicle">Commercial Vehicle</option>
+                  <option value="Industrial Vehicle">Industrial Vehicle</option>
                 </select>
+                {evTouched.vehicleCategory && !evData.vehicleCategory && <p className="form-error-text">Vehicle Category is required</p>}
               </div>
               <div className="form-group">
-                <label htmlFor="ev-manufacturer">Manufacturer</label>
+                <label>Sub Category *</label>
+                <select
+                  className={`form-control ${evTouched.subCategory && !evData.subCategory ? 'form-control-error' : ''}`}
+                  value={evData.subCategory}
+                  onChange={(e) => setEVData({ ...evData, subCategory: e.target.value })}
+                >
+                  <option value="">-- Select Sub Category --</option>
+                  <option value="Hatchback">Hatchback</option>
+                  <option value="Sedan">Sedan</option>
+                  <option value="SUV">SUV</option>
+                  <option value="MPV">MPV</option>
+                  <option value="Truck">Truck</option>
+                  <option value="Bus">Bus</option>
+                  <option value="Van">Van</option>
+                  <option value="Tractor">Tractor</option>
+                  <option value="Forklift">Forklift</option>
+                </select>
+                {evTouched.subCategory && !evData.subCategory && <p className="form-error-text">Sub Category is required</p>}
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Powertrain Type *</label>
+                <select
+                  className={`form-control ${evTouched.powertrainType && !evData.powertrainType ? 'form-control-error' : ''}`}
+                  value={evData.powertrainType}
+                  onChange={(e) => setEVData({ ...evData, powertrainType: e.target.value })}
+                >
+                  <option value="">-- Select Powertrain Type --</option>
+                  <option value="Petrol">Petrol</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="CNG">CNG</option>
+                  <option value="Hybrid">Hybrid</option>
+                  <option value="Electric (BEV)">Electric (BEV)</option>
+                  <option value="Plug-in Hybrid (PHEV)">Plug-in Hybrid (PHEV)</option>
+                </select>
+                {evTouched.powertrainType && !evData.powertrainType && <p className="form-error-text">Powertrain Type is required</p>}
+              </div>
+              <div className="form-group">
+                <label>Manufacturer *</label>
                 <input
                   type="text"
-                  id="ev-manufacturer"
-                  className="form-control"
-                  placeholder="e.g., Tesla, Nissan, Chevrolet"
+                  className={`form-control ${evTouched.manufacturer && !evData.manufacturer ? 'form-control-error' : ''}`}
                   value={evData.manufacturer}
                   onChange={(e) => setEVData({ ...evData, manufacturer: e.target.value })}
-                  required
                 />
+                {evTouched.manufacturer && !evData.manufacturer && <p className="form-error-text">Manufacturer is required</p>}
               </div>
             </div>
 
-
-
-
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="ev-model">Model</label>
+                <label>Model *</label>
                 <input
                   type="text"
-                  id="ev-model"
-                  className="form-control"
-                  placeholder="e.g., Model 3, Leaf, Bolt"
+                  className={`form-control ${evTouched.model && !evData.model ? 'form-control-error' : ''}`}
                   value={evData.model}
                   onChange={(e) => setEVData({ ...evData, model: e.target.value })}
-                  required
                 />
+                {evTouched.model && !evData.model && <p className="form-error-text">Model is required</p>}
               </div>
               <div className="form-group">
-                <label htmlFor="ev-year">Purchase Year</label>
+                <label>Purchase Year *</label>
                 <input
                   type="number"
-                  id="ev-year"
-                  className="form-control"
-                  placeholder="e.g., 2022"
-                  min="2000"
-                  max="2030"
-                  value={evData.year}
-                  onChange={(e) => setEVData({ ...evData, year: e.target.value })}
-                  required
+                  min="1990"
+                  max="2099"
+                  className={`form-control ${evTouched.purchaseYear && !evData.purchaseYear ? 'form-control-error' : ''}`}
+                  value={evData.purchaseYear}
+                  onChange={(e) => setEVData({ ...evData, purchaseYear: e.target.value })}
                 />
+                {evTouched.purchaseYear && !evData.purchaseYear && <p className="form-error-text">Purchase Year is required</p>}
               </div>
             </div>
 
+            <div className="ev-section-title">2. Usage Details</div>
+            <div className="form-row form-row-single">
+              <div className="form-group">
+                <label>Is this a Fleet? *</label>
+                <div className="ev-toggle-row">
+                  <button
+                    type="button"
+                    className={`ev-toggle-btn ${evData.isFleet === 'No' ? 'active' : ''}`}
+                    onClick={() => setEVData({ ...evData, isFleet: 'No' })}
+                  >No</button>
+                  <button
+                    type="button"
+                    className={`ev-toggle-btn ${evData.isFleet === 'Yes' ? 'active' : ''}`}
+                    onClick={() => setEVData({ ...evData, isFleet: 'Yes' })}
+                  >Yes</button>
+                </div>
+              </div>
+            </div>
 
+            {evData.isFleet === 'No' ? (
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Average Distance per Day (km) *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={`form-control ${evTouched.averageDistancePerDay && !evData.averageDistancePerDay ? 'form-control-error' : ''}`}
+                    value={evData.averageDistancePerDay}
+                    onChange={(e) => setEVData({ ...evData, averageDistancePerDay: e.target.value })}
+                  />
+                  {evTouched.averageDistancePerDay && !evData.averageDistancePerDay && <p className="form-error-text">This field is required</p>}
+                </div>
+                <div className="form-group">
+                  <label>Working Days per Year *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={`form-control ${evTouched.workingDaysPerYear && !evData.workingDaysPerYear ? 'form-control-error' : ''}`}
+                    value={evData.workingDaysPerYear}
+                    onChange={(e) => setEVData({ ...evData, workingDaysPerYear: e.target.value })}
+                  />
+                  {evTouched.workingDaysPerYear && !evData.workingDaysPerYear && <p className="form-error-text">This field is required</p>}
+                </div>
+              </div>
+            ) : (
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Number of Vehicles *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    className={`form-control ${evTouched.numberOfVehicles && !evData.numberOfVehicles ? 'form-control-error' : ''}`}
+                    value={evData.numberOfVehicles}
+                    onChange={(e) => setEVData({ ...evData, numberOfVehicles: e.target.value })}
+                  />
+                  {evTouched.numberOfVehicles && !evData.numberOfVehicles && <p className="form-error-text">This field is required</p>}
+                </div>
+                <div className="form-group">
+                  <label>Average Distance per Vehicle per Year (km) *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={`form-control ${evTouched.averageDistancePerVehiclePerYear && !evData.averageDistancePerVehiclePerYear ? 'form-control-error' : ''}`}
+                    value={evData.averageDistancePerVehiclePerYear}
+                    onChange={(e) => setEVData({ ...evData, averageDistancePerVehiclePerYear: e.target.value })}
+                  />
+                  {evTouched.averageDistancePerVehiclePerYear && !evData.averageDistancePerVehiclePerYear && <p className="form-error-text">This field is required</p>}
+                </div>
+              </div>
+            )}
+
+            <div className="ev-section-title">3. Energy / Fuel Details</div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Fuel Type *</label>
+                <select
+                  className={`form-control ${evTouched.fuelType && !evData.fuelType ? 'form-control-error' : ''}`}
+                  value={evData.fuelType}
+                  onChange={(e) => setEVData({ ...evData, fuelType: e.target.value })}
+                >
+                  <option value="">-- Select Fuel Type --</option>
+                  <option value="Petrol">Petrol</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="CNG">CNG</option>
+                  <option value="Electric">Electric</option>
+                  <option value="Hybrid">Hybrid</option>
+                </select>
+                {evTouched.fuelType && !evData.fuelType && <p className="form-error-text">Fuel Type is required</p>}
+              </div>
+              <div className="form-group">
+                <label>Fuel Efficiency (km per liter) *</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className={`form-control ${evTouched.fuelEfficiency && !evData.fuelEfficiency ? 'form-control-error' : ''}`}
+                  value={evData.fuelEfficiency}
+                  onChange={(e) => setEVData({ ...evData, fuelEfficiency: e.target.value })}
+                />
+                {evTouched.fuelEfficiency && !evData.fuelEfficiency && <p className="form-error-text">This field is required</p>}
+              </div>
+            </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="energyConsumed">Energy consumed(kWh)</label>
+                <label>Total Fuel Consumed per Year (liters) *</label>
                 <input
                   type="number"
-                  id="energyconsumed"
-                  className="form-control"
-                  placeholder="e.g., 75"
-                  step="0.1"
-                  min="1"
-                  value={evData.batteryconsumed}
-                  onChange={(e) => setEVData({ ...evData, batteryconsumed: e.target.value })}
-                  required
+                  min="0"
+                  className={`form-control ${evTouched.totalFuelConsumedPerYear && !evData.totalFuelConsumedPerYear ? 'form-control-error' : ''}`}
+                  value={evData.totalFuelConsumedPerYear}
+                  onChange={(e) => setEVData({ ...evData, totalFuelConsumedPerYear: e.target.value })}
                 />
+                {evTouched.totalFuelConsumedPerYear && !evData.totalFuelConsumedPerYear && <p className="form-error-text">This field is required</p>}
               </div>
               <div className="form-group">
-                <label htmlFor="chargingType">Primary Charging Type</label>
+                <label>Battery Capacity (kWh) *</label>
+                <input
+                  type="number"
+                  min="0"
+                  className={`form-control ${evTouched.batteryCapacity && !evData.batteryCapacity ? 'form-control-error' : ''}`}
+                  value={evData.batteryCapacity}
+                  onChange={(e) => setEVData({ ...evData, batteryCapacity: e.target.value })}
+                />
+                {evTouched.batteryCapacity && !evData.batteryCapacity && <p className="form-error-text">This field is required</p>}
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Energy Consumed per Month (kWh) *</label>
+                <input
+                  type="number"
+                  min="0"
+                  className={`form-control ${evTouched.energyConsumedPerMonth && !evData.energyConsumedPerMonth ? 'form-control-error' : ''}`}
+                  value={evData.energyConsumedPerMonth}
+                  onChange={(e) => setEVData({ ...evData, energyConsumedPerMonth: e.target.value })}
+                />
+                {evTouched.energyConsumedPerMonth && !evData.energyConsumedPerMonth && <p className="form-error-text">This field is required</p>}
+              </div>
+              <div className="form-group">
+                <label>Charging Type *</label>
                 <select
-                  id="chargingType"
-                  className="form-control"
+                  className={`form-control ${evTouched.chargingType && !evData.chargingType ? 'form-control-error' : ''}`}
                   value={evData.chargingType}
                   onChange={(e) => setEVData({ ...evData, chargingType: e.target.value })}
-                  required
                 >
-                  <option value="" disabled hidden>
-                    -- Select Charging Type --
-                  </option>
-                  <option value="level1">Level 1 (120V)</option>
-                  <option value="level2">Level 2 (240V)</option>
-                  <option value="dcfast">DC Fast Charging</option>
-                  <option value="tesla">Tesla Supercharger</option>
+                  <option value="">-- Select Charging Type --</option>
+                  <option value="Home">Home</option>
+                  <option value="Depot">Depot</option>
+                  <option value="Public">Public</option>
                 </select>
+                {evTouched.chargingType && !evData.chargingType && <p className="form-error-text">Charging Type is required</p>}
               </div>
             </div>
 
-
-
-            <div className="form-row">
+            <div className="form-row form-row-single">
               <div className="form-group">
-                <label htmlFor="range">Range (Km) </label>
+                <label>Grid Emission Factor (kgCO2/kWh) *</label>
                 <input
                   type="number"
-                  id="range"
-                  className="form-control"
-                  placeholder="e.g., 300"
-                  min="1"
-                  value={evData.range}
-                  onChange={(e) => setEVData({ ...evData, range: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="gridEmissionFactor">Grid Emission Factor</label>
-                <input
-                  type="number"
-                  id="gridEmissionFactor"
-                  className="form-control"
-                  placeholder="e.g., 5 "
                   min="0"
+                  step="0.0001"
+                  className={`form-control ${evTouched.gridEmissionFactor && !evData.gridEmissionFactor ? 'form-control-error' : ''}`}
                   value={evData.gridEmissionFactor}
                   onChange={(e) => setEVData({ ...evData, gridEmissionFactor: e.target.value })}
-                  required
                 />
+                {evTouched.gridEmissionFactor && !evData.gridEmissionFactor && <p className="form-error-text">Grid Emission Factor is required</p>}
               </div>
             </div>
 
-
-
+            <div className="ev-section-title">4. Additional Information (Optional)</div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Vehicle Weight (kg)</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="form-control"
+                  value={evData.vehicleWeight}
+                  onChange={(e) => setEVData({ ...evData, vehicleWeight: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Engine Capacity (cc)</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="form-control"
+                  value={evData.engineCapacity}
+                  onChange={(e) => setEVData({ ...evData, engineCapacity: e.target.value })}
+                />
+              </div>
+            </div>
 
             <div className="form-row">
-
               <div className="form-group">
-                <label htmlFor="topSpeed">Top Speed (km/h)</label>
+                <label>Motor Power (kW)</label>
                 <input
                   type="number"
-                  id="topSpeed"
-                  className="form-control"
-                  placeholder="e.g., 80"
                   min="0"
-                  value={evData.topSpeed}
-                  onChange={(e) => setEVData({ ...evData, topSpeed: e.target.value })}
-                // ❌ Removed 'required' (Optional field)
+                  className="form-control"
+                  value={evData.motorPower}
+                  onChange={(e) => setEVData({ ...evData, motorPower: e.target.value })}
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="chargingTime">Charging time (hrs)</label>
+                <label>Charging Time (hours)</label>
                 <input
                   type="number"
-                  id="chargingTime"
-                  className="form-control"
-                  placeholder="e.g., 1"
                   min="0"
+                  step="0.1"
+                  className="form-control"
                   value={evData.chargingTime}
                   onChange={(e) => setEVData({ ...evData, chargingTime: e.target.value })}
-                // ❌ Removed 'required' (Optional field)
                 />
               </div>
-              <div className="form-group">
-                <label htmlFor="motorpower">Motor power (kW)</label>
-                <input
-                  type="number"
-                  id="motorpower"
-                  className="form-control"
-                  placeholder="e.g., 5"
-                  min="0"
-                  value={evData.motorpower}
-                  onChange={(e) => setEVData({ ...evData, motorpower: e.target.value })}
-                // ❌ Removed 'required' (Optional field)
-                />
-              </div>
-
-
             </div>
-
-
-
-
 
             <div className="form-actions">
               <button type="button" className="btn-primary btn-cancel" onClick={() => setActiveEVPopup(false)}>Cancel</button>
@@ -585,7 +742,7 @@ const PopupForms = ({
               <MdSolarPower size={28} color="#f59e0b" />
               Solar Panel Details
             </h2>
-            <button className="popup-close" onClick={() => setActiveSolarPopup(false)}>×</button>
+            <button className="popup-close" onClick={() => setActiveSolarPopup(false)}>X</button>
           </div>
           <form onSubmit={handleSolarSubmit}>
             <div className="form-row">
@@ -695,7 +852,7 @@ const PopupForms = ({
               <GiPowder size={26} color="#475569" />
               Carbon Capture Facility
             </h2>
-            <button className="popup-close" onClick={() => setActiveCapturePopup(false)}>×</button>
+            <button className="popup-close" onClick={() => setActiveCapturePopup(false)}>X</button>
           </div>
 
           <form onSubmit={handleCaptureSubmit}>
@@ -820,6 +977,16 @@ const PopupForms = ({
   );
 };
 export default PopupForms;
+
+
+
+
+
+
+
+
+
+
 
 
 
