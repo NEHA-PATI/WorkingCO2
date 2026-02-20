@@ -469,6 +469,41 @@ select.form-control {
   line-height: 1.35;
 }
 
+.ev-form-ui .ev-section-title {
+  margin: 0.5rem 0 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  padding: 0.45rem 0.65rem;
+  border-left: 4px solid #2563eb;
+  background: #eff6ff;
+  border-radius: 6px;
+}
+
+.ev-toggle-row {
+  display: inline-flex;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.ev-toggle-btn {
+  border: none;
+  background: transparent;
+  color: #475569;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ev-toggle-btn.active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
 /* Responsive Styles */
 @media (max-width: 768px) {
     .form-row {
