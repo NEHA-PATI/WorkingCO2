@@ -43,6 +43,7 @@ import {
   FiPhone,
   FiMap,
   FiLayers,
+  FiX,
 } from "react-icons/fi";
 import {
   FaTree,
@@ -484,7 +485,6 @@ const PlantationAssetCard = ({ asset }) => {
             <span className="pc-tree-icon"><FaLeaf color="#2d7a3a" size={20} /></span>
             <div>
               <h2 className="pc-project-name">{details.name}</h2>
-              <p className="pc-project-id">ID: {details.id}</p>
             </div>
           </div>
           <span className="pc-badge pc-badge--pending">{details.status}</span>
@@ -584,28 +584,8 @@ const PlantationAssetCard = ({ asset }) => {
                   <span className="pc-info-value">{details.vegetation.treesPlanted}</span>
                 </div>
                 <div className="pc-detail-box">
-                  <span className="pc-info-label">AVG HEIGHT</span>
-                  <span className="pc-info-value">{details.vegetation.avgHeight}</span>
-                </div>
-                <div className="pc-detail-box">
-                  <span className="pc-info-label">AVG DBH</span>
-                  <span className="pc-info-value">{details.vegetation.avgDBH}</span>
-                </div>
-                <div className="pc-detail-box">
                   <span className="pc-info-label">PLANT AGE</span>
                   <span className="pc-info-value">{details.vegetation.plantAge}</span>
-                </div>
-              </div>
-
-              <h3 className="pc-section-title">SOIL INFORMATION</h3>
-              <div className="pc-info-grid pc-modal-grid">
-                <div className="pc-detail-box">
-                  <span className="pc-info-label">SOIL TYPE</span>
-                  <span className="pc-info-value">{details.soil.soilType}</span>
-                </div>
-                <div className="pc-detail-box">
-                  <span className="pc-info-label">SOIL PH</span>
-                  <span className="pc-info-value">{details.soil.soilPH}</span>
                 </div>
               </div>
 
@@ -685,6 +665,7 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
 
   const Icon = ASSET_ICONS[asset.type] || LeafIcon;
   const { bg: statusBg, color: statusText } = STATUS_COLORS[asset.status] || {};
+  const isCarbonCapture = asset.type === "Carbon Capture";
 
   return (
     <motion.div
@@ -722,22 +703,30 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
         >
           <span
             className={`asset-status-badge ${statusBg}`}
-            style={{ color: statusText }}
+            style={{
+              color: isCarbonCapture ? "#d97706" : statusText,
+              background: isCarbonCapture ? "#fef3c7" : undefined,
+              borderColor: isCarbonCapture ? "#fbbf24" : undefined,
+            }}
           >
-            {asset.status === "Active" && (
+            {!isCarbonCapture && asset.status === "Active" && (
               <ActiveStatusIcon
                 style={{ marginRight: "4px", color: statusText }}
               />
             )}
-            {asset.status}
+            {isCarbonCapture
+              ? asset.verified
+                ? "Verified"
+                : "Pending"
+              : asset.status}
           </span>
         </motion.div>
       </div>
 
       {/* Content */}
       <div className="asset-content">
-        {/* Location - Hide for EV and Solar assets */}
-        {asset.type !== "EV" && asset.type !== "Solar" && (
+        {/* Location - Hide for EV, Solar and Carbon Capture assets */}
+        {asset.type !== "EV" && asset.type !== "Solar" && !isCarbonCapture && (
           <div className="asset-location">
             <FiMapPin size={16} style={{ color: "#f59e0b" }} />
             <span>{asset.location}</span>
@@ -748,7 +737,7 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
         <div className="asset-info-row">
           <div className="asset-info-label">
             <TrendingUpIcon />
-            <span>Credits Generated</span>
+            <span>{isCarbonCapture ? "Estimated Credits" : "Credits Generated"}</span>
           </div>
           <motion.span
             className="asset-credits-value"
@@ -761,25 +750,27 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
         </div>
 
         {/* Verification Status */}
-        <div className="asset-info-row">
-          <span className="asset-info-label">Verification</span>
-          <motion.span
-            className={`badge ${
-              asset.verified ? "bg-green-light" : "bg-yellow-light"
-            }`}
-            style={{
-              color: asset.verified ? "#059669" : "#d97706",
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            {asset.verified ? "✓ Verified" : "⏳ Pending"}
-          </motion.span>
-        </div>
+        {!isCarbonCapture && (
+          <div className="asset-info-row">
+            <span className="asset-info-label">Verification</span>
+            <motion.span
+              className={`badge ${
+                asset.verified ? "bg-green-light" : "bg-yellow-light"
+              }`}
+              style={{
+                color: asset.verified ? "#059669" : "#d97706",
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              {asset.verified ? "✓ Verified" : "⏳ Pending"}
+            </motion.span>
+          </div>
+        )}
 
         {/* Efficiency (if available) */}
-        {asset.efficiency && (
+        {asset.efficiency && !isCarbonCapture && (
           <div className="asset-info-row">
             <span className="asset-info-label">Efficiency</span>
             <span className="asset-info-value">{asset.efficiency}</span>
@@ -787,13 +778,15 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
         )}
 
         {/* Last Updated */}
-        <div className="asset-updated">
-          <CalendarIcon />
-          <span>Updated {asset.lastUpdated}</span>
-        </div>
+        {!isCarbonCapture && (
+          <div className="asset-updated">
+            <CalendarIcon />
+            <span>Updated {asset.lastUpdated}</span>
+          </div>
+        )}
 
         {/* Action Buttons */}
-        <div className="asset-actions">
+        <div className={`asset-actions ${isCarbonCapture ? "asset-actions-cc" : ""}`}>
           <motion.button
             className="asset-action-btn asset-action-view"
             onClick={() => onClick(asset)}
@@ -810,6 +803,7 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
               e.stopPropagation();
               console.log("Add button clicked for", asset.type, asset.name);
             }}
+            style={isCarbonCapture ? { marginLeft: "auto" } : undefined}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -817,22 +811,24 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
             <span>Add</span>
           </motion.button>
 
-          <motion.button
-            className="asset-action-btn asset-action-delete"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (
-                window.confirm(`Are you sure you want to delete ${asset.name}?`)
-              ) {
-                onDelete(asset);
-              }
-            }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <TrashIcon className="asset-action-icon" />
-            <span>Delete</span>
-          </motion.button>
+          {!isCarbonCapture && (
+            <motion.button
+              className="asset-action-btn asset-action-delete"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (
+                  window.confirm(`Are you sure you want to delete ${asset.name}?`)
+                ) {
+                  onDelete(asset);
+                }
+              }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <TrashIcon className="asset-action-icon" />
+              <span>Delete</span>
+            </motion.button>
+          )}
         </div>
       </div>
     </motion.div>
@@ -2220,5 +2216,9 @@ const AssetManagement = () => {
 };
 
 export default AssetManagement;
+
+
+
+
 
 

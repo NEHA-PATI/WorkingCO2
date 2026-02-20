@@ -6,6 +6,7 @@ const evRoutes = require('./evRoutes');
 const solarRoutes = require('./solarRoutes');
 const treeRoutes = require('./treeRoutes');
 const carbonCaptureRoutes = require('./carbonCaptureRoutes');
+const plantationRoutes = require('./plantationRoutes');
 const transactionRoutes = require('./transactionRoutes');
 const imageRoutes = require('./imageRoutes');
 const statusRoutes = require('./statusRoutes');
@@ -30,6 +31,7 @@ router.use('/evmasterdata', evRoutes);
 router.use('/solarpanel', solarRoutes);
 router.use('/tree', treeRoutes);
 router.use('/carbon-capture', carbonCaptureRoutes);
+router.use('/plantation', plantationRoutes);
 router.use('/', transactionRoutes); // For /evtransaction and /by-ev
 router.use('/image', imageRoutes);
 router.use('/assets', statusRoutes);
@@ -44,3 +46,4 @@ router.use('*', (req, res) => {
 });
 
 module.exports = router;
+

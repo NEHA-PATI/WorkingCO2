@@ -502,7 +502,7 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
     if (step > 1) setStep((s) => s - 1);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isDetailsValid()) {
       setStepError("Please complete all required details before submitting.");
       return;
@@ -516,8 +516,12 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
       },
       points,
     };
-    if (typeof onSubmit === "function") onSubmit(payload);
-    onClose && onClose();
+    let shouldClose = true;
+    if (typeof onSubmit === "function") {
+      const submitResult = await onSubmit(payload);
+      shouldClose = submitResult !== false;
+    }
+    if (shouldClose && onClose) onClose();
   };
 
   return (
@@ -571,4 +575,5 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
     </div>
   );
 }
+
 

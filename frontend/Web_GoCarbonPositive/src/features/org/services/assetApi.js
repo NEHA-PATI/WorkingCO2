@@ -45,12 +45,13 @@ export const assetAPI = {
   // Fetch all assets for a user/org (combined)
   getAllAssets: async (userId, orgId = userId) => {
     try {
-      const [evsResult, solarResult, treesResult, captureResult] =
+      const [evsResult, solarResult, treesResult, captureResult, plantationResult] =
         await Promise.allSettled([
           apiClient.get(`${API_BASE_URL}/evmasterdata/${userId}`),
           apiClient.get(`${API_BASE_URL}/solarpanel/${userId}`),
           apiClient.get(`${API_BASE_URL}/tree/${userId}`),
           apiClient.get(`${API_BASE_URL}/carbon-capture/org/${orgId}`),
+          apiClient.get(`${API_BASE_URL}/plantation/org/${orgId}`),
         ]);
 
       const evsResponse =
@@ -61,6 +62,8 @@ export const assetAPI = {
         treesResult.status === "fulfilled" ? treesResult.value : { data: {} };
       const carbonResponse =
         captureResult.status === "fulfilled" ? captureResult.value : { data: {} };
+      const plantationResponse =
+        plantationResult.status === "fulfilled" ? plantationResult.value : { data: {} };
 
       // Transform data to match AssetCard format
       const assets = [];
@@ -130,13 +133,57 @@ export const assetAPI = {
           });
         });
       }
-
+      // Transform Plantation assets
+      if (isSuccessResponse(plantationResponse.data) && plantationResponse.data.data) {
+        plantationResponse.data.data.forEach((plantation) => {
+          assets.push({
+            id: plantation.p_id,
+            name: plantation.plantation_name,
+            type: "Trees",
+            location:
+              Array.isArray(plantation.points) && plantation.points.length > 0
+                ? `${plantation.points[0].lat}, ${plantation.points[0].lng}`
+                : "Location not specified",
+            creditsGenerated: Math.floor(Math.random() * 300) + 50,
+            verified: plantation.verification_status === "accepted",
+            lastUpdated: new Date(
+              plantation.updated_at || plantation.created_at || Date.now()
+            ).toLocaleDateString(),
+            status:
+              plantation.verification_status === "accepted"
+                ? "Active"
+                : plantation.verification_status === "rejected"
+                ? "Offline"
+                : "Maintenance",
+            region: "North America",
+            originalData: {
+              t_uid: plantation.p_id,
+              treename: plantation.plantation_name,
+              botanicalname: plantation.species_name,
+              plantingdate: plantation.plantation_date,
+              location:
+                Array.isArray(plantation.points) && plantation.points.length > 0
+                  ? `${plantation.points[0].lat}, ${plantation.points[0].lng}`
+                  : "",
+              area: plantation.total_area,
+              trees_planted: plantation.trees_planted,
+              manager_name: plantation.manager_name,
+              manager_contact: plantation.manager_contact,
+              plant_age: plantation.plant_age_years,
+              area_unit: plantation.area_unit,
+              points: plantation.points,
+            },
+          });
+        });
+      }
       // Transform Carbon Capture assets
       if (isSuccessResponse(carbonResponse.data) && carbonResponse.data.data) {
         carbonResponse.data.data.forEach((capture) => {
           assets.push({
             id: capture.c_uid || `CC-${capture.capture_id}`,
-            name: capture.facility_name || "Carbon Capture Facility",
+            name: capture.industry_type
+              ? `${capture.industry_type} Carbon Capture`
+              : "Carbon Capture Facility",
             type: "Carbon Capture",
             location: "Location not specified",
             creditsGenerated: Math.floor(Math.random() * 900) + 150,
@@ -243,7 +290,29 @@ export const assetAPI = {
       throw error;
     }
   },
+  // Create Plantation asset
+  createPlantation: async (data) => {
+    try {
+      const response = await apiClient.post(`${API_BASE_URL}/plantation`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating Plantation asset:", error);
+      throw error;
+    }
+  },
 
+  // Get Plantation assets by organization
+  getPlantationByOrg: async (orgId) => {
+    try {
+      const response = await apiClient.get(
+        `${API_BASE_URL}/plantation/org/${orgId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching Plantation assets:", error);
+      throw error;
+    }
+  },
   // Create Carbon Capture asset
   createCarbonCapture: async (data) => {
     try {
@@ -300,4 +369,5 @@ export const assetAPI = {
 };
 
 export default assetAPI;
+
 

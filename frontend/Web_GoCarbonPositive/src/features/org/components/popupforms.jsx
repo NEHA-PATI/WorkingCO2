@@ -53,14 +53,12 @@ const PopupForms = ({
     motorpower: '', // ✅ Fixed: Added to state
   });
   const [captureData, setCaptureData] = useState({
-    facilityName: "",
     industryType: "",
     totalEmission: "",
     captureTechnology: "",
     captureEfficiency: "",
   });
   const [captureTouched, setCaptureTouched] = useState({
-    facilityName: false,
     industryType: false,
     totalEmission: false,
     captureTechnology: false,
@@ -78,11 +76,6 @@ const PopupForms = ({
   };
 
   const validateCaptureField = (name, value) => {
-    if (name === "facilityName") {
-      if (!value.trim()) return "Facility Name is required";
-      return "";
-    }
-
     if (name === "industryType") {
       if (!value) return "Industry Type is required";
       return "";
@@ -110,7 +103,6 @@ const PopupForms = ({
   };
 
   const captureErrors = {
-    facilityName: validateCaptureField("facilityName", captureData.facilityName),
     industryType: validateCaptureField("industryType", captureData.industryType),
     totalEmission: validateCaptureField("totalEmission", captureData.totalEmission),
     captureTechnology: validateCaptureField("captureTechnology", captureData.captureTechnology),
@@ -132,7 +124,6 @@ const PopupForms = ({
     e.preventDefault();
 
     setCaptureTouched({
-      facilityName: true,
       industryType: true,
       totalEmission: true,
       captureTechnology: true,
@@ -160,7 +151,6 @@ const PopupForms = ({
     const payload = {
       c_uid: crypto.randomUUID(),
       org_id: orgId,
-      facility_name: captureData.facilityName.trim(),
       industry_type: captureData.industryType,
       total_emission_tonnes_per_year: Number(captureData.totalEmission),
       capture_technology: captureData.captureTechnology,
@@ -173,14 +163,12 @@ const PopupForms = ({
         handleSaveCapture?.(result.data);
         showToast("Carbon Capture details saved successfully.", "success");
         setCaptureData({
-          facilityName: "",
           industryType: "",
           totalEmission: "",
           captureTechnology: "",
           captureEfficiency: "",
         });
         setCaptureTouched({
-          facilityName: false,
           industryType: false,
           totalEmission: false,
           captureTechnology: false,
@@ -194,7 +182,54 @@ const PopupForms = ({
       showToast(error?.message || "Server error while saving Carbon Capture asset.", "error");
     }
   };
+  const handlePlantationSubmit = async (payload) => {
+    const authUserRaw = localStorage.getItem("authUser");
+    const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
+    const orgId =
+      authUser?.org_id ||
+      authUser?.u_id ||
+      localStorage.getItem("orgId") ||
+      localStorage.getItem("userId");
 
+    if (!orgId) {
+      showToast("Organization ID not found. Please login again.", "error");
+      return;
+    }
+
+    const step1 = payload?.step1 || {};
+    const step2 = payload?.step2 || {};
+    const points = payload?.points || [];
+
+    const apiPayload = {
+      org_id: orgId,
+      plantation_name: String(step1.name || "").trim(),
+      plantation_date: step1.date,
+      total_area: Number(step1.area),
+      area_unit: step1.areaUnit,
+      manager_name: String(step1.managerName || "").trim(),
+      manager_contact: String(step1.managerContact || "").trim(),
+      trees_planted: Number(step2.treesCount),
+      species_name: String(step2.speciesName || "").trim(),
+      plant_age_years: Number(step2.plantAge),
+      points: points.map((pt) => ({ lat: Number(pt.lat), lng: Number(pt.lng) })),
+    };
+
+    try {
+      const result = await assetAPI.createPlantation(apiPayload);
+      if (result?.success) {
+        handleSavePlantation?.(result.data);
+        showToast("Plantation details added successfully", "success");
+        setActivePlantationPopup(false);
+        return true;
+      } else {
+        showToast(result?.message || "Failed to save plantation", "error");
+        return false;
+      }
+    } catch (error) {
+      showToast(error?.message || "Server error while saving plantation", "error");
+      return false;
+    }
+  };
 
   const handleSolarSubmit = async (e) => {
     e.preventDefault();
@@ -536,10 +571,7 @@ const PopupForms = ({
       {activePlantationPopup && (
       <AddPlantationModal
         onClose={() => setActivePlantationPopup(false)}
-        onSubmit={(payload) => {
-          handleSavePlantation?.(payload);
-          showToast("Plantation details added successfully", "success");
-        }}
+        onSubmit={handlePlantationSubmit}
       />
       )}
 
@@ -670,22 +702,6 @@ const PopupForms = ({
             <div className="capture-section-card">
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="facilityName">Facility Name *</label>
-                  <input
-                    type="text"
-                    id="facilityName"
-                    className={`form-control ${captureTouched.facilityName && captureErrors.facilityName ? "form-control-error" : ""}`}
-                    placeholder="e.g., Jamnagar Carbon Unit-2"
-                    value={captureData.facilityName}
-                    onChange={(e) => handleCaptureChange("facilityName", e.target.value)}
-                    onBlur={() => handleCaptureBlur("facilityName")}
-                    required
-                  />
-                  {captureTouched.facilityName && captureErrors.facilityName && (
-                    <p className="form-error-text">{captureErrors.facilityName}</p>
-                  )}
-                </div>
-                <div className="form-group">
                   <label htmlFor="industryType">Industry Type *</label>
                   <select
                     id="industryType"
@@ -804,4 +820,6 @@ const PopupForms = ({
   );
 };
 export default PopupForms;
+
+
 
