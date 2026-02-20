@@ -39,9 +39,10 @@ import {
   FiSettings,
   FiMapPin,
   FiPlus,
-   FiMap,
-   FiUser,
-   FiPhone
+  FiUser,
+  FiPhone,
+  FiMap,
+  FiLayers,
 } from "react-icons/fi";
 import {
   FaTree,
