@@ -14,13 +14,10 @@ import FlightCalculatorForm from "@features/calculator/components/FlightCalculat
 
 export default function FootprintCalculatorStep() {
   const [vehicle, setVehicle] = useState("vehicles");
-  const [activeTab, setActiveTab] = useState("travel");
-  const [vehicleForm, setVehicleForm] = useState({
-    vehicleType: "",
-    fuelType: "",
-    distanceTravelled: "",
-    mileage: "",
-  });
+  const [activeTab, setActiveTab] = useState("housing");
+  const [vehicleEntries, setVehicleEntries] = useState([
+    { vehicleType: "", fuelType: "", distanceTravelled: "", mileage: "" },
+  ]);
   const [housingForm, setHousingForm] = useState({
     electricityKwh: "",
     lpgCylinders: "",
@@ -52,9 +49,22 @@ export default function FootprintCalculatorStep() {
     setFoodEntries((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleVehicleFormChange = (e) => {
+  const handleVehicleFormChange = (index, e) => {
     const { name, value } = e.target;
-    setVehicleForm((prev) => ({ ...prev, [name]: value }));
+    setVehicleEntries((prev) =>
+      prev.map((entry, i) => (i === index ? { ...entry, [name]: value } : entry)),
+    );
+  };
+
+  const addVehicleEntry = () => {
+    setVehicleEntries((prev) => [
+      ...prev,
+      { vehicleType: "", fuelType: "", distanceTravelled: "", mileage: "" },
+    ]);
+  };
+
+  const removeVehicleEntry = (index) => {
+    setVehicleEntries((prev) => prev.filter((_, i) => i !== index));
   };
 
   const tabs = [
@@ -174,68 +184,92 @@ export default function FootprintCalculatorStep() {
                 <FlightCalculatorForm />
               ) : (
                 <div className="w-full space-y-3">
-                  <div>
-                    <label className="block text-sm font-semibold mb-1.5">
-                      Vehicle Type
-                    </label>
-                    <select
-                      name="vehicleType"
-                      value={vehicleForm.vehicleType}
-                      onChange={handleVehicleFormChange}
-                      className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                  {vehicleEntries.map((entry, index) => (
+                    <div
+                      key={index}
+                      className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 space-y-3"
                     >
-                      <option value="">Select vehicle type</option>
-                      <option value="2-wheelers">2 Wheelers</option>
-                      <option value="4-wheelers">4 Wheelers</option>
-                    </select>
-                  </div>
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-slate-700">Vehicle Item {index + 1}</p>
+                        {vehicleEntries.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeVehicleEntry(index)}
+                            className="text-xs font-semibold text-rose-500 hover:text-rose-600"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold mb-1.5">
-                      Fuel Type
-                    </label>
-                    <select
-                      name="fuelType"
-                      value={vehicleForm.fuelType}
-                      onChange={handleVehicleFormChange}
-                      className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
-                    >
-                      <option value="">Select fuel type</option>
-                      <option value="petrol">Petrol</option>
-                      <option value="diesel">Diesel</option>
-                      <option value="cng">CNG</option>
-                      <option value="electric">Electric</option>
-                      <option value="hybrid">Hybrid</option>
-                    </select>
-                  </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                        <div>
+                          <label className="block text-sm font-semibold mb-1.5">Vehicle Type</label>
+                          <select
+                            name="vehicleType"
+                            value={entry.vehicleType}
+                            onChange={(e) => handleVehicleFormChange(index, e)}
+                            className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                          >
+                            <option value="">Select vehicle type</option>
+                            <option value="2-wheelers">2 Wheelers</option>
+                            <option value="4-wheelers">4 Wheelers</option>
+                          </select>
+                        </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold mb-1.5">
-                      Distance Travelled
-                    </label>
-                    <input
-                      type="number"
-                      name="distanceTravelled"
-                      min="0"
-                      placeholder="per month"
-                      value={vehicleForm.distanceTravelled}
-                      onChange={handleVehicleFormChange}
-                      className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
-                    />
-                  </div>
+                        <div>
+                          <label className="block text-sm font-semibold mb-1.5">Fuel Type</label>
+                          <select
+                            name="fuelType"
+                            value={entry.fuelType}
+                            onChange={(e) => handleVehicleFormChange(index, e)}
+                            className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                          >
+                            <option value="">Select fuel type</option>
+                            <option value="petrol">Petrol</option>
+                            <option value="diesel">Diesel</option>
+                            <option value="cng">CNG</option>
+                            <option value="electric">Electric</option>
+                            <option value="hybrid">Hybrid</option>
+                          </select>
+                        </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold mb-1.5">Mileage</label>
-                    <input
-                      type="number"
-                      name="mileage"
-                      min="0"
-                      placeholder="e.g. 18"
-                      value={vehicleForm.mileage}
-                      onChange={handleVehicleFormChange}
-                      className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
-                    />
-                  </div>
+                        <div>
+                          <label className="block text-sm font-semibold mb-1.5">Distance Travelled</label>
+                          <input
+                            type="number"
+                            name="distanceTravelled"
+                            min="0"
+                            placeholder="per month"
+                            value={entry.distanceTravelled}
+                            onChange={(e) => handleVehicleFormChange(index, e)}
+                            className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold mb-1.5">Mileage</label>
+                          <input
+                            type="number"
+                            name="mileage"
+                            min="0"
+                            placeholder="e.g. 18"
+                            value={entry.mileage}
+                            onChange={(e) => handleVehicleFormChange(index, e)}
+                            className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={addVehicleEntry}
+                    className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors"
+                  >
+                    + Add Vehicle Category
+                  </button>
                 </div>
               )}
             </section>
