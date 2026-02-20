@@ -16,6 +16,7 @@ const AddAsset = () => {
   const [activeEVPopup, setActiveEVPopup] = useState(false);
   const [activeSolarPopup, setActiveSolarPopup] = useState(false);
   const [activePlantationPopup, setActivePlantationPopup] = useState(false);
+  const [activeCapturePopup, setActiveCapturePopup] = useState(false);
 
   // Counts
   const [evCount, setEvCount] = useState(0);
@@ -52,6 +53,11 @@ const AddAsset = () => {
   const handleSavePlantation = (data) => {
     console.log('Saved Plantation:', data);
     setActivePlantationPopup(false);
+  };
+
+  const handleSaveCapture = (data) => {
+    console.log('Saved Carbon Capture:', data);
+    setActiveCapturePopup(false);
   };
 
   /* =======================
@@ -128,7 +134,7 @@ const AddAsset = () => {
           Carbon Capture
         </h2>
         <p className="subtitle">Negative emission tech</p>
-        <button className="add-button btn-capture">
+        <button className="add-button btn-capture" onClick={() => setActiveCapturePopup(true)}>
           + Add CarbonCapture Details
         </button>
       </div>
@@ -159,9 +165,13 @@ const AddAsset = () => {
         activePlantationPopup={activePlantationPopup}
         setActivePlantationPopup={setActivePlantationPopup}
 
+        activeCapturePopup={activeCapturePopup}
+        setActiveCapturePopup={setActiveCapturePopup}
+
         handleSaveEV={handleSaveEV}
         handleSaveSolar={handleSaveSolar}
         handleSavePlantation={handleSavePlantation}
+        handleSaveCapture={handleSaveCapture}
 
         setEvCount={setEvCount}
         setSolarCount={setSolarCount}
