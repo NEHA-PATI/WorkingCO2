@@ -8,7 +8,8 @@
    ======================================== */
 
 .org-tab-nav {
-  position: relative;
+  position: sticky;
+  top: var(--navbar-height, 72px);
   display: flex;
   align-items: center;
   width: 100%;
@@ -21,7 +22,7 @@
   padding: 0 24px;
   gap: 8px;
   overflow: visible;
-  z-index: 1200;
+  z-index: 950;
   isolation: isolate;
   font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -158,7 +159,7 @@
   margin-left: 10px;
   display: flex;
   align-items: center;
-  z-index: 1210;
+  z-index: 960;
 }
 
 .org-tab-bell-button {
@@ -242,7 +243,7 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   border: 1px solid rgba(99, 102, 241, 0.1);
   overflow: hidden;
-  z-index: 1220;
+  z-index: 980;
   animation: org-tab-slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
