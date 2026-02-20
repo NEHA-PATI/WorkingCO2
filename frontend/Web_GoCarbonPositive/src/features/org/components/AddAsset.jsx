@@ -4,8 +4,7 @@ import PopupForms from './popupforms';
 
 import { MdSolarPower, MdElectricCar } from "react-icons/md";
 import { GiWindmill, GiWaterMill, GiPowder } from "react-icons/gi";
-import { FaFire } from "react-icons/fa";
-import { LuTreePine } from "react-icons/lu"; // 🌱 Plantation icon
+import { FaFire, FaPagelines } from "react-icons/fa";
 
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -82,7 +81,7 @@ const AddAsset = () => {
       {/* 🌱 Plantation */}
       <div className="card plantation-card">
         <h2 className="card-title">
-          <LuTreePine className="card-icon" />
+          <FaPagelines className="card-icon plantation-logo-icon" />
           Plantation
         </h2>
         <p className="subtitle">Afforestation & land restoration</p>

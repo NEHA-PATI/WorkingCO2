@@ -43,8 +43,6 @@ import {
   FiPhone,
   FiMap,
   FiLayers,
-  FiX,
-  
 } from "react-icons/fi";
 import {
   FaTree,
@@ -444,7 +442,8 @@ const PlantationAssetCard = ({ asset }) => {
     },
     {
       label: "Report Generated",
-      icon: <FiLayers style={{ color: "#8b5cf6" }} size={14} />,
+      // icon: <FiLayers style={{ color: "#8b5cf6" }} size={14} />,
+      icon: <LayersIcon style={{ color: "#8b5cf6" }} />,
       current: false,
     },
   ];
@@ -1048,9 +1047,6 @@ const AssetManagement = () => {
     try {
       setLoading(true);
       setError(null);
-      const fetchedAssets = await assetAPI.getAllAssets(DEMO_USER_ID);
-      const hasPlantation = fetchedAssets.some((asset) => asset.type === "Trees");
-      setAssets(hasPlantation ? fetchedAssets : [DUMMY_PLANTATION_ASSET, ...fetchedAssets]);
       const authUserRaw = localStorage.getItem("authUser");
       const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
       const orgId =
@@ -1066,7 +1062,8 @@ const AssetManagement = () => {
       }
 
       const fetchedAssets = await assetAPI.getAllAssets(orgId, orgId);
-      setAssets(fetchedAssets);
+      const hasPlantation = fetchedAssets.some((asset) => asset.type === "Trees");
+      setAssets(hasPlantation ? fetchedAssets : [DUMMY_PLANTATION_ASSET, ...fetchedAssets]);
     } catch (err) {
       console.error("Error fetching assets:", err);
       setError(null);
