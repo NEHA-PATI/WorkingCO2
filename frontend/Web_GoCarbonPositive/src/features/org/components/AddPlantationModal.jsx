@@ -45,13 +45,33 @@ function MapComponent({ points, onPointAdd, onPointRemove }) {
     const L = window.L;
     const map = L.map(mapRef.current, {
       center: [20.5937, 78.9629],
-      zoom: 5,
+      zoom: 10,
     });
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors",
-    }).addTo(map);
+   L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {
+    attribution: "Tiles © Esri"
+  }
+  
+).addTo(map);
+map.attributionControl.setPrefix(false);
+map.attributionControl.setPosition("bottomleft");
+const brandControl = L.control({ position: "bottomright" });
 
+brandControl.onAdd = function () {
+  const div = L.DomUtil.create("div", "brand-control");
+
+  div.innerHTML = `
+    <div class="brand-wrapper">
+      <img src="/GoCarbonPositive_LOGO.svg" alt="Carbon Positive Logo" />
+      <span>Carbon Positive</span>
+    </div>
+  `;
+
+  return div;
+};
+brandControl.addTo(map);
     map.on("click", (e) => {
       const { lat, lng } = e.latlng;
       setPendingPoint({ lat, lng });
