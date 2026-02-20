@@ -6,8 +6,7 @@ import {
   FaTree,
   FaUtensils,
 } from "react-icons/fa6";
-import { MdOutlineDirectionsCar } from "react-icons/md";
-import { PiHouseLine } from "react-icons/pi";
+import { useMemo, useState } from "react";
 
 const resultData = {
   session_id: "6a07bbfc-29aa-4375-9231-9ce2408b1605",
@@ -65,7 +64,9 @@ const categoryMeta = {
   },
 };
 
-export default function CarbonDashboard() {
+export default function CarbonDashboard({ resultData }) {
+  const [activeDetailKey, setActiveDetailKey] = useState(null);
+
   const categoryRows = Object.entries(resultData.percentages).map(([key, value]) => ({
     key,
     percent: value,
@@ -73,15 +74,67 @@ export default function CarbonDashboard() {
       Object.values(resultData.breakdown[key]).reduce((sum, n) => sum + Number(n), 0).toFixed(2),
   }));
 
-  let start = 0;
-  const pieGradient = categoryRows
-    .map((row) => {
+  const pieMeta = useMemo(() => {
+    let start = 0;
+    const segments = categoryRows.map((row) => {
       const end = start + row.percent;
       const segment = `${categoryMeta[row.key].hex} ${start}% ${end}%`;
       start = end;
-      return segment;
-    })
-    .join(", ");
+      return {
+        ...row,
+        segment,
+      };
+    });
+
+    return {
+      pieGradient: segments.map((item) => item.segment).join(", "),
+    };
+  }, [categoryRows]);
+
+  const detailCards = [
+    {
+      key: "housing",
+      title: "Housing",
+      bgClass: "bg-sky-50/50",
+      icon: categoryMeta.housing.icon,
+      rows: [
+        { label: "Electricity", value: `${resultData.breakdown.housing.electricity} kg` },
+        { label: "LPG", value: `${resultData.breakdown.housing.lpg} kg` },
+      ],
+    },
+    {
+      key: "food",
+      title: "Food",
+      bgClass: "bg-orange-50/50",
+      icon: categoryMeta.food.icon,
+      rows: Object.entries(resultData.breakdown.food).map(([k, v]) => ({
+        label: k,
+        value: `${v} kg`,
+      })),
+    },
+    {
+      key: "transport",
+      title: "Transport",
+      bgClass: "bg-emerald-50/50",
+      icon: categoryMeta.transport.icon,
+      rows: Object.entries(resultData.breakdown.transport).map(([k, v]) => ({
+        label: k,
+        value: `${v} kg`,
+      })),
+    },
+    {
+      key: "flights",
+      title: "Flights",
+      bgClass: "bg-violet-50/50",
+      icon: categoryMeta.flights.icon,
+      rows: Object.entries(resultData.breakdown.flights).map(([k, v]) => ({
+        label: k,
+        value: `${v} kg`,
+      })),
+    },
+  ];
+
+  const activeDetail = detailCards.find((card) => card.key === activeDetailKey) || null;
 
   return (
     <div className="w-full min-h-full bg-slate-50 p-2 sm:p-3 lg:p-4 rounded-2xl font-['Poppins']">
@@ -112,7 +165,7 @@ export default function CarbonDashboard() {
               <div className="flex justify-center">
                 <div
                   className="relative w-48 h-48 sm:w-60 sm:h-60 rounded-full border border-slate-200"
-                  style={{ background: `conic-gradient(${pieGradient})` }}
+                  style={{ background: `conic-gradient(${pieMeta.pieGradient})` }}
                 >
                   <div className="absolute inset-[24%] rounded-full bg-white border border-slate-100 flex flex-col items-center justify-center text-center">
                     <p className="text-[11px] uppercase text-slate-500 font-semibold">Total</p>
@@ -120,20 +173,18 @@ export default function CarbonDashboard() {
                   </div>
                 </div>
               </div>
-
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {categoryRows.map((row) => (
-                  <div key={row.key} className="flex items-center justify-between rounded-xl bg-slate-50 px-3 sm:px-4 py-2">
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-base sm:text-lg">{categoryMeta[row.key].icon}</span>
-                      <span className="text-sm sm:text-base font-semibold text-slate-900">
-                        {categoryMeta[row.key].label}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs sm:text-sm font-bold text-slate-700">{row.percent}%</p>
-                      <p className="text-xs sm:text-sm text-slate-500">{row.total} kg</p>
-                    </div>
+                  <div key={row.key} className="flex items-center gap-2 rounded-lg bg-slate-50 border border-slate-200 px-2.5 py-2">
+                    <span
+                      className="inline-block h-3 w-3 rounded-sm"
+                      style={{ backgroundColor: categoryMeta[row.key].hex }}
+                    />
+                    <p className="text-xs sm:text-sm text-slate-700">
+                      <span className="font-semibold">{categoryMeta[row.key].label}</span>{" "}
+                      <span className="font-bold">{row.percent}%</span>{" "}
+                      <span className="text-slate-500">{row.total} kg</span>
+                    </p>
                   </div>
                 ))}
               </div>
@@ -142,81 +193,32 @@ export default function CarbonDashboard() {
 
           <div className="rounded-xl border border-slate-200 p-3 sm:p-4">
             <h3 className="text-base sm:text-lg font-bold mb-2.5 sm:mb-3">Detailed Views</h3>
-            <div className="space-y-3">
-              <div className="rounded-lg border border-slate-100 bg-sky-50/50 p-3">
-                <p className="font-semibold text-sm mb-2">Housing</p>
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 text-xs sm:text-sm">
-                  <p className="text-slate-600">Electricity</p>
-                  <p className="text-right font-semibold">{resultData.breakdown.housing.electricity} kg</p>
-                  <p className="text-slate-600">LPG</p>
-                  <p className="text-right font-semibold">{resultData.breakdown.housing.lpg} kg</p>
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-slate-100 bg-orange-50/50 p-3">
-                <p className="font-semibold text-sm mb-2">Food</p>
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 text-xs sm:text-sm">
-                  {Object.entries(resultData.breakdown.food).map(([k, v]) => (
-                    <div key={k} className="contents">
-                      <p className="text-slate-600 capitalize break-words">{k}</p>
-                      <p className="text-right font-semibold">{v} kg</p>
+            <div className="grid grid-cols-1 gap-3">
+              {detailCards.map((card) => (
+                <div
+                  key={card.key}
+                  className={`rounded-xl border border-slate-200 ${card.bgClass} p-3.5 sm:p-4`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-base">{card.icon}</span>
+                      <p className="font-semibold text-sm sm:text-base">{card.title}</p>
                     </div>
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => setActiveDetailKey(card.key)}
+                      className="px-3 py-1.5 rounded-md bg-white border border-slate-300 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      View More
+                    </button>
+                  </div>
                 </div>
-              </div>
-
-              <div className="rounded-lg border border-slate-100 bg-emerald-50/50 p-3">
-                <p className="font-semibold text-sm mb-2">Transport</p>
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 text-xs sm:text-sm">
-                  {Object.entries(resultData.breakdown.transport).map(([k, v]) => (
-                    <div key={k} className="contents">
-                      <p className="text-slate-600">{k}</p>
-                      <p className="text-right font-semibold">{v} kg</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-slate-100 bg-violet-50/50 p-3">
-                <p className="font-semibold text-sm mb-2">Flights</p>
-                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 text-xs sm:text-sm">
-                  {Object.entries(resultData.breakdown.flights).map(([k, v]) => (
-                    <div key={k} className="contents">
-                      <p className="text-slate-600 break-all">{k}</p>
-                      <p className="text-right font-semibold">{v} kg</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-xl border border-slate-200 p-3 sm:p-4">
-            <h3 className="text-base sm:text-lg font-bold mb-2.5 sm:mb-3">Equivalents</h3>
-            <div className="grid sm:grid-cols-3 gap-2 text-sm">
-              <div className="bg-emerald-50 rounded-lg p-3">
-                <p className="font-semibold flex items-center gap-1">
-                  <FaTree className="text-emerald-600" /> Trees
-                </p>
-                <p>{resultData.equivalents.trees_needed}</p>
-              </div>
-              <div className="bg-sky-50 rounded-lg p-3">
-                <p className="font-semibold flex items-center gap-1">
-                  <MdOutlineDirectionsCar className="text-sky-600" /> Car km
-                </p>
-                <p>{resultData.equivalents.car_km_equivalent}</p>
-              </div>
-              <div className="bg-violet-50 rounded-lg p-3">
-                <p className="font-semibold flex items-center gap-1">
-                  <PiHouseLine className="text-violet-600" /> Home days
-                </p>
-                <p>{resultData.equivalents.home_days_equivalent}</p>
-              </div>
-            </div>
-          </div>
-
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 sm:p-4">
             <p className="text-sm font-bold text-amber-700 mb-1">Score Message</p>
             <p className="text-sm">{resultData.score.message}</p>
@@ -239,6 +241,44 @@ export default function CarbonDashboard() {
           </div>
         </div>
       </div>
+
+      {activeDetail && (
+        <div
+          className="fixed inset-0 z-40 bg-slate-900/40 p-4 flex items-center justify-center"
+          onClick={() => setActiveDetailKey(null)}
+          role="presentation"
+        >
+          <div
+            className="w-full max-w-xl rounded-xl bg-white border border-slate-200 p-4 sm:p-5 shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${activeDetail.title} details`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <h4 className="text-lg font-bold">{activeDetail.title} Details</h4>
+              <button
+                type="button"
+                className="text-sm font-semibold text-slate-500 hover:text-slate-700"
+                onClick={() => setActiveDetailKey(null)}
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="max-h-[55vh] overflow-y-auto rounded-lg border border-slate-100">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 p-3 text-sm">
+                {activeDetail.rows.map((row) => (
+                  <div key={row.label} className="contents">
+                    <p className="text-slate-600 capitalize break-words">{row.label}</p>
+                    <p className="text-right font-semibold">{row.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
