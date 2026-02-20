@@ -311,6 +311,182 @@
   box-shadow: 0 6px 14px rgba(37, 99, 235, 0.16);
 }
 
+/* Asset Cards */
+.asset-management-page .asset-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 42%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  padding: 18px;
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.asset-management-page .asset-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.asset-management-page .asset-icon-container {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2ff;
+  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.16);
+  margin-bottom: 10px;
+}
+
+.asset-management-page .asset-title {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #0f172a;
+}
+
+.asset-management-page .asset-type {
+  margin: 6px 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.asset-management-page .asset-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  border: 1px solid rgba(100, 116, 139, 0.25);
+  background: #f8fafc;
+}
+
+.asset-management-page .asset-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.asset-management-page .asset-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  font-size: 1.02rem;
+}
+
+.asset-management-page .asset-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px dashed #dbe2ec;
+  padding-top: 10px;
+}
+
+.asset-management-page .asset-info-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #334155;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.asset-management-page .asset-credits-value {
+  font-size: 1.4rem;
+  line-height: 1;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.asset-management-page .asset-info-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.asset-management-page .asset-updated {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  color: #475569;
+  font-weight: 600;
+}
+
+/* Card action buttons */
+.asset-management-page .asset-actions {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.asset-management-page .asset-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.asset-management-page .asset-action-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.asset-management-page .asset-action-view {
+  color: #4f46e5;
+  border-color: #c7d2fe;
+  background: linear-gradient(180deg, #eef2ff 0%, #ffffff 100%);
+}
+
+.asset-management-page .asset-action-view:hover {
+  box-shadow: 0 8px 16px rgba(79, 70, 229, 0.16);
+}
+
+.asset-management-page .asset-action-add {
+  color: #059669;
+  border-color: #a7f3d0;
+  background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+}
+
+.asset-management-page .asset-action-add:hover {
+  box-shadow: 0 8px 16px rgba(5, 150, 105, 0.16);
+}
+
+.asset-management-page .asset-action-delete {
+  color: #dc2626;
+  border-color: #fecaca;
+  background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%);
+}
+
+.asset-management-page .asset-action-delete:hover {
+  box-shadow: 0 8px 16px rgba(220, 38, 38, 0.16);
+}
+
 @media (max-width: 1024px) {
   .asset-management-page .filterbar-row {
     grid-template-columns: 1fr;
@@ -320,6 +496,20 @@
   .asset-management-page .asset-results-toolbar {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .asset-management-page .asset-card {
+    min-height: 320px;
+    padding: 16px;
+  }
+
+  .asset-management-page .asset-actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .asset-management-page .asset-action-btn {
+    min-height: 42px;
   }
 }
 

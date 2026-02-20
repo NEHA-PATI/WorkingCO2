@@ -80,6 +80,7 @@ localStorage.removeItem("token");
       setTimeout(() => navigate("/login"), 2500);
       return;
     }
+    if (role !== "user") return;
     navigate("/arena-standalone");
   };
 
@@ -169,20 +170,22 @@ localStorage.removeItem("token");
 
         <div className="user-right-section">
           {/* <ArenaButton /> */}
-          <button
-            className="iconic-arena-button"
-            onClick={handleIconicArenaClick}
-          >
-            <video
-              src="/arena-animation.mp4"
-              className="iconic-arena-video"
-              autoPlay
-              loop
-              muted
-              playsInline
-            />
-            Iconic Arena
-          </button>
+          {isAuthenticated && role === "user" && (
+            <button
+              className="iconic-arena-button"
+              onClick={handleIconicArenaClick}
+            >
+              <video
+                src="/arena-animation.mp4"
+                className="iconic-arena-video"
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+              Iconic Arena
+            </button>
+          )}
 
           {/* ====== CHANGE STARTS HERE ONLY ====== */}
 
