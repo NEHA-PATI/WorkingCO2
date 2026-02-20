@@ -67,17 +67,6 @@ const AddAsset = () => {
   return (
     <div className="dashboard-container">
 
-      {/* EV */}
-      <div className="card ev-card">
-        <h2 className="card-title">
-          <MdElectricCar className="card-icon" />
-          Electric Vehicle
-        </h2>
-        <p className="subtitle">Smart mobility tracking</p>
-        <button className="add-button btn-ev" onClick={() => setActiveEVPopup(true)}>
-          + Add EV Details
-        </button>
-      </div>
 
       {/* 🌱 Plantation */}
       <div className="card plantation-card">
@@ -88,6 +77,18 @@ const AddAsset = () => {
         <p className="subtitle">Afforestation & land restoration</p>
         <button className="add-button btn-plantation" onClick={() => setActivePlantationPopup(true)}>
           + Add Plantation Details
+        </button>
+      </div>
+
+      {/* EV */}
+      <div className="card ev-card">
+        <h2 className="card-title">
+          <MdElectricCar className="card-icon" />
+          Electric Vehicle
+        </h2>
+        <p className="subtitle">Smart mobility tracking</p>
+        <button className="add-button btn-ev" onClick={() => setActiveEVPopup(true)}>
+          + Add EV Details
         </button>
       </div>
 
@@ -104,7 +105,7 @@ const AddAsset = () => {
       </div>
 
       {/* Wind */}
-      <div className="card wind-card">
+      {/* <div className="card wind-card">
         <h2 className="card-title">
           <GiWindmill className="card-icon" />
           Wind Mill
@@ -113,7 +114,7 @@ const AddAsset = () => {
         <button className="add-button btn-wind">
           + Add WindMill Details
         </button>
-      </div>
+      </div> */}
 
       {/* Hydro */}
       <div className="card hydro-card">
@@ -131,7 +132,7 @@ const AddAsset = () => {
       <div className="card capture-card">
         <h2 className="card-title">
           <GiPowder className="card-icon" />
-          Carbon Capture
+          Direct Carbon Capture
         </h2>
         <p className="subtitle">Negative emission tech</p>
         <button className="add-button btn-capture" onClick={() => setActiveCapturePopup(true)}>
@@ -140,7 +141,7 @@ const AddAsset = () => {
       </div>
 
       {/* Thermal */}
-      <div className="card thermal-card">
+      {/* <div className="card thermal-card">
         <h2 className="card-title">
           <FaFire className="card-icon" />
           Thermal Power
@@ -149,7 +150,7 @@ const AddAsset = () => {
         <button className="add-button btn-thermal">
           + Add Thermal Details
         </button>
-      </div>
+      </div> */}
 
       {/* =======================
              POPUPS

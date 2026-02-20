@@ -300,7 +300,7 @@ localStorage.removeItem("token");
                         className="user-profile-dropdown-item"
                         onClick={() => {
                           setProfileOpen(false);
-                          navigate("/community");
+                          navigate("/my-carbon-footprint");
                         }}
                       >
                         <FaLeaf style={{ color: "#16a34a" }} />
