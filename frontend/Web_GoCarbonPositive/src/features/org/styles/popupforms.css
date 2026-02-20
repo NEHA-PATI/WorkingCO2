@@ -230,6 +230,14 @@ select.form-control {
   background: var(--primary-dark);
 }
 
+.btn-submit-capture {
+  background: #334155;
+}
+
+.btn-submit-capture:hover {
+  background: #1f2937;
+}
+
 /* File Upload Styles */
 .file-upload {
     display: flex;
@@ -409,6 +417,58 @@ select.form-control {
     line-height: 1.4;
 }
 
+/* Carbon Capture Form */
+.capture-popup {
+  max-width: 760px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.capture-section-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+}
+
+.form-row-single {
+  grid-template-columns: 1fr;
+}
+
+.unit-input-wrap {
+  position: relative;
+}
+
+.form-control-with-unit {
+  padding-right: 72px;
+}
+
+.input-unit {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: #334155;
+  background: #e2e8f0;
+  border-radius: 999px;
+  padding: 4px 8px;
+}
+
+.form-control-error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12);
+}
+
+.form-error-text {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  color: #b91c1c;
+  line-height: 1.35;
+}
+
 /* Responsive Styles */
 @media (max-width: 768px) {
     .form-row {
@@ -426,6 +486,19 @@ select.form-control {
 
     .buttons-row {
         flex-direction: column;
+    }
+
+    .capture-section-card {
+      padding: 0.9rem;
+    }
+
+    .input-unit {
+      font-size: 0.72rem;
+      padding: 3px 7px;
+    }
+
+    .popup-header h2 {
+      font-size: 1.25rem;
     }
 }
 

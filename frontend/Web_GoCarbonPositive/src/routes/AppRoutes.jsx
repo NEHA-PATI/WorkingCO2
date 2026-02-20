@@ -31,6 +31,7 @@ import OAuthSuccess from "@features/auth/pages/OAuthSuccess";
 import Blog from "@features/blog/pages/blog";
 import BlogDetailPage from "@features/blog/pages/blog-detail";
 import Careers from "@features/careers/pages/Careers";
+import MyCarbonFootprint from "@features/calculator/pages/MyCarbonFootprint";
 
 // import MarketplacePage from "@features/marketplace/pages/MarketplacePage";
 import ViewAssets from "@shared/pages/ViewAssets";
@@ -83,12 +84,54 @@ const getOrgTabElement = (tabId) => {
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/arena" element={<Navigate to="/arena-standalone" replace />} />
-      <Route path="/arena-standalone" element={<ArenaStandalonePage />} />
-      <Route path="/arena/rewards" element={<ArenaRewardsPage />} />
-      <Route path="/arena/history" element={<ArenaHistoryPage />} />
-      <Route path="/arena/leaderboard" element={<ArenaLeaderboardPage />} />
-      <Route path="/arena/quiz" element={<ArenaQuizPage />} />
+      <Route
+        path="/arena"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <Navigate to="/arena-standalone" replace />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/arena-standalone"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <ArenaStandalonePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/arena/rewards"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <ArenaRewardsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/arena/history"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <ArenaHistoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/arena/leaderboard"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <ArenaLeaderboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/arena/quiz"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <ArenaQuizPage />
+          </ProtectedRoute>
+        }
+      />
 
       <Route element={<BaseLayout />}>
         <Route path="/" element={<Home />} />
@@ -141,6 +184,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute allowedRoles={["user", "organization", "admin"]}>
               <WalletPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-carbon-footprint"
+          element={
+            <ProtectedRoute allowedRoles={["user", "organization"]}>
+              <MyCarbonFootprint />
             </ProtectedRoute>
           }
         />

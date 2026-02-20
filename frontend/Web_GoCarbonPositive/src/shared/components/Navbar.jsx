@@ -76,10 +76,11 @@ localStorage.removeItem("token");
 
   const handleIconicArenaClick = () => {
     if (!isAuthenticated) {
-      fireToast("AUTH.LOGIN_REQUIRED_REDIRECT", "error", {}, { autoClose: 2500 });
-      setTimeout(() => navigate("/login"), 2500);
+      fireToast("AUTH.LOGIN_REQUIRED_REDIRECT", "error");
+      navigate("/login");
       return;
     }
+    if (role !== "user") return;
     navigate("/arena-standalone");
   };
 
@@ -169,20 +170,22 @@ localStorage.removeItem("token");
 
         <div className="user-right-section">
           {/* <ArenaButton /> */}
-          <button
-            className="iconic-arena-button"
-            onClick={handleIconicArenaClick}
-          >
-            <video
-              src="/arena-animation.mp4"
-              className="iconic-arena-video"
-              autoPlay
-              loop
-              muted
-              playsInline
-            />
-            Iconic Arena
-          </button>
+          {(!isAuthenticated || role === "user") && (
+            <button
+              className="iconic-arena-button"
+              onClick={handleIconicArenaClick}
+            >
+              <video
+                src="/arena-animation.mp4"
+                className="iconic-arena-video"
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+              Iconic Arena
+            </button>
+          )}
 
           {/* ====== CHANGE STARTS HERE ONLY ====== */}
 
@@ -297,7 +300,7 @@ localStorage.removeItem("token");
                         className="user-profile-dropdown-item"
                         onClick={() => {
                           setProfileOpen(false);
-                          navigate("/community");
+                          navigate("/my-carbon-footprint");
                         }}
                       >
                         <FaLeaf style={{ color: "#16a34a" }} />

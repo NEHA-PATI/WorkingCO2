@@ -33,6 +33,12 @@ export const USER_ORG_MENU = {
     },
     { label: "Add Asset", path: "/upload", iconKey: "upload", color: "#8e24aa" },
     { label: "My Wallet", path: "/wallet", iconKey: "wallet", color: "#f59e0b" },
+    {
+      label: "My Carbon Footprint",
+      path: "/my-carbon-footprint",
+      iconKey: "carbon_footprint",
+      color: "#16a34a",
+    },
     { label: "Community", path: "/community", iconKey: "users", color: "#28a745" },
     { label: "Blog", path: "/blog", iconKey: "blog", color: "#ff5722" },
     {
@@ -74,6 +80,12 @@ export const USER_ORG_MENU = {
       color: "#8e24aa",
     },
     { label: "My Wallet", path: "/wallet", iconKey: "wallet", color: "#f59e0b" },
+    {
+      label: "My Carbon Footprint",
+      path: "/my-carbon-footprint",
+      iconKey: "carbon_footprint",
+      color: "#16a34a",
+    },
     { label: "Community", path: "/community", iconKey: "users", color: "#28a745" },
     { label: "Blog", path: "/blog", iconKey: "blog", color: "#ff5722" },
     {

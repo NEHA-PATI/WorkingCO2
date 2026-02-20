@@ -1,17 +1,66 @@
 import { useEffect, useRef, useState } from "react";
 import { FaCheck, FaCheckCircle, FaLeaf, FaMapMarkerAlt, FaTrashAlt } from "react-icons/fa";
 import { MdMyLocation } from "react-icons/md";
-import { BsCloudUploadFill } from "react-icons/bs";
 import { GiTreeBranch } from "react-icons/gi";
 import "@features/org/styles/AddPlantationModal.css";
 
 const POINT_LABELS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const EARTH_RADIUS_M = 6378137;
+
+const TOP_SPECIES_OPTIONS = [
+  "Neem (Azadirachta indica)",
+  "Teak (Tectona grandis)",
+  "Eucalyptus",
+  "Bamboo",
+  "Mango (Mangifera indica)",
+  "Mixed",
+  "Other",
+];
+
+function toRadians(deg) {
+  return (deg * Math.PI) / 180;
+}
+
+function calculatePolygonAreaSqm(points) {
+  if (!Array.isArray(points) || points.length < 3) return 0;
+  const avgLatRad = toRadians(
+    points.reduce((sum, point) => sum + point.lat, 0) / points.length
+  );
+  const projected = points.map((point) => ({
+    x: EARTH_RADIUS_M * toRadians(point.lng) * Math.cos(avgLatRad),
+    y: EARTH_RADIUS_M * toRadians(point.lat),
+  }));
+
+  let area = 0;
+  for (let i = 0; i < projected.length; i += 1) {
+    const current = projected[i];
+    const next = projected[(i + 1) % projected.length];
+    area += current.x * next.y - next.x * current.y;
+  }
+  return Math.abs(area) / 2;
+}
+
+function convertArea(sqm, unit) {
+  if (unit === "ha") return sqm / 10000;
+  if (unit === "acres") return sqm / 4046.8564224;
+  return sqm;
+}
+
+function formatAreaForUnit(value, unit) {
+  if (!Number.isFinite(value) || value <= 0) return "";
+  if (unit === "sqm") return value.toFixed(2);
+  return value.toFixed(3);
+}
+
+function getSpeciesDisplayValue(step2) {
+  if (step2.speciesName === "Other") return step2.speciesOther.trim();
+  return step2.speciesName;
+}
 
 function StepIndicator({ currentStep }) {
   const steps = [
-    { num: 1, label: "Basic Info" },
-    { num: 2, label: "Vegetation Details" },
-    { num: 3, label: "Review" },
+    { num: 1, label: "Details" },
+    { num: 2, label: "Review" },
   ];
 
   return (
@@ -35,8 +84,6 @@ function MapComponent({ points, onPointAdd, onPointRemove }) {
   const markersRef = useRef([]);
   const polygonRef = useRef(null);
   const gridLayerRef = useRef(null);
-  const pendingMarkerRef = useRef(null);
-  const [pendingPoint, setPendingPoint] = useState(null);
   const [locating, setLocating] = useState(false);
 
   useEffect(() => {
@@ -74,7 +121,7 @@ brandControl.onAdd = function () {
 brandControl.addTo(map);
     map.on("click", (e) => {
       const { lat, lng } = e.latlng;
-      setPendingPoint({ lat, lng });
+      onPointAdd({ lat, lng });
     });
 
     leafletMap.current = map;
@@ -84,28 +131,6 @@ brandControl.addTo(map);
       leafletMap.current = null;
     };
   }, []);
-
-  useEffect(() => {
-    const L = window.L;
-    if (!L || !leafletMap.current) return;
-
-    if (pendingMarkerRef.current) {
-      leafletMap.current.removeLayer(pendingMarkerRef.current);
-      pendingMarkerRef.current = null;
-    }
-
-    if (!pendingPoint) return;
-
-    const icon = L.divIcon({
-      className: "",
-      html: '<div class="pending-marker-flat"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ef4444" d="M12 2c-3.87 0-7 3.13-7 7 0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="3" fill="#ffffff"/></svg></div>',
-      iconSize: [30, 30],
-      iconAnchor: [15, 30],
-    });
-
-    const marker = L.marker([pendingPoint.lat, pendingPoint.lng], { icon }).addTo(leafletMap.current);
-    pendingMarkerRef.current = marker;
-  }, [pendingPoint]);
 
   useEffect(() => {
     const L = window.L;
@@ -180,20 +205,6 @@ brandControl.addTo(map);
     }
   }, [points]);
 
-  const handleConfirm = () => {
-    if (!pendingPoint) return;
-    onPointAdd(pendingPoint);
-    setPendingPoint(null);
-  };
-
-  const handleCancel = () => {
-    if (pendingMarkerRef.current && leafletMap.current) {
-      leafletMap.current.removeLayer(pendingMarkerRef.current);
-      pendingMarkerRef.current = null;
-    }
-    setPendingPoint(null);
-  };
-
   const handleUseMyLocation = () => {
     if (locating || !navigator.geolocation) return;
     setLocating(true);
@@ -205,7 +216,7 @@ brandControl.addTo(map);
           if (leafletMap.current) {
             leafletMap.current.setView([latitude, longitude], 15);
           }
-          setPendingPoint({ lat: latitude, lng: longitude });
+          onPointAdd({ lat: latitude, lng: longitude });
           setLocating(false);
         },
         () => {
@@ -236,23 +247,7 @@ brandControl.addTo(map);
       </div>
 
       <div className="map-container" ref={mapRef} />
-      <p className="map-hint">Click on the map to place a point</p>
-
-      {pendingPoint && (
-        <div className="pending-point-card">
-          <p className="pending-title">
-            New point: {pendingPoint.lat.toFixed(5)}, {pendingPoint.lng.toFixed(5)}
-          </p>
-          <div className="pending-actions">
-            <button type="button" className="btn-confirm-point" onClick={handleConfirm}>
-              Confirm Point
-            </button>
-            <button type="button" className="btn-cancel-point" onClick={handleCancel}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
+      <p className="map-hint">Click on the map to add points directly</p>
 
       {points.length > 0 && (
         <div className="confirmed-points-card">
@@ -274,7 +269,9 @@ brandControl.addTo(map);
   );
 }
 
-function Step1({ data, onChange, points, onPointAdd, onPointRemove }) {
+function Step1({ data, step2, onChange, onStep2Change, points, onPointAdd, onPointRemove }) {
+  const isOtherSpecies = step2.speciesName === "Other";
+
   return (
     <div className="step-content">
       <div className="field-group">
@@ -298,13 +295,20 @@ function Step1({ data, onChange, points, onPointAdd, onPointRemove }) {
           Total Plantation Area <span className="required">*</span>
         </label>
         <div className="area-input-row">
-          <input className="field-input area-input" placeholder="Enter area" type="number" value={data.area} onChange={(e) => onChange("area", e.target.value)} />
+          <input
+            className="field-input area-input"
+            placeholder="Auto-calculated from map"
+            type="number"
+            value={data.area}
+            readOnly
+          />
           <select className="unit-select" value={data.areaUnit} onChange={(e) => onChange("areaUnit", e.target.value)}>
             <option value="ha">ha</option>
             <option value="acres">acres</option>
             <option value="sqm">sqm</option>
           </select>
         </div>
+        <p className="field-help">Area is auto-calculated from selected map points.</p>
       </div>
 
       <div className="field-group">
@@ -327,150 +331,72 @@ function Step1({ data, onChange, points, onPointAdd, onPointRemove }) {
           onChange={(e) => onChange("managerContact", e.target.value.replace(/\D/g, "").slice(0, 10))}
         />
       </div>
-    </div>
-  );
-}
+      <div className="field-group section-divider">
+        <label className="section-title">Vegetation Details</label>
+      </div>
 
-function Step2({ data, onChange }) {
-  const fileInputRef = useRef(null);
-  const soilSelectRef = useRef(null);
-  const [preview, setPreview] = useState(null);
-  const [soilMenuOpen, setSoilMenuOpen] = useState(false);
-
-  const soilOptions = [
-    { value: "clay", label: "Clay" },
-    { value: "sandy", label: "Sandy" },
-    { value: "loamy", label: "Loamy" },
-    { value: "silt", label: "Silt" },
-    { value: "peaty", label: "Peaty" },
-    { value: "chalky", label: "Chalky" },
-  ];
-
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (!soilSelectRef.current) return;
-      if (!soilSelectRef.current.contains(event.target)) {
-        setSoilMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, []);
-
-  const selectedSoilLabel =
-    soilOptions.find((opt) => opt.value === data.soilType)?.label ||
-    "Select soil type";
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    onChange("photo", file);
-    const reader = new FileReader();
-    reader.onload = (ev) => setPreview(ev.target.result);
-    reader.readAsDataURL(file);
-  };
-
-  return (
-    <div className="step-content">
       <div className="field-group">
         <label className="field-label">
           Number of Trees Planted <span className="required">*</span>
         </label>
-        <input className="field-input" placeholder="e.g. 500" type="number" value={data.treesCount} onChange={(e) => onChange("treesCount", e.target.value)} />
+        <input
+          className="field-input"
+          placeholder="e.g. 500"
+          type="number"
+          value={step2.treesCount}
+          onChange={(e) => onStep2Change("treesCount", e.target.value)}
+        />
       </div>
 
       <div className="field-group">
         <label className="field-label">
-          Species Name <span className="required">*</span>
+          Add Species <span className="required">*</span>
         </label>
-        <input className="field-input" placeholder="e.g. Tectona grandis (Teak)" value={data.speciesName} onChange={(e) => onChange("speciesName", e.target.value)} />
+        <select
+          className="field-input field-select"
+          value={step2.speciesName}
+          onChange={(e) => {
+            onStep2Change("speciesName", e.target.value);
+            if (e.target.value !== "Other") onStep2Change("speciesOther", "");
+          }}
+        >
+          <option value="">Select species</option>
+          {TOP_SPECIES_OPTIONS.map((species) => (
+            <option key={species} value={species}>
+              {species}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <div className="field-row">
-        <div className="field-group half">
+      {isOtherSpecies && (
+        <div className="field-group">
           <label className="field-label">
-            Average Height (m) <span className="required">*</span>
+            Specify Species <span className="required">*</span>
           </label>
-          <input className="field-input" placeholder="e.g. 3.5" type="number" value={data.avgHeight} onChange={(e) => onChange("avgHeight", e.target.value)} />
+          <input
+            className="field-input"
+            placeholder="Enter species name"
+            value={step2.speciesOther}
+            onChange={(e) => onStep2Change("speciesOther", e.target.value)}
+          />
         </div>
-        <div className="field-group half">
-          <label className="field-label">
-            Average DBH (cm) <span className="required">*</span>
-          </label>
-          <input className="field-input" placeholder="Diameter at Breast Height" type="number" value={data.avgDbh} onChange={(e) => onChange("avgDbh", e.target.value)} />
-        </div>
-      </div>
+      )}
 
       <div className="field-group">
         <label className="field-label">
-          Soil Type <span className="required">*</span>
+          Plantation Age <span className="required">*</span>
         </label>
-        <div className={`soil-select ${soilMenuOpen ? "open" : ""}`} ref={soilSelectRef}>
-          <button
-            type="button"
-            className="soil-select-trigger"
-            onClick={() => setSoilMenuOpen((prev) => !prev)}
-            aria-expanded={soilMenuOpen}
-          >
-            <span>{selectedSoilLabel}</span>
-            <span className="soil-select-caret">{soilMenuOpen ? "^" : "v"}</span>
-          </button>
-
-          {soilMenuOpen && (
-            <div className="soil-select-menu" role="listbox">
-              {soilOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`soil-select-option ${
-                    data.soilType === option.value ? "active" : ""
-                  }`}
-                  onClick={() => {
-                    onChange("soilType", option.value);
-                    setSoilMenuOpen(false);
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          )}
+        <div className="age-input-wrapper">
+          <input
+            className="field-input age-input"
+            placeholder="e.g. 2"
+            type="number"
+            value={step2.plantAge}
+            onChange={(e) => onStep2Change("plantAge", e.target.value)}
+          />
+          <span className="age-unit">yrs</span>
         </div>
-      </div>
-
-      <div className="field-row">
-        <div className="field-group half">
-          <label className="field-label">Soil pH (optional)</label>
-          <input className="field-input" placeholder="e.g. 6.5" type="number" step="0.1" value={data.soilPh} onChange={(e) => onChange("soilPh", e.target.value)} />
-        </div>
-        <div className="field-group half">
-          <label className="field-label">
-            Average Plant Age <span className="required">*</span>
-          </label>
-          <div className="age-input-wrapper">
-            <input className="field-input age-input" placeholder="e.g. 2" type="number" value={data.plantAge} onChange={(e) => onChange("plantAge", e.target.value)} />
-            <span className="age-unit">yrs</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="field-group">
-        <label className="field-label">
-          Photo of a Plant <span className="required">*</span>
-        </label>
-        <div className="photo-upload-area" onClick={() => fileInputRef.current.click()}>
-          {preview ? (
-            <img src={preview} alt="Plant preview" className="photo-preview" />
-          ) : (
-            <div className="upload-placeholder">
-              <div className="upload-icon-circle">
-                <BsCloudUploadFill color="#10b981" size={28} />
-              </div>
-            </div>
-          )}
-        </div>
-        <input ref={fileInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileChange} />
       </div>
     </div>
   );
@@ -519,13 +445,8 @@ function Step3({ step1, step2, points }) {
           <span className="review-card-title">Vegetation Details</span>
         </div>
         <ReviewRow label="TREES PLANTED" value={step2.treesCount} />
-        <ReviewRow label="SPECIES NAME" value={step2.speciesName} />
-        <ReviewRow label="AVERAGE HEIGHT" value={step2.avgHeight ? `${step2.avgHeight} m` : ""} />
-        <ReviewRow label="AVERAGE DBH" value={step2.avgDbh ? `${step2.avgDbh} cm` : ""} />
-        <ReviewRow label="SOIL TYPE" value={step2.soilType} />
-        <ReviewRow label="SOIL PH" value={step2.soilPh} />
-        <ReviewRow label="PLANT AGE" value={step2.plantAge ? `${step2.plantAge} yrs` : ""} />
-        <ReviewRow label="PHOTO" value={step2.photo ? step2.photo.name : ""} />
+        <ReviewRow label="SPECIES" value={getSpeciesDisplayValue(step2)} />
+        <ReviewRow label="PLANTATION AGE" value={step2.plantAge ? `${step2.plantAge} yrs` : ""} />
       </div>
     </div>
   );
@@ -547,12 +468,8 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
   const [step2, setStep2] = useState({
     treesCount: "",
     speciesName: "",
-    avgHeight: "",
-    avgDbh: "",
-    soilType: "",
-    soilPh: "",
+    speciesOther: "",
     plantAge: "",
-    photo: null,
   });
 
   useEffect(() => {
@@ -564,43 +481,40 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
   const handlePointAdd = (pt) => setPoints((p) => [...p, pt]);
   const handlePointRemove = (idx) => setPoints((p) => p.filter((_, i) => i !== idx));
 
-  const isStep1Valid = () => {
+  useEffect(() => {
+    const areaSqm = calculatePolygonAreaSqm(points);
+    setStep1((prev) => {
+      const converted = convertArea(areaSqm, prev.areaUnit);
+      const nextArea = formatAreaForUnit(converted, prev.areaUnit);
+      if (prev.area === nextArea) return prev;
+      return { ...prev, area: nextArea };
+    });
+  }, [points, step1.areaUnit]);
+
+  const isDetailsValid = () => {
     const tenDigit = /^\d{10}$/.test(step1.managerContact.trim());
+    const speciesValue = getSpeciesDisplayValue(step2);
     return (
       step1.name.trim() &&
       step1.date &&
       step1.area &&
       step1.managerName.trim() &&
       tenDigit &&
-      points.length > 0
-    );
-  };
-
-  const isStep2Valid = () => {
-    return (
+      points.length >= 3 &&
       step2.treesCount &&
-      step2.speciesName.trim() &&
-      step2.avgHeight &&
-      step2.avgDbh &&
-      step2.soilType &&
-      step2.plantAge &&
-      !!step2.photo
+      speciesValue &&
+      step2.plantAge
     );
   };
 
   const handleNext = () => {
-    if (step === 1 && !isStep1Valid()) {
-      setStepError("Complete Step 1: fill all required fields, enter a valid 10-digit contact number, and add at least one map point.");
-      return;
-    }
-
-    if (step === 2 && !isStep2Valid()) {
-      setStepError("Complete Step 2: fill all required fields and upload a photo.");
+    if (step === 1 && !isDetailsValid()) {
+      setStepError("Complete Step 1: fill all required fields, enter a valid 10-digit contact number, and add at least 3 map points.");
       return;
     }
 
     setStepError("");
-    if (step < 3) setStep((s) => s + 1);
+    if (step < 2) setStep((s) => s + 1);
   };
 
   const handleBack = () => {
@@ -608,15 +522,26 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
     if (step > 1) setStep((s) => s - 1);
   };
 
-  const handleSubmit = () => {
-    if (!isStep1Valid() || !isStep2Valid()) {
+  const handleSubmit = async () => {
+    if (!isDetailsValid()) {
       setStepError("Please complete all required details before submitting.");
       return;
     }
 
-    const payload = { step1, step2, points };
-    if (typeof onSubmit === "function") onSubmit(payload);
-    onClose && onClose();
+    const payload = {
+      step1,
+      step2: {
+        ...step2,
+        speciesName: getSpeciesDisplayValue(step2),
+      },
+      points,
+    };
+    let shouldClose = true;
+    if (typeof onSubmit === "function") {
+      const submitResult = await onSubmit(payload);
+      shouldClose = submitResult !== false;
+    }
+    if (shouldClose && onClose) onClose();
   };
 
   return (
@@ -629,7 +554,7 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
             </div>
             <div className="header-text">
               <h1 className="modal-title">Add Plantation Details</h1>
-              <p className="modal-subtitle">Step {step} of 3</p>
+              <p className="modal-subtitle">Step {step} of 2</p>
             </div>
           </div>
           <button className="close-btn" onClick={onClose}>X</button>
@@ -640,9 +565,18 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
         </div>
 
         <div className="modal-body" ref={bodyRef}>
-          {step === 1 && <Step1 data={step1} onChange={handleStep1Change} points={points} onPointAdd={handlePointAdd} onPointRemove={handlePointRemove} />}
-          {step === 2 && <Step2 data={step2} onChange={handleStep2Change} />}
-          {step === 3 && <Step3 step1={step1} step2={step2} points={points} />}
+          {step === 1 && (
+            <Step1
+              data={step1}
+              step2={step2}
+              onChange={handleStep1Change}
+              onStep2Change={handleStep2Change}
+              points={points}
+              onPointAdd={handlePointAdd}
+              onPointRemove={handlePointRemove}
+            />
+          )}
+          {step === 2 && <Step3 step1={step1} step2={step2} points={points} />}
         </div>
 
         {stepError && <div className="modal-inline-alert">{stepError}</div>}
@@ -651,7 +585,7 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
           <button className={`btn-back ${step === 1 ? "btn-back-disabled" : ""}`} onClick={handleBack} disabled={step === 1}>
             Back
           </button>
-          {step < 3 ? (
+          {step < 2 ? (
             <button className="btn-next" onClick={handleNext}>Next</button>
           ) : (
             <button className="btn-submit" onClick={handleSubmit}>Submit</button>
@@ -661,4 +595,5 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
     </div>
   );
 }
+
 
