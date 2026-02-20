@@ -13,12 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -1371,97 +1365,96 @@ const AssetManagement = () => {
           ))}
         </div>
       ) : (
-        <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Asset</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Credits</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Verified</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAssets.map((asset) => (
-                <TableRow key={asset.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{asset.name}</div>
-                      <div className="text-sm text-secondary">{asset.id}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{asset.type}</Badge>
-                  </TableCell>
-                  <TableCell>{asset.location}</TableCell>
-                  <TableCell className="font-medium">
-                    {asset.creditsGenerated.toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`badge-${asset.status.toLowerCase()}`}>
-                      {asset.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {asset.verified ? (
-                      <CheckCircleIcon style={{ color: "#10b981" }} />
-                    ) : (
-                      <ClockIcon style={{ color: "#f59e0b" }} />
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Button variant="ghost" size="sm">
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <circle cx="12" cy="5" r="1" />
-                            <circle cx="12" cy="12" r="1" />
-                            <circle cx="12" cy="19" r="1" />
-                          </svg>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem
-                          onClick={() => handleViewDetails(asset)}
+        <Card className="asset-list-card">
+          <div className="asset-list-header-row">
+            <span>Asset</span>
+            <span>Type</span>
+            <span>Location</span>
+            <span>Credits</span>
+            <span>Status</span>
+            <span>Verified</span>
+            <span>Actions</span>
+          </div>
+
+          <div className="asset-list-body">
+            {filteredAssets.map((asset) => (
+              <div className="asset-list-row" key={asset.id}>
+                <div className="asset-list-cell asset-list-asset" data-label="Asset">
+                  <div className="asset-list-name">{asset.name}</div>
+                  <div className="asset-list-id">{asset.id}</div>
+                </div>
+
+                <div className="asset-list-cell" data-label="Type">
+                  <Badge variant="outline">{asset.type}</Badge>
+                </div>
+
+                <div className="asset-list-cell asset-list-location" data-label="Location">{asset.location}</div>
+
+                <div className="asset-list-cell asset-list-credits" data-label="Credits">
+                  {asset.creditsGenerated.toLocaleString()}
+                </div>
+
+                <div className="asset-list-cell" data-label="Status">
+                  <Badge className={`badge-${asset.status.toLowerCase()}`}>
+                    {asset.status}
+                  </Badge>
+                </div>
+
+                <div className="asset-list-cell" data-label="Verified">
+                  {asset.verified ? (
+                    <CheckCircleIcon style={{ color: "#10b981" }} />
+                  ) : (
+                    <ClockIcon style={{ color: "#f59e0b" }} />
+                  )}
+                </div>
+
+                <div className="asset-list-cell asset-list-actions" data-label="Actions">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Button variant="ghost" size="sm">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
                         >
-                          <EyeIcon />
-                          <span className="ml-2">View Details</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleOpenUpdateModal}>
-                          <EditIcon />
-                          <span className="ml-2">Edit</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                `Are you sure you want to delete ${asset.name}?`
-                              )
-                            ) {
-                              handleDeleteAsset(asset);
-                            }
-                          }}
-                        >
-                          <TrashIcon />
-                          <span className="ml-2">Delete</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                          <circle cx="12" cy="5" r="1" />
+                          <circle cx="12" cy="12" r="1" />
+                          <circle cx="12" cy="19" r="1" />
+                        </svg>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => handleViewDetails(asset)}>
+                        <EyeIcon />
+                        <span className="ml-2">View Details</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleOpenUpdateModal}>
+                        <EditIcon />
+                        <span className="ml-2">Edit</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `Are you sure you want to delete ${asset.name}?`
+                            )
+                          ) {
+                            handleDeleteAsset(asset);
+                          }
+                        }}
+                      >
+                        <TrashIcon />
+                        <span className="ml-2">Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            ))}
+          </div>
         </Card>
       )}
 
