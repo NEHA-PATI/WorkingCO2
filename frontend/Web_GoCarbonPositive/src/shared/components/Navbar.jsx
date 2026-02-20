@@ -76,8 +76,8 @@ localStorage.removeItem("token");
 
   const handleIconicArenaClick = () => {
     if (!isAuthenticated) {
-      fireToast("AUTH.LOGIN_REQUIRED_REDIRECT", "error", {}, { autoClose: 2500 });
-      setTimeout(() => navigate("/login"), 2500);
+      fireToast("AUTH.LOGIN_REQUIRED_REDIRECT", "error");
+      navigate("/login");
       return;
     }
     if (role !== "user") return;
@@ -170,7 +170,7 @@ localStorage.removeItem("token");
 
         <div className="user-right-section">
           {/* <ArenaButton /> */}
-          {isAuthenticated && role === "user" && (
+          {(!isAuthenticated || role === "user") && (
             <button
               className="iconic-arena-button"
               onClick={handleIconicArenaClick}

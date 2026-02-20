@@ -70,6 +70,12 @@
   .dashboard-container .card-title .card-icon {
     order: -1;
   }
+
+  .dashboard-container .plantation-logo-icon {
+    font-size: 1.65rem;
+    color: #059669 !important;
+    filter: drop-shadow(0 2px 4px rgba(5, 150, 105, 0.22));
+  }
   
   .dashboard-container .subtitle {
     font-size: 1rem;

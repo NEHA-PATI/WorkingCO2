@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useAuth from "@contexts/AuthContext";
 import {
   FaArrowRight,
   FaAward,
@@ -21,6 +23,8 @@ import "../styles/Home.css";
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState("user");
   const [openFaq, setOpenFaq] = useState(null);
+  const navigate = useNavigate();
+  const { isAuthenticated, authLoading } = useAuth();
 
   const rewards = [
     {
@@ -170,11 +174,28 @@ const HomePage = () => {
             Join us in creating a better world through sustainable development
             practices and environmental consciousness.
           </p>
-          <div className="hp-hero-btns">
-            <button className="hp-btn-primary hp-hero-start-btn">
-              Get Started <FaArrowRight />
-            </button>
-          </div>
+          {!authLoading && !isAuthenticated && (
+            <>
+              <div className="hp-hero-btns">
+                <button
+                  className="hp-btn-primary hp-hero-start-btn"
+                  onClick={() => navigate("/signup")}
+                >
+                  Get Started <FaArrowRight />
+                </button>
+              </div>
+              {activeTab === "organisation" && (
+                <div style={{ marginTop: "12px" }}>
+                  <button
+                    className="hp-btn-primary hp-hero-start-btn hp-btn-outline-org"
+                    onClick={() => navigate("/join-organisation")}
+                  >
+                    Apply as an organisation <FaArrowRight />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 
@@ -252,7 +273,7 @@ const HomePage = () => {
         <div className="hp-section-header">
           <h2 className="hp-section-title hp-dark-title">
             <FaBullhorn className="hp-title-icon" style={{ color: "#3b82f6" }} />
-              Updates and Announcements
+            Updates and Announcements
           </h2>
           <p className="hp-section-sub">
             Stay in the loop with everything happening on the platform
@@ -295,7 +316,9 @@ const HomePage = () => {
               sustainability tools. Together, we can make every action count
               towards a greener planet.
             </p>
-            <button className="hp-btn-primary">Know More <FaArrowRight /></button>
+            <button className="hp-btn-primary" onClick={() => navigate("/about")}>Know More <FaArrowRight />
+
+            </button>
           </div>
         </div>
       </section>
