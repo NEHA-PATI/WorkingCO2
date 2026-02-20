@@ -45,13 +45,21 @@ export const assetAPI = {
   // Fetch all assets for a user/org (combined)
   getAllAssets: async (userId, orgId = userId) => {
     try {
-      const [evsResult, solarResult, treesResult, captureResult, plantationResult] =
+      const [
+        evsResult,
+        solarResult,
+        treesResult,
+        captureResult,
+        plantationResult,
+        fleetResult,
+      ] =
         await Promise.allSettled([
           apiClient.get(`${API_BASE_URL}/evmasterdata/${userId}`),
           apiClient.get(`${API_BASE_URL}/solarpanel/${userId}`),
           apiClient.get(`${API_BASE_URL}/tree/${userId}`),
           apiClient.get(`${API_BASE_URL}/carbon-capture/org/${orgId}`),
           apiClient.get(`${API_BASE_URL}/plantation/org/${orgId}`),
+          apiClient.get(`${API_BASE_URL}/fleet/org/${orgId}`),
         ]);
 
       const evsResponse =
@@ -64,6 +72,8 @@ export const assetAPI = {
         captureResult.status === "fulfilled" ? captureResult.value : { data: {} };
       const plantationResponse =
         plantationResult.status === "fulfilled" ? plantationResult.value : { data: {} };
+      const fleetResponse =
+        fleetResult.status === "fulfilled" ? fleetResult.value : { data: {} };
 
       // Transform data to match AssetCard format
       const assets = [];
@@ -130,6 +140,34 @@ export const assetAPI = {
             status: "Active",
             region: "North America",
             originalData: tree,
+          });
+        });
+      }
+
+      // Transform Fleet entries
+      if (isSuccessResponse(fleetResponse.data) && fleetResponse.data.data) {
+        fleetResponse.data.data.forEach((fleet) => {
+          const manufacturer = fleet.manufacturer || "Unknown";
+          const model = fleet.model || "Vehicle";
+          assets.push({
+            id: fleet.ev_uid || `FLEET-${fleet.ev_input_id}`,
+            name: `${manufacturer} ${model}`,
+            type: "EV",
+            location: "Location not specified",
+            creditsGenerated: Math.floor(Math.random() * 500) + 100,
+            verified: false,
+            lastUpdated: new Date(
+              fleet.updated_at || fleet.created_at || Date.now()
+            ).toLocaleDateString(),
+            status: "Pending",
+            efficiency: `${
+              fleet.fuel_efficiency_km_per_liter !== undefined &&
+              fleet.fuel_efficiency_km_per_liter !== null
+                ? Number(fleet.fuel_efficiency_km_per_liter).toFixed(2)
+                : 0
+            } km/l`,
+            region: "North America",
+            originalData: fleet,
           });
         });
       }
@@ -313,6 +351,27 @@ export const assetAPI = {
       throw error;
     }
   },
+  // Create Fleet entry
+  createFleet: async (data) => {
+    try {
+      const response = await apiClient.post(`${API_BASE_URL}/fleet`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating Fleet entry:", error);
+      throw error;
+    }
+  },
+
+  // Get Fleet entries by organization
+  getFleetByOrg: async (orgId) => {
+    try {
+      const response = await apiClient.get(`${API_BASE_URL}/fleet/org/${orgId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching Fleet entries:", error);
+      throw error;
+    }
+  },
   // Create Carbon Capture asset
   createCarbonCapture: async (data) => {
     try {
@@ -369,5 +428,6 @@ export const assetAPI = {
 };
 
 export default assetAPI;
+
 
 
