@@ -5,7 +5,6 @@ class CarbonCaptureController {
     try {
       const {
         org_id,
-        facility_name,
         industry_type,
         total_emission_tonnes_per_year,
         capture_technology,
@@ -14,7 +13,6 @@ class CarbonCaptureController {
 
       if (
         !org_id ||
-        !facility_name ||
         !industry_type ||
         total_emission_tonnes_per_year === undefined ||
         !capture_technology ||
@@ -29,7 +27,6 @@ class CarbonCaptureController {
 
       const created = await CarbonCaptureModel.create({
         org_id,
-        facility_name,
         industry_type,
         total_emission_tonnes_per_year,
         capture_technology,

@@ -5,7 +5,6 @@ class CarbonCaptureModel {
   static async create(data) {
     const {
       org_id,
-      facility_name,
       industry_type,
       total_emission_tonnes_per_year,
       capture_technology,
@@ -18,21 +17,19 @@ class CarbonCaptureModel {
       INSERT INTO carbon_capture_assets (
         c_uid,
         org_id,
-        facility_name,
         industry_type,
         total_emission_tonnes_per_year,
         capture_technology,
         capture_efficiency_percent,
         status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
 
     const values = [
       c_uid,
       org_id,
-      facility_name,
       industry_type,
       total_emission_tonnes_per_year,
       capture_technology,
