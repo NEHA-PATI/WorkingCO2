@@ -2167,6 +2167,8 @@ const AssetManagement = () => {
           minWidth: "300px",
           maxWidth: "400px",
           fontSize: "14px",
+          fontFamily:
+            '"Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
           borderLeft: `4px solid ${
             toast.type === "error" ? "#f44336" : "#4CAF50"
           }`,

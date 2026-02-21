@@ -272,6 +272,69 @@
   font-weight: 600;
 }
 
+.hp-org-solutions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.hp-org-solution-card {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 22px 20px;
+  background: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.hp-org-solution-card:hover {
+  transform: translateY(-4px);
+  border-color: #bbf7d0;
+  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.12);
+}
+
+.hp-org-solution-top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.hp-org-solution-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #f8fafc;
+  font-size: 20px;
+}
+
+.hp-org-solution-time {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.hp-org-solution-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px;
+}
+
+.hp-org-solution-desc {
+  margin: 0;
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
 /* ===== SERVICES ===== */
 .hp-services-section {
   background: #f9fafb;
@@ -533,6 +596,10 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .hp-org-solutions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .hp-services-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -588,6 +655,11 @@
 
   .hp-rewards-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .hp-org-solutions-grid {
+    grid-template-columns: 1fr;
     gap: 12px;
   }
 
@@ -664,6 +736,18 @@
 
   .hp-reward-card {
     padding: 18px 12px;
+  }
+
+  .hp-org-solution-card {
+    padding: 16px 14px;
+  }
+
+  .hp-org-solution-title {
+    font-size: 15px;
+  }
+
+  .hp-org-solution-desc {
+    font-size: 13px;
   }
 
   .hp-reward-icon-wrap {
