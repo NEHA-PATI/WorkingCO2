@@ -523,7 +523,8 @@ const PlantationAssetCard = ({ asset }) => {
               setShowDetails(true);
             }}
           >
-            View More Details ></button>
+            View More Details &gt;
+          </button>
           <button className="pc-btn-map" onClick={() => setShowMap(true)}><FiMapPin size={14} style={{ marginRight: "6px" }} />Map</button>
         </div>
       </div>

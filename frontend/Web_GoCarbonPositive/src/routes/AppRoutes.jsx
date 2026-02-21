@@ -265,6 +265,8 @@ const AppRoutes = () => {
           <Route path="configuration" element={<AdminConfiguration />} />
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="asset-management" element={<AdminAssetManagement />} />
+          <Route path="asset-management/user" element={<AdminAssetManagement />} />
+          <Route path="asset-management/organization" element={<AdminAssetManagement />} />
           <Route
             path="organization-management"
             element={<AdminOrganizationManagement />}

@@ -14,32 +14,26 @@ export const getMetrics = async (req, res) => {
         (
           (SELECT COUNT(*) FROM ev_master_data WHERE status = 'approved') +
           (SELECT COUNT(*) FROM trees WHERE status = 'approved') +
-          (SELECT COUNT(*) FROM solar_panels WHERE status = 'approved') +
-          (SELECT COUNT(*) FROM org_assets WHERE status = 'approved')
+          (SELECT COUNT(*) FROM solar_panels WHERE status = 'approved')
         ) AS "approved",
 
         /* ================= TOTAL REJECTED ================= */
         (
           (SELECT COUNT(*) FROM ev_master_data WHERE status = 'rejected') +
           (SELECT COUNT(*) FROM trees WHERE status = 'rejected') +
-          (SELECT COUNT(*) FROM solar_panels WHERE status = 'rejected') +
-          (SELECT COUNT(*) FROM org_assets WHERE status = 'rejected')
+          (SELECT COUNT(*) FROM solar_panels WHERE status = 'rejected')
         ) AS "rejected",
 
         /* ================= PENDING REVIEW ================= */
         (
           (SELECT COUNT(*) FROM ev_master_data WHERE status = 'pending') +
           (SELECT COUNT(*) FROM trees WHERE status = 'pending') +
-          (SELECT COUNT(*) FROM solar_panels WHERE status = 'pending') +
-          (SELECT COUNT(*) FROM org_assets WHERE status = 'pending')
+          (SELECT COUNT(*) FROM solar_panels WHERE status = 'pending')
         ) AS "pendingReview",
 
         /* ================= TYPE WISE TOTAL ================= */
         (SELECT COUNT(*) FROM ev_master_data WHERE status = 'approved') AS "totalEV",
-        (
-          (SELECT COUNT(*) FROM trees WHERE status = 'approved') +
-          (SELECT COUNT(*) FROM org_assets WHERE status = 'approved')
-        ) AS "totalTrees",
+        (SELECT COUNT(*) FROM trees WHERE status = 'approved') AS "totalTrees",
         (SELECT COUNT(*) FROM solar_panels WHERE status = 'approved') AS "totalSolar"
     `;
 
@@ -100,18 +94,6 @@ SELECT
 FROM solar_panels
 WHERE status IN ('pending','pending_approval')
 
-UNION ALL
-
-SELECT
-  plantation_id::text AS id,
-  'TREE' AS type,
-  u_id::text AS u_id,
-  status::text AS status,
-  created_at AS submitted_on,
-  'organisation' AS submittedByType
-FROM org_assets
-WHERE status IN ('pending','pending_approval')
-
 ORDER BY submitted_on DESC;
 `;
 
@@ -170,17 +152,6 @@ SELECT
   created_at,
   'individual' AS submittedByType
 FROM solar_panels
-WHERE status = 'approved'
-
-UNION ALL
-
-SELECT
-  plantation_id::text AS id,
-  'TREE' AS type,
-  u_id::text AS u_id,
-  created_at,
-  'organisation' AS submittedByType
-FROM org_assets
 WHERE status = 'approved'
 
 ORDER BY created_at DESC;
@@ -279,17 +250,6 @@ export const getRejectedAssets = async (req, res) => {
         created_at,
         'individual' AS submittedByType
       FROM solar_panels
-      WHERE status = 'rejected'
-
-      UNION ALL
-
-      SELECT
-        plantation_id::text AS id,
-        'TREE' AS type,
-        u_id::text AS u_id,
-        created_at,
-        'organisation' AS submittedByType
-      FROM org_assets
       WHERE status = 'rejected'
 
       ORDER BY created_at DESC

@@ -35,12 +35,18 @@ const AdminNavbar = () => {
   };
 
   const [activeTab, setActiveTab] = useState(getActiveTab());
+  const [isAssetMenuOpen, setIsAssetMenuOpen] = useState(
+    location.pathname.includes("/admin/asset-management")
+  );
   const [isOrgMenuOpen, setIsOrgMenuOpen] = useState(
     location.pathname.includes("/admin/organization-management")
   );
 
   useEffect(() => {
     setActiveTab(getActiveTab());
+    if (location.pathname.includes("/admin/asset-management")) {
+      setIsAssetMenuOpen(true);
+    }
     if (location.pathname.includes("/admin/organization-management")) {
       setIsOrgMenuOpen(true);
     }
@@ -64,6 +70,18 @@ const AdminNavbar = () => {
       label: "Asset Management",
       icon: <FaBoxesStacked className="icon asset-icon" />,
       path: "/admin/asset-management",
+      children: [
+        {
+          id: "asset-user",
+          label: "User Asset",
+          path: "/admin/asset-management/user",
+        },
+        {
+          id: "asset-organization",
+          label: "Organization Asset",
+          path: "/admin/asset-management/organization",
+        },
+      ],
     },
 
     {
@@ -142,7 +160,12 @@ const AdminNavbar = () => {
             className={`nav-item ${activeTab === item.id ? "active" : ""}`}
             onClick={() => {
               if (item.children) {
-                setIsOrgMenuOpen((prev) => !prev);
+                if (item.id === "asset-management") {
+                  setIsAssetMenuOpen((prev) => !prev);
+                }
+                if (item.id === "organization-management") {
+                  setIsOrgMenuOpen((prev) => !prev);
+                }
                 return;
               }
               setActiveTab(item.id);
@@ -153,24 +176,38 @@ const AdminNavbar = () => {
             <span>{item.label}</span>
             {item.children && (
               <FaChevronDown
-                className={`nav-chevron ${isOrgMenuOpen ? "open" : ""}`}
+                className={`nav-chevron ${
+                  item.id === "asset-management"
+                    ? isAssetMenuOpen
+                      ? "open"
+                      : ""
+                    : isOrgMenuOpen
+                      ? "open"
+                      : ""
+                }`}
               />
             )}
           </div>
 
-          {item.children && isOrgMenuOpen && (
+          {item.children &&
+            ((item.id === "asset-management" && isAssetMenuOpen) ||
+              (item.id === "organization-management" && isOrgMenuOpen)) && (
             <div className="nav-submenu">
               {item.children.map((child) => (
                 <div
                   key={child.id}
-                  className={`nav-subitem ${location.pathname === child.path ? "active" : ""}`}
+                  className={`nav-subitem ${
+                    `${location.pathname}${location.search}` === child.path
+                      ? "active"
+                      : ""
+                  }`}
                   onClick={() => navigate(child.path)}
                 >
                   {child.label}
                 </div>
               ))}
             </div>
-          )}
+            )}
         </div>
       ))}
     </nav>
