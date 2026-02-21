@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   MdAccessTime,
   MdCancel,
@@ -17,83 +17,11 @@ import {
 } from "react-icons/fa";
 import { FaSolarPanel } from "react-icons/fa6";
 import OrgCard from "@features/admin/pages/OrgCard";
+import { assetApiClient as apiClient } from "@shared/utils/apiClient";
 import "@features/admin/styles/OrgAssets.css";
 
-const ALL_USER_ASSETS = [
-  {
-    id: "asset-001",
-    name: "Heritage Oak Planting",
-    user: "Sarah Chen",
-    category: "plantation",
-    submitted: "Jan 15, 2026",
-    status: "pending",
-    location: "Portland, OR",
-    co2: "22 kg CO2",
-  },
-  {
-    id: "asset-002",
-    name: "Redwood Seedling Grove",
-    user: "Marcus Rivera",
-    category: "plantation",
-    submitted: "Feb 10, 2026",
-    status: "pending",
-    location: "Santa Cruz, CA",
-    co2: "45 kg CO2",
-  },
-  {
-    id: "asset-003",
-    name: "Rooftop Solar Array",
-    user: "James Park",
-    category: "solar",
-    submitted: "Jan 28, 2026",
-    status: "pending",
-    location: "Austin, TX",
-    co2: "3200 kg CO2",
-  },
-  {
-    id: "asset-004",
-    name: "Tesla Model 3 Registration",
-    user: "David Kim",
-    category: "fleet",
-    submitted: "Jan 22, 2026",
-    status: "pending",
-    location: "Seattle, WA",
-    co2: "4100 kg CO2",
-  },
-  {
-    id: "asset-005",
-    name: "Mangrove Coastal Planting",
-    user: "Priya Nair",
-    category: "plantation",
-    submitted: "Feb 5, 2026",
-    status: "approved",
-    location: "Miami, FL",
-    co2: "310 kg CO2",
-  },
-  {
-    id: "asset-006",
-    name: "Community Solar Farm",
-    user: "Leo Zhang",
-    category: "solar",
-    submitted: "Jan 2, 2026",
-    status: "approved",
-    location: "Phoenix, AZ",
-    co2: "6100 kg CO2",
-  },
-  {
-    id: "asset-007",
-    name: "Nissan Leaf Registration",
-    user: "Amy Brown",
-    category: "fleet",
-    submitted: "Dec 5, 2025",
-    status: "rejected",
-    location: "Denver, CO",
-    co2: "2800 kg CO2",
-  },
-];
-
 const CATEGORY_META = {
-  plantation: { label: "Tree", icon: <FaTree />, color: "plantation" },
+  tree: { label: "Tree", icon: <FaTree />, color: "plantation" },
   fleet: { label: "EV", icon: <FaCarSide />, color: "fleet" },
   solar: { label: "Solar", icon: <FaSolarPanel />, color: "solar" },
 };
@@ -128,9 +56,7 @@ function AssetRow({ asset, onReview, onRevert, onOpenRevertAction }) {
         <AssetIcon category={asset.category} />
         <div>
           <div className="asset-title">{asset.name}</div>
-          <div className="asset-id">
-            {asset.id} | {asset.location} | {asset.co2}
-          </div>
+          <div className="asset-id">{asset.id}</div>
         </div>
       </div>
       <div className="org-cell">
@@ -146,7 +72,7 @@ function AssetRow({ asset, onReview, onRevert, onOpenRevertAction }) {
       </div>
       <div className="actions-cell">
         {asset.status !== "pending" && (
-          <button className="action-btn revert" onClick={() => onRevert(asset.id)}>
+          <button className="action-btn revert" onClick={() => onRevert(asset)}>
             <FaUndo size={12} /> Revert
           </button>
         )}
@@ -179,15 +105,99 @@ function AssetRow({ asset, onReview, onRevert, onOpenRevertAction }) {
 }
 
 export default function UserAssets() {
-  const [activeCategory, setActiveCategory] = useState("plantation");
+  const [activeCategory, setActiveCategory] = useState("tree");
   const [statusFilter, setStatusFilter] = useState("all");
   const [userFilter, setUserFilter] = useState("all");
-  const [assets, setAssets] = useState(ALL_USER_ASSETS);
+  const [assets, setAssets] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [selectedReviewAsset, setSelectedReviewAsset] = useState(null);
   const [revertDialog, setRevertDialog] = useState({ open: false, asset: null, action: null });
   const [revertReason, setRevertReason] = useState("");
   const [revertError, setRevertError] = useState("");
+
+  const extractImageUrls = (payload) => {
+    const objectUrls = Array.isArray(payload?.images)
+      ? payload.images
+          .map((img) =>
+            typeof img === "string"
+              ? img
+              : img?.image_url || img?.url || img?.secure_url
+          )
+          .filter(Boolean)
+      : [];
+    const arrayUrls = Array.isArray(payload?.tree_images)
+      ? payload.tree_images.filter(Boolean)
+      : [];
+    return objectUrls.length ? objectUrls : arrayUrls;
+  };
+
+  useEffect(() => {
+    const formatDate = (value) => {
+      if (!value) return "-";
+      const d = new Date(value);
+      if (Number.isNaN(d.getTime())) return "-";
+      return d.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    };
+
+    const mapTreeAsset = (row) => ({
+      id: String(row.tid ?? row.id),
+      name: row.treename || row.asset_name || `Tree ${row.tid ?? row.id}`,
+      user: row.username || row.user_name || row.u_id || "-",
+      category: "tree",
+      submitted: formatDate(row.submitted_on || row.created_at),
+      status: String(row.status || "pending").toLowerCase(),
+      raw: row,
+    });
+
+    const mapEvAsset = (row) => ({
+      id: String(row.ev_id ?? row.id),
+      name: `${row.manufacturers || ""} ${row.model || ""}`.trim() || `EV ${row.ev_id ?? row.id}`,
+      user: row.username || row.user_name || row.u_id || "-",
+      category: "fleet",
+      submitted: formatDate(row.created_at),
+      status: String(row.status || "pending").toLowerCase(),
+      raw: row,
+    });
+
+    const loadAssets = async () => {
+      setIsLoading(true);
+      setError("");
+      try {
+        const [treeResult, evResult] = await Promise.allSettled([
+          apiClient.get("/tree/admin/all"),
+          apiClient.get("/evmasterdata/admin/all"),
+        ]);
+
+        const treeRows =
+          treeResult.status === "fulfilled" && Array.isArray(treeResult.value?.data?.data)
+            ? treeResult.value.data.data
+            : [];
+        const evRows =
+          evResult.status === "fulfilled" && Array.isArray(evResult.value?.data?.data)
+            ? evResult.value.data.data
+            : [];
+
+        if (treeResult.status === "rejected" && evResult.status === "rejected") {
+          throw new Error("Failed to load tree and EV assets");
+        }
+
+        setAssets([...treeRows.map(mapTreeAsset), ...evRows.map(mapEvAsset)]);
+      } catch (err) {
+        setError(err?.message || "Failed to load assets");
+        setAssets([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAssets();
+  }, []);
 
   const users = useMemo(() => [...new Set(assets.map((a) => a.user))], [assets]);
 
@@ -201,9 +211,65 @@ export default function UserAssets() {
   const catApproved = filteredByCategory.filter((a) => a.status === "approved").length;
   const catRejected = filteredByCategory.filter((a) => a.status === "rejected").length;
 
-  function handleReview(asset) {
-    setSelectedReviewAsset(asset);
-    setIsReviewOpen(true);
+  async function handleReview(asset) {
+    try {
+      if (asset.category === "fleet") {
+        const res = await apiClient.get(`/evmasterdata/single/${asset.id}`);
+        const data = res?.data?.data || res?.data || {};
+
+        setSelectedReviewAsset({
+          ...asset,
+          category: "fleet",
+          org: asset.user,
+          name: data.manufacturers && data.model ? `${data.manufacturers} ${data.model}` : asset.name,
+          evId: data.ev_id ?? asset.id,
+          vuid: data.vuid || "-",
+          uId: data.u_id || "-",
+          evCategory: data.category || "-",
+          manufacturers: data.manufacturers || "-",
+          evModel: data.model || "-",
+          purchaseYear: data.purchase_year ?? "-",
+          energyConsumed: data.energy_consumed ?? "-",
+          primaryChargingType: data.primary_charging_type || "-",
+          evRange: data.range ?? "-",
+          gridEmissionFactor: data.grid_emission_factor ?? "-",
+          topSpeed: data.top_speed ?? "-",
+          chargingTime: data.charging_time ?? "-",
+          motorPower: data.motor_power || "-",
+          status: data.status || asset.status || "-",
+          createdAt: data.created_at || "-",
+          updatedAt: data.updated_at || "-",
+          raw: data,
+        });
+      } else {
+        const res = await apiClient.get(`/tree/single/${asset.id}`);
+        const data = res?.data?.data || res?.data || {};
+
+        setSelectedReviewAsset({
+          ...asset,
+          org: asset.user,
+          name: data.treename || asset.name,
+          treeId: data.tid ?? asset.id,
+          treeUid: data.t_uid || "-",
+          treeName: data.treename || "-",
+          botanicalName: data.botanicalname || "-",
+          plantingDate: data.plantingdate || "-",
+          height: data.height ?? "-",
+          dbh: data.dbh ?? "-",
+          location: data.location || "-",
+          createdBy: data.created_by || "-",
+          treeStatus: data.status || asset.status || "-",
+          createdAt: data.created_at || "-",
+          updatedAt: data.updated_at || "-",
+          treeImages: extractImageUrls(data),
+          raw: data,
+        });
+      }
+
+      setIsReviewOpen(true);
+    } catch (err) {
+      setRevertError(err?.message || "Failed to load asset details.");
+    }
   }
 
   function handleCloseReview() {
@@ -211,15 +277,25 @@ export default function UserAssets() {
     setSelectedReviewAsset(null);
   }
 
-  function handleReviewDecision(nextStatus) {
+  async function handleReviewDecision(nextStatus) {
     if (!selectedReviewAsset?.id) return;
-    setAssets((prev) =>
-      prev.map((a) => (a.id === selectedReviewAsset.id ? { ...a, status: nextStatus } : a))
-    );
+    try {
+      const path =
+        selectedReviewAsset.category === "fleet"
+          ? `/evmasterdata/${selectedReviewAsset.id}/status`
+          : `/tree/${selectedReviewAsset.id}/status`;
+      await apiClient.patch(path, {
+        status: nextStatus,
+      });
+      setAssets((prev) =>
+        prev.map((a) => (a.id === selectedReviewAsset.id ? { ...a, status: nextStatus } : a))
+      );
+    } catch (err) {
+      setRevertError(err?.message || "Failed to update status.");
+    }
   }
 
-  function handleRevert(id) {
-    const asset = assets.find((a) => a.id === id);
+  function handleRevert(asset) {
     if (!asset) return;
     setRevertDialog({ open: true, asset, action: "pending" });
     setRevertReason("");
@@ -238,7 +314,7 @@ export default function UserAssets() {
     setRevertError("");
   }
 
-  function handleConfirmRevert() {
+  async function handleConfirmRevert() {
     if (!revertDialog.asset?.id || !revertDialog.action) return;
     if (revertDialog.action === "rejected" && !revertReason.trim()) {
       setRevertError("Reason is required for rejection.");
@@ -246,22 +322,33 @@ export default function UserAssets() {
     }
 
     const targetId = revertDialog.asset.id;
-    setAssets((prev) =>
-      prev.map((a) =>
-        a.id === targetId
-          ? {
-              ...a,
-              status: revertDialog.action,
-              rejectionReason:
-                revertDialog.action === "rejected" ? revertReason.trim() : a.rejectionReason,
-            }
-          : a
-      )
-    );
-    handleCloseRevertDialog();
+    try {
+      const path =
+        revertDialog.asset.category === "fleet"
+          ? `/evmasterdata/${targetId}/status`
+          : `/tree/${targetId}/status`;
+      await apiClient.patch(path, {
+        status: revertDialog.action,
+      });
+      setAssets((prev) =>
+        prev.map((a) =>
+          a.id === targetId
+            ? {
+                ...a,
+                status: revertDialog.action,
+                rejectionReason:
+                  revertDialog.action === "rejected" ? revertReason.trim() : a.rejectionReason,
+              }
+            : a
+        )
+      );
+      handleCloseRevertDialog();
+    } catch (err) {
+      setRevertError(err?.message || "Failed to update status.");
+    }
   }
 
-  const categories = ["plantation", "fleet", "solar"];
+  const categories = ["tree", "fleet"];
   const reviewAssetForModal = selectedReviewAsset
     ? {
         ...selectedReviewAsset,
@@ -370,14 +457,23 @@ export default function UserAssets() {
           <span>Status</span>
           <span style={{ textAlign: "right" }}>Actions</span>
         </div>
-        {filtered.length === 0 ? (
+        {error && (
+          <div className="empty-state" style={{ padding: "16px 20px" }}>
+            <p style={{ color: "#ff8a8a", fontSize: "14px" }}>{error}</p>
+          </div>
+        )}
+        {isLoading ? (
+          <div className="empty-state" style={{ padding: "48px 20px" }}>
+            <p style={{ color: "#aaa", fontSize: "14px" }}>Loading assets...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="empty-state" style={{ padding: "48px 20px" }}>
             <p style={{ color: "#aaa", fontSize: "14px" }}>No assets match the current filters.</p>
           </div>
         ) : (
           filtered.map((asset) => (
             <AssetRow
-              key={asset.id}
+              key={`${asset.category}-${asset.id}`}
               asset={asset}
               onReview={handleReview}
               onRevert={handleRevert}
