@@ -1,4 +1,33 @@
-.asset-management-page .asset-summary-grid {
+
+/* Asset grid layout (explicit, so mixed card types stay aligned) */
+.asset-management-page .grid-3.lg-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(280px, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.asset-management-page .grid-3.lg-grid-4 > * {
+  min-width: 0;
+}
+
+@media (max-width: 1280px) {
+  .asset-management-page .grid-3.lg-grid-4 {
+    grid-template-columns: repeat(3, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .asset-management-page .grid-3.lg-grid-4 {
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .asset-management-page .grid-3.lg-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}.asset-management-page .asset-summary-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(220px, 1fr));
   gap: 16px;
@@ -267,6 +296,81 @@
   padding: 56px 12px;
 }
 
+.asset-management-page .asset-list-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.asset-management-page .asset-list-header-row {
+  display: grid;
+  grid-template-columns: 1.9fr 1fr 1.6fr 1fr 1fr 0.8fr 0.8fr;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.35px;
+  text-transform: uppercase;
+}
+
+.asset-management-page .asset-list-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.asset-management-page .asset-list-row {
+  display: grid;
+  grid-template-columns: 1.9fr 1fr 1.6fr 1fr 1fr 0.8fr 0.8fr;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.asset-management-page .asset-list-row:last-child {
+  border-bottom: 0;
+}
+
+.asset-management-page .asset-list-cell {
+  min-width: 0;
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.asset-management-page .asset-list-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.asset-management-page .asset-list-id {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.asset-management-page .asset-list-location {
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.asset-management-page .asset-list-credits {
+  font-weight: 700;
+}
+
+.asset-management-page .asset-list-actions {
+  display: inline-flex;
+  justify-content: flex-start;
+}
+
 .asset-management-page .asset-feedback-card {
   min-width: 320px;
   max-width: 460px;
@@ -311,6 +415,255 @@
   box-shadow: 0 6px 14px rgba(37, 99, 235, 0.16);
 }
 
+/* Asset Cards */
+.asset-management-page .asset-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 42%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  padding: 18px;
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.asset-management-page .asset-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.asset-management-page .asset-icon-container {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2ff;
+  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.16);
+  margin-bottom: 10px;
+}
+
+.asset-management-page .asset-title {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #0f172a;
+}
+
+.asset-management-page .asset-type {
+  margin: 6px 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.asset-management-page .asset-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  border: 1px solid rgba(100, 116, 139, 0.25);
+  background: #f8fafc;
+}
+
+.asset-management-page .asset-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.asset-management-page .asset-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  font-size: 1.02rem;
+}
+
+.asset-management-page .asset-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px dashed #dbe2ec;
+  padding-top: 10px;
+}
+
+.asset-management-page .asset-info-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #334155;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.asset-management-page .asset-credits-value {
+  font-size: 1.4rem;
+  line-height: 1;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.asset-management-page .asset-info-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.asset-management-page .asset-updated {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  color: #475569;
+  font-weight: 600;
+}
+
+/* Card action buttons */
+.asset-management-page .asset-actions {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.asset-management-page .asset-actions.asset-actions-cc {
+  display: flex;
+}
+
+.asset-management-page .asset-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.asset-management-page .asset-action-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.asset-management-page .asset-action-view {
+  color: #4f46e5;
+  border-color: #c7d2fe;
+  background: linear-gradient(180deg, #eef2ff 0%, #ffffff 100%);
+}
+
+.asset-management-page .asset-action-view:hover {
+  box-shadow: 0 8px 16px rgba(79, 70, 229, 0.16);
+}
+
+.asset-management-page .asset-action-add {
+  color: #059669;
+  border-color: #a7f3d0;
+  background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+}
+
+.asset-management-page .asset-action-add:hover {
+  box-shadow: 0 8px 16px rgba(5, 150, 105, 0.16);
+}
+
+.asset-management-page .asset-action-delete {
+  color: #dc2626;
+  border-color: #fecaca;
+  background: linear-gradient(180deg, #fef2f2 0%, #ffffff 100%);
+}
+
+.asset-management-page .asset-action-delete:hover {
+  box-shadow: 0 8px 16px rgba(220, 38, 38, 0.16);
+}
+
+/* Asset details modal */
+.asset-management-page .dialog-content-medium {
+  width: min(760px, 95vw);
+  max-height: 88vh;
+  overflow: auto;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+  padding: 20px;
+}
+
+.asset-management-page .asset-details-modal-content {
+  margin-top: 8px;
+}
+
+.asset-management-page .grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.asset-management-page .text-sm {
+  font-size: 0.82rem;
+}
+
+.asset-management-page .text-secondary {
+  color: #64748b;
+}
+
+.asset-management-page .text-lg {
+  font-size: 1.1rem;
+}
+
+.asset-management-page .font-semibold {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.asset-management-page .text-green {
+  color: #16a34a;
+}
+
+.asset-management-page .button-row {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.asset-management-page .update-asset-btn,
+.asset-management-page .view-fleet-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  padding: 10px 14px;
+  background: #ffffff;
+  color: #1e293b;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.asset-management-page .update-asset-btn:hover,
+.asset-management-page .view-fleet-btn:hover {
+  background: #f8fafc;
+}
+
 @media (max-width: 1024px) {
   .asset-management-page .filterbar-row {
     grid-template-columns: 1fr;
@@ -321,13 +674,77 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .asset-management-page .asset-card {
+    min-height: 320px;
+    padding: 16px;
+  }
+
+  .asset-management-page .asset-actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .asset-management-page .asset-action-btn {
+    min-height: 42px;
+  }
+
+  .asset-management-page .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .asset-management-page .asset-list-header-row {
+    display: none;
+  }
+
+  .asset-management-page .asset-list-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .asset-management-page .asset-list-cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 0;
+    border-bottom: 1px dashed #e2e8f0;
+  }
+
+  .asset-management-page .asset-list-cell:last-child {
+    border-bottom: 0;
+  }
+
+  .asset-management-page .asset-list-cell::before {
+    content: attr(data-label);
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.35px;
+  }
+
+  .asset-management-page .asset-list-asset {
+    align-items: flex-start;
+    flex-direction: column;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 10px;
+  }
+
+  .asset-management-page .asset-list-asset::before {
+    content: "Asset";
+    margin-bottom: 2px;
+  }
 }
 
 /* Plantation card (Trees only) */
 .pc-card {
-  width: min(460px, 100%);
-  justify-self: start;
-  margin-left: 14px;
+  width: 100%;
+  margin-left: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
   background: #fff;
@@ -524,11 +941,7 @@
   padding: 16px 18px;
 }
 
-@media (max-width: 640px) {
-  .pc-card {
-    margin-left: 0;
-  }
-}
+
 
 .pc-btn-full {
   width: 100%;
@@ -792,4 +1205,7 @@
   height: 420px;
   width: 100%;
 }
+
+
+
 

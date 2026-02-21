@@ -19,6 +19,10 @@ const API_CONFIG = {
 
   // Contact Service (port 5005)
   CONTACT_API: import.meta.env.VITE_CONTACT_API || "http://localhost:5005",
+
+  // Carbon Footprint Service (port 5003 for example)
+CFC_API:
+  import.meta.env.VITE_CFC_SERVICE_URL || "http://localhost:8004/api",
 };
 
 /**
@@ -147,6 +151,10 @@ export const blogApiClient = createApiClient(
   "Blog Service",
 );
 
+export const carbonApiClient = createApiClient(
+  API_CONFIG.CFC_API,
+  "Carbon Footprint Service",
+);
 export const contactApiClient = createApiClient(
   API_CONFIG.CONTACT_API ,
   "Contact Service",
@@ -163,3 +171,9 @@ export default assetApiClient;
 
 // Export config for reference
 export { API_CONFIG };
+
+export const calculateCarbonFootprint = async (payload) => {
+  const response = await carbonApiClient.post('/v1/calculate', payload);
+  return response.data;
+};
+

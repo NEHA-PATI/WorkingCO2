@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 import {
   FaCarSide,
   FaTree,
@@ -10,13 +11,20 @@ import {
   FaDownload,
   FaClockRotateLeft,
 } from "react-icons/fa6";
+import OrgAssets from "@features/admin/pages/OrgAssets";
 
 import "@features/admin/styles/AssetManagement.css";
 
 const ITEMS_PER_PAGE = 10;
 
 const AssetManagement = () => {
-  const [activeSubmitterTab, setActiveSubmitterTab] = useState("individual");
+  const location = useLocation();
+  const scope = (new URLSearchParams(location.search).get("scope") || "").toLowerCase();
+  const isOrganizationScope =
+    scope === "organization" ||
+    scope === "organisation" ||
+    location.pathname.includes("/admin/asset-management/organization");
+
   const [activeAssetFilter, setActiveAssetFilter] = useState("tree");
   const [activeWorkflowTab, setActiveWorkflowTab] = useState("pendingRequests");
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -49,16 +57,10 @@ const AssetManagement = () => {
   const [workflowAssets, setWorkflowAssets] = useState([]);
   const [approvedAssets, setApprovedAssets] = useState([]);
 const getStatusUpdateUrl = (asset) => {
-  if (asset.submittedByType === "organisation") {
-    return `/api/org-assets/${asset.id}/status`;
-  }
   return `/api/assets/${asset.assetType}/${asset.id}/status`;
 };
 
 const getDetailsUrl = (asset) => {
-  if (asset.submittedByType === "organisation") {
-    return `/api/org-assets/${asset.id}/details`; // ✅ UUID safe
-  }
   return `/api/assets/${asset.assetType}/${asset.id}/details`; // user assets
 };
 
@@ -112,9 +114,6 @@ const getDetailsUrl = (asset) => {
       status,
       submittedBy: a.u_id,
       submittedOn: new Date(a.submitted_on).toLocaleDateString(),
-
-       // 🔥 THIS LINE IS MANDATORY
-  submittedByType: (a.submittedbytype || "individual").toLowerCase(),
     };
   })
 );
@@ -139,10 +138,6 @@ const getDetailsUrl = (asset) => {
     status: "Approved",
     submittedBy: a.u_id,
     submittedOn: new Date(a.created_at).toLocaleDateString(),
-
-    // ✅ THIS IS THE KEY FIX
-    submittedByType:
-      (a.submittedByType || a.submittedbytype || "individual").toLowerCase(),
   }))
 );
 
@@ -190,30 +185,6 @@ const openReviewModal = async (asset) => {
   try {
     const res = await axios.get(getDetailsUrl(asset));
     const data = res.data;
-
-    // ✅ ORGANISATION TREE ASSET
-    if (asset.submittedByType === "organisation") {
-      setSelectedAsset({
-        ...asset,
-
-        // Map org plantation → popup fields
-        treeName: data.species_name,
-        botanicalName: data.species_name, // (agar alag column nahi hai)
-        plantingDate: data.plantation_date
-          ? new Date(data.plantation_date).toLocaleDateString()
-          : "-",
-        height: data.avg_height,
-        dbh: data.avg_dbh,
-        location: `${data.location_lat}, ${data.location_long}`,
-        createdBy: data.u_id,
-
-        // org assets me images optional
-        treeImages: [],
-      });
-
-      setReviewModalOpen(true);
-      return;
-    }
 
     // ✅ USER ASSETS (EV / TREE / SOLAR)
     setSelectedAsset({
@@ -265,7 +236,7 @@ const openReviewModal = async (asset) => {
   // actual backend call when confirmed
   const handleAcceptConfirmed = async (asset) => {
   try {
- await axios.put(`/api/org-assets/${asset.id}/status`, {
+ await axios.patch(getStatusUpdateUrl(asset), {
   status: "approved",
 });
 
@@ -278,7 +249,6 @@ const openReviewModal = async (asset) => {
       {
         ...asset,
         status: "Approved",
-        submittedByType: asset.submittedByType,
       },
       ...prev,
     ]);
@@ -298,7 +268,7 @@ const openReviewModal = async (asset) => {
 
   const handleRejectConfirmed = async (asset) => {
   try {
- await axios.put(`/api/org-assets/${asset.id}/status`, {
+ await axios.patch(getStatusUpdateUrl(asset), {
   status: "rejected",
 });
 
@@ -370,10 +340,6 @@ const openReviewModal = async (asset) => {
     status: "Rejected",
     submittedBy: a.u_id,
     submittedOn: new Date(a.created_at).toLocaleDateString(),
-
-    // 🔥 REQUIRED
-    submittedByType: (a.submittedbytype || "individual").toLowerCase(),
-
   }))
 );
 
@@ -410,12 +376,7 @@ const openReviewModal = async (asset) => {
   const rejectedPaged = paginate(rejectedAssets, rejectedPage);
 
   // approved assets – derive by submitter + type filter at render time
-  const approvedBySubmitter =
-    activeSubmitterTab === "individual"
-      ? approvedAssets.filter((a) => a.submittedByType !== "organisation")
-      : approvedAssets.filter((a) => a.submittedByType === "organisation");
-
-  const approvedFiltered = approvedBySubmitter.filter(
+  const approvedFiltered = approvedAssets.filter(
     (a) => a.assetType === activeAssetFilter
   );
   const approvedPaged = paginate(approvedFiltered, approvedPage);
@@ -655,6 +616,10 @@ const openReviewModal = async (asset) => {
     if (asset.assetType === "tree") return renderTreeDetails(asset);
     return null;
   };
+
+  if (isOrganizationScope) {
+    return <OrgAssets />;
+  }
 
   /* ================= UI ================= */
   return (
@@ -967,38 +932,8 @@ const openReviewModal = async (asset) => {
         <div className="am26-asset-header-row">
           <h2 className="am26-section-title">Asset Management</h2>
           <p className="am26-section-subtitle">
-            View and manage approved assets by submitter type
+            View and manage approved assets
           </p>
-        </div>
-
-        {/* submitter segmented control */}
-        <div className="am26-submitters-tabs">
-          <button
-            className={
-              activeSubmitterTab === "individual"
-                ? "am26-submitters-tab am26-submitters-tab-active"
-                : "am26-submitters-tab"
-            }
-            onClick={() => {
-              setActiveSubmitterTab("individual");
-              setApprovedPage(1);
-            }}
-          >
-            Individual Assets
-          </button>
-          <button
-            className={
-              activeSubmitterTab === "organisation"
-                ? "am26-submitters-tab am26-submitters-tab-active"
-                : "am26-submitters-tab"
-            }
-            onClick={() => {
-              setActiveSubmitterTab("organisation");
-              setApprovedPage(1);
-            }}
-          >
-            Organisation Assets
-          </button>
         </div>
 
         {/* asset-type segmented control */}

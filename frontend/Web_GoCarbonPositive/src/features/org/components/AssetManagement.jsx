@@ -13,12 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -322,6 +316,7 @@ const ASSET_COLORS = {
 // Status colors
 const STATUS_COLORS = {
   Active: { bg: "bg-green-light", text: "var(--color-green-dark)" },
+  Pending: { bg: "bg-yellow-light", text: "var(--color-yellow-dark)" },
   Maintenance: { bg: "bg-yellow-light", text: "var(--color-yellow-dark)" },
   Offline: { bg: "bg-red-light", text: "var(--color-red)" },
 };
@@ -443,7 +438,8 @@ const PlantationAssetCard = ({ asset }) => {
     },
     {
       label: "Report Generated",
-      icon: <FiLayers style={{ color: "#8b5cf6" }} size={14} />,
+      // icon: <FiLayers style={{ color: "#8b5cf6" }} size={14} />,
+      icon: <LayersIcon style={{ color: "#8b5cf6" }} />,
       current: false,
     },
   ];
@@ -484,7 +480,6 @@ const PlantationAssetCard = ({ asset }) => {
             <span className="pc-tree-icon"><FaLeaf color="#2d7a3a" size={20} /></span>
             <div>
               <h2 className="pc-project-name">{details.name}</h2>
-              <p className="pc-project-id">ID: {details.id}</p>
             </div>
           </div>
           <span className="pc-badge pc-badge--pending">{details.status}</span>
@@ -584,28 +579,8 @@ const PlantationAssetCard = ({ asset }) => {
                   <span className="pc-info-value">{details.vegetation.treesPlanted}</span>
                 </div>
                 <div className="pc-detail-box">
-                  <span className="pc-info-label">AVG HEIGHT</span>
-                  <span className="pc-info-value">{details.vegetation.avgHeight}</span>
-                </div>
-                <div className="pc-detail-box">
-                  <span className="pc-info-label">AVG DBH</span>
-                  <span className="pc-info-value">{details.vegetation.avgDBH}</span>
-                </div>
-                <div className="pc-detail-box">
                   <span className="pc-info-label">PLANT AGE</span>
                   <span className="pc-info-value">{details.vegetation.plantAge}</span>
-                </div>
-              </div>
-
-              <h3 className="pc-section-title">SOIL INFORMATION</h3>
-              <div className="pc-info-grid pc-modal-grid">
-                <div className="pc-detail-box">
-                  <span className="pc-info-label">SOIL TYPE</span>
-                  <span className="pc-info-value">{details.soil.soilType}</span>
-                </div>
-                <div className="pc-detail-box">
-                  <span className="pc-info-label">SOIL PH</span>
-                  <span className="pc-info-value">{details.soil.soilPH}</span>
                 </div>
               </div>
 
@@ -685,6 +660,8 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
 
   const Icon = ASSET_ICONS[asset.type] || LeafIcon;
   const { bg: statusBg, color: statusText } = STATUS_COLORS[asset.status] || {};
+  const isCarbonCapture = asset.type === "Carbon Capture";
+  const isFleetEntry = asset.type === "EV" && !!asset.originalData?.ev_input_id;
 
   return (
     <motion.div
@@ -722,22 +699,30 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
         >
           <span
             className={`asset-status-badge ${statusBg}`}
-            style={{ color: statusText }}
+            style={{
+              color: isCarbonCapture ? "#d97706" : statusText,
+              background: isCarbonCapture ? "#fef3c7" : undefined,
+              borderColor: isCarbonCapture ? "#fbbf24" : undefined,
+            }}
           >
-            {asset.status === "Active" && (
+            {!isCarbonCapture && asset.status === "Active" && (
               <ActiveStatusIcon
                 style={{ marginRight: "4px", color: statusText }}
               />
             )}
-            {asset.status}
+            {isCarbonCapture
+              ? asset.verified
+                ? "Verified"
+                : "Pending"
+              : asset.status}
           </span>
         </motion.div>
       </div>
 
       {/* Content */}
       <div className="asset-content">
-        {/* Location - Hide for EV and Solar assets */}
-        {asset.type !== "EV" && asset.type !== "Solar" && (
+        {/* Location - Hide for EV, Solar and Carbon Capture assets */}
+        {asset.type !== "EV" && asset.type !== "Solar" && !isCarbonCapture && (
           <div className="asset-location">
             <FiMapPin size={16} style={{ color: "#f59e0b" }} />
             <span>{asset.location}</span>
@@ -748,7 +733,7 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
         <div className="asset-info-row">
           <div className="asset-info-label">
             <TrendingUpIcon />
-            <span>Credits Generated</span>
+            <span>{isCarbonCapture || isFleetEntry ? "Estimated Credits" : "Credits Generated"}</span>
           </div>
           <motion.span
             className="asset-credits-value"
@@ -761,25 +746,27 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
         </div>
 
         {/* Verification Status */}
-        <div className="asset-info-row">
-          <span className="asset-info-label">Verification</span>
-          <motion.span
-            className={`badge ${
-              asset.verified ? "bg-green-light" : "bg-yellow-light"
-            }`}
-            style={{
-              color: asset.verified ? "#059669" : "#d97706",
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            {asset.verified ? "✓ Verified" : "⏳ Pending"}
-          </motion.span>
-        </div>
+        {!isCarbonCapture && !isFleetEntry && (
+          <div className="asset-info-row">
+            <span className="asset-info-label">Verification</span>
+            <motion.span
+              className={`badge ${
+                asset.verified ? "bg-green-light" : "bg-yellow-light"
+              }`}
+              style={{
+                color: asset.verified ? "#059669" : "#d97706",
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              {asset.verified ? "✓ Verified" : "⏳ Pending"}
+            </motion.span>
+          </div>
+        )}
 
         {/* Efficiency (if available) */}
-        {asset.efficiency && (
+        {asset.efficiency && !isCarbonCapture && (
           <div className="asset-info-row">
             <span className="asset-info-label">Efficiency</span>
             <span className="asset-info-value">{asset.efficiency}</span>
@@ -787,103 +774,57 @@ const AssetCard = ({ asset, onClick, onDelete }) => {
         )}
 
         {/* Last Updated */}
-        <div className="asset-updated">
-          <CalendarIcon />
-          <span>Updated {asset.lastUpdated}</span>
-        </div>
+        {!isCarbonCapture && !isFleetEntry && (
+          <div className="asset-updated">
+            <CalendarIcon />
+            <span>Updated {asset.lastUpdated}</span>
+          </div>
+        )}
 
         {/* Action Buttons */}
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            marginTop: "1rem",
-          }}
-        >
+        <div className={`asset-actions ${isCarbonCapture ? "asset-actions-cc" : ""}`}>
           <motion.button
-            style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: "transparent",
-              color: "#6366f1",
-              border: "1px solid #6366f1",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-              fontWeight: "500",
-              transition: "all 0.2s ease",
-            }}
+            className="asset-action-btn asset-action-view"
             onClick={() => onClick(asset)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <EyeIcon />
+            <EyeIcon className="asset-action-icon" />
             <span>View Details</span>
           </motion.button>
 
           <motion.button
-            style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: "transparent",
-              color: "#10b981",
-              border: "1px solid #10b981",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-              fontWeight: "500",
-              transition: "all 0.2s ease",
-            }}
+            className="asset-action-btn asset-action-add"
             onClick={(e) => {
               e.stopPropagation();
               console.log("Add button clicked for", asset.type, asset.name);
             }}
+            style={isCarbonCapture ? { marginLeft: "auto" } : undefined}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <FiPlus size={16} />
+            <FiPlus size={16} className="asset-action-icon" />
             <span>Add</span>
           </motion.button>
 
-          <motion.button
-            style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: "transparent",
-              color: "#ef4444",
-              border: "1px solid #ef4444",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-              fontWeight: "500",
-              transition: "all 0.2s ease",
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (
-                window.confirm(`Are you sure you want to delete ${asset.name}?`)
-              ) {
-                onDelete(asset);
-              }
-            }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <TrashIcon />
-            <span>Delete</span>
-          </motion.button>
+          {!isCarbonCapture && (
+            <motion.button
+              className="asset-action-btn asset-action-delete"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (
+                  window.confirm(`Are you sure you want to delete ${asset.name}?`)
+                ) {
+                  onDelete(asset);
+                }
+              }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <TrashIcon className="asset-action-icon" />
+              <span>Delete</span>
+            </motion.button>
+          )}
         </div>
       </div>
     </motion.div>
@@ -1057,16 +998,21 @@ const AssetManagement = () => {
         );
       } else if (selectedAsset.type === "Solar") {
         response = await assetAPI.updateSolar(
-          updateFormData.Solar_ID,
+          updateFormData.solar_id || updateFormData.Solar_ID || updateFormData.suid,
           updateFormData
         );
       } else if (selectedAsset.type === "Trees") {
         response = await assetAPI.updateTree(
-          updateFormData.Tree_ID,
+          updateFormData.tree_id || updateFormData.Tree_ID || updateFormData.tid,
+          updateFormData
+        );
+      } else if (selectedAsset.type === "Carbon Capture") {
+        response = await assetAPI.updateCarbonCapture(
+          updateFormData.capture_id,
           updateFormData
         );
       }
-      if (response.status === "success") {
+      if (response?.status === "success" || response?.success === true) {
         showToast("Asset updated successfully!", "success");
         setShowUpdateModal(false);
         fetchAssets();
@@ -1088,15 +1034,26 @@ const AssetManagement = () => {
     }, 3000);
   };
 
-  // Hardcoded user ID for demo purposes
-  const DEMO_USER_ID = "DEMO_USER_001";
-
   // Fetch assets from backend
   const fetchAssets = async () => {
     try {
       setLoading(true);
       setError(null);
-      const fetchedAssets = await assetAPI.getAllAssets(DEMO_USER_ID);
+      const authUserRaw = localStorage.getItem("authUser");
+      const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
+      const orgId =
+        authUser?.org_id ||
+        authUser?.u_id ||
+        localStorage.getItem("orgId") ||
+        localStorage.getItem("userId");
+
+      if (!orgId) {
+        setError("Organization ID not found. Please login again.");
+        setAssets([]);
+        return;
+      }
+
+      const fetchedAssets = await assetAPI.getAllAssets(orgId, orgId);
       const hasPlantation = fetchedAssets.some((asset) => asset.type === "Trees");
       setAssets(hasPlantation ? fetchedAssets : [DUMMY_PLANTATION_ASSET, ...fetchedAssets]);
     } catch (err) {
@@ -1185,11 +1142,16 @@ const AssetManagement = () => {
         case "Trees":
           response = await assetAPI.deleteTree(asset.originalData.tree_id);
           break;
+        case "Carbon Capture":
+          response = await assetAPI.deleteCarbonCapture(
+            asset.originalData.capture_id
+          );
+          break;
         default:
           throw new Error("Unknown asset type");
       }
 
-      if (response.status === "success") {
+      if (response?.status === "success" || response?.success === true) {
         setAssets((prevAssets) => prevAssets.filter((a) => a.id !== asset.id));
         showToast(`${asset.name} deleted successfully!`, "success");
       } else {
@@ -1405,97 +1367,96 @@ const AssetManagement = () => {
           ))}
         </div>
       ) : (
-        <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Asset</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Credits</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Verified</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAssets.map((asset) => (
-                <TableRow key={asset.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{asset.name}</div>
-                      <div className="text-sm text-secondary">{asset.id}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{asset.type}</Badge>
-                  </TableCell>
-                  <TableCell>{asset.location}</TableCell>
-                  <TableCell className="font-medium">
-                    {asset.creditsGenerated.toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`badge-${asset.status.toLowerCase()}`}>
-                      {asset.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {asset.verified ? (
-                      <CheckCircleIcon style={{ color: "#10b981" }} />
-                    ) : (
-                      <ClockIcon style={{ color: "#f59e0b" }} />
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Button variant="ghost" size="sm">
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <circle cx="12" cy="5" r="1" />
-                            <circle cx="12" cy="12" r="1" />
-                            <circle cx="12" cy="19" r="1" />
-                          </svg>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem
-                          onClick={() => handleViewDetails(asset)}
+        <Card className="asset-list-card">
+          <div className="asset-list-header-row">
+            <span>Asset</span>
+            <span>Type</span>
+            <span>Location</span>
+            <span>Credits</span>
+            <span>Status</span>
+            <span>Verified</span>
+            <span>Actions</span>
+          </div>
+
+          <div className="asset-list-body">
+            {filteredAssets.map((asset) => (
+              <div className="asset-list-row" key={asset.id}>
+                <div className="asset-list-cell asset-list-asset" data-label="Asset">
+                  <div className="asset-list-name">{asset.name}</div>
+                  <div className="asset-list-id">{asset.id}</div>
+                </div>
+
+                <div className="asset-list-cell" data-label="Type">
+                  <Badge variant="outline">{asset.type}</Badge>
+                </div>
+
+                <div className="asset-list-cell asset-list-location" data-label="Location">{asset.location}</div>
+
+                <div className="asset-list-cell asset-list-credits" data-label="Credits">
+                  {asset.creditsGenerated.toLocaleString()}
+                </div>
+
+                <div className="asset-list-cell" data-label="Status">
+                  <Badge className={`badge-${asset.status.toLowerCase()}`}>
+                    {asset.status}
+                  </Badge>
+                </div>
+
+                <div className="asset-list-cell" data-label="Verified">
+                  {asset.verified ? (
+                    <CheckCircleIcon style={{ color: "#10b981" }} />
+                  ) : (
+                    <ClockIcon style={{ color: "#f59e0b" }} />
+                  )}
+                </div>
+
+                <div className="asset-list-cell asset-list-actions" data-label="Actions">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Button variant="ghost" size="sm">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
                         >
-                          <EyeIcon />
-                          <span className="ml-2">View Details</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleOpenUpdateModal}>
-                          <EditIcon />
-                          <span className="ml-2">Edit</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                `Are you sure you want to delete ${asset.name}?`
-                              )
-                            ) {
-                              handleDeleteAsset(asset);
-                            }
-                          }}
-                        >
-                          <TrashIcon />
-                          <span className="ml-2">Delete</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                          <circle cx="12" cy="5" r="1" />
+                          <circle cx="12" cy="12" r="1" />
+                          <circle cx="12" cy="19" r="1" />
+                        </svg>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => handleViewDetails(asset)}>
+                        <EyeIcon />
+                        <span className="ml-2">View Details</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleOpenUpdateModal}>
+                        <EditIcon />
+                        <span className="ml-2">Edit</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              `Are you sure you want to delete ${asset.name}?`
+                            )
+                          ) {
+                            handleDeleteAsset(asset);
+                          }
+                        }}
+                      >
+                        <TrashIcon />
+                        <span className="ml-2">Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            ))}
+          </div>
         </Card>
       )}
 
@@ -2250,5 +2211,9 @@ const AssetManagement = () => {
 };
 
 export default AssetManagement;
+
+
+
+
 
 

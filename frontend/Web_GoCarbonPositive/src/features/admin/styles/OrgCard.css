@@ -1,0 +1,497 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+.orgcard-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(17, 24, 39, 0.45);
+}
+
+.orgcard-card {
+  position: relative;
+  width: min(720px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 18px 56px rgba(15, 23, 42, 0.25);
+  font-family: "Poppins", sans-serif;
+}
+
+.orgcard-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.orgcard-close-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.orgcard-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 24px 68px 20px 24px;
+}
+
+.orgcard-bell-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.orgcard-header-info {
+  flex: 1;
+}
+
+.orgcard-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.25;
+  margin-bottom: 10px;
+}
+
+.orgcard-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.orgcard-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.orgcard-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.orgcard-badge-pending {
+  border: 1px solid #f59e0b;
+  color: #b45309;
+  background: #fffbeb;
+}
+
+.orgcard-badge-pending .orgcard-dot {
+  background: #f59e0b;
+}
+
+.orgcard-badge-approved {
+  border: 1px solid #22c55e;
+  color: #15803d;
+  background: #ecfdf3;
+}
+
+.orgcard-badge-approved .orgcard-dot {
+  background: #16a34a;
+}
+
+.orgcard-badge-rejected {
+  border: 1px solid #f87171;
+  color: #b91c1c;
+  background: #fef2f2;
+}
+
+.orgcard-badge-rejected .orgcard-dot {
+  background: #ef4444;
+}
+
+.orgcard-badge-outline {
+  border: 1px solid #d1d5db;
+  color: #4b5563;
+  background: transparent;
+}
+
+.orgcard-divider {
+  height: 1px;
+  margin: 0 24px;
+  background: #edf0f3;
+}
+
+.orgcard-meta-section {
+  padding: 20px 24px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.orgcard-meta-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.orgcard-meta-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.orgcard-meta-label {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+
+.orgcard-meta-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.orgcard-asset-section {
+  padding: 20px 24px;
+}
+
+.orgcard-section-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+  margin-bottom: 16px;
+}
+
+.orgcard-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 14px;
+}
+
+.orgcard-asset-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.orgcard-asset-icon {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.orgcard-asset-label {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+
+.orgcard-asset-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.orgcard-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px 24px;
+}
+
+.orgcard-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.orgcard-btn:disabled {
+  cursor: not-allowed;
+}
+
+.orgcard-btn-reject {
+  color: #dc2626;
+  background: #ffffff;
+  border-color: #fca5a5;
+}
+
+.orgcard-btn-reject:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+.orgcard-btn-approve {
+  color: #ffffff;
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.orgcard-btn-approve:hover {
+  background: #15803d;
+  border-color: #15803d;
+}
+
+.orgcard-btn-active-reject {
+  color: #ffffff;
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+.orgcard-btn-active-reject:hover {
+  color: #ffffff;
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.orgcard-btn-disabled,
+.orgcard-btn-disabled:hover {
+  color: #9ca3af;
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+}
+
+.orgcard-dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.orgcard-dialog {
+  width: min(460px, 100%);
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.24);
+  padding: 20px;
+}
+
+.orgcard-dialog-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.orgcard-dialog-text {
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+.orgcard-dialog-field {
+  margin-bottom: 10px;
+}
+
+.orgcard-dialog-field label {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.orgcard-dialog-input {
+  width: 100%;
+  min-height: 94px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px 12px;
+  resize: vertical;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  outline: none;
+}
+
+.orgcard-dialog-input:focus {
+  border-color: #22c55e;
+}
+
+.orgcard-dialog-error {
+  font-size: 12px;
+  color: #dc2626;
+  margin-bottom: 10px;
+}
+
+.orgcard-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.orgcard-dialog-btn {
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 8px 16px;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.orgcard-dialog-cancel {
+  border-color: #d1d5db;
+  color: #4b5563;
+  background: #ffffff;
+}
+
+.orgcard-dialog-approve {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: #ffffff;
+}
+
+.orgcard-dialog-reject {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+}
+
+.orgcard-result-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 14;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.36);
+}
+
+.orgcard-result-card {
+  width: min(260px, 90%);
+  border-radius: 14px;
+  padding: 22px 16px;
+  text-align: center;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
+  animation: orgcard-pop-in 0.28s ease-out;
+}
+
+.orgcard-result-card.approved {
+  color: #15803d;
+}
+
+.orgcard-result-card.rejected {
+  color: #b91c1c;
+}
+
+.orgcard-result-icon-wrap {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 10px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid currentColor;
+  animation: orgcard-pulse 0.5s ease-in-out;
+}
+
+.orgcard-result-icon-wrap svg {
+  width: 34px;
+  height: 34px;
+}
+
+.orgcard-result-text {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+@keyframes orgcard-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.84);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes orgcard-pulse {
+  0% {
+    transform: scale(0.86);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .orgcard-overlay {
+    padding: 12px;
+  }
+
+  .orgcard-card {
+    max-height: calc(100vh - 24px);
+  }
+
+  .orgcard-header {
+    padding: 20px 62px 16px 16px;
+  }
+
+  .orgcard-title {
+    font-size: 22px;
+  }
+
+  .orgcard-divider {
+    margin: 0 16px;
+  }
+
+  .orgcard-meta-section,
+  .orgcard-asset-section,
+  .orgcard-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .orgcard-meta-section,
+  .orgcard-asset-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .orgcard-dialog {
+    padding: 16px;
+  }
+}
