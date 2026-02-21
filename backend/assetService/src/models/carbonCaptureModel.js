@@ -52,6 +52,19 @@ class CarbonCaptureModel {
     return result.rows;
   }
 
+  static async getAll() {
+    const queryText = `
+      SELECT
+        c.*,
+        o.org_name
+      FROM carbon_capture_assets c
+      LEFT JOIN organizations o ON o.org_id = c.org_id
+      ORDER BY c.created_at DESC
+    `;
+    const result = await query(queryText);
+    return result.rows;
+  }
+
   static async getById(captureId) {
     const queryText = `
       SELECT *

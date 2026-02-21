@@ -98,6 +98,28 @@ class TreeController {
   }
 
   /**
+   * Get all trees (admin)
+   * GET /api/tree/admin/all
+   */
+  static async getAllTrees(req, res) {
+    try {
+      const trees = await TreeModel.getAll();
+      res.status(200).json({
+        success: true,
+        message: "All trees retrieved successfully",
+        data: trees,
+      });
+    } catch (error) {
+      logger.error("Error fetching all trees:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch trees",
+        data: { error: error.message },
+      });
+    }
+  }
+
+  /**
    * Get single Tree by ID
    * GET /api/tree/single/:tid
    */

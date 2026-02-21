@@ -67,6 +67,21 @@ class EVModel {
   }
 
   /**
+   * Get all EVs (admin)
+   */
+  static async getAll() {
+    const queryText = `
+      SELECT e.*, COALESCE(MAX(u.username), e.u_id) AS username
+      FROM ev_master_data e
+      LEFT JOIN users u ON u.u_id = e.u_id
+      GROUP BY e.ev_id
+      ORDER BY e.created_at DESC
+    `;
+    const result = await query(queryText);
+    return result.rows;
+  }
+
+  /**
    * Get single EV by ID
    */
   static async getById(evId) {
