@@ -22,6 +22,7 @@
 /* Global layout spacing for sticky navbar */
 :root {
   --navbar-height: 72px;
+  --toastify-font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* Main content layout */
@@ -33,4 +34,19 @@
 /* Fix for React Icons not inheriting color */
 svg {
   color: inherit;
+}
+
+/* Force Poppins for all toast UIs */
+.Toastify__toast,
+.Toastify__toast-body,
+.Toastify__close-button,
+.toast,
+.toast-message,
+.toast-notification,
+.toast-content,
+.org-popup-toast,
+.org-popup-toast-message,
+.config-toast,
+.join-org-toast-box {
+  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
