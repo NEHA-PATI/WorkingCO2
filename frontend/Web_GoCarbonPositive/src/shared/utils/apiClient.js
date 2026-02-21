@@ -23,6 +23,9 @@ const API_CONFIG = {
   // Carbon Footprint Service (port 5003 for example)
 CFC_API:
   import.meta.env.VITE_CFC_SERVICE_URL || "http://localhost:8004/api",
+
+  ORG_API:
+    import.meta.env.VITE_ORG_SERVICE_URL || ENV.ORG_SERVICE_URL || "http://localhost:5003",
 };
 
 /**
@@ -165,7 +168,10 @@ export const ticketApiClient = createApiClient(
   "Ticket Service",
 );
 
-
+export const orgApiClient = createApiClient(
+  API_CONFIG.ORG_API,
+  "Organization Service",
+);
 // Default export
 export default assetApiClient;
 
@@ -211,3 +217,32 @@ export const deleteTicket = async (ticketId) => {
   const response = await ticketApiClient.delete(`/tickets/${ticketId}`);
   return response.data;
 };
+
+// Send OTP
+export const sendOrgOtp = async (email) => {
+  const response = await orgApiClient.post(
+    "/api/org-email-otp/send",
+    { email }
+  );
+  return response.data;
+};
+
+// Verify OTP
+export const verifyOrgOtp = async (email, otp) => {
+  const response = await orgApiClient.post(
+    "/api/org-email-otp/verify",
+    { email, otp }
+  );
+  return response.data;
+};
+
+// Submit Organization Request
+export const submitOrgRequest = async (payload) => {
+  const response = await orgApiClient.post(
+    "/api/org-requests",
+    payload
+  );
+  return response.data;
+};
+
+

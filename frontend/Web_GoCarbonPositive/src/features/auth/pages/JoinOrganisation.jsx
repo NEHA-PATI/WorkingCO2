@@ -5,6 +5,11 @@ import { Country, State } from 'country-state-city';
 import "@features/auth/styles/JoinOrganisation.css";
 import { fireToast } from "@shared/utils/toastService";
 import { ENV } from "@config/env";
+import {
+  sendOrgOtp,
+  verifyOrgOtp,
+  submitOrgRequest
+} from "@shared/utils/apiClient";
 
 const dropdownArrowSvg =
   `data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a5a3a' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e`;
@@ -207,93 +212,72 @@ export default function JoinOrganisation() {
   };
 
   const handleVerifyEmail = async () => {
-    if (!formData.email) {
-      setErrors(prev => ({ ...prev, email: 'Email is required' }));
-      return;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setErrors(prev => ({ ...prev, email: 'Please enter a valid email' }));
-      return;
-    }
-    try {
-      const response = await fetch(`${ORG_API_URL}/api/org-email-otp/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email })
-      });
+  if (!formData.email) {
+    setErrors(prev => ({ ...prev, email: 'Email is required' }));
+    return;
+  }
 
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        setErrors(prev => ({ ...prev, email: data.message || "Failed to send OTP" }));
-        return;
-      }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(formData.email)) {
+    setErrors(prev => ({ ...prev, email: 'Please enter a valid email' }));
+    return;
+  }
 
-      setShowOTP(true);
-      setOtp(['', '', '', '', '', '']);
-      setOtpError('');
-      setOtpSuccess(false);
-      setTimer(30);
-      setCanResend(false);
-    } catch (err) {
-      setErrors(prev => ({ ...prev, email: "Unable to send OTP. Please try again." }));
-    }
-  };
+  try {
+    await sendOrgOtp(formData.email);
+
+    setShowOTP(true);
+    setOtp(['', '', '', '', '', '']);
+    setOtpError('');
+    setOtpSuccess(false);
+    setTimer(30);
+    setCanResend(false);
+  } catch (err) {
+    setErrors(prev => ({
+      ...prev,
+      email: err.message || "Failed to send OTP"
+    }));
+  }
+};
 
   const handleResendOtp = async () => {
-    try {
-      const response = await fetch(`${ORG_API_URL}/api/org-email-otp/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email })
-      });
+  try {
+    await sendOrgOtp(formData.email);
 
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        setOtpError(data.message || "Failed to resend OTP");
-        return;
-      }
+    setOtp(['', '', '', '', '', '']);
+    setTimer(30);
+    setCanResend(false);
+    setOtpError('');
+    setOtpSuccess(false);
 
-      setOtp(['', '', '', '', '', '']);
-      setTimer(30);
-      setCanResend(false);
-      setOtpError('');
-      setOtpSuccess(false);
-    } catch (err) {
-      setOtpError("Unable to resend OTP. Please try again.");
-    }
-  };
+  } catch (err) {
+    setOtpError(err.message || "Failed to resend OTP");
+  }
+};
 
   const handleSubmitOtp = async () => {
-    const otpValue = otp.join('');
-    if (otpValue.length !== 6) {
-      setOtpError('Please enter all 6 digits');
-      return;
-    }
-    try {
-      const response = await fetch(`${ORG_API_URL}/api/org-email-otp/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email, otp: otpValue })
-      });
+  const otpValue = otp.join('');
 
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        setOtpError(data.message || "Invalid OTP. Please try again.");
-        setOtp(['', '', '', '', '', '']);
-        return;
-      }
+  if (otpValue.length !== 6) {
+    setOtpError('Please enter all 6 digits');
+    return;
+  }
 
-      setOtpSuccess(true);
-      setOtpError('');
-      setTimeout(() => {
-        setEmailVerified(true);
-        setShowOTP(false);
-      }, 1500);
-    } catch (err) {
-      setOtpError("Unable to verify OTP. Please try again.");
-    }
-  };
+  try {
+    await verifyOrgOtp(formData.email, otpValue);
+
+    setOtpSuccess(true);
+    setOtpError('');
+
+    setTimeout(() => {
+      setEmailVerified(true);
+      setShowOTP(false);
+    }, 1500);
+  } catch (err) {
+    setOtpError(err.message || "Invalid OTP");
+    setOtp(['', '', '', '', '', '']);
+  }
+};
 
   const validateForm = () => {
     const newErrors = {};
@@ -332,26 +316,17 @@ export default function JoinOrganisation() {
     };
 
     try {
-      const response = await fetch(`${ORG_API_URL}/api/org-requests`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+  await submitOrgRequest(payload);
 
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        fireToast("ORG.REQUEST_FAILED", "error");
-        return;
-      }
+  fireToast("ORG.REQUEST_SUBMITTED", "success");
 
-      console.log('Form submitted:', payload);
-      fireToast("ORG.REQUEST_SUBMITTED", "success");
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 2000);
-    } catch (err) {
-      fireToast("ORG.REQUEST_FAILED", "error");
-    }
+  setTimeout(() => {
+    window.location.href = '/';
+  }, 2000);
+
+} catch (err) {
+  fireToast("ORG.REQUEST_FAILED", "error");
+}
   };
 
   const countryOptions = countries
