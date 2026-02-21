@@ -98,6 +98,23 @@ class PlantationController {
     }
   }
 
+  static async getAll(req, res) {
+    try {
+      const rows = await PlantationModel.getAll();
+      return res.status(200).json({
+        success: true,
+        message: "Plantations fetched successfully",
+        data: rows,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch plantations",
+        data: { error: error.message },
+      });
+    }
+  }
+
   static async getById(req, res) {
     try {
       const { p_id } = req.params;
@@ -120,6 +137,57 @@ class PlantationController {
       return res.status(500).json({
         success: false,
         message: "Failed to fetch plantation",
+        data: { error: error.message },
+      });
+    }
+  }
+
+  static async updateVerificationStatus(req, res) {
+    try {
+      const { p_id } = req.params;
+      const { status } = req.body;
+      const normalizedStatus = String(status || "").trim().toLowerCase();
+
+      const statusMap = {
+        approved: "accepted",
+        accepted: "accepted",
+        rejected: "rejected",
+        pending: "pending",
+      };
+
+      const verificationStatus = statusMap[normalizedStatus];
+
+      if (!verificationStatus) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid status. Use pending, approved, or rejected",
+          data: null,
+        });
+      }
+
+      const existing = await PlantationModel.getById(p_id);
+      if (!existing) {
+        return res.status(404).json({
+          success: false,
+          message: "Plantation not found",
+          data: null,
+        });
+      }
+
+      const updated = await PlantationModel.updateVerificationStatus(
+        p_id,
+        verificationStatus
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Plantation status updated successfully",
+        data: updated,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update plantation status",
         data: { error: error.message },
       });
     }
