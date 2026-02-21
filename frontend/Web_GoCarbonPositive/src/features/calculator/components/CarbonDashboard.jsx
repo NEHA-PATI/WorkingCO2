@@ -67,12 +67,33 @@ const categoryMeta = {
 export default function CarbonDashboard({ resultData }) {
   const [activeDetailKey, setActiveDetailKey] = useState(null);
 
-  const categoryRows = Object.entries(resultData.percentages).map(([key, value]) => ({
-    key,
-    percent: value,
-    total:
-      Object.values(resultData.breakdown[key]).reduce((sum, n) => sum + Number(n), 0).toFixed(2),
-  }));
+  const safeBreakdown = {
+    housing: resultData?.breakdown?.housing || {},
+    food: resultData?.breakdown?.food || {},
+    transport: resultData?.breakdown?.transport || {},
+    flights: resultData?.breakdown?.flights || {},
+  };
+
+  const categoryKeys = ["housing", "food", "transport", "flights"];
+  const computedTotals = categoryKeys.reduce((acc, key) => {
+    acc[key] = Object.values(safeBreakdown[key]).reduce((sum, n) => sum + Number(n || 0), 0);
+    return acc;
+  }, {});
+
+  const categoryRows = categoryKeys
+    .filter((key) => computedTotals[key] > 0 || Number(resultData?.percentages?.[key] || 0) > 0)
+    .map((key) => {
+      const fallbackPercent =
+        Number(resultData?.total || 0) > 0
+          ? Math.round((computedTotals[key] / Number(resultData.total)) * 100)
+          : 0;
+
+      return {
+        key,
+        percent: Number(resultData?.percentages?.[key] ?? fallbackPercent),
+        total: computedTotals[key].toFixed(2),
+      };
+    });
 
   const pieMeta = useMemo(() => {
     let start = 0;
@@ -98,8 +119,8 @@ export default function CarbonDashboard({ resultData }) {
       bgClass: "bg-sky-50/50",
       icon: categoryMeta.housing.icon,
       rows: [
-        { label: "Electricity", value: `${resultData.breakdown.housing.electricity} kg` },
-        { label: "LPG", value: `${resultData.breakdown.housing.lpg} kg` },
+        { label: "Electricity", value: `${safeBreakdown.housing.electricity || 0} kg` },
+        { label: "LPG", value: `${safeBreakdown.housing.lpg || 0} kg` },
       ],
     },
     {
@@ -107,7 +128,7 @@ export default function CarbonDashboard({ resultData }) {
       title: "Food",
       bgClass: "bg-orange-50/50",
       icon: categoryMeta.food.icon,
-      rows: Object.entries(resultData.breakdown.food).map(([k, v]) => ({
+      rows: Object.entries(safeBreakdown.food).map(([k, v]) => ({
         label: k,
         value: `${v} kg`,
       })),
@@ -117,7 +138,7 @@ export default function CarbonDashboard({ resultData }) {
       title: "Transport",
       bgClass: "bg-emerald-50/50",
       icon: categoryMeta.transport.icon,
-      rows: Object.entries(resultData.breakdown.transport).map(([k, v]) => ({
+      rows: Object.entries(safeBreakdown.transport).map(([k, v]) => ({
         label: k,
         value: `${v} kg`,
       })),
@@ -127,12 +148,12 @@ export default function CarbonDashboard({ resultData }) {
       title: "Flights",
       bgClass: "bg-violet-50/50",
       icon: categoryMeta.flights.icon,
-      rows: Object.entries(resultData.breakdown.flights).map(([k, v]) => ({
+      rows: Object.entries(safeBreakdown.flights).map(([k, v]) => ({
         label: k,
         value: `${v} kg`,
       })),
     },
-  ];
+  ].filter((card) => card.rows.length > 0);
 
   const activeDetail = detailCards.find((card) => card.key === activeDetailKey) || null;
 

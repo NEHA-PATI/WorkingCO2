@@ -19,3 +19,5 @@ exports.loadAirports = async () => {
 exports.getAirport = (code) => {
   return airportMap[code];
 };
+
+exports.getAirportCodes = () => Object.keys(airportMap);
