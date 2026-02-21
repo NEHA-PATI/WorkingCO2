@@ -184,7 +184,15 @@ const getDetailsUrl = (asset) => {
 const openReviewModal = async (asset) => {
   try {
     const res = await axios.get(getDetailsUrl(asset));
-    const data = res.data;
+    const data = res?.data?.data || res?.data || {};
+    const imageUrlsFromObjects = Array.isArray(data.images)
+      ? data.images
+          .map((img) => (typeof img === "string" ? img : img?.image_url))
+          .filter(Boolean)
+      : [];
+    const imageUrlsFromTreeImages = Array.isArray(data.tree_images)
+      ? data.tree_images.filter(Boolean)
+      : [];
 
     // ✅ USER ASSETS (EV / TREE / SOLAR)
     setSelectedAsset({
@@ -204,6 +212,8 @@ const openReviewModal = async (asset) => {
       motorPower: data.motor_power,
 
       // Tree
+      treeId: data.tid,
+      treeUid: data.t_uid,
       treeName: data.treename,
       botanicalName: data.botanicalname,
       plantingDate: data.plantingdate,
@@ -211,7 +221,10 @@ const openReviewModal = async (asset) => {
       dbh: data.dbh,
       location: data.location,
       createdBy: data.created_by,
-      treeImages: data.images || data.tree_images || [],
+      treeStatus: data.status,
+      treeImages: imageUrlsFromObjects.length
+        ? imageUrlsFromObjects
+        : imageUrlsFromTreeImages,
 
       // Solar
       installedCapacity: data.installed_capacity,
@@ -543,6 +556,16 @@ const openReviewModal = async (asset) => {
       <div className="am26-modal-section-title">Tree Details</div>
       <div className="am26-modal-details-grid am26-modal-details-grid-wide">
         <div className="am26-modal-detail">
+          <div className="am26-modal-detail-label">Tree ID</div>
+          <div className="am26-modal-detail-value">{asset.treeId ?? "-"}</div>
+        </div>
+
+        <div className="am26-modal-detail">
+          <div className="am26-modal-detail-label">Tree UID</div>
+          <div className="am26-modal-detail-value">{asset.treeUid || "-"}</div>
+        </div>
+
+        <div className="am26-modal-detail">
           <div className="am26-modal-detail-label">Tree Name</div>
           <div className="am26-modal-detail-value">
             {asset.treeName || "-"}
@@ -587,6 +610,11 @@ const openReviewModal = async (asset) => {
           <div className="am26-modal-detail-value">
             {asset.createdBy || "-"}
           </div>
+        </div>
+
+        <div className="am26-modal-detail">
+          <div className="am26-modal-detail-label">Status</div>
+          <div className="am26-modal-detail-value">{asset.treeStatus || "-"}</div>
         </div>
       </div>
 

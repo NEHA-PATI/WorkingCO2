@@ -260,6 +260,29 @@ class EVController {
   }
 
   /**
+   * Get all EVs (admin)
+   * GET /api/evmasterdata/admin/all
+   */
+  static async getAllEVs(req, res) {
+    try {
+      const evs = await EVModel.getAll();
+
+      return res.status(200).json({
+        success: true,
+        message: "All EVs retrieved successfully",
+        data: evs,
+      });
+    } catch (error) {
+      logger.error("Error fetching all EVs:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch EVs",
+        data: { error: error.message },
+      });
+    }
+  }
+
+  /**
    * Get single EV by ID
    * GET /api/evmasterdata/single/:ev_id
    */

@@ -73,6 +73,23 @@ class CarbonCaptureController {
     }
   }
 
+  static async getAll(req, res) {
+    try {
+      const assets = await CarbonCaptureModel.getAll();
+      return res.status(200).json({
+        success: true,
+        message: "Carbon capture assets fetched successfully",
+        data: assets,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch carbon capture assets",
+        data: { error: error.message },
+      });
+    }
+  }
+
   static async getById(req, res) {
     try {
       const { capture_id } = req.params;

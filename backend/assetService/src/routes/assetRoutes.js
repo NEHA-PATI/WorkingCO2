@@ -4,6 +4,7 @@ const {
   getWorkflowAssets,
   getApprovedAssets,
   getRejectedAssets,
+  getUserTreeAssets,
   updateAssetStatus,
   getAssetDetails
 } = require("../controllers/assetController");
@@ -14,6 +15,7 @@ router.get("/metrics", getMetrics);
 router.get("/workflow", getWorkflowAssets);
 router.get("/approved", getApprovedAssets);
 router.get("/rejected", getRejectedAssets); 
+router.get("/user-trees", getUserTreeAssets);
 // approve / reject
 router.patch("/:type/:id/status", updateAssetStatus);
 router.get("/:type/:id/details", getAssetDetails);
