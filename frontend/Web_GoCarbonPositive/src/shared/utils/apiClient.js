@@ -161,7 +161,7 @@ export const contactApiClient = createApiClient(
 );
 
 export const ticketApiClient = createApiClient(
-  import.meta.env.VITE_TICKET_API || "http://localhost:5004",
+  (import.meta.env.VITE_TICKET_API || "http://localhost:5004") + "/api",
   "Ticket Service",
 );
 
@@ -184,3 +184,30 @@ export const fetchAirportCodes = async (search = "", limit = 300) => {
   return response.data?.data || [];
 };
 
+export const fetchTickets = async () => {
+  const response = await ticketApiClient.get("/tickets");
+  return response.data.data;
+};
+
+export const fetchTicketById = async (ticketId) => {
+  const response = await ticketApiClient.get(`/tickets/${ticketId}`);
+  return response.data.data;
+};
+
+export const createTicket = async (payload) => {
+  const response = await ticketApiClient.post("/tickets", payload);
+  return response.data;
+};
+
+export const updateTicket = async (ticketId, payload) => {
+  const response = await ticketApiClient.put(
+    `/tickets/${ticketId}`,
+    payload
+  );
+  return response.data;
+};
+
+export const deleteTicket = async (ticketId) => {
+  const response = await ticketApiClient.delete(`/tickets/${ticketId}`);
+  return response.data;
+};
