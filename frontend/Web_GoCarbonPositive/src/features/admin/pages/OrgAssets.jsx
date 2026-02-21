@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   MdOutlineBusinessCenter,
   MdAccessTime,
@@ -21,6 +21,7 @@ import {
 } from "react-icons/fa";
 import { BsGrid } from "react-icons/bs";
 import OrgCard from "@features/admin/pages/OrgCard";
+import orgAssetApi from "@features/admin/services/orgAssetApi";
 import "@features/admin/styles/OrgAssets.css";
 
 const ALL_ASSETS = [
@@ -114,6 +115,8 @@ const ALL_ASSETS = [
   },
 ];
 
+const STATIC_NON_PLANTATION_ASSETS = ALL_ASSETS.filter((asset) => asset.category !== "plantation");
+
 const CATEGORY_META = {
   plantation: { label: "Plantation", icon: <GiTreehouse />, color: "plantation" },
   fleet: { label: "Fleet", icon: <FaTruck />, color: "fleet" },
@@ -124,6 +127,30 @@ const CATEGORY_META = {
 
 function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function formatCoordinate(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return "-";
+  return num.toFixed(7);
+}
+
+function mapVerificationToUiStatus(value) {
+  const normalized = String(value || "").toLowerCase();
+  if (normalized === "accepted" || normalized === "approved") return "approved";
+  if (normalized === "rejected") return "rejected";
+  return "pending";
 }
 
 function StatCard({ label, value, sub, iconBg, icon }) {
@@ -142,9 +169,13 @@ function StatCard({ label, value, sub, iconBg, icon }) {
   );
 }
 
-function CategoryBadge({ category }) {
-  const meta = CATEGORY_META[category];
-  return <span className={`cat-badge ${category}`}>{meta?.label || category}</span>;
+function ManagerContactCell({ managerName, managerContact }) {
+  return (
+    <div>
+      <div style={{ fontWeight: 600, color: "#1f2937" }}>{managerName || "-"}</div>
+      <div style={{ fontSize: "12px", color: "#64748b" }}>{managerContact || "-"}</div>
+    </div>
+  );
 }
 
 function StatusBadge({ status }) {
@@ -182,7 +213,10 @@ function AssetRow({
         {asset.org}
       </div>
       <div>
-        <CategoryBadge category={asset.category} />
+        <ManagerContactCell
+          managerName={asset.managerName}
+          managerContact={asset.managerContact}
+        />
       </div>
       <div className="submitted-cell">{asset.submitted}</div>
       <div>
@@ -265,7 +299,9 @@ export default function OrgAssets() {
   const [activeCategory, setActiveCategory] = useState("plantation");
   const [statusFilter, setStatusFilter] = useState("all");
   const [orgFilter, setOrgFilter] = useState("all");
-  const [assets, setAssets] = useState(ALL_ASSETS);
+  const [assets, setAssets] = useState(STATIC_NON_PLANTATION_ASSETS);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [selectedReviewAsset, setSelectedReviewAsset] = useState(null);
   const [openRevertRows, setOpenRevertRows] = useState({});
@@ -273,7 +309,84 @@ export default function OrgAssets() {
   const [revertReason, setRevertReason] = useState("");
   const [revertError, setRevertError] = useState("");
 
+  useEffect(() => {
+    const loadPlantationAssets = async () => {
+      setIsLoading(true);
+      setApiError("");
+      try {
+        const result = await orgAssetApi.getAll();
+        const rows = Array.isArray(result?.data) ? result.data : [];
+        const plantationAssets = rows.map((row) => ({
+          id: String(row.p_id || row.plantation_id || row.id || ""),
+          name:
+            row.plantation_name ||
+            row.name ||
+            `Plantation ${row.p_id || row.plantation_id || row.id || "-"}`,
+          org: row.org_name || row.org_id || "Unknown Org",
+          category: "plantation",
+          submitted: formatDate(row.created_at || row.plantation_date),
+          status: mapVerificationToUiStatus(row.verification_status),
+          plantationId: row.p_id || row.plantation_id || row.id || "-",
+          plantationDate: formatDate(row.plantation_date),
+          totalArea: row.total_area,
+          areaUnit: row.area_unit,
+          area: `${row.total_area ?? "-"} ${row.area_unit || ""}`.trim(),
+          species: row.species_name || "-",
+          treesPlanted: row.trees_planted ?? row.total_trees ?? "-",
+          plantAgeYears: row.plant_age_years ?? row.plant_age ?? "-",
+          verificationStatus: row.verification_status || "pending",
+          createdAt: formatDate(row.created_at),
+          managerName: String(row.manager_name || "").trim() || "-",
+          managerContact: String(row.manager_contact || "").trim() || "-",
+          location:
+            Array.isArray(row.points) && row.points.length > 0
+              ? `${formatCoordinate(row.points[0].lat)}, ${formatCoordinate(
+                  row.points[0].lng
+                )}`
+              : "-",
+          boundaryPoints: Array.isArray(row.points)
+            ? row.points.map(
+                (point) =>
+                  `${formatCoordinate(point.lat)}, ${formatCoordinate(point.lng)}`
+              )
+            : [],
+          plantingDate: formatDate(row.plantation_date),
+          raw: row,
+        }));
+        setAssets([...plantationAssets, ...STATIC_NON_PLANTATION_ASSETS]);
+      } catch (error) {
+        setApiError(error?.message || "Failed to load plantation assets");
+        setAssets(STATIC_NON_PLANTATION_ASSETS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPlantationAssets();
+  }, []);
+
+  async function updateAssetStatus(asset, nextStatus, reason = "") {
+    if (!asset?.id) return;
+
+    if (asset.category === "plantation") {
+      await orgAssetApi.updateStatus(asset.id, nextStatus);
+    }
+
+    setAssets((prev) =>
+      prev.map((a) =>
+        a.id === asset.id
+          ? {
+              ...a,
+              status: nextStatus,
+              rejectionReason: nextStatus === "rejected" ? reason : a.rejectionReason,
+            }
+          : a
+      )
+    );
+  }
+
   const totalAssets = assets.length;
+  const orgCount = new Set(assets.map((a) => a.org).filter(Boolean)).size;
   const pendingCount = assets.filter((a) => a.status === "pending").length;
   const approvedCount = assets.filter((a) => a.status === "approved").length;
   const rejectedCount = assets.filter((a) => a.status === "rejected").length;
@@ -312,17 +425,7 @@ export default function OrgAssets() {
 
   function handleReviewDecision(nextStatus, reason = "") {
     if (!selectedReviewAsset?.id) return;
-    setAssets((prev) =>
-      prev.map((a) =>
-        a.id === selectedReviewAsset.id
-          ? {
-              ...a,
-              status: nextStatus,
-              rejectionReason: nextStatus === "rejected" ? reason : a.rejectionReason,
-            }
-          : a
-      )
-    );
+    updateAssetStatus(selectedReviewAsset, nextStatus, reason);
   }
 
   function handleToggleRevert(id) {
@@ -347,29 +450,21 @@ export default function OrgAssets() {
     setRevertError("");
   }
 
-  function handleConfirmRevert() {
+  async function handleConfirmRevert() {
     if (!revertDialog.asset || !revertDialog.action) return;
     if (revertDialog.action === "rejected" && !revertReason.trim()) {
       setRevertError("Reason is required for rejection.");
       return;
     }
 
-    const targetId = revertDialog.asset.id;
-    setAssets((prev) =>
-      prev.map((a) =>
-        a.id === targetId
-          ? {
-              ...a,
-              status: revertDialog.action,
-              rejectionReason:
-                revertDialog.action === "rejected" ? revertReason.trim() : a.rejectionReason,
-            }
-          : a
-      )
-    );
-
-    setOpenRevertRows((prev) => ({ ...prev, [targetId]: false }));
-    handleCloseRevertDialog();
+    try {
+      await updateAssetStatus(revertDialog.asset, revertDialog.action, revertReason.trim());
+      const targetId = revertDialog.asset.id;
+      setOpenRevertRows((prev) => ({ ...prev, [targetId]: false }));
+      handleCloseRevertDialog();
+    } catch (error) {
+      setRevertError(error?.message || "Failed to update asset status.");
+    }
   }
 
   const categories = ["plantation", "fleet", "carbon", "solar", "hydro"];
@@ -389,7 +484,7 @@ export default function OrgAssets() {
       <div className="stat-cards">
         <StatCard
           label="Organizations"
-          value={5}
+          value={orgCount}
           sub={`${totalAssets} total assets`}
           iconBg="green"
           icon={<MdOutlineBusinessCenter size={22} />}
@@ -507,12 +602,21 @@ export default function OrgAssets() {
             <div className="assets-table-header">
               <span>Asset</span>
               <span>Organization</span>
-              <span>Category</span>
+              <span>Manager / Contact</span>
               <span>Submitted</span>
               <span>Status</span>
               <span style={{ textAlign: "right" }}>Actions</span>
             </div>
-            {filtered.length === 0 ? (
+            {apiError && activeCategory === "plantation" && (
+              <div className="empty-state" style={{ padding: "20px" }}>
+                <p style={{ color: "#ff8a8a", fontSize: "14px" }}>{apiError}</p>
+              </div>
+            )}
+            {isLoading && activeCategory === "plantation" ? (
+              <div className="empty-state" style={{ padding: "48px 20px" }}>
+                <p style={{ color: "#aaa", fontSize: "14px" }}>Loading plantation assets...</p>
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="empty-state" style={{ padding: "48px 20px" }}>
                 <p style={{ color: "#aaa", fontSize: "14px" }}>No assets match the current filters.</p>
               </div>
