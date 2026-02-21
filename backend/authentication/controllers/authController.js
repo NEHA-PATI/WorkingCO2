@@ -388,7 +388,11 @@ exports.login = async (req, res) => {
       }
 
       const organization = orgRes.rows[0];
-      const orgPasswordMatch = await bcrypt.compare(password, organization.password_hash);
+      const orgPasswordMatch = await bcrypt.compare(
+  password,
+  String(organization.password_hash)
+);
+
 
       if (!orgPasswordMatch) {
         return res.status(400).json({
