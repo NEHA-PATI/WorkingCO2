@@ -1,50 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaPlaneDeparture } from "react-icons/fa";
+import { fetchAirportCodes } from "@shared/utils/apiClient";
 
-export default function FlightCalculatorForm() {
-  const [entries, setEntries] = useState([
-    {
-      tripType: "one-way",
-      departure: "",
-      arrival: "",
-      cabinClass: "economy",
-      legs: 1,
-    },
-  ]);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+export default function FlightCalculatorForm({
+  entries,
+  onEntryChange,
+  onAddEntry,
+  onRemoveEntry,
+}) {
+  const [airportOptions, setAirportOptions] = useState([]);
 
-  const handleChange = (index, e) => {
-    const { name, value } = e.target;
-    setEntries((prev) =>
-      prev.map((entry, i) => (i === index ? { ...entry, [name]: value } : entry)),
-    );
-  };
+  useEffect(() => {
+    let mounted = true;
 
-  const addEntry = () => {
-    setEntries((prev) => [
-      ...prev,
-      {
-        tripType: "one-way",
-        departure: "",
-        arrival: "",
-        cabinClass: "economy",
-        legs: 1,
-      },
-    ]);
-  };
+    const loadAirports = async () => {
+      try {
+        const codes = await fetchAirportCodes("", 500);
+        if (mounted) {
+          setAirportOptions(codes);
+        }
+      } catch (error) {
+        if (mounted) {
+          setAirportOptions([]);
+        }
+      }
+    };
 
-  const removeEntry = (index) => {
-    setEntries((prev) => prev.filter((_, i) => i !== index));
-  };
+    loadAirports();
 
-  const handleConfirmSubmit = () => {
-    setShowConfirmModal(false);
-    setShowToast(true);
-    setTimeout(() => {
-      setShowToast(false);
-    }, 2200);
-  };
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <div className="w-full min-h-full bg-slate-50 p-3 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl font-['Poppins']">
@@ -62,7 +49,7 @@ export default function FlightCalculatorForm() {
                 {entries.length > 1 && (
                   <button
                     type="button"
-                    onClick={() => removeEntry(index)}
+                    onClick={() => onRemoveEntry(index)}
                     className="text-xs font-semibold text-rose-500 hover:text-rose-600"
                   >
                     Remove
@@ -77,7 +64,7 @@ export default function FlightCalculatorForm() {
                     <select
                       name="tripType"
                       value={entry.tripType}
-                      onChange={(e) => handleChange(index, e)}
+                      onChange={(e) => onEntryChange(index, e)}
                       className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
                     >
                       <option value="one-way">One Way</option>
@@ -95,10 +82,19 @@ export default function FlightCalculatorForm() {
                     <input
                       type="text"
                       name="departure"
-                      placeholder="e.g. DEL"
+                      list="airport-codes-list"
+                      placeholder="Select airport (e.g. DEL)"
                       value={entry.departure}
-                      onChange={(e) => handleChange(index, e)}
-                      className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                      maxLength={3}
+                      onChange={(e) =>
+                        onEntryChange(index, {
+                          target: {
+                            name: e.target.name,
+                            value: e.target.value.toUpperCase(),
+                          },
+                        })
+                      }
+                      className="w-full px-3.5 py-2.5 uppercase text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
                     />
                   </div>
                 </div>
@@ -111,10 +107,19 @@ export default function FlightCalculatorForm() {
                     <input
                       type="text"
                       name="arrival"
-                      placeholder="e.g. LHR"
+                      list="airport-codes-list"
+                      placeholder="Select airport (e.g. LHR)"
                       value={entry.arrival}
-                      onChange={(e) => handleChange(index, e)}
-                      className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                      maxLength={3}
+                      onChange={(e) =>
+                        onEntryChange(index, {
+                          target: {
+                            name: e.target.name,
+                            value: e.target.value.toUpperCase(),
+                          },
+                        })
+                      }
+                      className="w-full px-3.5 py-2.5 uppercase text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
                     />
                   </div>
                 </div>
@@ -125,7 +130,7 @@ export default function FlightCalculatorForm() {
                     <select
                       name="cabinClass"
                       value={entry.cabinClass}
-                      onChange={(e) => handleChange(index, e)}
+                      onChange={(e) => onEntryChange(index, e)}
                       className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
                     >
                       <option value="economy">Economy</option>
@@ -146,7 +151,7 @@ export default function FlightCalculatorForm() {
                       name="legs"
                       min="1"
                       value={entry.legs}
-                      onChange={(e) => handleChange(index, e)}
+                      onChange={(e) => onEntryChange(index, e)}
                       className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
                     />
                   </div>
@@ -157,54 +162,18 @@ export default function FlightCalculatorForm() {
 
           <button
             type="button"
-            onClick={addEntry}
+            onClick={onAddEntry}
             className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors"
           >
             + Add Flight Category
           </button>
         </div>
-
-        <div className="mt-5 sm:mt-7">
-          <button
-            type="button"
-            onClick={() => setShowConfirmModal(true)}
-            className="block w-full sm:w-auto sm:min-w-[280px] mx-auto px-6 sm:px-8 py-2.5 bg-[#13ec5b] text-slate-900 font-semibold text-sm sm:text-base rounded-xl shadow-md hover:bg-[#0eb947] transition-colors"
-          >
-            Submit Details
-          </button>
-        </div>
       </div>
-
-      {showConfirmModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-2xl">
-            <h3 className="text-lg font-bold mb-2">Confirm Submission</h3>
-            <p className="text-sm text-slate-600 mb-4">Do you want to submit these details?</p>
-            <div className="flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setShowConfirmModal(false)}
-                className="px-3 py-2 rounded-lg border border-slate-300 text-sm font-semibold"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmSubmit}
-                className="px-3 py-2 rounded-lg bg-emerald-500 text-white text-sm font-semibold"
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showToast && (
-        <div className="fixed bottom-4 right-4 z-[60] rounded-lg bg-emerald-600 text-white px-4 py-2.5 text-sm font-semibold shadow-lg">
-          Details submitted successfully
-        </div>
-      )}
+      <datalist id="airport-codes-list">
+        {airportOptions.map((code) => (
+          <option key={code} value={code} />
+        ))}
+      </datalist>
     </div>
   );
 }
