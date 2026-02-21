@@ -177,3 +177,10 @@ export const calculateCarbonFootprint = async (payload) => {
   return response.data;
 };
 
+export const fetchAirportCodes = async (search = "", limit = 300) => {
+  const response = await carbonApiClient.get('/v1/airports', {
+    params: { q: search, limit },
+  });
+  return response.data?.data || [];
+};
+

@@ -14,6 +14,19 @@ import CarbonDashboard from "@features/calculator/components/CarbonDashboard";
 import FlightCalculatorForm from "@features/calculator/components/FlightCalculatorForm";
 import { calculateCarbonFootprint } from "@shared/utils/apiClient";
 
+const FOOD_CATEGORIES = [
+  { value: "rice", label: "Rice" },
+  { value: "wheat", label: "Wheat" },
+  { value: "milk", label: "Milk" },
+  { value: "vegetables", label: "Vegetables" },
+  { value: "fruits", label: "Fruits" },
+  { value: "paneer", label: "Paneer" },
+  { value: "chicken", label: "Chicken" },
+  { value: "mutton", label: "Mutton" },
+  { value: "eggs", label: "Eggs" },
+  { value: "processed_food", label: "Processed Food" },
+];
+
 
 
 
@@ -23,8 +36,33 @@ export default function FootprintCalculatorStep() {
   const [maxUnlockedTabIndex, setMaxUnlockedTabIndex] = useState(0);
   const [resultData, setResultData] = useState(null);
 const [loading, setLoading] = useState(false);
-  const [vehicleEntries, setVehicleEntries] = useState([
-    { vehicleType: "", fuelType: "", distanceTravelled: "", mileage: "" },
+  const createVehicleEntry = () => ({
+    vehicleType: "",
+    fuelType: "",
+    distanceTravelled: "",
+    mileage: "",
+    make: "",
+    manufacturingYear: "",
+    fuelEfficiencyCertificate: "",
+    vehicleClass: "",
+    puc: {
+      available: false,
+      lastTestDate: "",
+      expiryDate: "",
+      emissionCoPercent: "",
+      emissionHcPpm: "",
+    },
+  });
+
+  const [vehicleEntries, setVehicleEntries] = useState([createVehicleEntry()]);
+  const [flightEntries, setFlightEntries] = useState([
+    {
+      tripType: "one-way",
+      departure: "",
+      arrival: "",
+      cabinClass: "economy",
+      legs: 1,
+    },
   ]);
   const [housingForm, setHousingForm] = useState({
     electricityKwh: "",
@@ -58,35 +96,159 @@ const [loading, setLoading] = useState(false);
   };
 
   const handleVehicleFormChange = (index, e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setVehicleEntries((prev) =>
-      prev.map((entry, i) => (i === index ? { ...entry, [name]: value } : entry)),
+      prev.map((entry, i) => {
+        if (i !== index) {
+          return entry;
+        }
+
+        if (name.startsWith("puc.")) {
+          const pucField = name.split(".")[1];
+          const nextPuc = {
+            ...entry.puc,
+            [pucField]: type === "checkbox" ? checked : value,
+          };
+
+          if (pucField === "available" && !checked) {
+            nextPuc.lastTestDate = "";
+            nextPuc.expiryDate = "";
+            nextPuc.emissionCoPercent = "";
+            nextPuc.emissionHcPpm = "";
+          }
+
+          return { ...entry, puc: nextPuc };
+        }
+
+        return { ...entry, [name]: type === "checkbox" ? checked : value };
+      }),
     );
   };
 
   const addVehicleEntry = () => {
     setVehicleEntries((prev) => [
       ...prev,
-      { vehicleType: "", fuelType: "", distanceTravelled: "", mileage: "" },
+      createVehicleEntry(),
     ]);
   };
 
   const removeVehicleEntry = (index) => {
     setVehicleEntries((prev) => prev.filter((_, i) => i !== index));
   };
+
+  const handleFlightChange = (index, e) => {
+    const { name, value } = e.target;
+    setFlightEntries((prev) =>
+      prev.map((entry, i) => (i === index ? { ...entry, [name]: value } : entry)),
+    );
+  };
+
+  const addFlightEntry = () => {
+    setFlightEntries((prev) => [
+      ...prev,
+      {
+        tripType: "one-way",
+        departure: "",
+        arrival: "",
+        cabinClass: "economy",
+        legs: 1,
+      },
+    ]);
+  };
+
+  const removeFlightEntry = (index) => {
+    setFlightEntries((prev) => prev.filter((_, i) => i !== index));
+  };
 const handleFinalSubmit = async () => {
   try {
     setLoading(true);
-if (
-  !housingForm.electricityKwh &&
-  !housingForm.lpgCylinders &&
-  foodEntries.every(f => !f.category) &&
-  vehicleEntries.every(v => !v.vehicleType)
-) {
-  toast.error("Please enter at least one data point.");
-   setLoading(false); // 👈 ADD THIS
-  return;
-}
+
+    const hasHousingData =
+      Number(housingForm.electricityKwh || 0) > 0 ||
+      Number(housingForm.lpgCylinders || 0) > 0;
+
+    const validFoodEntries = foodEntries.filter(
+      (f) =>
+        f.category &&
+        Number(f.daysConsumed || 0) > 0 &&
+        Number(f.avgConsumptionPerDay || 0) > 0,
+    );
+    const hasIncompleteFoodEntries = foodEntries.some(
+      (f) =>
+        f.category &&
+        !(Number(f.daysConsumed || 0) > 0 && Number(f.avgConsumptionPerDay || 0) > 0),
+    );
+
+    const validVehicleEntries = vehicleEntries.filter((v) => {
+      const mileageSource =
+        v.fuelEfficiencyCertificate !== ""
+          ? v.fuelEfficiencyCertificate
+          : v.mileage;
+
+      return (
+        v.vehicleType &&
+        v.fuelType &&
+        Number(v.distanceTravelled || 0) > 0 &&
+        Number(mileageSource || 0) > 0
+      );
+    });
+
+    const hasIncompleteVehicleEntries = vehicleEntries.some((v) => {
+      const mileageSource =
+        v.fuelEfficiencyCertificate !== ""
+          ? v.fuelEfficiencyCertificate
+          : v.mileage;
+
+      const isTouched =
+        v.vehicleType ||
+        v.fuelType ||
+        v.distanceTravelled ||
+        mileageSource ||
+        v.make ||
+        v.manufacturingYear ||
+        v.fuelEfficiencyCertificate ||
+        v.vehicleClass ||
+        v.puc?.available ||
+        v.puc?.lastTestDate ||
+        v.puc?.expiryDate ||
+        v.puc?.emissionCoPercent ||
+        v.puc?.emissionHcPpm;
+
+      const isComplete =
+        v.vehicleType &&
+        v.fuelType &&
+        Number(v.distanceTravelled || 0) > 0 &&
+        Number(mileageSource || 0) > 0;
+
+      return Boolean(isTouched) && !isComplete;
+    });
+
+    const validFlightEntries = flightEntries.filter(
+      (f) => f.departure?.trim() && f.arrival?.trim(),
+    );
+    const hasIncompleteFlightEntries = flightEntries.some((f) => {
+      const isTouched = f.departure?.trim() || f.arrival?.trim();
+      const isComplete = f.departure?.trim() && f.arrival?.trim();
+      return Boolean(isTouched) && !isComplete;
+    });
+
+    if (hasIncompleteFoodEntries || hasIncompleteVehicleEntries || hasIncompleteFlightEntries) {
+      toast.error("Please complete all selected entries before submitting.");
+      setLoading(false);
+      return;
+    }
+
+    if (
+      !hasHousingData &&
+      validFoodEntries.length === 0 &&
+      validVehicleEntries.length === 0 &&
+      validFlightEntries.length === 0
+    ) {
+      toast.error("Please enter at least one complete data point.");
+      setLoading(false);
+      return;
+    }
+
     const payload = {
       calculation_month: new Date().toISOString().slice(0, 7),
 
@@ -95,37 +257,64 @@ if (
         lpg_cylinders: Number(housingForm.lpgCylinders || 0),
       },
 
-      food: foodEntries
-        .filter(f => f.category)
-        .map(f => ({
-          category: f.category,
-          avg_quantity_per_day_kg: Number(f.avgConsumptionPerDay || 0) / 1000,
-          days_consumed: Number(f.daysConsumed || 0),
-        })),
+      food: validFoodEntries.map((f) => ({
+        category: f.category,
+        avg_quantity_per_day_kg: Number(f.avgConsumptionPerDay || 0) / 1000,
+        days_consumed: Number(f.daysConsumed || 0),
+      })),
 
       transport: {
-        vehicles:
-          vehicle === "vehicles"
-            ? vehicleEntries
-                .filter(v => v.vehicleType)
-                .map(v => ({
-                  vehicle_type:
-                    v.vehicleType === "2-wheelers" ? "2w" : "4w",
-                  fuel_type: v.fuelType,
-                  distance_km: Number(v.distanceTravelled || 0),
-                  mileage_kmpl: Number(v.mileage || 0),
-                }))
-            : [],
-        flights: [] // for now (we connect flight form next)
-      }
+        vehicles: validVehicleEntries.map((v) => {
+          const mileageSource =
+            v.fuelEfficiencyCertificate !== ""
+              ? v.fuelEfficiencyCertificate
+              : v.mileage;
+
+          return {
+            vehicle_type: v.vehicleType === "2-wheelers" ? "2w" : "4w",
+            fuel_type: v.fuelType,
+            distance_km: Number(v.distanceTravelled || 0),
+            mileage_kmpl: Number(mileageSource || 0),
+            make: v.make?.trim() || "",
+            manufacturing_year: v.manufacturingYear ? Number(v.manufacturingYear) : null,
+            fuel_efficiency_certificate: v.fuelEfficiencyCertificate
+              ? Number(v.fuelEfficiencyCertificate)
+              : null,
+            vehicle_class: v.vehicleClass?.trim() || "",
+            puc: {
+              available: Boolean(v.puc?.available),
+              last_test_date: v.puc?.lastTestDate || "",
+              expiry_date: v.puc?.expiryDate || "",
+              emission_co_percent:
+                v.puc?.emissionCoPercent !== "" ? Number(v.puc.emissionCoPercent) : null,
+              emission_hc_ppm:
+                v.puc?.emissionHcPpm !== "" ? Number(v.puc.emissionHcPpm) : null,
+            },
+          };
+        }),
+        flights: validFlightEntries.map((f) => ({
+          trip_type:
+            f.tripType === "one-way"
+              ? "one_way"
+              : f.tripType === "round-trip"
+                ? "round_trip"
+                : "multi_city",
+          cabin_class: f.cabinClass === "premium" ? "premium_economy" : f.cabinClass,
+          legs: [
+            {
+              departure_airport: f.departure.trim().toUpperCase(),
+              arrival_airport: f.arrival.trim().toUpperCase(),
+            },
+          ],
+        })),
+      },
     };
 
     const result = await calculateCarbonFootprint(payload);
 
     setResultData(result);
-
+    setMaxUnlockedTabIndex(tabs.length - 1);
     setActiveTab("results");
-
   } catch (error) {
     toast.error("Calculation failed. Please try again.");
   } finally {
@@ -163,7 +352,7 @@ if (
 
   const handleTabChange = (tabId) => {
   if (tabId === "results" && !resultData) {
-    toast.info("Please calculate first.");
+    toast.info("Please enter data first");
     return;
   }
 
@@ -173,7 +362,7 @@ if (
     return;
   }
 
-  toast.info("Please fill details here first.", {
+  toast.info("Fill details and Click next ", {
     toastId: "calculator-step-lock",
   });
 };
@@ -255,17 +444,17 @@ if (
                 <div>
                   <h2 className="text-xl sm:text-2xl font-bold mb-0.5">Transportation</h2>
                   <p className="text-slate-600 text-sm sm:text-base mb-2.5 sm:mb-3">
-                    How do you get around on a daily basis?
+                  
                   </p>
                 </div>
-               <button
-  type="button"
-  onClick={handleFinalSubmit}
-  disabled={loading}
-  className="shrink-0 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors"
->
-  {loading ? "Calculating..." : "Submit Details"}
-</button>
+                <button
+                  type="button"
+                  onClick={handleFinalSubmit}
+                  disabled={loading}
+                  className="shrink-0 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Calculating..." : "Submit Details"}
+                </button>
               </div>
             </section>
 
@@ -305,7 +494,12 @@ if (
               </div>
 
               {vehicle === "flight" ? (
-                <FlightCalculatorForm />
+                <FlightCalculatorForm
+                  entries={flightEntries}
+                  onEntryChange={handleFlightChange}
+                  onAddEntry={addFlightEntry}
+                  onRemoveEntry={removeFlightEntry}
+                />
               ) : (
                 <div className="w-full space-y-3">
                   {vehicleEntries.map((entry, index) => (
@@ -384,6 +578,127 @@ if (
                           />
                         </div>
                       </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                        <div>
+                          <label className="block text-sm font-semibold mb-1.5">Make</label>
+                          <input
+                            type="text"
+                            name="make"
+                            placeholder="e.g. Honda"
+                            value={entry.make || ""}
+                            onChange={(e) => handleVehicleFormChange(index, e)}
+                            className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold mb-1.5">Manufacturing Year</label>
+                          <input
+                            type="number"
+                            name="manufacturingYear"
+                            min="1900"
+                            max="2100"
+                            placeholder="e.g. 2022"
+                            value={entry.manufacturingYear || ""}
+                            onChange={(e) => handleVehicleFormChange(index, e)}
+                            className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold mb-1.5">Fuel Efficiency Certificate (km/l)</label>
+                          <input
+                            type="number"
+                            name="fuelEfficiencyCertificate"
+                            min="0"
+                            step="0.01"
+                            placeholder="e.g. 20"
+                            value={entry.fuelEfficiencyCertificate || ""}
+                            onChange={(e) => handleVehicleFormChange(index, e)}
+                            className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold mb-1.5">Vehicle Class</label>
+                          <input
+                            type="text"
+                            name="vehicleClass"
+                            placeholder="e.g. hatchback"
+                            value={entry.vehicleClass || ""}
+                            onChange={(e) => handleVehicleFormChange(index, e)}
+                            className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-3">
+                        <label className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            name="puc.available"
+                            checked={Boolean(entry.puc?.available)}
+                            onChange={(e) => handleVehicleFormChange(index, e)}
+                            className="h-4 w-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-400"
+                          />
+                          PUC Available?
+                        </label>
+
+                        {entry.puc?.available && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                            <div>
+                              <label className="block text-sm font-semibold mb-1.5">Last Test Date</label>
+                              <input
+                                type="date"
+                                name="puc.lastTestDate"
+                                value={entry.puc?.lastTestDate || ""}
+                                onChange={(e) => handleVehicleFormChange(index, e)}
+                                className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-semibold mb-1.5">Expiry Date</label>
+                              <input
+                                type="date"
+                                name="puc.expiryDate"
+                                value={entry.puc?.expiryDate || ""}
+                                onChange={(e) => handleVehicleFormChange(index, e)}
+                                className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-semibold mb-1.5">CO Emission %</label>
+                              <input
+                                type="number"
+                                name="puc.emissionCoPercent"
+                                min="0"
+                                step="0.01"
+                                placeholder="e.g. 2.5"
+                                value={entry.puc?.emissionCoPercent || ""}
+                                onChange={(e) => handleVehicleFormChange(index, e)}
+                                className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-semibold mb-1.5">HC Emission PPM</label>
+                              <input
+                                type="number"
+                                name="puc.emissionHcPpm"
+                                min="0"
+                                step="1"
+                                placeholder="e.g. 120"
+                                value={entry.puc?.emissionHcPpm || ""}
+                                onChange={(e) => handleVehicleFormChange(index, e)}
+                                className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
 
@@ -406,7 +721,7 @@ if (
           <div className="w-full min-h-full bg-slate-50 p-3 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl font-['Poppins']">
             <div className="w-full bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-3.5 sm:p-5 md:p-6 lg:p-8">
               <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3">
-                <h2 className="text-xl sm:text-[30px] font-bold">Housing Carbon Calculator</h2>
+                <h2 className="text-xl sm:text-[30px] font-bold">Household Energy Usage</h2>
                 <button
                   type="button"
                   onClick={goToNextTab}
@@ -455,7 +770,7 @@ if (
           <div className="w-full min-h-full bg-slate-50 p-3 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl font-['Poppins']">
             <div className="w-full bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl p-3.5 sm:p-5 md:p-6 lg:p-8">
               <div className="mb-4 sm:mb-6 flex items-start justify-between gap-3">
-                <h2 className="text-xl sm:text-[30px] font-bold">Food Carbon Calculator</h2>
+                <h2 className="text-xl sm:text-[30px] font-bold">Food Consumption</h2>
                 <button
                   type="button"
                   onClick={goToNextTab}
@@ -495,11 +810,11 @@ if (
                           className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
                         >
                           <option value="">Select category</option>
-                          <option value="rice">Rice</option>
-                          <option value="dal">Dal</option>
-                          <option value="chicken">Chicken</option>
-                          <option value="fish">Fish</option>
-                          <option value="milk">Milk</option>
+                          {FOOD_CATEGORIES.map((item) => (
+                            <option key={item.value} value={item.value}>
+                              {item.label}
+                            </option>
+                          ))}
                         </select>
                       </div>
 
@@ -559,3 +874,4 @@ if (
     </div>
   );
 }
+
