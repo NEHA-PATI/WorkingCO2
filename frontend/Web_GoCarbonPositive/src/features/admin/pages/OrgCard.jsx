@@ -11,6 +11,16 @@ const DEFAULT_ASSET = {
   category: "plantation",
   submitted: "February 10, 2026",
   status: "pending",
+  plantationId: "-",
+  area: "800 hectares",
+  species: "Rattan, Dipterocarp",
+  location: "1.5 deg, 110 deg",
+  plantingDate: "Sep 15, 2025",
+  treesPlanted: "-",
+  plantAgeYears: "-",
+  managerName: "-",
+  managerContact: "-",
+  boundaryPoints: [],
 };
 
 const VALID_STATUSES = new Set(["pending", "approved", "rejected"]);
@@ -21,9 +31,25 @@ export default function OrgCard({ asset, onClose, onDecision }) {
 
   const safeAsset = useMemo(() => {
     const merged = { ...DEFAULT_ASSET, ...(asset || {}) };
+    const resolvedPlantAge =
+      merged.plantAgeYears ??
+      merged.plant_age_years ??
+      merged.raw?.plant_age_years ??
+      merged.raw?.plant_age ??
+      "-";
+    const resolvedPlantationId =
+      merged.plantationId ??
+      merged.p_id ??
+      merged.raw?.p_id ??
+      merged.raw?.plantation_id ??
+      merged.id ??
+      "-";
+
     return {
       ...merged,
       status: VALID_STATUSES.has(merged.status) ? merged.status : "pending",
+      plantAgeYears: resolvedPlantAge,
+      plantationId: resolvedPlantationId,
     };
   }, [asset]);
 
@@ -205,7 +231,7 @@ export default function OrgCard({ asset, onClose, onDecision }) {
               </div>
               <div>
                 <p className="orgcard-asset-label">Area</p>
-                <p className="orgcard-asset-value">800 hectares</p>
+                <p className="orgcard-asset-value">{safeAsset.area || "-"}</p>
               </div>
             </div>
             <div className="orgcard-asset-item">
@@ -225,7 +251,7 @@ export default function OrgCard({ asset, onClose, onDecision }) {
               </div>
               <div>
                 <p className="orgcard-asset-label">Species</p>
-                <p className="orgcard-asset-value">Rattan, Dipterocarp</p>
+                <p className="orgcard-asset-value">{safeAsset.species || "-"}</p>
               </div>
             </div>
             <div className="orgcard-asset-item">
@@ -246,7 +272,7 @@ export default function OrgCard({ asset, onClose, onDecision }) {
               </div>
               <div>
                 <p className="orgcard-asset-label">Location</p>
-                <p className="orgcard-asset-value">1.5 deg, 110 deg</p>
+                <p className="orgcard-asset-value">{safeAsset.location || "-"}</p>
               </div>
             </div>
             <div className="orgcard-asset-item">
@@ -269,7 +295,7 @@ export default function OrgCard({ asset, onClose, onDecision }) {
               </div>
               <div>
                 <p className="orgcard-asset-label">Planting Date</p>
-                <p className="orgcard-asset-value">Sep 15, 2025</p>
+                <p className="orgcard-asset-value">{safeAsset.plantingDate || "-"}</p>
               </div>
             </div>
             <div className="orgcard-asset-item">
@@ -289,8 +315,100 @@ export default function OrgCard({ asset, onClose, onDecision }) {
                 </svg>
               </div>
               <div>
-                <p className="orgcard-asset-label">Est. Carbon Offset</p>
-                <p className="orgcard-asset-value">2,800 tCO2e</p>
+                <p className="orgcard-asset-label">Trees Planted</p>
+                <p className="orgcard-asset-value">{safeAsset.treesPlanted ?? "-"}</p>
+              </div>
+            </div>
+            <div className="orgcard-asset-item">
+              <div className="orgcard-asset-icon">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#22c55e"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
+                  <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                </svg>
+              </div>
+              <div>
+                <p className="orgcard-asset-label">Plant Age (Years)</p>
+                <p className="orgcard-asset-value">{safeAsset.plantAgeYears ?? "-"}</p>
+              </div>
+            </div>
+            <div className="orgcard-asset-item">
+              <div className="orgcard-asset-icon">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#22c55e"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="2" y="5" width="20" height="14" rx="2" />
+                  <line x1="2" y1="10" x2="22" y2="10" />
+                </svg>
+              </div>
+              <div>
+                <p className="orgcard-asset-label">Manager Contact</p>
+                <p className="orgcard-asset-value">
+                  {safeAsset.managerName} ({safeAsset.managerContact})
+                </p>
+              </div>
+            </div>
+            <div className="orgcard-asset-item">
+              <div className="orgcard-asset-icon">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#22c55e"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </div>
+              <div>
+                <p className="orgcard-asset-label">Plantation ID</p>
+                <p className="orgcard-asset-value">{safeAsset.plantationId || safeAsset.id}</p>
+              </div>
+            </div>
+            <div className="orgcard-asset-item">
+              <div className="orgcard-asset-icon">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#22c55e"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </div>
+              <div>
+                <p className="orgcard-asset-label">Boundary Coordinates</p>
+                <p className="orgcard-asset-value">
+                  {safeAsset.boundaryPoints?.length
+                    ? safeAsset.boundaryPoints.join(" | ")
+                    : safeAsset.location || "-"}
+                </p>
               </div>
             </div>
           </div>
