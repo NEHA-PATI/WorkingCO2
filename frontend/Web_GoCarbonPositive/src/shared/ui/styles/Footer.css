@@ -36,6 +36,11 @@
 
 .footer__logo-icon {
   color: #2f855a;
+  font-size: 1.9rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Headings */
@@ -203,6 +208,17 @@
     padding: 30px 20px;
   }
 
+  .footer__container {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px 12px;
+    align-items: start;
+  }
+
+  .footer_about {
+    grid-column: 1 / -1;
+  }
+
   .footer_section,
   .footer__heading,
   .footer__text,
@@ -213,19 +229,24 @@
     text-align: center;
   }
 
+  .footer_links {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
   .footer__logo {
     justify-content: center;
   }
 
-  .footer_contact .footer__item {
+  .footer_contact .footer__item,
+  .footer_links .footer__item,
+  .footer__item {
     justify-content: center;
   }
 
   .footer__socials {
-    justify-content: center;
-  }
-
-  .footer__item {
     justify-content: center;
   }
 }

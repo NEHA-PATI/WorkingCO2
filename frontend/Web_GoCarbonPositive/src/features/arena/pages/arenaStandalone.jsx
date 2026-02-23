@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom';
 import "@features/arena/styles/arenaglobals.css";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { AnimatePresence, useMotionValue, useAnimationFrame } from 'framer-motion';
@@ -14,7 +14,7 @@ import {
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import arenaApi, { getArenaUserId } from '@features/arena/services/arenaApi';
 import { useCountdown } from '@features/arena/hooks/useCountdown';
-import a4 from "@features/arena/components/photos/a4.jpeg";
+import a4 from "@features/arena/components/photos/a4.jpg";
 import a5 from "@features/arena/components/photos/a5.jpg";
 import a6 from "@features/arena/components/photos/a6.jpg";
 import a7 from "@features/arena/components/photos/a7.jpg";
@@ -128,10 +128,111 @@ const styles = `
 `;
 
 const iconMap = {
-    UserPlus, ClipboardList, Linkedin, Instagram, Users, CalendarCheck, Gamepad2, Brain
+    UserPlus, ClipboardList, Linkedin, Instagram, Users, CalendarCheck, Gamepad2, Brain, Gift, Star, Flame, Trophy, Sparkles
+};
+
+const TASK_ICON_MAP = {
+    sign_up: 'UserPlus',
+    complete_profile: 'ClipboardList',
+    take_survey: 'Brain',
+    connect_linkedin: 'Linkedin',
+    connect_instagram: 'Instagram',
+    join_community: 'Users',
+    daily_checkin: 'CalendarCheck',
+    daily_quiz: 'Gamepad2'
 };
 
 const QUIZ_TASK_KEY = 'daily_quiz';
+const QUIZ_COOLDOWN_GLOBAL_KEY = 'arena_daily_quiz_cooldown_until';
+const INSTAGRAM_CONNECT_URL = 'https://www.instagram.com/gocarbonpositive/';
+const LINKEDIN_CONNECT_URL = 'https://www.linkedin.com/company/gocarbonpositive/';
+const COMMUNITY_CONNECT_URL = 'https://chat.whatsapp.com/Er0bkEnZG6O7WRjLu3AOBT';
+const SURVEY_TASK_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdNvw4VpMCI7Q3ttZ2vir8cv_w7gRv7VUyoUcAgQbEcf0oLvQ/viewform?usp=publish-editor';
+const PENDING_SOCIAL_TASK_KEY = 'arena_pending_social_task';
+const PENDING_PROFILE_TASK_KEY = 'arena_pending_profile_task';
+
+const getQuizCooldownStorageKey = (userId) => `arena_daily_quiz_cooldown_until:${userId || 'guest'}`;
+
+const readQuizCooldownUntil = (userId) => {
+    if (typeof window === 'undefined') return null;
+    try {
+        const scopedRawValue = window.localStorage.getItem(getQuizCooldownStorageKey(userId));
+        const globalRawValue = window.localStorage.getItem(QUIZ_COOLDOWN_GLOBAL_KEY);
+        const scopedValue = Number(scopedRawValue);
+        const globalValue = Number(globalRawValue);
+        const maxValue = Math.max(
+            Number.isFinite(scopedValue) ? scopedValue : 0,
+            Number.isFinite(globalValue) ? globalValue : 0
+        );
+        return maxValue > 0 ? maxValue : null;
+    } catch {
+        return null;
+    }
+};
+
+const writeQuizCooldownUntil = (userId, untilTimestamp) => {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.setItem(getQuizCooldownStorageKey(userId), String(untilTimestamp));
+        window.localStorage.setItem(QUIZ_COOLDOWN_GLOBAL_KEY, String(untilTimestamp));
+    } catch {
+        // Ignore storage failures and keep UI functional.
+    }
+};
+
+const readPendingSocialTask = () => {
+    if (typeof window === 'undefined') return null;
+    try {
+        return window.localStorage.getItem(PENDING_SOCIAL_TASK_KEY);
+    } catch {
+        return null;
+    }
+};
+
+const writePendingSocialTask = (taskType) => {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.setItem(PENDING_SOCIAL_TASK_KEY, taskType);
+    } catch {
+        // Ignore storage failures and keep UI functional.
+    }
+};
+
+const clearPendingSocialTask = () => {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.removeItem(PENDING_SOCIAL_TASK_KEY);
+    } catch {
+        // Ignore storage failures and keep UI functional.
+    }
+};
+
+const readPendingProfileTask = () => {
+    if (typeof window === 'undefined') return null;
+    try {
+        return window.localStorage.getItem(PENDING_PROFILE_TASK_KEY);
+    } catch {
+        return null;
+    }
+};
+
+const writePendingProfileTask = (taskType) => {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.setItem(PENDING_PROFILE_TASK_KEY, taskType);
+    } catch {
+        // Ignore storage failures and keep UI functional.
+    }
+};
+
+const clearPendingProfileTask = () => {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.removeItem(PENDING_PROFILE_TASK_KEY);
+    } catch {
+        // Ignore storage failures and keep UI functional.
+    }
+};
 
 const DEFAULT_THEME = {
     gradient: "from-slate-500 to-slate-700",
@@ -142,134 +243,78 @@ const DEFAULT_THEME = {
     button: "from-slate-600 to-slate-700"
 };
 
-const CONTEST_UI_CONFIG = {
+const EARN_CARD_THEME = {
     sign_up: {
-        title: "Sign Up Bonus",
-        description: "One-time signup reward",
-        icon: "UserPlus",
-        buttonText: "Claim Bonus",
-        rules: ["Configured from backend reward rules", "One-time task"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-violet-500 to-purple-600",
-            bg: "bg-violet-50",
-            border: "border-violet-200",
-            iconBg: "bg-violet-600",
-            iconText: "text-white",
-            button: "from-violet-500 to-purple-600"
-        }
+        bg: 'bg-violet-100',
+        border: 'border-violet-300',
+        hover: 'from-violet-200 to-fuchsia-100',
+        icon: 'text-violet-600',
+        button: 'from-violet-300 to-fuchsia-300',
+        badge: 'from-violet-500 to-fuchsia-500'
     },
     complete_profile: {
-        title: "Complete Profile",
-        description: "Finish your profile to unlock bonus points",
-        icon: "UserPlus",
-        buttonText: "Mark Complete",
-        rules: ["Configured from backend reward rules", "One-time task"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-indigo-500 to-violet-600",
-            bg: "bg-indigo-50",
-            border: "border-indigo-200",
-            iconBg: "bg-indigo-600",
-            iconText: "text-white",
-            button: "from-indigo-500 to-violet-600"
-        }
+        bg: 'bg-indigo-100',
+        border: 'border-indigo-300',
+        hover: 'from-indigo-200 to-violet-100',
+        icon: 'text-indigo-600',
+        button: 'from-indigo-300 to-violet-300',
+        badge: 'from-indigo-500 to-violet-500'
     },
     take_survey: {
-        title: "Take a Survey",
-        description: "Share your feedback and claim points",
-        icon: "ClipboardList",
-        buttonText: "Start Survey",
-        rules: ["Configured from backend reward rules", "One-time task"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-emerald-500 to-teal-600",
-            bg: "bg-emerald-50",
-            border: "border-emerald-200",
-            iconBg: "bg-emerald-600",
-            iconText: "text-white",
-            button: "from-emerald-500 to-teal-600"
-        }
+        bg: 'bg-emerald-100',
+        border: 'border-emerald-300',
+        hover: 'from-emerald-200 to-teal-100',
+        icon: 'text-emerald-600',
+        button: 'from-emerald-300 to-teal-300',
+        badge: 'from-emerald-500 to-teal-500'
     },
     connect_linkedin: {
-        title: "Connect on LinkedIn",
-        description: "Follow us on LinkedIn",
-        icon: "Linkedin",
-        buttonText: "Connect Now",
-        rules: ["Configured from backend reward rules", "One-time task"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-blue-500 to-indigo-600",
-            bg: "bg-blue-50",
-            border: "border-blue-200",
-            iconBg: "bg-blue-600",
-            iconText: "text-white",
-            button: "from-blue-500 to-indigo-600"
-        }
+        bg: 'bg-blue-100',
+        border: 'border-blue-300',
+        hover: 'from-blue-200 to-indigo-100',
+        icon: 'text-blue-600',
+        button: 'from-blue-300 to-indigo-300',
+        badge: 'from-blue-500 to-indigo-500'
     },
     connect_instagram: {
-        title: "Follow on Instagram",
-        description: "Join our Instagram community",
-        icon: "Instagram",
-        buttonText: "Follow Us",
-        rules: ["Configured from backend reward rules", "One-time task"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-pink-500 to-rose-600",
-            bg: "bg-pink-50",
-            border: "border-pink-200",
-            iconBg: "bg-pink-600",
-            iconText: "text-white",
-            button: "from-pink-500 to-rose-600"
-        }
+        bg: 'bg-pink-100',
+        border: 'border-pink-300',
+        hover: 'from-pink-200 to-rose-100',
+        icon: 'text-pink-600',
+        button: 'from-pink-300 to-rose-300',
+        badge: 'from-pink-500 to-rose-500'
     },
     join_community: {
-        title: "Join Community",
-        description: "Be part of our community",
-        icon: "Users",
-        buttonText: "Join Community",
-        rules: ["Configured from backend reward rules", "One-time task"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-cyan-500 to-blue-600",
-            bg: "bg-cyan-50",
-            border: "border-cyan-200",
-            iconBg: "bg-cyan-600",
-            iconText: "text-white",
-            button: "from-cyan-500 to-blue-600"
-        }
+        bg: 'bg-cyan-100',
+        border: 'border-cyan-300',
+        hover: 'from-cyan-200 to-blue-100',
+        icon: 'text-cyan-600',
+        button: 'from-cyan-300 to-blue-300',
+        badge: 'from-cyan-500 to-blue-500'
     },
     daily_checkin: {
-        title: "Daily Check-in",
-        description: "Claim your daily check-in points",
-        icon: "CalendarCheck",
-        buttonText: "Check In",
-        rules: ["Available once every 24 hours", "Cooldown controlled by backend"],
-        rewards: ["Daily points + streak progression"],
-        theme: {
-            gradient: "from-sky-600 to-indigo-600",
-            bg: "bg-sky-50",
-            border: "border-sky-200",
-            iconBg: "bg-sky-600",
-            iconText: "text-white",
-            button: "from-sky-600 to-indigo-600"
-        }
+        bg: 'bg-sky-100',
+        border: 'border-sky-300',
+        hover: 'from-sky-200 to-indigo-100',
+        icon: 'text-sky-600',
+        button: 'from-sky-300 to-indigo-300',
+        badge: 'from-sky-500 to-indigo-500'
     },
     daily_quiz: {
-        title: "Daily Quiz",
-        description: "Submit your correct answers to earn points",
-        icon: "Brain",
-        buttonText: "Submit Score",
-        rules: ["Enter number of correct answers", "Daily cap is from backend"],
-        rewards: ["Points from reward_rules table"],
-        theme: {
-            gradient: "from-fuchsia-500 to-pink-600",
-            bg: "bg-fuchsia-50",
-            border: "border-fuchsia-200",
-            iconBg: "bg-fuchsia-600",
-            iconText: "text-white",
-            button: "from-fuchsia-500 to-pink-600"
-        }
+        bg: 'bg-fuchsia-100',
+        border: 'border-fuchsia-300',
+        hover: 'from-fuchsia-200 to-pink-100',
+        icon: 'text-fuchsia-600',
+        button: 'from-fuchsia-300 to-pink-300',
+        badge: 'from-fuchsia-500 to-pink-500'
+    },
+    default: {
+        bg: 'bg-slate-100',
+        border: 'border-slate-300',
+        hover: 'from-slate-200 to-slate-100',
+        icon: 'text-slate-600',
+        button: 'from-slate-300 to-slate-400',
+        badge: 'from-slate-500 to-slate-600'
     }
 };
 
@@ -325,15 +370,15 @@ const HeroSlider = () => {
     const prev = () => setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
 
     return (
-        <div className="relative w-full h-[280px] sm:h-[320px] overflow-hidden">
-            <AnimatePresence mode="wait">
+        <div className="relative w-full h-[280px] sm:h-[320px] overflow-hidden bg-black">
+            <AnimatePresence initial={false}>
                 <motion.div
                     key={current}
-                    initial={{ opacity: 0, x: 100 }}
+                    className="absolute inset-0"
+                    initial={{ opacity: 0, x: 36 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -100 }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
-
+                    exit={{ opacity: 0, x: -36 }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
                 >
                     <img
                         src={banners[current].image}
@@ -404,11 +449,11 @@ const HeroSlider = () => {
     );
 };
 
-const STREAK_WINDOW_DAYS = 30;
 const STREAK_BONUS_TIERS = [
-    { days: 7, points: 75 },
-    { days: 14, points: 150 },
-    { days: 30, points: 250 }
+    { days: 7, points: 25 },
+    { days: 14, points: 50 },
+    { days: 21, points: 75 },
+    { days: 28, points: 100 }
 ];
 
 const StreakProgressPanel = ({
@@ -419,7 +464,6 @@ const StreakProgressPanel = ({
     isError,
     errorMessage
 }) => {
-    const [days, setDays] = useState([]);
     const safeCurrentStreak = Math.max(Number(currentStreak) || 0, 0);
     const safeLongestStreak = Math.max(Number(longestStreak) || 0, 0);
     const nextBonusTier = STREAK_BONUS_TIERS.find((tier) => safeCurrentStreak < tier.days) || null;
@@ -430,36 +474,6 @@ const StreakProgressPanel = ({
         if (safeCurrentStreak >= tier.days) return tier.points;
         return sum;
     }, 0);
-
-    useEffect(() => {
-        const now = new Date();
-        const normalizedStreak = Math.max(0, Math.min(safeCurrentStreak, STREAK_WINDOW_DAYS));
-
-        const generated = Array.from({ length: STREAK_WINDOW_DAYS }, (_, index) => {
-            const dayOffset = STREAK_WINDOW_DAYS - 1 - index;
-            const date = new Date(now);
-            date.setHours(0, 0, 0, 0);
-            date.setDate(now.getDate() - dayOffset);
-
-            const isActive = index >= STREAK_WINDOW_DAYS - normalizedStreak;
-            const distanceFromToday = STREAK_WINDOW_DAYS - 1 - index;
-
-            let intensity = 'inactive';
-            if (isActive && distanceFromToday <= 1) intensity = 'bright';
-            else if (isActive && distanceFromToday <= 4) intensity = 'medium';
-            else if (isActive) intensity = 'soft';
-
-            return {
-                index,
-                date,
-                isActive,
-                isToday: index === STREAK_WINDOW_DAYS - 1,
-                intensity
-            };
-        });
-
-        setDays(generated);
-    }, [safeCurrentStreak]);
 
     if (isLoading) {
         return (
@@ -505,21 +519,27 @@ const StreakProgressPanel = ({
                 <p className="text-[11px] text-slate-400 mb-3">Last check-in: {lastCheckinDate}</p>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
-                {STREAK_BONUS_TIERS.map((tier) => {
-                    const unlocked = safeCurrentStreak >= tier.days;
-                    return (
-                        <div
-                            key={tier.days}
-                            className={`rounded-xl border px-3 py-2 text-center transition-all ${unlocked
-                                ? 'border-emerald-300 bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm'
-                                : 'border-slate-200 bg-slate-50 text-slate-600'}`}
-                        >
-                            <p className="text-xs font-semibold">Streak Bonus</p>
-                            <p className="text-sm font-bold mt-0.5">{tier.days} days - +{tier.points} pts</p>
-                        </div>
-                    );
-                })}
+            <div className="mb-4 overflow-x-auto">
+                <div className="grid grid-cols-4 gap-2 min-w-[640px] sm:min-w-0">
+                    {STREAK_BONUS_TIERS.map((tier) => {
+                        const unlocked = safeCurrentStreak >= tier.days;
+                        return (
+                            <div
+                                key={tier.days}
+                                className={`rounded-lg border px-2.5 py-2 text-center transition-all ${unlocked
+                                    ? 'border-emerald-300 bg-gradient-to-r from-emerald-100 to-teal-100 shadow-sm'
+                                    : 'border-slate-200 bg-white text-slate-600 hover:border-violet-200 hover:bg-violet-50/40'}`}
+                            >
+                                <p className={`text-[11px] font-semibold tracking-wide bg-clip-text text-transparent ${unlocked ? 'bg-gradient-to-r from-sky-600 to-cyan-600' : 'bg-gradient-to-r from-rose-600 to-pink-600'}`}>
+                                    Streak Bonus
+                                </p>
+                                <p className={`text-[15px] font-bold mt-0.5 ${unlocked ? 'text-emerald-800' : 'text-violet-700'}`}>
+                                    {tier.days} days - +{tier.points} pts
+                                </p>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
@@ -541,54 +561,6 @@ const StreakProgressPanel = ({
                 </div>
             </div>
 
-            <div className="mt-4 overflow-x-auto pb-1">
-                <div className="flex items-end gap-1.5 min-w-max">
-                    {days.map((day, index) => {
-                        const barBase = 'bg-slate-200 border border-slate-300';
-                        const barColor = day.intensity === 'bright'
-                            ? 'bg-gradient-to-t from-emerald-600 to-teal-400 border-emerald-500'
-                            : day.intensity === 'medium'
-                                ? 'bg-gradient-to-t from-emerald-500 to-teal-300 border-emerald-400'
-                                : day.intensity === 'soft'
-                                    ? 'bg-gradient-to-t from-emerald-400 to-emerald-300 border-emerald-300'
-                                    : barBase;
-
-                        const dateLabel = day.date.toLocaleDateString('en-IN', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric'
-                        });
-
-                        return (
-                            <div key={dateLabel} className="group relative" title={dateLabel}>
-                                <motion.div
-                                    initial={{ opacity: 0, scaleY: 0.4 }}
-                                    animate={{
-                                        opacity: 1,
-                                        scaleY: day.isActive ? 1 : 0.65
-                                    }}
-                                    transition={{
-                                        delay: index * 0.015,
-                                        duration: 0.35
-                                    }}
-                                    className={`w-3 sm:w-3.5 h-10 sm:h-12 rounded-md origin-bottom ${barColor} ${day.isToday ? 'ring-2 ring-emerald-300 ring-offset-1' : ''}`}
-                                >
-                                    {day.isToday && (
-                                        <motion.div
-                                            className="w-full h-full rounded-md"
-                                            animate={{ opacity: [0.45, 0.95, 0.45] }}
-                                            transition={{ duration: 1.6, repeat: Infinity }}
-                                        />
-                                    )}
-                                </motion.div>
-                                <div className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] px-2 py-1 rounded-md bg-slate-900 text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {dateLabel}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
         </motion.div>
     );
 };
@@ -695,6 +667,7 @@ const Leaderboard = ({ leaderboardData, isLoading, myRank, onSeeMore }) => {
 // ContestCard Component
 const ContestCard = ({ contest, index, onClick, state, onCooldownExpired }) => {
     const Icon = iconMap[contest.icon] || Zap;
+    const cardTheme = EARN_CARD_THEME[contest.taskType] || EARN_CARD_THEME.default;
     const cooldownTarget = state === 'COOLDOWN' ? contest.backend?.next_available_at : null;
     const { formatted: cooldownText, isExpired } = useCountdown(cooldownTarget);
 
@@ -715,46 +688,32 @@ const ContestCard = ({ contest, index, onClick, state, onCooldownExpired }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             whileHover={{ y: isUnavailable ? 0 : -4, transition: { duration: 0.2 } }}
-            onClick={() => onClick(contest.taskType)}
-            className={`group relative ${contest.theme.bg} ${contest.theme.border} border rounded-2xl p-5 cursor-pointer overflow-hidden transition-all ${isCompleted ? 'opacity-70 hover:shadow-sm' : 'hover:shadow-lg'}`}
+            onClick={() => onClick(contest)}
+            className={`group relative border ${cardTheme.border} rounded-2xl p-4 sm:p-4 cursor-pointer overflow-hidden transition-all min-h-[245px] flex flex-col bg-white ${isCompleted ? 'opacity-75 hover:shadow-sm' : 'hover:shadow-lg shadow-sm'}`}
         >
-            <div className={`absolute inset-0 bg-gradient-to-br ${contest.theme.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
-            {isCooldown ? (
-                <div className="cooldown-pill">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>{cooldownText}</span>
+            <div className={`absolute inset-x-0 bottom-0 h-1.5 bg-gradient-to-r ${cardTheme.badge}`} />
+            <div className="mb-5 flex items-start justify-between gap-3">
+                <div className="w-10 h-10 flex items-center justify-center">
+                    <Icon className={`w-8 h-8 ${cardTheme.icon}`} />
                 </div>
-            ) : isCompleted ? (
-                <div className="completed-pill">
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Completed</span>
-                </div>
-            ) : (
-                <div className={`points-pill bg-gradient-to-r ${contest.theme.gradient}`}>
-                    <Zap className="w-3.5 h-3.5" />
-                    <span>{Number(contest.points || 0).toLocaleString()} pts</span>
-                </div>
-            )}
-            <div className={`w-12 h-12 ${contest.theme.iconBg} rounded-xl flex items-center justify-center shadow-lg mb-4`}>
-                <Icon className={`w-8 h-8 ${contest.theme.iconText}`} />
+                {isCooldown ? (
+                    <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold border border-slate-200 bg-slate-100 text-slate-700">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>{cooldownText}</span>
+                    </div>
+                ) : isCompleted ? (
+                    <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold border border-emerald-200 bg-emerald-50 text-emerald-700">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Done</span>
+                    </div>
+                ) : null}
             </div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-1">{contest.title}</h3>
-            <p className="text-sm text-slate-500 mb-4">{contest.description}</p>
-            <button
-                className={`arena-standalone-btn w-full border-0 shadow-md transition-all ${isCooldown ? 'bg-slate-100 text-slate-500' : isCompleted ? 'bg-emerald-100 text-emerald-700' : `bg-gradient-to-r ${contest.theme.button} hover:opacity-90 text-white group-hover:shadow-lg`}`}
-                disabled={isUnavailable}
-            >
-                <span>
-                    {isCompleted
-                        ? 'Completed'
-                        : isCooldown
-                            ? 'On Cooldown'
-                            : contest.buttonText}
-                </span>
-                {!isUnavailable && (
-                    <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                )}
-            </button>
+            <h3 className="text-lg sm:text-xl leading-tight font-semibold text-slate-900 mb-2">{contest.title}</h3>
+            <p className="text-sm text-slate-600 mb-4">{contest.description}</p>
+            <div className="mt-auto border-t border-slate-200/90 pt-3 flex items-center justify-between">
+                <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Points</span>
+                <span className="text-lg sm:text-xl font-bold text-slate-800">+{Number(contest.points || 0).toLocaleString()}</span>
+            </div>
         </motion.div>
     );
 };
@@ -794,6 +753,7 @@ const ContestModal = ({
     const contestUsesScoreInput = isScoreTask(contest);
     const effectiveState = state === 'COOLDOWN' && isExpired ? 'AVAILABLE' : state;
     const hasValidScore = scoreInput.trim() !== '' && Number.isFinite(Number(scoreInput));
+    const isTaskDone = effectiveState === 'COMPLETED' || effectiveState === 'COOLDOWN';
 
     const canComplete = () => {
         if (isSubmitting) return false;
@@ -935,12 +895,14 @@ const ContestModal = ({
                                 <button
                                     onClick={handleAction}
                                     disabled={!canComplete()}
-                                    className={`arena-standalone-btn w-full bg-gradient-to-r ${contest.theme.button} hover:opacity-90 text-white border-0 shadow-lg h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed`}
+                                    className={`arena-standalone-btn w-full bg-gradient-to-r ${isTaskDone ? 'from-slate-300 to-slate-400' : 'from-slate-800 to-slate-900'} text-white border-0 shadow-lg h-12 text-base font-semibold ${isTaskDone ? 'opacity-60' : 'hover:opacity-90'} disabled:cursor-not-allowed`}
                                 >
                                     {effectiveState === 'COMPLETED'
                                         ? 'Completed'
                                         : effectiveState === 'COOLDOWN'
                                             ? `Available in ${cooldownText}`
+                                            : contest.taskType === 'sign_up'
+                                                ? 'Redeem Signup Bonus'
                                             : contestUsesScoreInput
                                                 ? 'Complete & Claim Points'
                                                 : contest.buttonText}
@@ -1411,6 +1373,8 @@ export default function ArenaStandalone() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [selectedContestTask, setSelectedContestTask] = useState(null);
+    const [pendingSocialTask, setPendingSocialTask] = useState(() => readPendingSocialTask());
+    const [pendingProfileTask, setPendingProfileTask] = useState(() => readPendingProfileTask());
     const userId = useMemo(() => getArenaUserId(), []);
     const hasAuthUser = Boolean(userId);
 
@@ -1473,7 +1437,8 @@ export default function ArenaStandalone() {
             toast.success('Task completed! Points added.');
             setSelectedContestTask(null);
         },
-        onError: (error) => {
+        onError: (error, variables) => {
+            if (variables?.suppressErrorToast) return;
             toast.error(getErrorMessage(error, 'Unable to complete task right now.'));
         },
         onSettled: () => {
@@ -1489,42 +1454,104 @@ export default function ArenaStandalone() {
         }, {});
     }, [contestStatusQuery.data]);
 
-    const mergedContests = useMemo(() => {
-        const metadataList = contestMetadataQuery.data || [];
+   const mergedContests = useMemo(() => {
+  const metadataList = contestMetadataQuery.data || [];
 
-        return metadataList.map((metadata, index) => {
-            const backend = statusByTask[metadata.task_type] || {};
-            const configuredActionType = metadata.action_type || backend.action_type || (metadata.repeatable ? 'daily' : 'one_time');
-            const configuredUi = CONTEST_UI_CONFIG[metadata.task_type] || {};
+  return metadataList.map((metadata, index) => {
+    const backend = statusByTask[metadata.task_type] || {};
+    const backendNextAvailableAt = backend.next_available_at ? new Date(backend.next_available_at).getTime() : null;
+    const localQuizCooldownUntil = metadata.task_type === QUIZ_TASK_KEY ? readQuizCooldownUntil(userId) : null;
+    const effectiveNextAvailableAt = Math.max(
+      backendNextAvailableAt || 0,
+      localQuizCooldownUntil || 0
+    ) || null;
 
-            return {
-                id: index + 1,
-                taskType: metadata.task_type,
-                title: configuredUi.title || humanizeTaskType(metadata.task_type),
-                description: configuredUi.description || 'Task configured from backend reward rules',
-                icon: configuredUi.icon || (configuredActionType === 'daily' ? 'CalendarCheck' : 'Zap'),
-                theme: configuredUi.theme || DEFAULT_THEME,
-                buttonText: configuredUi.buttonText || (configuredActionType === 'daily' ? 'Claim Points' : 'Complete Task'),
-                rules: configuredUi.rules || ['Configured from backend reward rules'],
-                rewards: configuredUi.rewards || ['Points from reward_rules table'],
-                requiredScore: metadata.required_score ?? null,
-                points: Number(metadata.points ?? backend.points ?? 0),
-                backend: {
-                    ...backend,
-                    action_type: backend.action_type || configuredActionType,
-                    repeatable: backend.repeatable ?? metadata.repeatable ?? (configuredActionType === 'daily'),
-                    required_score: backend.required_score ?? metadata.required_score ?? null,
-                    points: Number(backend.points ?? metadata.points ?? 0)
-                }
-            };
-        });
-    }, [contestMetadataQuery.data, statusByTask]);
+    const configuredActionType =
+      metadata.action_type ||
+      backend.action_type ||
+      (metadata.repeatable ? "daily" : "one_time");
+
+    const theme =
+      EARN_CARD_THEME[metadata.task_type] ||
+      EARN_CARD_THEME.default;
+
+    return {
+      id: index + 1,
+      taskType: metadata.task_type,
+
+      // ✅ Title auto generated
+      title: humanizeTaskType(metadata.task_type),
+
+      // ✅ Description fallback
+      description:
+        "Complete the task and earn points ",
+
+      // ✅ Icon logic
+      icon: TASK_ICON_MAP[metadata.task_type] || "Sparkles",
+
+      // ✅ Use theme from your theme map
+      theme: {
+        ...DEFAULT_THEME,
+        bg: theme.bg,
+        border: theme.border,
+        iconBg: theme.badge,
+        iconText: "text-white",
+        button: theme.button,
+        gradient: theme.badge
+      },
+
+      // ✅ Button text
+      buttonText:
+        configuredActionType === "daily"
+          ? "Claim Points"
+          : "Complete Task",
+
+      // ✅ RULES from backend metadata
+      rules: Array.isArray(metadata.rules)
+        ? metadata.rules
+        : [],
+
+      // ✅ Rewards from backend
+      rewards: [
+        `+${Number(metadata.points ?? 0)} Points`
+      ],
+
+      requiredScore: metadata.required_score ?? null,
+      points: Number(metadata.points ?? 0),
+
+      backend: {
+        ...backend,
+        next_available_at: effectiveNextAvailableAt ? new Date(effectiveNextAvailableAt).toISOString() : null,
+        action_type: configuredActionType,
+        repeatable:
+          metadata.repeatable ??
+          (configuredActionType === "daily"),
+        required_score:
+          metadata.required_score ?? null,
+        points: Number(metadata.points ?? 0)
+      }
+    };
+  });
+}, [contestMetadataQuery.data, statusByTask, userId]);
+
+    useEffect(() => {
+        const quizContest = mergedContests.find((contest) => contest.taskType === QUIZ_TASK_KEY);
+        const nextAvailableAt = quizContest?.backend?.next_available_at
+            ? new Date(quizContest.backend.next_available_at).getTime()
+            : null;
+
+        if (nextAvailableAt && nextAvailableAt > Date.now()) {
+            writeQuizCooldownUntil(userId, nextAvailableAt);
+        }
+    }, [mergedContests, userId]);
+
 
     const getContestState = useCallback((contest) => {
         const backend = contest?.backend || {};
         const nextAvailableAt = backend.next_available_at ? new Date(backend.next_available_at).getTime() : null;
         const cooldownActive = Boolean(nextAvailableAt && nextAvailableAt > Date.now());
         if (cooldownActive) return 'COOLDOWN';
+        if (contest?.taskType === QUIZ_TASK_KEY) return 'AVAILABLE';
         if (backend.completed) return 'COMPLETED';
         return 'AVAILABLE';
     }, []);
@@ -1544,9 +1571,201 @@ export default function ArenaStandalone() {
         [selectedContest, getContestState]
     );
 
+    useEffect(() => {
+        const syncPendingTasks = () => {
+            const storedPendingTask = readPendingSocialTask();
+            if (storedPendingTask !== pendingSocialTask) {
+                setPendingSocialTask(storedPendingTask);
+            }
+
+            const storedPendingProfileTask = readPendingProfileTask();
+            if (storedPendingProfileTask !== pendingProfileTask) {
+                setPendingProfileTask(storedPendingProfileTask);
+            }
+        };
+
+        syncPendingTasks();
+        window.addEventListener('focus', syncPendingTasks);
+        window.addEventListener('pageshow', syncPendingTasks);
+
+        return () => {
+            window.removeEventListener('focus', syncPendingTasks);
+            window.removeEventListener('pageshow', syncPendingTasks);
+        };
+    }, [pendingSocialTask, pendingProfileTask]);
+
+    const isUserProfileCompleted = useCallback(async () => {
+        try {
+            const authHeaders = (() => {
+                const token = localStorage.getItem('authToken');
+                const headers = {
+                    'x-user-id': userId
+                };
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
+                return headers;
+            })();
+
+            const response = await fetch('http://localhost:5006/api/profiles/complete', {
+                headers: authHeaders
+            });
+
+            if (!response.ok) return false;
+
+            const data = await response.json();
+            const profile = data?.profile || {};
+            const addresses = Array.isArray(data?.addresses) ? data.addresses : [];
+
+            const hasBasicProfile =
+                Boolean(String(profile.first_name || '').trim()) &&
+                Boolean(String(profile.last_name || '').trim()) &&
+                Boolean(String(profile.email || '').trim());
+
+            const hasPrimaryAddress = addresses.some((address) =>
+                Boolean(String(address?.address_line || '').trim()) &&
+                (Boolean(String(address?.country_code || '').trim()) || Boolean(String(address?.country || '').trim()))
+            );
+
+            return hasBasicProfile && hasPrimaryAddress;
+        } catch {
+            return false;
+        }
+    }, [userId]);
+
+    useEffect(() => {
+        if (!pendingSocialTask || completeTaskMutation.isPending) return;
+
+        const pendingContest = mergedContests.find((contest) => contest.taskType === pendingSocialTask);
+        if (!pendingContest) return;
+
+        if (getContestState(pendingContest) !== 'AVAILABLE') {
+            clearPendingSocialTask();
+            setPendingSocialTask(null);
+            return;
+        }
+
+        completeTaskMutation.mutate(
+            { contest: pendingContest, score: undefined },
+            {
+                onSettled: () => {
+                    clearPendingSocialTask();
+                    setPendingSocialTask(null);
+                }
+            }
+        );
+    }, [pendingSocialTask, mergedContests, getContestState, completeTaskMutation]);
+
+    useEffect(() => {
+        if (!pendingProfileTask || completeTaskMutation.isPending) return;
+
+        const run = async () => {
+            const pendingContest = mergedContests.find((contest) => contest.taskType === pendingProfileTask);
+            if (!pendingContest) return;
+
+            if (getContestState(pendingContest) !== 'AVAILABLE') {
+                clearPendingProfileTask();
+                setPendingProfileTask(null);
+                return;
+            }
+
+            const completed = await isUserProfileCompleted();
+            if (!completed) return;
+
+            completeTaskMutation.mutate(
+                { contest: pendingContest, score: undefined, suppressErrorToast: true },
+                {
+                    onSuccess: () => {
+                        clearPendingProfileTask();
+                        setPendingProfileTask(null);
+                    }
+                }
+            );
+        };
+
+        run();
+    }, [pendingProfileTask, mergedContests, getContestState, completeTaskMutation, isUserProfileCompleted]);
+
     const handleTaskComplete = (contest, payload = {}) => {
+        if (contest?.taskType === 'complete_profile') {
+            (async () => {
+                const completed = await isUserProfileCompleted();
+
+                if (!completed) {
+                    writePendingProfileTask('complete_profile');
+                    setPendingProfileTask('complete_profile');
+                    setSelectedContestTask(null);
+                    navigate('/profile');
+                    return;
+                }
+
+                completeTaskMutation.mutate({ contest, score: payload.score });
+            })();
+            return;
+        }
+        if (contest?.taskType === 'connect_linkedin') {
+            if (typeof window !== 'undefined') {
+                writePendingSocialTask('connect_linkedin');
+                setSelectedContestTask(null);
+                window.location.href = LINKEDIN_CONNECT_URL;
+            }
+            return;
+        }
+        if (contest?.taskType === 'connect_instagram') {
+            if (typeof window !== 'undefined') {
+                writePendingSocialTask('connect_instagram');
+                setSelectedContestTask(null);
+                window.location.href = INSTAGRAM_CONNECT_URL;
+            }
+            return;
+        }
+        if (contest?.taskType === 'join_community') {
+            if (typeof window !== 'undefined') {
+                writePendingSocialTask('join_community');
+                setSelectedContestTask(null);
+                window.location.href = COMMUNITY_CONNECT_URL;
+            }
+            return;
+        }
+        if (contest?.taskType === 'take_survey') {
+            if (typeof window !== 'undefined') {
+                writePendingSocialTask('take_survey');
+                setSelectedContestTask(null);
+                window.location.href = SURVEY_TASK_URL;
+            }
+            return;
+        }
         completeTaskMutation.mutate({ contest, score: payload.score });
     };
+
+    const handleContestClick = useCallback((contest) => {
+        const taskType = contest?.taskType;
+        if (!taskType) return;
+
+        if (taskType === QUIZ_TASK_KEY) {
+            const quizState = getContestState(contest);
+            const quizCooldownUntil = contest?.backend?.next_available_at
+                ? new Date(contest.backend.next_available_at).getTime()
+                : null;
+            const isQuizLocked = quizState === 'COOLDOWN' || Boolean(quizCooldownUntil && quizCooldownUntil > Date.now());
+
+            if (isQuizLocked) {
+                writeQuizCooldownUntil(userId, quizCooldownUntil);
+                toast.error('Come back tomorrow', { duration: 1000 });
+                return;
+            }
+
+            const quizPath = quizCooldownUntil
+                ? `/arena/quiz?cooldownUntil=${quizCooldownUntil}`
+                : '/arena/quiz';
+
+            navigate(quizPath, {
+                state: { quizCooldownUntil }
+            });
+            return;
+        }
+        setSelectedContestTask(taskType);
+    }, [getContestState, navigate, userId]);
 
     const handleCooldownExpired = useCallback(() => {
         queryClient.invalidateQueries({ queryKey: ['arenaContestStatus'] });
@@ -1599,6 +1818,7 @@ export default function ArenaStandalone() {
 
     return (
         <>
+            <Toaster position="top-center" duration={1000} richColors closeButton={false} />
             <style>{styles}</style>
             <div className="arena-standalone-page arena-scope">
                 <HeroSlider />
@@ -1640,13 +1860,13 @@ export default function ArenaStandalone() {
                                 {carouselItems.map((contest, index) => (
                                     <div
                                         key={`${contest.id}-${index}`}
-                                        className="min-w-[280px] sm:min-w-[320px]"
+                                        className="min-w-[250px] sm:min-w-[280px]"
                                     >
                                         <ContestCard
                                             contest={contest}
                                             index={index}
                                             state={getContestState(contest)}
-                                            onClick={setSelectedContestTask}
+                                            onClick={handleContestClick}
                                             onCooldownExpired={handleCooldownExpired}
                                         />
                                     </div>

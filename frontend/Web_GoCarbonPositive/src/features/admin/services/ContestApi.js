@@ -35,11 +35,12 @@ export const getContestStats = async () => {
 
 export const createContest = async (payload) => {
   return apiClient({
-    url: "/rewards/config",
+    url: "/rewards/rule",   // ✅ FIXED
     method: "POST",
     data: payload,
   });
 };
+
 export const updateRule = async (id, data) => {
   return apiClient({
     url: `/rewards/rule/${id}`,

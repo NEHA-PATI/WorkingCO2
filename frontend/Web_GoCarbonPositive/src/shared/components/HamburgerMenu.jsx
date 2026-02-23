@@ -13,6 +13,7 @@ import {
   FaSignOutAlt,
   FaIndustry,
   FaStore,
+  FaLeaf,
 } from "react-icons/fa";
 import { MdDashboard, MdUpload, MdAnalytics, MdWorkspaces } from "react-icons/md";
 import { GiWallet } from "react-icons/gi";
@@ -32,6 +33,7 @@ const MENU_ICONS = {
   analytics: MdAnalytics,
   workspace: MdWorkspaces,
   marketplace: FaStore,
+  carbon_footprint: FaLeaf,
 };
 
 export default function HamburgerMenu({ role, close, handleLogout }) {

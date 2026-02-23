@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   FiSearch,
   FiEye,
+  FiEyeOff,
   FiCheckCircle,
   FiXCircle,
   FiX,
@@ -13,7 +14,6 @@ import {
 } from "react-icons/fi";
 import {
   FaFileAlt,
-  FaCheckCircle,
   FaClock,
   FaTimesCircle,
   FaBuilding,
@@ -56,6 +56,7 @@ const getStatusClass = (status) => {
 export default function OrgRequest() {
   const [orgrqRows, setOrgrqRows] = useState([]);
   const [orgrqLoading, setOrgrqLoading] = useState(true);
+  const [orgrqActionLoading, setOrgrqActionLoading] = useState(false);
   const [orgrqError, setOrgrqError] = useState("");
   const [orgrqSearch, setOrgrqSearch] = useState("");
   const [orgrqStatusFilter, setOrgrqStatusFilter] = useState("All Status");
@@ -68,6 +69,10 @@ export default function OrgRequest() {
   const [orgrqCreatePassword, setOrgrqCreatePassword] = useState("");
   const [orgrqCreateConfirmPassword, setOrgrqCreateConfirmPassword] =
     useState("");
+  const [orgrqShowCreatePassword, setOrgrqShowCreatePassword] = useState(false);
+  const [orgrqShowCreateConfirmPassword, setOrgrqShowCreateConfirmPassword] =
+    useState(false);
+  const [orgrqActionError, setOrgrqActionError] = useState("");
 
   useEffect(() => {
     const fetchOrgRequests = async () => {
@@ -82,7 +87,11 @@ export default function OrgRequest() {
           throw new Error(result.message || "Failed to fetch organization requests");
         }
 
-        setOrgrqRows((result.data || []).map(normalizeOrgRequest));
+        const rows = (result.data || [])
+          .map(normalizeOrgRequest)
+          .filter((row) => row.status !== "Approved");
+
+        setOrgrqRows(rows);
       } catch (error) {
         setOrgrqError(error.message || "Failed to fetch organization requests");
       } finally {
@@ -92,6 +101,117 @@ export default function OrgRequest() {
 
     fetchOrgRequests();
   }, []);
+
+  const updateRowStatus = (orgRequestId, nextStatus) => {
+    setOrgrqRows((prev) =>
+      prev.map((row) =>
+        row.id === orgRequestId ? { ...row, status: nextStatus } : row
+      )
+    );
+  };
+
+  const resetApproveModalState = () => {
+    setOrgrqApproveModal(null);
+    setOrgrqCreateEmail("");
+    setOrgrqCreatePassword("");
+    setOrgrqCreateConfirmPassword("");
+    setOrgrqShowCreatePassword(false);
+    setOrgrqShowCreateConfirmPassword(false);
+    setOrgrqActionError("");
+  };
+
+  const resetRejectModalState = () => {
+    setOrgrqRejectModal(null);
+    setOrgrqRejectReason("");
+    setOrgrqActionError("");
+  };
+
+  const handleApproveOrganization = async () => {
+    if (!orgrqApproveModal) return;
+
+    const email = orgrqCreateEmail.trim().toLowerCase();
+    const password = orgrqCreatePassword.trim();
+    const confirmPassword = orgrqCreateConfirmPassword.trim();
+
+    if (!email || !password || !confirmPassword) {
+      setOrgrqActionError("Email, password, and confirm password are required.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setOrgrqActionError("Password and confirm password do not match.");
+      return;
+    }
+
+    try {
+      setOrgrqActionLoading(true);
+      setOrgrqActionError("");
+
+      const response = await fetch(
+        `${ORGRQ_API_BASE_URL}/admin/approve-organization`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            org_request_id: orgrqApproveModal.id,
+            email,
+            password,
+          }),
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Failed to approve organization.");
+      }
+
+      setOrgrqRows((prev) => prev.filter((row) => row.id !== orgrqApproveModal.id));
+      resetApproveModalState();
+    } catch (error) {
+      setOrgrqActionError(error.message || "Failed to approve organization.");
+    } finally {
+      setOrgrqActionLoading(false);
+    }
+  };
+
+  const handleRejectOrganization = async () => {
+    if (!orgrqRejectModal) return;
+
+    const reason = orgrqRejectReason.trim();
+    if (!reason) {
+      setOrgrqActionError("Rejection reason is required.");
+      return;
+    }
+
+    try {
+      setOrgrqActionLoading(true);
+      setOrgrqActionError("");
+
+      const response = await fetch(
+        `${ORGRQ_API_BASE_URL}/admin/reject-organization`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            org_request_id: orgrqRejectModal.id,
+            reason,
+          }),
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Failed to reject request.");
+      }
+
+      updateRowStatus(orgrqRejectModal.id, "Rejected");
+      resetRejectModalState();
+    } catch (error) {
+      setOrgrqActionError(error.message || "Failed to reject request.");
+    } finally {
+      setOrgrqActionLoading(false);
+    }
+  };
 
   const orgrqFilteredRows = useMemo(() => {
     return orgrqRows.filter((row) => {
@@ -111,10 +231,9 @@ export default function OrgRequest() {
 
   const orgrqStats = useMemo(() => {
     const total = orgrqRows.length;
-    const approved = orgrqRows.filter((r) => r.status === "Approved").length;
     const pending = orgrqRows.filter((r) => r.status === "Pending").length;
     const rejected = orgrqRows.filter((r) => r.status === "Rejected").length;
-    return { total, approved, pending, rejected };
+    return { total, pending, rejected };
   }, [orgrqRows]);
 
   return (
@@ -134,16 +253,6 @@ export default function OrgRequest() {
           <div>
             <div className="orgrq-stat-count">{orgrqStats.total}</div>
             <div className="orgrq-stat-label">TOTAL REQUESTS</div>
-          </div>
-        </article>
-
-        <article className="orgrq-stat-card">
-          <div className="orgrq-stat-icon orgrq-stat-icon-approved">
-            <FaCheckCircle />
-          </div>
-          <div>
-            <div className="orgrq-stat-count">{orgrqStats.approved}</div>
-            <div className="orgrq-stat-label">APPROVED</div>
           </div>
         </article>
 
@@ -186,7 +295,6 @@ export default function OrgRequest() {
         >
           <option>All Status</option>
           <option>Pending</option>
-          <option>Approved</option>
           <option>Rejected</option>
         </select>
 
@@ -258,19 +366,25 @@ export default function OrgRequest() {
 
                     {row.status === "Pending" && (
                       <>
-                        <button
-                          className="orgrq-action-btn orgrq-action-check"
-                          onClick={() => setOrgrqApproveModal(row)}
-                          type="button"
-                        >
-                          <FiCheckCircle />
-                        </button>
-                        <button
-                          className="orgrq-action-btn orgrq-action-cross"
-                          onClick={() => setOrgrqRejectModal(row)}
-                          type="button"
-                        >
-                          <FiXCircle />
+                    <button
+                      className="orgrq-action-btn orgrq-action-check"
+                      onClick={() => {
+                        setOrgrqActionError("");
+                        setOrgrqApproveModal(row);
+                      }}
+                      type="button"
+                    >
+                      <FiCheckCircle />
+                    </button>
+                    <button
+                      className="orgrq-action-btn orgrq-action-cross"
+                      onClick={() => {
+                        setOrgrqActionError("");
+                        setOrgrqRejectModal(row);
+                      }}
+                      type="button"
+                    >
+                      <FiXCircle />
                         </button>
                       </>
                     )}
@@ -409,7 +523,7 @@ export default function OrgRequest() {
         <div
           className="orgrq-overlay"
           role="presentation"
-          onClick={() => setOrgrqApproveModal(null)}
+          onClick={resetApproveModalState}
         >
           <div
             className="orgrq-modal-card orgrq-create-modal"
@@ -419,7 +533,7 @@ export default function OrgRequest() {
           >
             <button
               className="orgrq-close-xplain"
-              onClick={() => setOrgrqApproveModal(null)}
+              onClick={resetApproveModalState}
               type="button"
             >
               <FiX />
@@ -438,23 +552,39 @@ export default function OrgRequest() {
 
             <label className="orgrq-field-block">
               <span>EMAIL</span>
-              <input
-                className="orgrq-input"
-                value={orgrqCreateEmail}
-                onChange={(e) => setOrgrqCreateEmail(e.target.value)}
-              />
-            </label>
+                <input
+                  className="orgrq-input"
+                  value={orgrqCreateEmail}
+                  onChange={(e) => setOrgrqCreateEmail(e.target.value)}
+                  disabled={orgrqActionLoading}
+                />
+              </label>
 
             <label className="orgrq-field-block">
               <span>PASSWORD</span>
               <div className="orgrq-pass-wrap">
                 <input
                   className="orgrq-input"
-                  type="password"
+                  type={orgrqShowCreatePassword ? "text" : "password"}
                   value={orgrqCreatePassword}
                   onChange={(e) => setOrgrqCreatePassword(e.target.value)}
+                  disabled={orgrqActionLoading}
                 />
-                <FiEye className="orgrq-pass-eye" />
+                <button
+                  type="button"
+                  className="orgrq-pass-eye-btn"
+                  onClick={() => setOrgrqShowCreatePassword((prev) => !prev)}
+                  aria-label={
+                    orgrqShowCreatePassword ? "Hide password" : "Show password"
+                  }
+                  disabled={orgrqActionLoading}
+                >
+                  {orgrqShowCreatePassword ? (
+                    <FiEyeOff className="orgrq-pass-eye" />
+                  ) : (
+                    <FiEye className="orgrq-pass-eye" />
+                  )}
+                </button>
               </div>
             </label>
 
@@ -463,24 +593,51 @@ export default function OrgRequest() {
               <div className="orgrq-pass-wrap">
                 <input
                   className="orgrq-input"
-                  type="password"
+                  type={orgrqShowCreateConfirmPassword ? "text" : "password"}
                   value={orgrqCreateConfirmPassword}
                   onChange={(e) => setOrgrqCreateConfirmPassword(e.target.value)}
+                  disabled={orgrqActionLoading}
                 />
-                <FiEye className="orgrq-pass-eye" />
+                <button
+                  type="button"
+                  className="orgrq-pass-eye-btn"
+                  onClick={() =>
+                    setOrgrqShowCreateConfirmPassword((prev) => !prev)
+                  }
+                  aria-label={
+                    orgrqShowCreateConfirmPassword
+                      ? "Hide password"
+                      : "Show password"
+                  }
+                  disabled={orgrqActionLoading}
+                >
+                  {orgrqShowCreateConfirmPassword ? (
+                    <FiEyeOff className="orgrq-pass-eye" />
+                  ) : (
+                    <FiEye className="orgrq-pass-eye" />
+                  )}
+                </button>
               </div>
             </label>
+
+            {orgrqActionError && <p className="orgrq-reject-sub">{orgrqActionError}</p>}
 
             <div className="orgrq-modal-btn-row">
               <button
                 type="button"
                 className="orgrq-btn orgrq-btn-cancel"
-                onClick={() => setOrgrqApproveModal(null)}
+                onClick={resetApproveModalState}
+                disabled={orgrqActionLoading}
               >
                 Cancel
               </button>
-              <button type="button" className="orgrq-btn orgrq-btn-green">
-                Create Organization
+              <button
+                type="button"
+                className="orgrq-btn orgrq-btn-green"
+                onClick={handleApproveOrganization}
+                disabled={orgrqActionLoading}
+              >
+                {orgrqActionLoading ? "Creating..." : "Create Organization"}
               </button>
             </div>
           </div>
@@ -523,19 +680,28 @@ export default function OrgRequest() {
                 placeholder="Please specify why this request is being rejected..."
                 value={orgrqRejectReason}
                 onChange={(e) => setOrgrqRejectReason(e.target.value)}
+                disabled={orgrqActionLoading}
               />
             </label>
+
+            {orgrqActionError && <p className="orgrq-reject-sub">{orgrqActionError}</p>}
 
             <div className="orgrq-modal-btn-row">
               <button
                 type="button"
                 className="orgrq-btn orgrq-btn-cancel"
-                onClick={() => setOrgrqRejectModal(null)}
+                onClick={resetRejectModalState}
+                disabled={orgrqActionLoading}
               >
                 Cancel
               </button>
-              <button type="button" className="orgrq-btn orgrq-btn-red">
-                Reject Request
+              <button
+                type="button"
+                className="orgrq-btn orgrq-btn-red"
+                onClick={handleRejectOrganization}
+                disabled={orgrqActionLoading}
+              >
+                {orgrqActionLoading ? "Rejecting..." : "Reject Request"}
               </button>
             </div>
           </div>
