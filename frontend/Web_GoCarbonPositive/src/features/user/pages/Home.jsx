@@ -295,16 +295,6 @@ const HomePage = () => {
                   Get Started <FaArrowRight />
                 </button>
               </div>
-              {activeTab === "organisation" && (
-                <div style={{ marginTop: "12px" }}>
-                  <button
-                    className="hp-btn-primary hp-hero-start-btn hp-btn-outline-org"
-                    onClick={() => navigate("/join-organisation")}
-                  >
-                    Apply as an organisation <FaArrowRight />
-                  </button>
-                </div>
-              )}
             </>
           )}
         </div>
@@ -335,25 +325,50 @@ const HomePage = () => {
               </button>
             </div>
           </div>
-          <h2 className="hp-section-title hp-rewards-title">
-            {activeTab === "organisation" ? (
-              <>
-                <FaGlobe className="hp-title-icon" style={{ color: "#0ea5e9" }} />
-                Industrial Solutions for Organisations
-              </>
-            ) : (
-              <>
+          {activeTab !== "organisation" && (
+            <>
+              <h2 className="hp-section-title hp-rewards-title">
                 <FaAward className="hp-title-icon" style={{ color: "#f59e0b" }} />
                 Join Contest,Earn Rewards
-              </>
-            )}
-          </h2>
-          <p className="hp-section-sub">
-            {activeTab === "organisation"
-              ? "Comprehensive sustainability-focused solutions designed for industrial operations"
-              : "Redeem your hard-earned coins for real-world impact"}
-          </p>
+              </h2>
+              <p className="hp-section-sub">
+                Redeem your hard-earned coins for real-world impact
+              </p>
+            </>
+          )}
         </div>
+        {activeTab === "organisation" && (
+          <div className="hp-org-apply-card">
+            <div className="hp-org-apply-icon-wrap">
+              <FaShieldHeart className="hp-org-apply-icon" />
+            </div>
+            <div className="hp-org-apply-content">
+              <p className="hp-org-apply-eyebrow">Organisation Onboarding</p>
+              <h3 className="hp-org-apply-title">Apply as an Organisation</h3>
+              <p className="hp-org-apply-desc">
+                Register your organisation to access verified sustainability workflows,
+                team dashboards, and enterprise carbon reporting tools in one place.
+              </p>
+            </div>
+            <button
+              className="hp-btn-primary hp-org-apply-btn"
+              onClick={() => navigate("/join-organisation")}
+            >
+              Apply as an organisation <FaArrowRight />
+            </button>
+          </div>
+        )}
+        {activeTab === "organisation" && (
+          <div className="hp-section-header hp-org-solutions-header">
+            <h2 className="hp-section-title hp-rewards-title">
+              <FaGlobe className="hp-title-icon" style={{ color: "#0ea5e9" }} />
+              Industrial Solutions for Organisations
+            </h2>
+            <p className="hp-section-sub">
+              Comprehensive sustainability-focused solutions designed for industrial operations
+            </p>
+          </div>
+        )}
         {activeTab === "organisation" ? (
           <div className="hp-org-solutions-grid">
             {organisationSolutions.map((solution, i) => (
