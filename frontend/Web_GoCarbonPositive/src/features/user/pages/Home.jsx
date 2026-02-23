@@ -47,8 +47,8 @@ const HomePage = () => {
     },
     {
       icon: <GiRecycle style={{ color: "#14b8a6" }} />,
-      title: "Carbon Offset",
-      desc: "Offset 1 ton of CO2 emissions",
+      title: "Streak Points",
+      desc: "Stay consistent and Earn more points ",
       
     },
   ];
