@@ -1,41 +1,34 @@
 const { Pool } = require("pg");
-require("dotenv").config();
 
-const isProduction = process.env.NODE_ENV === "production";
-const isRDS = process.env.DB_HOST && process.env.DB_HOST.includes("rds.amazonaws.com");
+const truthy = new Set(["1", "true", "yes", "on"]);
+const dbSslEnv = String(process.env.DB_SSL || "").toLowerCase();
+const useSsl = truthy.has(dbSslEnv) || process.env.NODE_ENV === "production";
 
-const pool = new Pool({
-  user: process.env.DB_USER,
+const poolConfig = {
   host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT || 5432,
+  database: process.env.DB_NAME,
+  port: Number(process.env.DB_PORT) || 5432,
+};
 
-  ssl: isRDS
-    ? { rejectUnauthorized: false } // ✅ AWS RDS
-    : false,                         // ✅ local postgres
+if (process.env.DATABASE_URL) {
+  poolConfig.connectionString = process.env.DATABASE_URL;
+}
 
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000, // ⬅️ 2s bahut kam tha
-});
+if (useSsl) {
+  poolConfig.ssl = { rejectUnauthorized: false };
+}
+
+const pool = new Pool(poolConfig);
 
 pool.on("connect", () => {
-  console.log("✅ Connected to PostgreSQL");
+  console.log("Connected to PostgreSQL");
 });
 
-pool.on("error", (err) => {
-  console.error("❌ Unexpected database error:", err);
-});
-
-// Test connection
-(async () => {
-  try {
-    const res = await pool.query("SELECT NOW()");
-    console.log("🕐 DB time:", res.rows[0].now);
-  } catch (err) {
-    console.error("❌ PostgreSQL connection error:", err.message);
-  }
-})();
+pool
+  .query("SELECT NOW()")
+  .then((res) => console.log("DB time:", res.rows[0].now))
+  .catch((err) => console.error("PostgreSQL error:", err));
 
 module.exports = pool;

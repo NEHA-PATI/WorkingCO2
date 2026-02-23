@@ -53,16 +53,22 @@ const getGroupedRules = async () => {
 
   rules.forEach((rule) => {
     const {
+      rule_id,
       action_key,
       action_type,
       points,
       milestone_weeks,
       max_points_per_day,
-      required_score
+      required_score,
+      is_active,
+      rules: ruleList   // 👈 get rules from DB
     } = rule;
 
     if (!grouped[action_key]) {
-      grouped[action_key] = {};
+      grouped[action_key] = {
+        is_active,
+        rule_id
+      };
     }
 
     if (action_type === 'consistency') {
@@ -70,51 +76,77 @@ const getGroupedRules = async () => {
         grouped[action_key].consistency = {};
       }
 
-      grouped[action_key].consistency[milestone_weeks] = toSafeNumber(points, 0);
+      grouped[action_key].consistency[milestone_weeks] = {
+        rule_id,
+        points: toSafeNumber(points, 0),
+        is_active,
+        rules: ruleList || []   // 👈 added
+      };
+
       return;
     }
 
     if (action_type === 'daily') {
       grouped[action_key].daily = {
+        rule_id,
         points_per_action: toSafeNumber(points, 0),
         max_per_day: toNullableNumber(max_points_per_day),
-        required_score: toPositiveNullableNumber(required_score)
+        required_score: toPositiveNullableNumber(required_score),
+        is_active,
+        rules: ruleList || []   // 👈 added
       };
+
       return;
     }
 
+    // one_time or other types
     grouped[action_key][action_type] = {
-      points: toSafeNumber(points, 0)
+      rule_id,
+      points: toSafeNumber(points, 0),
+      is_active,
+      rules: ruleList || []   // 👈 added
     };
   });
 
   return grouped;
 };
 
+
+
 const getTaskDefinitions = async () => {
   const groupedRules = await getGroupedRules();
   const tasks = [];
 
   Object.entries(groupedRules).forEach(([actionKey, config]) => {
+
+    // ONE TIME TASK
     if (config.one_time?.points !== undefined) {
       tasks.push({
         task_type: actionKey,
         action_type: 'one_time',
         points: toSafeNumber(config.one_time.points, 0),
         required_score: null,
-        repeatable: false
+        repeatable: false,
+
+        // ✅ ADD THIS
+        rules: config.one_time.rules || []
       });
     }
 
+    // DAILY TASK
     if (config.daily?.points_per_action !== undefined) {
       tasks.push({
         task_type: actionKey,
         action_type: 'daily',
         points: toSafeNumber(config.daily.points_per_action, 0),
         required_score: toPositiveNullableNumber(config.daily.required_score),
-        repeatable: true
+        repeatable: true,
+
+        // ✅ ADD THIS
+        rules: config.daily.rules || []
       });
     }
+
   });
 
   return tasks.sort((a, b) => {
@@ -124,6 +156,7 @@ const getTaskDefinitions = async () => {
     return a.task_type.localeCompare(b.task_type);
   });
 };
+
 
 const getTaskDefinitionByType = async (taskType) => {
   const taskDefinitions = await getTaskDefinitions();
@@ -468,7 +501,8 @@ const getLeaderboard = async (type = 'monthly', page = 1, limit = 10) => {
   const items = rows.map((row) => ({
     rank: Number(row.rank),
     points: Number(row.total_points),
-    u_id: row.u_id
+    u_id: row.u_id,
+    username: row.username || row.u_id
   }));
 
   return {
@@ -480,7 +514,11 @@ const getLeaderboard = async (type = 'monthly', page = 1, limit = 10) => {
   };
 };
 
-const getMyRank = async (u_id) => {
+const getMyRank = async (u_id, type = 'monthly') => {
+  if (type === 'lifetime') {
+    return await repo.getUserLifetimeRank(u_id);
+  }
+
   return await repo.getUserMonthlyRank(u_id);
 };
 
@@ -644,6 +682,16 @@ const redeemReward = async (u_id, reward_id) => {
     current_points: availablePoints - reward.points
   };
 };
+const createRule = async (data) => {
+  return await repo.createRule(data);
+};
+
+const updateRule = async (id, data) => {
+  return await repo.updateRule(id, data);
+};
+const getContestStats = async () => {
+  return await repo.getContestStats();
+};
 
 module.exports = {
   awardOneTime,
@@ -661,5 +709,9 @@ module.exports = {
   getTodayTaskStatus,
   getRewardHistory,
   getRewardCatalog,
-  redeemReward
+  redeemReward,
+  getContestStats,
+  createRule,
+  updateRule
+
 };

@@ -31,8 +31,9 @@ import OAuthSuccess from "@features/auth/pages/OAuthSuccess";
 import Blog from "@features/blog/pages/blog";
 import BlogDetailPage from "@features/blog/pages/blog-detail";
 import Careers from "@features/careers/pages/Careers";
+import MyCarbonFootprint from "@features/calculator/pages/MyCarbonFootprint";
 
-import MarketplacePage from "@features/marketplace/pages/MarketplacePage";
+// import MarketplacePage from "@features/marketplace/pages/MarketplacePage";
 import ViewAssets from "@shared/pages/ViewAssets";
 import WalletPage from "@shared/pages/wallet";
 import Upload from "@shared/pages/upload";
@@ -41,14 +42,17 @@ import ArenaStandalonePage from "@features/arena/pages/arenaStandalone";
 import ArenaRewardsPage from "@features/arena/pages/rewards";
 import ArenaHistoryPage from "@features/arena/pages/history";
 import ArenaLeaderboardPage from "@features/arena/pages/leaderboard";
+import ArenaQuizPage from "@features/arena/pages/quiz";
+
 
 import OrgDashboard, {
   ORG_DASHBOARD_TAB_COMPONENTS,
 } from "@features/org/pages/OrgDashboard";
 import OrgProfile from "@features/org/components/OrgProfile";
+import AddAsset from "@features/org/components/AddAsset";
 
 import AdminOverview from "@features/admin/pages/Overview";
-import AdminUsers from "@features/admin/pages/Users";
+import AdminUsers from "@features/admin/pages/User Management";
 import AdminSupport from "@features/admin/pages/Support";
 import AdminSecurity from "@features/admin/pages/Security";
 import AdminConfiguration from "@features/admin/pages/Configuration";
@@ -57,6 +61,11 @@ import AdminCareerManagement from "@features/admin/pages/CareerManagement";
 import AdminCaseStudyManagement from "@features/admin/pages/CaseStudyManagement";
 import AdminReports from "@features/admin/pages/Reports";
 import AdminAssetManagement from "@features/admin/pages/AssetManagement";
+import AdminContestManagement from "@features/admin/pages/ContestManagement";
+import AdminOrganizationManagement from "@features/admin/pages/OrganizationManagement";
+import AdminOrgRequest from "@features/admin/pages/OrgRequest";
+import AdminOrganizationList from "@features/admin/pages/OrganizationList";
+import AdminUserCard from "@features/admin/pages/UserCard";
 import AdminProfile from "@features/admin/components/AdminProfile";
 
 const RoleProfilePage = () => {
@@ -76,11 +85,54 @@ const getOrgTabElement = (tabId) => {
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/arena" element={<Navigate to="/arena-standalone" replace />} />
-      <Route path="/arena-standalone" element={<ArenaStandalonePage />} />
-      <Route path="/arena/rewards" element={<ArenaRewardsPage />} />
-      <Route path="/arena/history" element={<ArenaHistoryPage />} />
-      <Route path="/arena/leaderboard" element={<ArenaLeaderboardPage />} />
+      <Route
+        path="/arena"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <Navigate to="/arena-standalone" replace />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/arena-standalone"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <ArenaStandalonePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/arena/rewards"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <ArenaRewardsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/arena/history"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <ArenaHistoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/arena/leaderboard"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <ArenaLeaderboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/arena/quiz"
+        element={
+          <ProtectedRoute requiredRole="user">
+            <ArenaQuizPage />
+          </ProtectedRoute>
+        }
+      />
 
       <Route element={<BaseLayout />}>
         <Route path="/" element={<Home />} />
@@ -104,14 +156,14 @@ const AppRoutes = () => {
         <Route path="/industrial" element={<IndustrialSolutions />} />
         <Route path="/faq" element={<Faq />} />
 
-        <Route
+        {/* <Route
           path="/marketplace"
           element={
             <ProtectedRoute allowedRoles={["user", "organization", "admin"]}>
               <MarketplacePage />
             </ProtectedRoute>
           }
-        />
+        /> */}
         <Route
           path="/upload"
           element={
@@ -133,6 +185,22 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute allowedRoles={["user", "organization", "admin"]}>
               <WalletPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-carbon-footprint"
+          element={
+            <ProtectedRoute allowedRoles={["user", "organization"]}>
+              <MyCarbonFootprint />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-asset"
+          element={
+            <ProtectedRoute requiredRole="organization">
+              <AddAsset />
             </ProtectedRoute>
           }
         />
@@ -168,6 +236,7 @@ const AppRoutes = () => {
         >
           <Route path="dashboard" element={<OrgDashboard />}>
             <Route index element={<Navigate to={ORG_DEFAULT_TAB_ID} replace />} />
+            <Route path="add-asset" element={<AddAsset />} />
             {ORG_TAB_CONFIG.map((tab) => (
               <Route
                 key={tab.id}
@@ -189,25 +258,48 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         >
-          <Route path="dashboard" element={<Navigate to="overview" replace />} />
+          <Route path="dashboard" element={<Navigate to="/admin/overview" replace />} />
           <Route path="overview" element={<AdminOverview />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="support" element={<AdminSupport />} />
           <Route path="security" element={<AdminSecurity />} />
           <Route path="configuration" element={<AdminConfiguration />} />
           <Route path="analytics" element={<AdminAnalytics />} />
-          <Route path="asset-management" element={<AdminAssetManagement />} />
+          <Route
+            path="asset-management"
+            element={<Navigate to="/admin/asset-management/user" replace />}
+          />
+          <Route path="asset-management/user" element={<AdminUserCard />} />
+          <Route path="asset-management/organization" element={<AdminAssetManagement />} />
+          <Route
+            path="asset-management/organization/review"
+            element={<Navigate to="/admin/asset-management/organization" replace />}
+          />
+          <Route
+            path="organization-management"
+            element={<AdminOrganizationManagement />}
+          />
+          <Route
+            path="organization-management/org-request"
+            element={<AdminOrgRequest />}
+          />
+          <Route
+            path="organization-management/organization"
+            element={<AdminOrganizationList />}
+          />
           <Route path="career-management" element={<AdminCareerManagement />} />
           <Route
             path="case-study-management"
             element={<AdminCaseStudyManagement />}
           />
+          <Route path="contest" element={<AdminContestManagement />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="" element={<Navigate to="overview" replace />} />
         </Route>
 
         <Route path="/adminDashboard" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/organization/dashboard" element={<Navigate to="/org/dashboard" replace />} />
         <Route path="/orgDashboard" element={<Navigate to="/org/dashboard" replace />} />
         <Route path="/userDashboard" element={<Navigate to="/user/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />

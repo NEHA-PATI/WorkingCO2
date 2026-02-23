@@ -1082,6 +1082,97 @@
     .org-earnings-table td {
         padding: 8px;
     }
+
+    .org-earnings-header {
+        gap: 10px;
+    }
+
+    .org-earnings-header-content {
+        min-width: 0;
+    }
+
+    .org-earnings-header-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .org-earnings-time-filter,
+    .org-earnings-export-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .org-earnings-chart-toggle {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        padding: 4px;
+    }
+
+    .org-earnings-toggle-btn {
+        width: 100%;
+        padding: 7px 6px;
+        font-size: 12px;
+    }
+
+    .org-earnings-bar-chart,
+    .org-earnings-quarterly-chart,
+    .org-earnings-trend-chart {
+        height: 230px;
+    }
+
+    .org-earnings-forecasting-header,
+    .org-earnings-history-header {
+        gap: 10px;
+    }
+
+    .org-earnings-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .org-earnings-table {
+        min-width: 620px;
+    }
+}
+
+@media (max-width: 480px) {
+    .org-earnings-container {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .org-earnings-title {
+        font-size: 18px;
+    }
+
+    .org-earnings-subtitle {
+        font-size: 12px;
+    }
+
+    .org-earnings-header-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .org-earnings-chart-toggle {
+        grid-template-columns: 1fr;
+    }
+
+    .org-earnings-chart-wrapper,
+    .org-earnings-revenue-chart,
+    .org-earnings-forecasting-section,
+    .org-earnings-history-section {
+        padding: 12px;
+    }
+
+    .org-earnings-bar-chart,
+    .org-earnings-quarterly-chart,
+    .org-earnings-trend-chart {
+        height: 200px;
+    }
 }
 
 /* Smooth scroll behavior */

@@ -1,7 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
 /* Root container */
 .am26-page {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  font-family: "Poppins", sans-serif;
   background-color: #f5f6fb;
   min-height: 100vh;
   padding: 24px 28px 40px;

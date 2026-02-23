@@ -6,3 +6,5 @@ logs
 .gitignore
 .dockerignore
 test-env.js
+Dockerfile
+

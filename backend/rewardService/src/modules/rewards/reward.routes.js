@@ -32,5 +32,8 @@ router.get('/my-rank', auth, controller.getMyRank);
 router.get('/streak', auth, controller.getStreak);
 router.get('/today-status', auth, controller.getTodayStatus);
 router.get('/history', auth, controller.getRewardHistory);
+router.get('/contest-stats', auth,controller.getContestStats);
+router.post('/rule', auth, controller.createRule);
+router.put('/rule/:id', auth, controller.updateRule);
 
 module.exports = router;

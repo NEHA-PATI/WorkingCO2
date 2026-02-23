@@ -324,7 +324,8 @@ exports.getLeaderboard = async (req, res, next) => {
 ================================ */
 exports.getMyRank = async (req, res, next) => {
   try {
-    const rank = await service.getMyRank(req.u_id);
+    const { type } = req.query;
+    const rank = await service.getMyRank(req.u_id, type);
 
     res.json({
       success: true,
@@ -393,3 +394,82 @@ exports.getRewardHistory = async (req, res, next) => {
     next(err);
   }
 };
+exports.getContestStats = async (req, res, next) => {
+  try {
+    const data = await service.getContestStats();
+
+
+    res.json({
+      success: true,
+      data
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+exports.updateRule = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      points,
+      max_points_per_day,
+      is_active,
+      rules   // 👈 ADD THIS
+    } = req.body;
+
+    const updated = await service.updateRule(id, {
+      points,
+      max_points_per_day,
+      is_active,
+      rules   // 👈 PASS IT FORWARD
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Rule updated",
+      data: updated
+    });
+
+  } catch (error) {
+    console.error("Update rule error:", error);
+    return res.status(500).json({
+      message: "Internal server error"
+    });
+  }
+};
+
+exports.createRule = async (req, res) => {
+  try {
+    const {
+      action_key,
+      action_type,
+      points,
+      milestone_weeks,
+      max_points_per_day,
+      rules   // 👈 ADD THIS
+    } = req.body;
+
+    const data = await service.createRule({
+      action_key,
+      action_type,
+      points,
+      milestone_weeks,
+      max_points_per_day,
+      rules   // 👈 PASS THIS
+    });
+
+    return res.status(201).json({
+      success: true,
+      data
+    });
+
+  } catch (error) {
+    console.error("Create rule error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+

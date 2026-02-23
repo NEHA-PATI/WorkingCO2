@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 import {
   FaCarSide,
   FaTree,
@@ -10,13 +11,20 @@ import {
   FaDownload,
   FaClockRotateLeft,
 } from "react-icons/fa6";
+import OrgAssets from "@features/admin/pages/OrgAssets";
 
 import "@features/admin/styles/AssetManagement.css";
 
 const ITEMS_PER_PAGE = 10;
 
 const AssetManagement = () => {
-  const [activeSubmitterTab, setActiveSubmitterTab] = useState("individual");
+  const location = useLocation();
+  const scope = (new URLSearchParams(location.search).get("scope") || "").toLowerCase();
+  const isOrganizationScope =
+    scope === "organization" ||
+    scope === "organisation" ||
+    location.pathname.includes("/admin/asset-management/organization");
+
   const [activeAssetFilter, setActiveAssetFilter] = useState("tree");
   const [activeWorkflowTab, setActiveWorkflowTab] = useState("pendingRequests");
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -49,18 +57,13 @@ const AssetManagement = () => {
   const [workflowAssets, setWorkflowAssets] = useState([]);
   const [approvedAssets, setApprovedAssets] = useState([]);
 const getStatusUpdateUrl = (asset) => {
-  if (asset.submittedByType === "organisation") {
-    return `/api/org-assets/${asset.id}/status`;
-  }
   return `/api/assets/${asset.assetType}/${asset.id}/status`;
 };
 
 const getDetailsUrl = (asset) => {
-  if (asset.submittedByType === "organisation") {
-    return `/api/assets/tree/${asset.id}/details`; // temporary
-  }
-  return `/api/assets/${asset.assetType}/${asset.id}/details`;
+  return `/api/assets/${asset.assetType}/${asset.id}/details`; // user assets
 };
+
 
 
 
@@ -119,7 +122,7 @@ const getDetailsUrl = (asset) => {
         setApprovedAssets(
   approvedRes.data.map((a, index) => ({
     id: a.id,
-    _uiKey: `approved-${a.type}-${a.id}-${a.u_id}-${index}`, // ✅ ADD THIS
+    _uiKey: `approved-${a.type}-${a.id}-${a.u_id}-${index}`,
     assetType:
       a.type === "EV"
         ? "ev"
@@ -135,9 +138,9 @@ const getDetailsUrl = (asset) => {
     status: "Approved",
     submittedBy: a.u_id,
     submittedOn: new Date(a.created_at).toLocaleDateString(),
-    submittedByType: a.submittedByType || "individual",
   }))
 );
+
 
 
 
@@ -178,49 +181,65 @@ const getDetailsUrl = (asset) => {
   };
 
   /* ---------- MODAL / WORKFLOW HANDLERS ---------- */
-  const openReviewModal = async (asset) => {
-    try {
-     const res = await axios.get(getDetailsUrl(asset));
+const openReviewModal = async (asset) => {
+  try {
+    const res = await axios.get(getDetailsUrl(asset));
+    const data = res?.data?.data || res?.data || {};
+    const imageUrlsFromObjects = Array.isArray(data.images)
+      ? data.images
+          .map((img) => (typeof img === "string" ? img : img?.image_url))
+          .filter(Boolean)
+      : [];
+    const imageUrlsFromTreeImages = Array.isArray(data.tree_images)
+      ? data.tree_images.filter(Boolean)
+      : [];
 
-      setSelectedAsset({
-        ...asset,
+    // ✅ USER ASSETS (EV / TREE / SOLAR)
+    setSelectedAsset({
+      ...asset,
 
-        // EV
-        vehicleCategory: res.data.category,
-        manufacturer: res.data.manufacturers,
-        model: res.data.model,
-        purchaseYear: res.data.purchase_year,
-        energyConsumed: res.data.energy_consumed,
-        primaryChargingType: res.data.primary_charging_type,
-        range: res.data.range,
-        gridEmissionFactor: res.data.grid_emission_factor,
-        topSpeed: res.data.top_speed,
-        chargingTime: res.data.charging_time,
-        motorPower: res.data.motor_power,
+      // EV
+      vehicleCategory: data.category,
+      manufacturer: data.manufacturers,
+      model: data.model,
+      purchaseYear: data.purchase_year,
+      energyConsumed: data.energy_consumed,
+      primaryChargingType: data.primary_charging_type,
+      range: data.range,
+      gridEmissionFactor: data.grid_emission_factor,
+      topSpeed: data.top_speed,
+      chargingTime: data.charging_time,
+      motorPower: data.motor_power,
 
-        // Tree
-        treeName: res.data.treename,
-        botanicalName: res.data.botanicalname,
-        plantingDate: res.data.plantingdate,
-        height: res.data.height,
-        dbh: res.data.dbh,
-        location: res.data.location,
-        createdBy: res.data.created_by,
-        treeImages: res.data.images || res.data.tree_images || [],
+      // Tree
+      treeId: data.tid,
+      treeUid: data.t_uid,
+      treeName: data.treename,
+      botanicalName: data.botanicalname,
+      plantingDate: data.plantingdate,
+      height: data.height,
+      dbh: data.dbh,
+      location: data.location,
+      createdBy: data.created_by,
+      treeStatus: data.status,
+      treeImages: imageUrlsFromObjects.length
+        ? imageUrlsFromObjects
+        : imageUrlsFromTreeImages,
 
-        // Solar
-        installedCapacity: res.data.installed_capacity,
-        installationDate: res.data.installation_date,
-        energyGenerationValue: res.data.energy_generation_value,
-        solarGridEmissionFactor: res.data.grid_emission_factor,
-        inverterType: res.data.inverter_type,
-      });
+      // Solar
+      installedCapacity: data.installed_capacity,
+      installationDate: data.installation_date,
+      energyGenerationValue: data.energy_generation_value,
+      solarGridEmissionFactor: data.grid_emission_factor,
+      inverterType: data.inverter_type,
+    });
 
-      setReviewModalOpen(true);
-    } catch (err) {
-      console.error("Failed to load asset details", err);
-    }
-  };
+    setReviewModalOpen(true);
+  } catch (err) {
+    console.error("Failed to load asset details", err);
+  }
+};
+
 
   const closeReviewModal = () => {
     setReviewModalOpen(false);
@@ -230,7 +249,7 @@ const getDetailsUrl = (asset) => {
   // actual backend call when confirmed
   const handleAcceptConfirmed = async (asset) => {
   try {
- await axios.put(`/api/org-assets/${asset.id}/status`, {
+ await axios.patch(getStatusUpdateUrl(asset), {
   status: "approved",
 });
 
@@ -243,7 +262,6 @@ const getDetailsUrl = (asset) => {
       {
         ...asset,
         status: "Approved",
-        submittedByType: asset.submittedByType,
       },
       ...prev,
     ]);
@@ -263,7 +281,7 @@ const getDetailsUrl = (asset) => {
 
   const handleRejectConfirmed = async (asset) => {
   try {
- await axios.put(`/api/org-assets/${asset.id}/status`, {
+ await axios.patch(getStatusUpdateUrl(asset), {
   status: "rejected",
 });
 
@@ -335,10 +353,6 @@ const getDetailsUrl = (asset) => {
     status: "Rejected",
     submittedBy: a.u_id,
     submittedOn: new Date(a.created_at).toLocaleDateString(),
-
-    // 🔥 REQUIRED
-    submittedByType: (a.submittedbytype || "individual").toLowerCase(),
-
   }))
 );
 
@@ -375,12 +389,7 @@ const getDetailsUrl = (asset) => {
   const rejectedPaged = paginate(rejectedAssets, rejectedPage);
 
   // approved assets – derive by submitter + type filter at render time
-  const approvedBySubmitter =
-    activeSubmitterTab === "individual"
-      ? approvedAssets.filter((a) => a.submittedByType !== "organisation")
-      : approvedAssets.filter((a) => a.submittedByType === "organisation");
-
-  const approvedFiltered = approvedBySubmitter.filter(
+  const approvedFiltered = approvedAssets.filter(
     (a) => a.assetType === activeAssetFilter
   );
   const approvedPaged = paginate(approvedFiltered, approvedPage);
@@ -547,6 +556,16 @@ const getDetailsUrl = (asset) => {
       <div className="am26-modal-section-title">Tree Details</div>
       <div className="am26-modal-details-grid am26-modal-details-grid-wide">
         <div className="am26-modal-detail">
+          <div className="am26-modal-detail-label">Tree ID</div>
+          <div className="am26-modal-detail-value">{asset.treeId ?? "-"}</div>
+        </div>
+
+        <div className="am26-modal-detail">
+          <div className="am26-modal-detail-label">Tree UID</div>
+          <div className="am26-modal-detail-value">{asset.treeUid || "-"}</div>
+        </div>
+
+        <div className="am26-modal-detail">
           <div className="am26-modal-detail-label">Tree Name</div>
           <div className="am26-modal-detail-value">
             {asset.treeName || "-"}
@@ -592,6 +611,11 @@ const getDetailsUrl = (asset) => {
             {asset.createdBy || "-"}
           </div>
         </div>
+
+        <div className="am26-modal-detail">
+          <div className="am26-modal-detail-label">Status</div>
+          <div className="am26-modal-detail-value">{asset.treeStatus || "-"}</div>
+        </div>
       </div>
 
       {asset.treeImages && asset.treeImages.length > 0 && (
@@ -620,6 +644,10 @@ const getDetailsUrl = (asset) => {
     if (asset.assetType === "tree") return renderTreeDetails(asset);
     return null;
   };
+
+  if (isOrganizationScope) {
+    return <OrgAssets />;
+  }
 
   /* ================= UI ================= */
   return (
@@ -932,38 +960,8 @@ const getDetailsUrl = (asset) => {
         <div className="am26-asset-header-row">
           <h2 className="am26-section-title">Asset Management</h2>
           <p className="am26-section-subtitle">
-            View and manage approved assets by submitter type
+            View and manage approved assets
           </p>
-        </div>
-
-        {/* submitter segmented control */}
-        <div className="am26-submitters-tabs">
-          <button
-            className={
-              activeSubmitterTab === "individual"
-                ? "am26-submitters-tab am26-submitters-tab-active"
-                : "am26-submitters-tab"
-            }
-            onClick={() => {
-              setActiveSubmitterTab("individual");
-              setApprovedPage(1);
-            }}
-          >
-            Individual Assets
-          </button>
-          <button
-            className={
-              activeSubmitterTab === "organisation"
-                ? "am26-submitters-tab am26-submitters-tab-active"
-                : "am26-submitters-tab"
-            }
-            onClick={() => {
-              setActiveSubmitterTab("organisation");
-              setApprovedPage(1);
-            }}
-          >
-            Organisation Assets
-          </button>
         </div>
 
         {/* asset-type segmented control */}

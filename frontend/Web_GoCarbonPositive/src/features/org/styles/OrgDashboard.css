@@ -10,7 +10,7 @@
     radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.03) 0%, transparent 50%),
     radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.02) 0%, transparent 50%);
   color: var(--color-text);
-  font-family: var(--font-family);
+  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: var(--font-size-base);
   line-height: 1.6;
   margin: 0;

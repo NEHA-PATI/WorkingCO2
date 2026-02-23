@@ -1,12 +1,8 @@
 import React from "react";
+import MaintenancePage from "@shared/components/MaintenancePage";
 
 const Reports = () => {
-  return (
-    <div className="page-content">
-      <h2>Reports Section</h2>
-      <p>Generate and view analytics reports.</p>
-    </div>
-  );
+  return <MaintenancePage pageName="Reports" />;
 };
 
 export default Reports;

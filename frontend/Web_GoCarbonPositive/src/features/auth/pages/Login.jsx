@@ -9,7 +9,7 @@ import { fireToast } from "@shared/utils/toastService";
 import { ENV } from "@config/env";
 
 const Login = ({ onClose, onSwitchToSignup }) => {
-  const API_URL = ENV.API_URL;
+  const API_URL = import.meta.env.VITE_AUTH_API || "http://localhost:5002";
 
   const [formData, setFormData] = useState({
     email: "",
@@ -54,7 +54,7 @@ const Login = ({ onClose, onSwitchToSignup }) => {
       display: "flex",
       alignItems: isMobile ? "flex-end" : "center",
       justifyContent: "center",
-      zIndex: 999,
+      zIndex: 2000,
       padding: isMobile ? "0" : "20px",
     },
     modal: {
@@ -369,12 +369,13 @@ const Login = ({ onClose, onSwitchToSignup }) => {
       fireToast("AUTH.LOGIN_SUCCESS");
 
       const role =
-        data.user.role?.toLowerCase() || data.user.role_name?.toLowerCase();
+        data.data.user.role?.toLowerCase() ||
+        data.data.user.role_name?.toLowerCase();
 
       if (role === "admin") {
         navigate("/admin/dashboard", { replace: true });
       } else if (role === "organization") {
-        navigate("/org/dashboard", { replace: true });
+        navigate("/organization/dashboard", { replace: true });
       } else {
         navigate("/user/dashboard", { replace: true });
       }

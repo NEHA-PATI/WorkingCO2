@@ -1,7 +1,11 @@
 // PopupForms.js - React component file with all three popup forms
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import "@features/org/styles/popupforms.css";
-import { assetAPI } from "@shared/utils/api";
+import { assetAPI } from "@features/org/services/assetApi";
+import { MdElectricCar, MdSolarPower } from "react-icons/md";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { GiPowder } from "react-icons/gi";
+import AddPlantationModal from "@features/org/components/AddPlantationModal";
 const PopupForms = ({
   activeEVPopup,
   setActiveEVPopup,
@@ -9,29 +13,19 @@ const PopupForms = ({
   setActiveSolarPopup,
   activePlantationPopup,
   setActivePlantationPopup,
+  activeCapturePopup,
+  setActiveCapturePopup,
   handleSaveEV,
   handleSavePlantation,
   handleSaveSolar,
+  handleSaveCapture,
   setEvCount,
   setSolarCount // ✅ Add this line!
 }) => {
 
-
-
-
-
   // State for managing popups
 
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
-
-  // List state for fetched data
-  const [evList, setEvList] = useState([]);      // All EVs from backend
-  const [plantationList, setPlantationList] = useState([]);  // All plantations from backend
-  const [solarPanels, setSolarPanels] = useState([]); // All solar panels from backend
-
-
-
-
 
   const [solarPanelData, setSolarPanelData] = useState({
     Installed_Capacity: '',
@@ -45,40 +39,43 @@ const PopupForms = ({
 
 
 
-  const [evData, setEVData] = useState({
-    manufacturer: '',
-    model: '',
-    year: '',
-    batteryconsumed: '', // ✅ Fixed: Was batteryCapacity, caused uncontrolled input
-    range: '',
-    EVCategory: '',
-    chargingType: '',
-    gridEmissionFactor: '', // ✅ Fixed: Added to state
-    topSpeed: '', // ✅ Fixed: Added to state
-    chargingTime: '', // ✅ Fixed: Added to state
-    motorpower: '', // ✅ Fixed: Added to state
+    const [evData, setEVData] = useState({
+    vehicleCategory: "",
+    subCategory: "",
+    powertrainType: "",
+    manufacturer: "",
+    model: "",
+    purchaseYear: "",
+    isFleet: "No",
+    averageDistancePerDay: "",
+    workingDaysPerYear: "",
+    numberOfVehicles: "",
+    averageDistancePerVehiclePerYear: "",
+    fuelType: "",
+    fuelEfficiency: "",
+    totalFuelConsumedPerYear: "",
+    batteryCapacity: "",
+    energyConsumedPerMonth: "",
+    chargingType: "",
+    gridEmissionFactor: "",
+    vehicleWeight: "",
+    engineCapacity: "",
+    motorPower: "",
+    chargingTime: "",
   });
-
-
-  const [plantationData, setPlantationData] = useState({
-    location_lat: '',
-    location_long: '',
-    area_hactare: '',
-    species_Name: '',
-    trees_planted: '',
-    avg_height: '',
-    avg_dbh: '',
-    survival_rate: '',
-    plantation_date: '',
-    Base_line_Land: '',
-    photos: [],
+  const [evTouched, setEVTouched] = useState({});
+  const [captureData, setCaptureData] = useState({
+    industryType: "",
+    totalEmission: "",
+    captureTechnology: "",
+    captureEfficiency: "",
   });
-
-
-
-
-
-
+  const [captureTouched, setCaptureTouched] = useState({
+    industryType: false,
+    totalEmission: false,
+    captureTechnology: false,
+    captureEfficiency: false,
+  });
 
   // Toast notification handler
   const showToast = (message, type = 'success') => {
@@ -90,6 +87,161 @@ const PopupForms = ({
     }, 3000);
   };
 
+  const validateCaptureField = (name, value) => {
+    if (name === "industryType") {
+      if (!value) return "Industry Type is required";
+      return "";
+    }
+
+    if (name === "totalEmission") {
+      if (value === "") return "Total Emission is required";
+      if (Number(value) <= 0) return "Total Emission must be greater than 0";
+      return "";
+    }
+
+    if (name === "captureTechnology") {
+      if (!value) return "Capture Technology is required";
+      return "";
+    }
+
+    if (name === "captureEfficiency") {
+      if (value === "") return "Capture Efficiency is required";
+      const numericValue = Number(value);
+      if (numericValue < 0 || numericValue > 100) return "Capture Efficiency must be between 0 and 100";
+      return "";
+    }
+
+    return "";
+  };
+
+  const captureErrors = {
+    industryType: validateCaptureField("industryType", captureData.industryType),
+    totalEmission: validateCaptureField("totalEmission", captureData.totalEmission),
+    captureTechnology: validateCaptureField("captureTechnology", captureData.captureTechnology),
+    captureEfficiency: validateCaptureField("captureEfficiency", captureData.captureEfficiency),
+  };
+
+  const hasCaptureErrors = Object.values(captureErrors).some(Boolean);
+
+  const handleCaptureChange = (name, value) => {
+    setCaptureData((prev) => ({ ...prev, [name]: value }));
+    setCaptureTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
+  const handleCaptureBlur = (name) => {
+    setCaptureTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
+  const handleCaptureSubmit = async (e) => {
+    e.preventDefault();
+
+    setCaptureTouched({
+      industryType: true,
+      totalEmission: true,
+      captureTechnology: true,
+      captureEfficiency: true,
+    });
+
+    if (hasCaptureErrors) {
+      showToast("Please fix validation errors before submitting.", "error");
+      return;
+    }
+
+    const authUserRaw = localStorage.getItem("authUser");
+    const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
+    const orgId =
+      authUser?.org_id ||
+      authUser?.u_id ||
+      localStorage.getItem("orgId") ||
+      localStorage.getItem("userId");
+
+    if (!orgId) {
+      showToast("Organization ID not found. Please login again.", "error");
+      return;
+    }
+
+    const payload = {
+      c_uid: crypto.randomUUID(),
+      org_id: orgId,
+      industry_type: captureData.industryType,
+      total_emission_tonnes_per_year: Number(captureData.totalEmission),
+      capture_technology: captureData.captureTechnology,
+      capture_efficiency_percent: Number(captureData.captureEfficiency),
+    };
+
+    try {
+      const result = await assetAPI.createCarbonCapture(payload);
+      if (result?.success) {
+        handleSaveCapture?.(result.data);
+        showToast("Carbon Capture details saved successfully.", "success");
+        setCaptureData({
+          industryType: "",
+          totalEmission: "",
+          captureTechnology: "",
+          captureEfficiency: "",
+        });
+        setCaptureTouched({
+          industryType: false,
+          totalEmission: false,
+          captureTechnology: false,
+          captureEfficiency: false,
+        });
+        setActiveCapturePopup(false);
+      } else {
+        showToast(result?.message || "Failed to save Carbon Capture asset.", "error");
+      }
+    } catch (error) {
+      showToast(error?.message || "Server error while saving Carbon Capture asset.", "error");
+    }
+  };
+  const handlePlantationSubmit = async (payload) => {
+    const authUserRaw = localStorage.getItem("authUser");
+    const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
+    const orgId =
+      authUser?.org_id ||
+      authUser?.u_id ||
+      localStorage.getItem("orgId") ||
+      localStorage.getItem("userId");
+
+    if (!orgId) {
+      showToast("Organization ID not found. Please login again.", "error");
+      return;
+    }
+
+    const step1 = payload?.step1 || {};
+    const step2 = payload?.step2 || {};
+    const points = payload?.points || [];
+
+    const apiPayload = {
+      org_id: orgId,
+      plantation_name: String(step1.name || "").trim(),
+      plantation_date: step1.date,
+      total_area: Number(step1.area),
+      area_unit: step1.areaUnit,
+      manager_name: String(step1.managerName || "").trim(),
+      manager_contact: String(step1.managerContact || "").trim(),
+      trees_planted: Number(step2.treesCount),
+      species_name: String(step2.speciesName || "").trim(),
+      plant_age_years: Number(step2.plantAge),
+      points: points.map((pt) => ({ lat: Number(pt.lat), lng: Number(pt.lng) })),
+    };
+
+    try {
+      const result = await assetAPI.createPlantation(apiPayload);
+      if (result?.success) {
+        handleSavePlantation?.(result.data);
+        showToast("Plantation details added successfully", "success");
+        setActivePlantationPopup(false);
+        return true;
+      } else {
+        showToast(result?.message || "Failed to save plantation", "error");
+        return false;
+      }
+    } catch (error) {
+      showToast(error?.message || "Server error while saving plantation", "error");
+      return false;
+    }
+  };
 
   const handleSolarSubmit = async (e) => {
     e.preventDefault();
@@ -113,7 +265,6 @@ const PopupForms = ({
 
     };
 
-    // ✅ Debug log
     console.log('Submitting Solar Panel Payload:', payload);
 
     // ✅ Quick client-side validation
@@ -143,384 +294,427 @@ const PopupForms = ({
     }
   };
 
-
-
   const handleEVSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ 1. Auth Validation (Robust)
-    const U_ID = localStorage.getItem("userId");
-    if (!U_ID || U_ID === "undefined" || U_ID === "null") {
-      showToast("Session invalid. Please log in again.", "error");
+    const requiredFields = [
+      "vehicleCategory",
+      "subCategory",
+      "powertrainType",
+      "manufacturer",
+      "model",
+      "purchaseYear",
+      "fuelType",
+      "fuelEfficiency",
+      "totalFuelConsumedPerYear",
+      "batteryCapacity",
+      "energyConsumedPerMonth",
+      "chargingType",
+      "gridEmissionFactor",
+    ];
+
+    if (evData.isFleet === "Yes") {
+      requiredFields.push("numberOfVehicles", "averageDistancePerVehiclePerYear");
+    } else {
+      requiredFields.push("averageDistancePerDay", "workingDaysPerYear");
+    }
+
+    const nextTouched = {};
+    requiredFields.forEach((key) => {
+      nextTouched[key] = true;
+    });
+    setEVTouched(nextTouched);
+
+    const hasMissing = requiredFields.some((key) => {
+      const value = evData[key];
+      return value === "" || value === null || value === undefined;
+    });
+
+    if (hasMissing) {
+      showToast("Please fill all required EV fields.", "error");
       return;
     }
 
-    // 📦 2. Payload Construction (Aligned with State & Backend)
+    const authUserRaw = localStorage.getItem("authUser");
+    const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
+    const orgId =
+      authUser?.org_id ||
+      authUser?.u_id ||
+      localStorage.getItem("orgId") ||
+      localStorage.getItem("userId");
+
+    if (!orgId) {
+      showToast("Organization ID not found. Please login again.", "error");
+      return;
+    }
+
     const payload = {
-      VUID: crypto.randomUUID(),
-      U_ID, // Backend expects u_id
-      Category: evData.EVCategory,
-      Manufacturers: evData.manufacturer,
-      Model: evData.model,
-      Purchase_Year: Number(evData.year),
-      Energy_Consumed: Number(evData.batteryconsumed), // ✅ Fixed key mapping
-      Primary_Charging_Type: evData.chargingType,
-      Range: Number(evData.range),
-      Grid_Emission_Factor: Number(evData.gridEmissionFactor),
-      // ✅ Optional fields validation: valid number or null
-      Top_Speed: evData.topSpeed ? Number(evData.topSpeed) : null,
-      Charging_Time: evData.chargingTime ? Number(evData.chargingTime) : null,
-      Motor_Power: evData.motorpower ? String(evData.motorpower) : null // Backend might expect string or number, safely handling
+      org_id: orgId,
+      vehicleCategory: evData.vehicleCategory,
+      subCategory: evData.subCategory,
+      powertrainType: evData.powertrainType,
+      manufacturer: evData.manufacturer,
+      model: evData.model,
+      purchaseYear: evData.purchaseYear,
+      isFleet: evData.isFleet,
+      averageDistancePerDay: evData.averageDistancePerDay,
+      workingDaysPerYear: evData.workingDaysPerYear,
+      numberOfVehicles: evData.numberOfVehicles,
+      averageDistancePerVehiclePerYear: evData.averageDistancePerVehiclePerYear,
+      fuelType: evData.fuelType,
+      fuelEfficiency: evData.fuelEfficiency,
+      totalFuelConsumedPerYear: evData.totalFuelConsumedPerYear,
+      batteryCapacity: evData.batteryCapacity,
+      energyConsumedPerMonth: evData.energyConsumedPerMonth,
+      chargingType: evData.chargingType,
+      gridEmissionFactor: evData.gridEmissionFactor,
+      vehicleWeight: evData.vehicleWeight,
+      engineCapacity: evData.engineCapacity,
+      motorPower: evData.motorPower,
+      chargingTime: evData.chargingTime,
     };
 
-    // ✅ Debug log
-    console.log('🔍 Submitting EV Payload:', payload);
-
     try {
-      const result = await assetAPI.createEV(payload);
-
-      if (result.status === 'success') {
-        const { data: savedEV, evCount } = result;
-
-        // ✅ Only call if it's a valid function
-        if (typeof setEvCount === 'function') {
-          setEvCount(evCount);
-        }
-
-        showToast(`EV saved! Total EVs: ${evCount}`, 'success');
-
-        // ✅ Save new activity to localStorage
-        const newActivity = {
-          title: "EV Added",
-          detail: `${evData.manufacturer} ${evData.model} - ${evData.range} km range`,
-          time: "Just now",
-          credits: 20,            // Adjust as per logic
-          color: "bg-blue-100"
-        };
-
-        localStorage.setItem("latestActivity", JSON.stringify(newActivity));
-
-        // Let AddAsset.jsx handle the popup closing and navigation
-        handleSaveEV(savedEV);
+      const result = await assetAPI.createFleet(payload);
+      if (result?.success) {
+        showToast("Fleet details saved successfully.", "success");
+        setActiveEVPopup(false);
       } else {
-        showToast('Failed to save EV: ' + (result.message || 'Unknown error'), 'error');
+        showToast(result?.message || "Failed to save fleet details.", "error");
       }
     } catch (error) {
-      console.error("EV submit error:", error);
-      showToast('Server error! ' + error.message, 'error');
+      showToast(error?.message || "Server error while saving fleet details.", "error");
     }
-  };
-
-
-
-
-
-  const handlePlantationSubmit = async (e) => {
-    e.preventDefault();
-
-    const u_id = localStorage.getItem("userId");
-    if (!u_id) {
-      showToast("User not logged in", "error");
-      return;
-    }
-
-    try {
-      let image_id = null;
-
-      // 1️⃣ Upload image (take FIRST image only)
-      if (plantationData.photos?.length > 0) {
-        const formData = new FormData();
-
-        const blob = dataURLtoBlob(plantationData.photos[0]);
-        formData.append("images", blob);
-
-        const imageRes = await assetAPI.uploadImage(formData);
-
-        if (imageRes.status !== "success") {
-          showToast("Image upload failed", "error");
-          return;
-        }
-
-        image_id = imageRes.imageIds[0]; // ✅ SINGLE image_id
-      }
-
-      // 2️⃣ Build ORG ASSET payload
-      const payload = {
-        plantationId: crypto.randomUUID(),   // ✅ REQUIRED
-        t_oid: `TREE-${Date.now()}`,          // ✅ REQUIRED
-        u_id,                                // ✅ MATCH DB
-        location_lat: Number(plantationData.location_lat),
-        location_long: Number(plantationData.location_long),
-        area_hactare: Number(plantationData.area_hactare),
-        species_Name: plantationData.species_Name,
-        trees_planted: Number(plantationData.trees_planted),
-        avg_height: Number(plantationData.avg_height),
-        avg_dbh: Number(plantationData.avg_dbh),
-        survival_rate: Number(plantationData.survival_rate),
-        plantation_date: plantationData.plantation_date,
-        Base_line_Land: plantationData.Base_line_Land,
-        ImageId: image_id,
-      };
-
-      console.log("🌱 ORG ASSET PAYLOAD:", payload);
-
-      // 3️⃣ Call ORG ASSET backend (PORT 5000)
-      const result = await assetAPI.createOrgAsset(payload);
-
-      if (result.success) {
-        showToast("Plantation saved successfully!", "success");
-        handleSavePlantation?.(result.data);
-        setActivePlantationPopup(false);
-      } else {
-        showToast(result.error || "Failed to save plantation", "error");
-      }
-
-    } catch (err) {
-      console.error(err);
-      showToast("Server error", "error");
-    }
-  };
-
-
-  // ✅ Helper function: dataURL to Blob
-  function dataURLtoBlob(dataURL) {
-    const byteString = atob(dataURL.split(',')[1]);
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-    const blob = new Blob([ab], { type: 'image/jpeg' });
-    return blob;
-  }
-
-
-  // File upload handler for tree photos
-
-
-
-
-
-  const removePlantationPhoto = (index) => {
-    setPlantationData((prev) => ({
-      ...prev,
-      photos: prev.photos.filter((_, i) => i !== index),
-    }));
   };
 
   return (
     <div>
-      {/* EV Popup */}
+            {/* EV Popup */}
+      {activeEVPopup && (
       <div className={`popup-overlay ${activeEVPopup ? 'active' : ''}`} onClick={() => setActiveEVPopup(false)}>
         <div className={`popup ${activeEVPopup ? 'active' : ''}`} onClick={e => e.stopPropagation()}>
           <div className="popup-header">
             <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2196F3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="9" width="20" height="10" rx="2" ry="2"></rect>
-                <circle cx="7" cy="19" r="2"></circle>
-                <circle cx="17" cy="19" r="2"></circle>
-                <path d="M5 9V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"></path>
-                <path d="M15 13h2"></path>
-                <path d="M7 13h2"></path>
-              </svg>
-              Electric Vehicle Details
+              <MdElectricCar size={30} color="#2563eb" />
+              EV Emissions Input Form
             </h2>
-            <button className="popup-close" onClick={() => setActiveEVPopup(false)}>×</button>
+            <button className="popup-close" onClick={() => setActiveEVPopup(false)}>X</button>
           </div>
-          <form onSubmit={handleEVSubmit}>
+
+          <form onSubmit={handleEVSubmit} className="ev-form-ui">
+            <div className="ev-section-title">1. Basic Information</div>
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="EVCategory">Vehicle Category</label>
+                <label>Vehicle Category *</label>
                 <select
-                  id="EVCategory"
-                  className="form-control"
-                  value={evData.EVCategory}
-                  onChange={(e) => setEVData({ ...evData, EVCategory: e.target.value })}
-                  required
+                  className={`form-control ${evTouched.vehicleCategory && !evData.vehicleCategory ? 'form-control-error' : ''}`}
+                  value={evData.vehicleCategory}
+                  onChange={(e) => setEVData({ ...evData, vehicleCategory: e.target.value })}
                 >
-                  <option value="" disabled hidden>
-                    -- Select Vehicle Category --
-                  </option>
-                  <option value="Two-Wheelers">Two-Wheelers</option>
-                  <option value="Three-Wheeler">Three-Wheeler </option>
-                  <option value="Hatchbacks">Hatchbacks</option>
-                  <option value="Sedans">Sedans</option>
-                  <option value="SUVs">SUVs</option>
-                  <option value="MPVs">MPVs</option>
-                  <option value="Buses">Buses</option>
-                  <option value="Trucks">Trucks</option>
-                  <option value="Vans">Vans</option>
-                  <option value="Tractors">Tractors</option>
-                  <option value="nForklifts">Forklifts</option>
-                  <option value="NEVs">NEVs</option>
-                  <option value="Golf Carts">Golf Carts</option>
+                  <option value="">-- Select Vehicle Category --</option>
+                  <option value="Two-Wheeler">Two-Wheeler</option>
+                  <option value="Three-Wheeler">Three-Wheeler</option>
+                  <option value="Passenger Car">Passenger Car</option>
+                  <option value="Commercial Vehicle">Commercial Vehicle</option>
+                  <option value="Industrial Vehicle">Industrial Vehicle</option>
                 </select>
+                {evTouched.vehicleCategory && !evData.vehicleCategory && <p className="form-error-text">Vehicle Category is required</p>}
               </div>
               <div className="form-group">
-                <label htmlFor="ev-manufacturer">Manufacturer</label>
+                <label>Sub Category *</label>
+                <select
+                  className={`form-control ${evTouched.subCategory && !evData.subCategory ? 'form-control-error' : ''}`}
+                  value={evData.subCategory}
+                  onChange={(e) => setEVData({ ...evData, subCategory: e.target.value })}
+                >
+                  <option value="">-- Select Sub Category --</option>
+                  <option value="Hatchback">Hatchback</option>
+                  <option value="Sedan">Sedan</option>
+                  <option value="SUV">SUV</option>
+                  <option value="MPV">MPV</option>
+                  <option value="Truck">Truck</option>
+                  <option value="Bus">Bus</option>
+                  <option value="Van">Van</option>
+                  <option value="Tractor">Tractor</option>
+                  <option value="Forklift">Forklift</option>
+                </select>
+                {evTouched.subCategory && !evData.subCategory && <p className="form-error-text">Sub Category is required</p>}
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Powertrain Type *</label>
+                <select
+                  className={`form-control ${evTouched.powertrainType && !evData.powertrainType ? 'form-control-error' : ''}`}
+                  value={evData.powertrainType}
+                  onChange={(e) => setEVData({ ...evData, powertrainType: e.target.value })}
+                >
+                  <option value="">-- Select Powertrain Type --</option>
+                  <option value="Petrol">Petrol</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="CNG">CNG</option>
+                  <option value="Hybrid">Hybrid</option>
+                  <option value="Electric (BEV)">Electric (BEV)</option>
+                  <option value="Plug-in Hybrid (PHEV)">Plug-in Hybrid (PHEV)</option>
+                </select>
+                {evTouched.powertrainType && !evData.powertrainType && <p className="form-error-text">Powertrain Type is required</p>}
+              </div>
+              <div className="form-group">
+                <label>Manufacturer *</label>
                 <input
                   type="text"
-                  id="ev-manufacturer"
-                  className="form-control"
-                  placeholder="e.g., Tesla, Nissan, Chevrolet"
+                  className={`form-control ${evTouched.manufacturer && !evData.manufacturer ? 'form-control-error' : ''}`}
                   value={evData.manufacturer}
                   onChange={(e) => setEVData({ ...evData, manufacturer: e.target.value })}
-                  required
                 />
+                {evTouched.manufacturer && !evData.manufacturer && <p className="form-error-text">Manufacturer is required</p>}
               </div>
             </div>
 
-
-
-
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="ev-model">Model</label>
+                <label>Model *</label>
                 <input
                   type="text"
-                  id="ev-model"
-                  className="form-control"
-                  placeholder="e.g., Model 3, Leaf, Bolt"
+                  className={`form-control ${evTouched.model && !evData.model ? 'form-control-error' : ''}`}
                   value={evData.model}
                   onChange={(e) => setEVData({ ...evData, model: e.target.value })}
-                  required
                 />
+                {evTouched.model && !evData.model && <p className="form-error-text">Model is required</p>}
               </div>
               <div className="form-group">
-                <label htmlFor="ev-year">Purchase Year</label>
+                <label>Purchase Year *</label>
                 <input
                   type="number"
-                  id="ev-year"
-                  className="form-control"
-                  placeholder="e.g., 2022"
-                  min="2000"
-                  max="2030"
-                  value={evData.year}
-                  onChange={(e) => setEVData({ ...evData, year: e.target.value })}
-                  required
+                  min="1990"
+                  max="2099"
+                  className={`form-control ${evTouched.purchaseYear && !evData.purchaseYear ? 'form-control-error' : ''}`}
+                  value={evData.purchaseYear}
+                  onChange={(e) => setEVData({ ...evData, purchaseYear: e.target.value })}
                 />
+                {evTouched.purchaseYear && !evData.purchaseYear && <p className="form-error-text">Purchase Year is required</p>}
               </div>
             </div>
 
+            <div className="ev-section-title">2. Usage Details</div>
+            <div className="form-row form-row-single">
+              <div className="form-group">
+                <label>Is this a Fleet? *</label>
+                <div className="ev-toggle-row">
+                  <button
+                    type="button"
+                    className={`ev-toggle-btn ${evData.isFleet === 'No' ? 'active' : ''}`}
+                    onClick={() => setEVData({ ...evData, isFleet: 'No' })}
+                  >No</button>
+                  <button
+                    type="button"
+                    className={`ev-toggle-btn ${evData.isFleet === 'Yes' ? 'active' : ''}`}
+                    onClick={() => setEVData({ ...evData, isFleet: 'Yes' })}
+                  >Yes</button>
+                </div>
+              </div>
+            </div>
 
+            {evData.isFleet === 'No' ? (
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Average Distance per Day (km) *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={`form-control ${evTouched.averageDistancePerDay && !evData.averageDistancePerDay ? 'form-control-error' : ''}`}
+                    value={evData.averageDistancePerDay}
+                    onChange={(e) => setEVData({ ...evData, averageDistancePerDay: e.target.value })}
+                  />
+                  {evTouched.averageDistancePerDay && !evData.averageDistancePerDay && <p className="form-error-text">This field is required</p>}
+                </div>
+                <div className="form-group">
+                  <label>Working Days per Year *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={`form-control ${evTouched.workingDaysPerYear && !evData.workingDaysPerYear ? 'form-control-error' : ''}`}
+                    value={evData.workingDaysPerYear}
+                    onChange={(e) => setEVData({ ...evData, workingDaysPerYear: e.target.value })}
+                  />
+                  {evTouched.workingDaysPerYear && !evData.workingDaysPerYear && <p className="form-error-text">This field is required</p>}
+                </div>
+              </div>
+            ) : (
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Number of Vehicles *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    className={`form-control ${evTouched.numberOfVehicles && !evData.numberOfVehicles ? 'form-control-error' : ''}`}
+                    value={evData.numberOfVehicles}
+                    onChange={(e) => setEVData({ ...evData, numberOfVehicles: e.target.value })}
+                  />
+                  {evTouched.numberOfVehicles && !evData.numberOfVehicles && <p className="form-error-text">This field is required</p>}
+                </div>
+                <div className="form-group">
+                  <label>Average Distance per Vehicle per Year (km) *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={`form-control ${evTouched.averageDistancePerVehiclePerYear && !evData.averageDistancePerVehiclePerYear ? 'form-control-error' : ''}`}
+                    value={evData.averageDistancePerVehiclePerYear}
+                    onChange={(e) => setEVData({ ...evData, averageDistancePerVehiclePerYear: e.target.value })}
+                  />
+                  {evTouched.averageDistancePerVehiclePerYear && !evData.averageDistancePerVehiclePerYear && <p className="form-error-text">This field is required</p>}
+                </div>
+              </div>
+            )}
+
+            <div className="ev-section-title">3. Energy / Fuel Details</div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Fuel Type *</label>
+                <select
+                  className={`form-control ${evTouched.fuelType && !evData.fuelType ? 'form-control-error' : ''}`}
+                  value={evData.fuelType}
+                  onChange={(e) => setEVData({ ...evData, fuelType: e.target.value })}
+                >
+                  <option value="">-- Select Fuel Type --</option>
+                  <option value="Petrol">Petrol</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="CNG">CNG</option>
+                  <option value="Electric">Electric</option>
+                  <option value="Hybrid">Hybrid</option>
+                </select>
+                {evTouched.fuelType && !evData.fuelType && <p className="form-error-text">Fuel Type is required</p>}
+              </div>
+              <div className="form-group">
+                <label>Fuel Efficiency (km per liter) *</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className={`form-control ${evTouched.fuelEfficiency && !evData.fuelEfficiency ? 'form-control-error' : ''}`}
+                  value={evData.fuelEfficiency}
+                  onChange={(e) => setEVData({ ...evData, fuelEfficiency: e.target.value })}
+                />
+                {evTouched.fuelEfficiency && !evData.fuelEfficiency && <p className="form-error-text">This field is required</p>}
+              </div>
+            </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="energyConsumed">Energy consumed(kWh)</label>
+                <label>Total Fuel Consumed per Year (liters) *</label>
                 <input
                   type="number"
-                  id="energyconsumed"
-                  className="form-control"
-                  placeholder="e.g., 75"
-                  step="0.1"
-                  min="1"
-                  value={evData.batteryconsumed}
-                  onChange={(e) => setEVData({ ...evData, batteryconsumed: e.target.value })}
-                  required
+                  min="0"
+                  className={`form-control ${evTouched.totalFuelConsumedPerYear && !evData.totalFuelConsumedPerYear ? 'form-control-error' : ''}`}
+                  value={evData.totalFuelConsumedPerYear}
+                  onChange={(e) => setEVData({ ...evData, totalFuelConsumedPerYear: e.target.value })}
                 />
+                {evTouched.totalFuelConsumedPerYear && !evData.totalFuelConsumedPerYear && <p className="form-error-text">This field is required</p>}
               </div>
               <div className="form-group">
-                <label htmlFor="chargingType">Primary Charging Type</label>
+                <label>Battery Capacity (kWh) *</label>
+                <input
+                  type="number"
+                  min="0"
+                  className={`form-control ${evTouched.batteryCapacity && !evData.batteryCapacity ? 'form-control-error' : ''}`}
+                  value={evData.batteryCapacity}
+                  onChange={(e) => setEVData({ ...evData, batteryCapacity: e.target.value })}
+                />
+                {evTouched.batteryCapacity && !evData.batteryCapacity && <p className="form-error-text">This field is required</p>}
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Energy Consumed per Month (kWh) *</label>
+                <input
+                  type="number"
+                  min="0"
+                  className={`form-control ${evTouched.energyConsumedPerMonth && !evData.energyConsumedPerMonth ? 'form-control-error' : ''}`}
+                  value={evData.energyConsumedPerMonth}
+                  onChange={(e) => setEVData({ ...evData, energyConsumedPerMonth: e.target.value })}
+                />
+                {evTouched.energyConsumedPerMonth && !evData.energyConsumedPerMonth && <p className="form-error-text">This field is required</p>}
+              </div>
+              <div className="form-group">
+                <label>Charging Type *</label>
                 <select
-                  id="chargingType"
-                  className="form-control"
+                  className={`form-control ${evTouched.chargingType && !evData.chargingType ? 'form-control-error' : ''}`}
                   value={evData.chargingType}
                   onChange={(e) => setEVData({ ...evData, chargingType: e.target.value })}
-                  required
                 >
-                  <option value="" disabled hidden>
-                    -- Select Charging Type --
-                  </option>
-                  <option value="level1">Level 1 (120V)</option>
-                  <option value="level2">Level 2 (240V)</option>
-                  <option value="dcfast">DC Fast Charging</option>
-                  <option value="tesla">Tesla Supercharger</option>
+                  <option value="">-- Select Charging Type --</option>
+                  <option value="Home">Home</option>
+                  <option value="Depot">Depot</option>
+                  <option value="Public">Public</option>
                 </select>
+                {evTouched.chargingType && !evData.chargingType && <p className="form-error-text">Charging Type is required</p>}
               </div>
             </div>
 
-
-
-            <div className="form-row">
+            <div className="form-row form-row-single">
               <div className="form-group">
-                <label htmlFor="range">Range (Km) </label>
+                <label>Grid Emission Factor (kgCO2/kWh) *</label>
                 <input
                   type="number"
-                  id="range"
-                  className="form-control"
-                  placeholder="e.g., 300"
-                  min="1"
-                  value={evData.range}
-                  onChange={(e) => setEVData({ ...evData, range: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="gridEmissionFactor">Grid Emission Factor</label>
-                <input
-                  type="number"
-                  id="gridEmissionFactor"
-                  className="form-control"
-                  placeholder="e.g., 5 "
                   min="0"
+                  step="0.0001"
+                  className={`form-control ${evTouched.gridEmissionFactor && !evData.gridEmissionFactor ? 'form-control-error' : ''}`}
                   value={evData.gridEmissionFactor}
                   onChange={(e) => setEVData({ ...evData, gridEmissionFactor: e.target.value })}
-                  required
                 />
+                {evTouched.gridEmissionFactor && !evData.gridEmissionFactor && <p className="form-error-text">Grid Emission Factor is required</p>}
               </div>
             </div>
 
-
-
+            <div className="ev-section-title">4. Additional Information (Optional)</div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Vehicle Weight (kg)</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="form-control"
+                  value={evData.vehicleWeight}
+                  onChange={(e) => setEVData({ ...evData, vehicleWeight: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Engine Capacity (cc)</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="form-control"
+                  value={evData.engineCapacity}
+                  onChange={(e) => setEVData({ ...evData, engineCapacity: e.target.value })}
+                />
+              </div>
+            </div>
 
             <div className="form-row">
-
               <div className="form-group">
-                <label htmlFor="topSpeed">Top Speed (km/h)</label>
+                <label>Motor Power (kW)</label>
                 <input
                   type="number"
-                  id="topSpeed"
-                  className="form-control"
-                  placeholder="e.g., 80"
                   min="0"
-                  value={evData.topSpeed}
-                  onChange={(e) => setEVData({ ...evData, topSpeed: e.target.value })}
-                // ❌ Removed 'required' (Optional field)
+                  className="form-control"
+                  value={evData.motorPower}
+                  onChange={(e) => setEVData({ ...evData, motorPower: e.target.value })}
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="chargingTime">Charging time (hrs)</label>
+                <label>Charging Time (hours)</label>
                 <input
                   type="number"
-                  id="chargingTime"
-                  className="form-control"
-                  placeholder="e.g., 1"
                   min="0"
+                  step="0.1"
+                  className="form-control"
                   value={evData.chargingTime}
                   onChange={(e) => setEVData({ ...evData, chargingTime: e.target.value })}
-                // ❌ Removed 'required' (Optional field)
                 />
               </div>
-              <div className="form-group">
-                <label htmlFor="motorpower">Motor power (kW)</label>
-                <input
-                  type="number"
-                  id="motorpower"
-                  className="form-control"
-                  placeholder="e.g., 5"
-                  min="0"
-                  value={evData.motorpower}
-                  onChange={(e) => setEVData({ ...evData, motorpower: e.target.value })}
-                // ❌ Removed 'required' (Optional field)
-                />
-              </div>
-
-
             </div>
-
-
-
-
 
             <div className="form-actions">
               <button type="button" className="btn-primary btn-cancel" onClick={() => setActiveEVPopup(false)}>Cancel</button>
@@ -529,256 +723,26 @@ const PopupForms = ({
           </form>
         </div>
       </div>
-      {/* Plantation Popup (using activePlantationPopup prop) */}
-      <div className={`popup-overlay ${activePlantationPopup ? 'active' : ''}`} onClick={() => setActivePlantationPopup(false)}>
-        <div className={`popup ${activePlantationPopup ? 'active' : ''}`} onClick={e => e.stopPropagation()}>
-          <div className="popup-header">
-            <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 14l-5-5-5 5"></path>
-                <path d="M12 9v12"></path>
-                <path d="M12 3a5 5 0 0 1 5 5c0 2-3 3-5 3s-5-1-5-3a5 5 0 0 1 5-5z"></path>
-              </svg>
-              Plantation Details
-            </h2>
-            <button className="popup-close" onClick={() => setActivePlantationPopup(false)}>×</button>
-          </div>
-          <form onSubmit={handlePlantationSubmit}>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="location_lat">Location Latitude</label>
-                <input
-                  type="number"
-                  id="location_lat"
-                  className="form-control"
-                  placeholder="e.g., 28.6139"
-                  step="any"
-                  value={plantationData.location_lat}
-                  onChange={(e) => setPlantationData({ ...plantationData, location_lat: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="location_long">Location Longitude</label>
-                <input
-                  type="number"
-                  id="location_long"
-                  className="form-control"
-                  placeholder="e.g., 77.2090"
-                  step="any"
-                  value={plantationData.location_long}
-                  onChange={(e) => setPlantationData({ ...plantationData, location_long: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="area_hactare">Area in Hectares</label>
-                <input
-                  type="number"
-                  id="area_hactare"
-                  className="form-control"
-                  placeholder="e.g., 2.5"
-                  step="0.01"
-                  value={plantationData.area_hactare}
-                  onChange={(e) => setPlantationData({ ...plantationData, area_hactare: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="species_Name">Species Name</label>
-                <input
-                  type="text"
-                  id="species_Name"
-                  className="form-control"
-                  placeholder="e.g., Teak, Mango, Neem"
-                  value={plantationData.species_Name}
-                  onChange={(e) => setPlantationData({ ...plantationData, species_Name: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="trees_planted">Number of Trees Planted</label>
-                <input
-                  type="number"
-                  id="trees_planted"
-                  className="form-control"
-                  placeholder="e.g., 500"
-                  min="1"
-                  value={plantationData.trees_planted}
-                  onChange={(e) => setPlantationData({ ...plantationData, trees_planted: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="avg_height">Average Height (cm)</label>
-                <input
-                  type="number"
-                  id="avg_height"
-                  className="form-control"
-                  placeholder="e.g., 150"
-                  step="0.1"
-                  value={plantationData.avg_height}
-                  onChange={(e) => setPlantationData({ ...plantationData, avg_height: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="avg_dbh">Average DBH (cm)</label>
-                <input
-                  type="number"
-                  id="avg_dbh"
-                  className="form-control"
-                  placeholder="e.g., 15"
-                  step="0.1"
-                  value={plantationData.avg_dbh}
-                  onChange={(e) => setPlantationData({ ...plantationData, avg_dbh: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="survival_rate">Survival Rate (%)</label>
-                <input
-                  type="number"
-                  id="survival_rate"
-                  className="form-control"
-                  placeholder="e.g., 85"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={plantationData.survival_rate}
-                  onChange={(e) => setPlantationData({ ...plantationData, survival_rate: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="plantation_date">Date of Plantation</label>
-                <input
-                  type="date"
-                  id="plantation_date"
-                  className="form-control"
-                  value={plantationData.plantation_date}
-                  onChange={(e) => setPlantationData({ ...plantationData, plantation_date: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="Base_line_Land">Base line Land</label>
-                <select
-                  id="Base_line_Land"
-                  className="form-control"
-                  value={plantationData.Base_line_Land}
-                  onChange={(e) => setPlantationData({ ...plantationData, Base_line_Land: e.target.value })}
-                  required
-                >
-                  <option value="" disabled hidden>-- Select Base line Land --</option>
-                  <option value="Crop">Crop</option>
-                  <option value="Grass">Grass</option>
-                  <option value="Barren">Barren</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Upload Images Here (Up to 5)</label>
-              <label className="file-upload">
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => {
-                    const files = e.target.files;
-                    if (!files || files.length === 0) return;
-
-                    const updatedPhotos = Array.from(files).slice(0, 5);
-                    const fileReaders = [];
-                    const base64Images = [];
-
-                    updatedPhotos.forEach((file) => {
-                      const reader = new FileReader();
-                      fileReaders.push(reader);
-
-                      reader.onload = (event) => {
-                        base64Images.push(event.target.result);
-                        if (base64Images.length === updatedPhotos.length) {
-                          setPlantationData((prev) => ({
-                            ...prev,
-                            photos: [...(prev.photos || []), ...base64Images].slice(0, 5),
-                          }));
-                        }
-                      };
-
-                      reader.readAsDataURL(file);
-                    });
-                  }}
-                  disabled={(plantationData.photos || []).length >= 5}
-                />
-                <svg className="file-upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="17 8 12 3 7 8"></polyline>
-                  <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <div className="file-upload-text">
-                  <strong>Click to upload photos</strong>
-                  <p>Install GPS MAP CAMERA and upload the picture</p>
-                  <p>PER IMAGE LIMIT 1 Mb</p>
-                  <p>{(plantationData.photos || []).length}/5 photos uploaded</p>
-                </div>
-              </label>
-              {(plantationData.photos || []).length > 0 && (
-                <div className="photo-preview">
-                  {plantationData.photos.map((photo, index) => (
-                    <div key={index} className="photo-item">
-                      <img src={photo} alt={`Plantation photo ${index + 1}`} />
-                      <button
-                        type="button"
-                        className="remove-photo"
-                        onClick={() => removePlantationPhoto(index)}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="form-actions">
-              <button type="button" className="btn-primary btn-cancel" onClick={() => setActivePlantationPopup(false)}>Cancel</button>
-              <button type="submit" className="btn-primary btn-submit">Save Details</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
+      )}
+      {/* Plantation Popup */}
+      {activePlantationPopup && (
+      <AddPlantationModal
+        onClose={() => setActivePlantationPopup(false)}
+        onSubmit={handlePlantationSubmit}
+      />
+      )}
 
 
       {/* Solar Panel Popup */}
+      {activeSolarPopup && (
       <div className={`popup-overlay ${activeSolarPopup ? 'active' : ''}`} onClick={() => setActiveSolarPopup(false)}>
         <div className={`popup ${activeSolarPopup ? 'active' : ''}`} onClick={e => e.stopPropagation()}>
           <div className="popup-header">
             <h2>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF9800" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="7" width="18" height="12" rx="2" ry="2"></rect>
-                <line x1="3" y1="13" x2="21" y2="13"></line>
-                <line x1="9" y1="7" x2="9" y2="19"></line>
-                <line x1="15" y1="7" x2="15" y2="19"></line>
-              </svg>
+              <MdSolarPower size={28} color="#f59e0b" />
               Solar Panel Details
             </h2>
-            <button className="popup-close" onClick={() => setActiveSolarPopup(false)}>×</button>
+            <button className="popup-close" onClick={() => setActiveSolarPopup(false)}>X</button>
           </div>
           <form onSubmit={handleSolarSubmit}>
             <div className="form-row">
@@ -877,26 +841,152 @@ const PopupForms = ({
           </form>
         </div>
       </div>
+      )}
+
+      {/* Carbon Capture Popup */}
+      {activeCapturePopup && (
+      <div className={`popup-overlay ${activeCapturePopup ? 'active' : ''}`} onClick={() => setActiveCapturePopup(false)}>
+        <div className={`popup capture-popup ${activeCapturePopup ? 'active' : ''}`} onClick={e => e.stopPropagation()}>
+          <div className="popup-header">
+            <h2>
+              <GiPowder size={26} color="#475569" />
+              Carbon Capture Facility
+            </h2>
+            <button className="popup-close" onClick={() => setActiveCapturePopup(false)}>X</button>
+          </div>
+
+          <form onSubmit={handleCaptureSubmit}>
+            <div className="capture-section-card">
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="industryType">Industry Type *</label>
+                  <select
+                    id="industryType"
+                    className={`form-control ${captureTouched.industryType && captureErrors.industryType ? "form-control-error" : ""}`}
+                    value={captureData.industryType}
+                    onChange={(e) => handleCaptureChange("industryType", e.target.value)}
+                    onBlur={() => handleCaptureBlur("industryType")}
+                    required
+                  >
+                    <option value="" disabled hidden>-- Select Industry Type --</option>
+                    <option value="Cement">Cement</option>
+                    <option value="Steel">Steel</option>
+                    <option value="Power">Power</option>
+                    <option value="Refinery">Refinery</option>
+                    <option value="Chemical">Chemical</option>
+                  </select>
+                  {captureTouched.industryType && captureErrors.industryType && (
+                    <p className="form-error-text">{captureErrors.industryType}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="totalEmission">Total Emission (tonnes CO2/year) *</label>
+                  <div className="unit-input-wrap">
+                    <input
+                      type="number"
+                      id="totalEmission"
+                      className={`form-control form-control-with-unit ${captureTouched.totalEmission && captureErrors.totalEmission ? "form-control-error" : ""}`}
+                      placeholder="e.g., 250000"
+                      min="0.01"
+                      step="0.01"
+                      value={captureData.totalEmission}
+                      onChange={(e) => handleCaptureChange("totalEmission", e.target.value)}
+                      onBlur={() => handleCaptureBlur("totalEmission")}
+                      required
+                    />
+                    <span className="input-unit">tonnes</span>
+                  </div>
+                  {captureTouched.totalEmission && captureErrors.totalEmission && (
+                    <p className="form-error-text">{captureErrors.totalEmission}</p>
+                  )}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="captureTechnology">Capture Technology *</label>
+                  <select
+                    id="captureTechnology"
+                    className={`form-control ${captureTouched.captureTechnology && captureErrors.captureTechnology ? "form-control-error" : ""}`}
+                    value={captureData.captureTechnology}
+                    onChange={(e) => handleCaptureChange("captureTechnology", e.target.value)}
+                    onBlur={() => handleCaptureBlur("captureTechnology")}
+                    required
+                  >
+                    <option value="" disabled hidden>-- Select Capture Technology --</option>
+                    <option value="Post-combustion">Post-combustion</option>
+                    <option value="Pre-combustion">Pre-combustion</option>
+                    <option value="Oxy-fuel">Oxy-fuel</option>
+                    <option value="Direct Air Capture">Direct Air Capture</option>
+                  </select>
+                  {captureTouched.captureTechnology && captureErrors.captureTechnology && (
+                    <p className="form-error-text">{captureErrors.captureTechnology}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="form-row form-row-single">
+                <div className="form-group">
+                  <label htmlFor="captureEfficiency">Capture Efficiency (%) *</label>
+                  <div className="unit-input-wrap">
+                    <input
+                      type="number"
+                      id="captureEfficiency"
+                      className={`form-control form-control-with-unit ${captureTouched.captureEfficiency && captureErrors.captureEfficiency ? "form-control-error" : ""}`}
+                      placeholder="0-100"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                      value={captureData.captureEfficiency}
+                      onChange={(e) => handleCaptureChange("captureEfficiency", e.target.value)}
+                      onBlur={() => handleCaptureBlur("captureEfficiency")}
+                      required
+                    />
+                    <span className="input-unit">%</span>
+                  </div>
+                  {captureTouched.captureEfficiency && captureErrors.captureEfficiency && (
+                    <p className="form-error-text">{captureErrors.captureEfficiency}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="form-actions">
+              <button type="button" className="btn-primary btn-cancel" onClick={() => setActiveCapturePopup(false)}>Cancel</button>
+              <button type="submit" className="btn-primary btn-submit-capture">Save Details</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      )}
 
 
 
       {/* Toast Notification */}
-      <div className={`toast ${toast.show ? 'show' : ''} ${toast.type}`}>
+      {toast.show && (
+      <div className={`org-popup-toast show ${toast.type}`}>
         {toast.type === 'error' ? (
-          <svg className="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="15" y1="9" x2="9" y2="15"></line>
-            <line x1="9" y1="9" x2="15" y2="15"></line>
-          </svg>
+          <FaTimesCircle className="org-popup-toast-icon" size={24} color="#fecaca" />
         ) : (
-          <svg className="toast-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
+          <FaCheckCircle className="org-popup-toast-icon" size={24} color="#bbf7d0" />
         )}
-        <span className="toast-message">{toast.message}</span>
+        <span className="org-popup-toast-message">{toast.message}</span>
       </div>
+      )}
     </div>
   );
 };
 export default PopupForms;
+
+
+
+
+
+
+
+
+
+
+
+
+

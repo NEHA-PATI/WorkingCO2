@@ -37,18 +37,72 @@ rewardsClient.interceptors.response.use(
   }
 );
 
-const getStoredUserId = () => {
+const decodeJwtPayload = (token) => {
+  try {
+    if (!token || typeof token !== 'string') return null;
+    const segments = token.split('.');
+    if (segments.length < 2) return null;
+
+    const normalized = segments[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+    const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+
+    const payloadJson = atob(padded);
+    return JSON.parse(payloadJson);
+  } catch {
+    return null;
+  }
+};
+
+const normalizeUserId = (value) => {
+  if (value === null || value === undefined) return null;
+  const normalized = String(value).trim();
+  if (!normalized) return null;
+
+  // Reward service keys on stable string ids like "USR_...".
+  // Pure numeric ids usually refer to internal auth table ids.
+  if (/^\d+$/.test(normalized)) return null;
+
+  return normalized;
+};
+
+export const getArenaUserId = () => {
   try {
     const rawUser = localStorage.getItem('authUser');
     const parsedUser = rawUser ? JSON.parse(rawUser) : null;
-    return parsedUser?.u_id || ENV.DEFAULT_USER_ID || null;
+
+    const userIdFromAuthUser =
+      normalizeUserId(parsedUser?.u_id) ||
+      normalizeUserId(parsedUser?.user_id) ||
+      normalizeUserId(parsedUser?.uid) ||
+      normalizeUserId(parsedUser?.id);
+
+    if (userIdFromAuthUser) {
+      return userIdFromAuthUser;
+    }
+
+    const token = localStorage.getItem('authToken');
+    const tokenPayload = decodeJwtPayload(token);
+
+    const userIdFromToken =
+      normalizeUserId(tokenPayload?.u_id) ||
+      normalizeUserId(tokenPayload?.user_id) ||
+      normalizeUserId(tokenPayload?.uid) ||
+      normalizeUserId(tokenPayload?.id);
+
+    if (userIdFromToken) {
+      return userIdFromToken;
+    }
+
+    return normalizeUserId(localStorage.getItem('userId')) || normalizeUserId(ENV.DEFAULT_USER_ID);
   } catch {
-    return ENV.DEFAULT_USER_ID || null;
+    return normalizeUserId(ENV.DEFAULT_USER_ID);
   }
 };
 
 const getAuthHeaders = () => {
-  const uId = getStoredUserId();
+  const uId = getArenaUserId();
   if (!uId) {
     throw new Error('Missing user id for Arena reward requests');
   }
@@ -148,9 +202,10 @@ export const arenaApi = {
     };
   },
 
-  async getMyRank() {
+  async getMyRank({ type = 'monthly' } = {}) {
     const res = await rewardsClient.get('/my-rank', {
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
+      params: { type }
     });
     const payload = parseApiData(res);
     return payload.rank ?? null;
