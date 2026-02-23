@@ -1,5 +1,6 @@
 jest.mock("../config/db", () => ({
   query: jest.fn(),
+  connect: jest.fn(),
 }));
 
 jest.mock("bcryptjs", () => ({
@@ -7,16 +8,8 @@ jest.mock("bcryptjs", () => ({
   compare: jest.fn(),
 }));
 
-const mockSend = jest.fn();
-jest.mock("resend", () => ({
-  Resend: jest.fn().mockImplementation(() => ({
-    emails: { send: mockSend },
-  })),
-}));
-
 const pool = require("../config/db");
 const bcrypt = require("bcryptjs");
-const { Resend } = require("resend");
 const {
   sendOrgEmailOtp,
   verifyOrgEmailOtp,
@@ -33,10 +26,12 @@ describe("orgEmailOtpController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, "error").mockImplementation(() => {});
+    global.fetch = jest.fn();
   });
 
   afterEach(() => {
     console.error.mockRestore();
+    delete global.fetch;
   });
 
   describe("sendOrgEmailOtp", () => {
@@ -47,9 +42,11 @@ describe("orgEmailOtpController", () => {
       await sendOrgEmailOtp(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Please provide a valid email",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Please provide a valid email",
+        })
+      );
       expect(pool.query).not.toHaveBeenCalled();
     });
 
@@ -80,21 +77,75 @@ describe("orgEmailOtpController", () => {
       const req = { body: { email: "org@example.com" } };
       const res = createRes();
 
-      pool.query
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [] });
-
+      pool.query.mockResolvedValueOnce({ rows: [] });
       bcrypt.hash.mockResolvedValue("hashed-otp");
+
+      const mockClient = {
+        query: jest
+          .fn()
+          .mockResolvedValueOnce({})
+          .mockResolvedValueOnce({})
+          .mockResolvedValueOnce({})
+          .mockResolvedValueOnce({}),
+        release: jest.fn(),
+      };
+      pool.connect.mockResolvedValue(mockClient);
+
+      global.fetch.mockResolvedValue({
+        ok: true,
+      });
 
       await sendOrgEmailOtp(req, res);
 
       expect(bcrypt.hash).toHaveBeenCalled();
-      expect(mockSend).toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalledWith(
+        "http://localhost:5002/api/v1/mail/send-otp",
+        expect.objectContaining({
+          method: "POST",
+        })
+      );
+      expect(mockClient.release).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "OTP sent successfully",
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "OTP sent successfully",
+        })
+      );
+    });
+
+    test("Central OTP service failure -> 500", async () => {
+      const req = { body: { email: "org@example.com" } };
+      const res = createRes();
+
+      pool.query.mockResolvedValueOnce({ rows: [] });
+      bcrypt.hash.mockResolvedValue("hashed-otp");
+
+      const mockClient = {
+        query: jest
+          .fn()
+          .mockResolvedValueOnce({})
+          .mockResolvedValueOnce({})
+          .mockResolvedValueOnce({})
+          .mockResolvedValueOnce({}),
+        release: jest.fn(),
+      };
+      pool.connect.mockResolvedValue(mockClient);
+
+      global.fetch.mockResolvedValue({
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+        json: jest.fn().mockResolvedValue({ message: "Failed to send OTP" }),
       });
+
+      await sendOrgEmailOtp(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Failed to send OTP",
+        })
+      );
     });
 
     test("DB error -> 500", async () => {
@@ -106,9 +157,11 @@ describe("orgEmailOtpController", () => {
       await sendOrgEmailOtp(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Failed to send OTP",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Failed to send OTP",
+        })
+      );
     });
   });
 
@@ -120,9 +173,11 @@ describe("orgEmailOtpController", () => {
       await verifyOrgEmailOtp(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Please provide a valid OTP",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Please provide a valid OTP",
+        })
+      );
     });
 
     test("Invalid email -> 400", async () => {
@@ -132,9 +187,11 @@ describe("orgEmailOtpController", () => {
       await verifyOrgEmailOtp(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Please provide a valid email",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Please provide a valid email",
+        })
+      );
     });
 
     test("OTP not found -> 404", async () => {
@@ -146,9 +203,11 @@ describe("orgEmailOtpController", () => {
       await verifyOrgEmailOtp(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "OTP not found. Please request a new one.",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "OTP not found. Please request a new one.",
+        })
+      );
     });
 
     test("Expired otp -> 400", async () => {
@@ -170,9 +229,11 @@ describe("orgEmailOtpController", () => {
       await verifyOrgEmailOtp(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "OTP expired. Please request a new one.",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "OTP expired. Please request a new one.",
+        })
+      );
     });
 
     test("Max attempts reached -> 429", async () => {
@@ -194,9 +255,11 @@ describe("orgEmailOtpController", () => {
       await verifyOrgEmailOtp(req, res);
 
       expect(res.status).toHaveBeenCalledWith(429);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Too many attempts. Please request a new OTP.",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Too many attempts. Please request a new OTP.",
+        })
+      );
     });
 
     test("Invalid otp -> 400", async () => {
@@ -221,9 +284,11 @@ describe("orgEmailOtpController", () => {
 
       expect(bcrypt.compare).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Invalid OTP. Please try again.",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Invalid OTP. Please try again.",
+        })
+      );
     });
 
     test("Success -> 200", async () => {
@@ -247,9 +312,11 @@ describe("orgEmailOtpController", () => {
       await verifyOrgEmailOtp(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "OTP verified successfully",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "OTP verified successfully",
+        })
+      );
     });
 
     test("DB error -> 500", async () => {
@@ -261,9 +328,11 @@ describe("orgEmailOtpController", () => {
       await verifyOrgEmailOtp(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Failed to verify OTP",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Failed to verify OTP",
+        })
+      );
     });
   });
 });

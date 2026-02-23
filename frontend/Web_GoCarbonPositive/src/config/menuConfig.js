@@ -33,6 +33,12 @@ export const USER_ORG_MENU = {
     },
     { label: "Add Asset", path: "/upload", iconKey: "upload", color: "#8e24aa" },
     { label: "My Wallet", path: "/wallet", iconKey: "wallet", color: "#f59e0b" },
+    {
+      label: "My Carbon Footprint",
+      path: "/my-carbon-footprint",
+      iconKey: "carbon_footprint",
+      color: "#16a34a",
+    },
     { label: "Community", path: "/community", iconKey: "users", color: "#28a745" },
     { label: "Blog", path: "/blog", iconKey: "blog", color: "#ff5722" },
     {
@@ -74,6 +80,12 @@ export const USER_ORG_MENU = {
       color: "#8e24aa",
     },
     { label: "My Wallet", path: "/wallet", iconKey: "wallet", color: "#f59e0b" },
+    {
+      label: "My Carbon Footprint",
+      path: "/my-carbon-footprint",
+      iconKey: "carbon_footprint",
+      color: "#16a34a",
+    },
     { label: "Community", path: "/community", iconKey: "users", color: "#28a745" },
     { label: "Blog", path: "/blog", iconKey: "blog", color: "#ff5722" },
     {
@@ -97,24 +109,66 @@ export const USER_ORG_MENU = {
       color: "#0d6efd",
     },
   ],
+
+  admin: [
+    {
+      label: "Dashboard",
+      path: "/admin/overview",
+      iconKey: "dashboard",
+      color: "#2e7d32",
+    },
+    { label: "Users Management", 
+      path: "/admin/users", 
+      iconKey: "users", 
+      color: "#6b1258" 
+    },
+      { label: "Asset Management", 
+      path: "/admin/asset-management", 
+      iconKey: "users", 
+      color: "#3b82f6" 
+    },
+    {
+      label: "Support Management",
+      path: "/admin/support",
+      iconKey: "contact",
+      color: "#14b8a6",
+    },
+    {
+      label: "Configuration",
+      path: "/admin/configuration",
+      iconKey: "workspace",
+      color: "#8e24aa",
+    },
+    {
+      label: "Security",
+      path: "/admin/security",
+      iconKey: "about",
+      color: "#f97316",
+    },
+    {
+      label: "Analytics",
+      path: "/admin/analytics",
+      iconKey: "analytics",
+      color: "#6366f1",
+    },
+    {
+      label: "Careers Management",
+      path: "/admin/career-management",
+      iconKey: "careers",
+      color: "#0ea5e9",
+    },
+    {
+      label: "Case Study Management",
+      path: "/admin/case-study-management",
+      iconKey: "case_study",
+      color: "#06b6d4",
+    },
+    {
+      label: "Reports",
+      path: "/admin/reports",
+      iconKey: "workspace",
+      color: "#ef4444",
+    },
+    { label: "Logout", action: "logout", iconKey: "logout", color: "#e53935" },
+  ],
 };
-
-export const ADMIN_MENU = [
-  { label: "Dashboard", path: "/admin", iconKey: "dashboard" },
-  { label: "Blog Management", path: "/blog-management", iconKey: "blog" },
-  {
-    label: "Case Study Management",
-    path: "/case-study-management",
-    iconKey: "case_study",
-  },
-  { label: "Analytics", path: "/analytics", iconKey: "analytics" },
-  { label: "Asset Management", path: "/assets", iconKey: "workspace" },
-  { label: "Marketplace", path: "/marketplace", iconKey: "marketplace" },
-  {
-    label: "Community Management",
-    path: "/community-management",
-    iconKey: "users",
-  },
-  { label: "Career Management", path: "/career-management", iconKey: "careers" },
-];
-

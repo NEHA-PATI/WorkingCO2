@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import "@features/user/styles/contact.css";
-import { fireToast } from "@shared/utils/toastService";
-
+import { fireToast } from "@shared/utils/toastService.js";
+import { contactApiClient,ticketApiClient } from "@shared/utils/apiClient.js";
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
@@ -10,6 +10,7 @@ export default function Contact() {
     subject: "",
     message: "",
   });
+  
 
   const [showQueryModal, setShowQueryModal] = useState(false);
 
@@ -41,34 +42,28 @@ export default function Contact() {
       subject: formData.subject,
       message: formData.message,
     };
+try {
+  const res = await contactApiClient.post("/api/contact", payload);
 
-    try {
-      const res = await fetch("http://localhost:5005/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+  const data = res.data;
 
-      const data = await res.json();
+  fireToast("CONTACT.MESSAGE_SENT", "success", {
+    id: data.contact_id,
+  });
 
-      if (res.ok) {
-        fireToast("CONTACT.MESSAGE_SENT", "success", {
-          id: data.contact_id,
-        });
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          subject: "",
-          message: "",
-        });
-      } else {
-        fireToast("CONTACT.MESSAGE_FAILED", "error");
-      }
-    } catch (error) {
-      console.error("CONTACT ERROR:", error);
-      fireToast("API.NETWORK", "error");
-    } finally {
+  setFormData({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
+
+} catch (error) {
+  console.error("CONTACT ERROR:", error);
+  fireToast("API.NETWORK", "error");
+}
+ finally {
       setIsSubmitting(false);
     }
   };
@@ -84,58 +79,59 @@ export default function Contact() {
     }
   };
 
-  const handleQuerySubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+const handleQuerySubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
-    try {
-      const storedUser = getAuthUser();
-      const u_id = storedUser?.u_id ?? null;
+  try {
+    const storedUser = getAuthUser();
+    const u_id = storedUser?.u_id ?? null;
 
-      if (!u_id) {
-        fireToast("CONTACT.LOGIN_REQUIRED", "warning");
-        return;
-      }
+    if (!u_id) {
+      fireToast("CONTACT.LOGIN_REQUIRED", "warning");
+      setIsSubmitting(false);
+      return;
+    }
 
-      const payload = {
-        subject: queryData.subject,
-        message: queryData.issue,
-        category: queryData.category,
-        priority: queryData.priority,
-      };
+    const payload = {
+      subject: queryData.subject,
+      message: queryData.issue,
+      category: queryData.category,
+      priority: queryData.priority,
+    };
 
-      const res = await fetch("http://localhost:5004/api/tickets", {
-        method: "POST",
+    const res = await ticketApiClient.post(
+      "/api/tickets",
+      payload,
+      {
         headers: {
-          "Content-Type": "application/json",
           "x-user-id": u_id,
         },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        fireToast("TICKET.SUBMITTED", "success", {
-          id: data.ticket_id,
-        });
-        setShowQueryModal(false);
-        setQueryData({
-          subject: "",
-          issue: "",
-          category: "",
-          priority: "",
-        });
-      } else {
-        fireToast("TICKET.SUBMIT_FAILED", "error");
       }
-    } catch (error) {
-      console.error("RAISE QUERY ERROR:", error);
-      fireToast("API.NETWORK", "error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    );
+
+    const data = res.data;
+
+    fireToast("TICKET.SUBMITTED", "success", {
+      id: data.ticket_id,
+    });
+
+    setShowQueryModal(false);
+    setQueryData({
+      subject: "",
+      issue: "",
+      category: "",
+      priority: "",
+    });
+
+  } catch (error) {
+    console.error("RAISE QUERY ERROR:", error);
+    fireToast("API.NETWORK", "error");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
 
 
@@ -158,7 +154,7 @@ export default function Contact() {
             <div className="info-card">
               <div className="icon-box">
                 <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
               <div>
@@ -172,7 +168,7 @@ export default function Contact() {
             <div className="info-card">
               <div className="icon-box">
                 <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
               </div>
               <div>
@@ -184,7 +180,7 @@ export default function Contact() {
             <div className="info-card">
               <div className="icon-box">
                 <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
               <div>

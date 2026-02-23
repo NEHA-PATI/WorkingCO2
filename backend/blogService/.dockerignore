@@ -1,0 +1,26 @@
+# Node modules
+node_modules
+npm-debug.log
+
+# Logs
+logs
+*.log
+
+# Environment
+.env
+
+# Git
+.git
+.gitignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Tests
+coverage
+__tests__
+
+# Docker
+Dockerfile
+docker-compose.yml

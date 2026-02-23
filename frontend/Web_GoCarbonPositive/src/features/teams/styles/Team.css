@@ -1002,3 +1002,96 @@
     font-size: 16px;
   }
 }
+
+/* Actual layout class mobile overrides */
+@media (max-width: 768px) {
+  .teams-root {
+    min-height: auto;
+  }
+
+  .teams-stats-container {
+    padding: 14px 12px;
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .teams-stat-card {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .teams-stat-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .teams-stat-value {
+    font-size: 18px;
+  }
+
+  .teams-main-content {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 14px 12px;
+  }
+
+  .teams-right-section {
+    gap: 14px;
+  }
+
+  .teams-filter-bar {
+    flex-direction: column;
+  }
+
+  .teams-search-input,
+  .teams-select-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .teams-members-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .teams-header {
+    padding: 14px 10px;
+  }
+
+  .teams-header-right {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .teams-header-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 9px 10px;
+    font-size: 12px;
+  }
+
+  .teams-stats-container {
+    grid-template-columns: 1fr;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .teams-main-content {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .teams-member-card {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .teams-member-name {
+    font-size: 13px;
+  }
+
+  .teams-member-email {
+    font-size: 11px;
+  }
+}

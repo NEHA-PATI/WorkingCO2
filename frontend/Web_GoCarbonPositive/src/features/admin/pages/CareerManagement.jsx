@@ -115,6 +115,7 @@ export default function CareerManagement() {
     try {
       await deleteJob(id);
       loadData();
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       fireToast("CAREER.DELETE_FAILED", "error");
     }

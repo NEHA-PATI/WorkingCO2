@@ -4,8 +4,7 @@ import PopupForms from './popupforms';
 
 import { MdSolarPower, MdElectricCar } from "react-icons/md";
 import { GiWindmill, GiWaterMill, GiPowder } from "react-icons/gi";
-import { FaFire } from "react-icons/fa";
-import { LuTreePine } from "react-icons/lu"; // 🌱 Plantation icon
+import { FaFire, FaPagelines } from "react-icons/fa";
 
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +15,7 @@ const AddAsset = () => {
   const [activeEVPopup, setActiveEVPopup] = useState(false);
   const [activeSolarPopup, setActiveSolarPopup] = useState(false);
   const [activePlantationPopup, setActivePlantationPopup] = useState(false);
+  const [activeCapturePopup, setActiveCapturePopup] = useState(false);
 
   // Counts
   const [evCount, setEvCount] = useState(0);
@@ -54,6 +54,11 @@ const AddAsset = () => {
     setActivePlantationPopup(false);
   };
 
+  const handleSaveCapture = (data) => {
+    console.log('Saved Carbon Capture:', data);
+    setActiveCapturePopup(false);
+  };
+
   /* =======================
           UI
   ======================= */
@@ -61,89 +66,90 @@ const AddAsset = () => {
   return (
     <div className="dashboard-container">
 
-      {/* EV */}
-      <div className="card electric-vehicle">
-        <h2 className="card-title">
-          <MdElectricCar className="card-icon" style={{ color: "#3b82f6" }} />
-          Electric Vehicle
-        </h2>
-        <p className="subtitle">Smart mobility tracking</p>
-        <button className="add-button blue" onClick={() => setActiveEVPopup(true)}>
-          + Add EV Details
-        </button>
-      </div>
 
       {/* 🌱 Plantation */}
-      <div className="card trees">
+      <div className="card plantation-card">
         <h2 className="card-title">
-          <LuTreePine className="card-icon" style={{ color: "#10b981" }} />
+          <FaPagelines className="card-icon plantation-logo-icon" />
           Plantation
         </h2>
         <p className="subtitle">Afforestation & land restoration</p>
-        <button className="add-button green" onClick={() => setActivePlantationPopup(true)}>
+        <button className="add-button btn-plantation" onClick={() => setActivePlantationPopup(true)}>
           + Add Plantation Details
         </button>
       </div>
 
-      {/* Solar */}
-      <div className="card solar-panel">
+      {/* EV */}
+      <div className="card ev-card">
         <h2 className="card-title">
-          <MdSolarPower className="card-icon" style={{ color: "#f59e0b" }} />
+          <MdElectricCar className="card-icon" />
+          Electric Vehicle
+        </h2>
+        <p className="subtitle">Smart mobility tracking</p>
+        <button className="add-button btn-ev" onClick={() => setActiveEVPopup(true)}>
+          + Add EV Details
+        </button>
+      </div>
+
+      {/* Solar */}
+      <div className="card solar-card">
+        <h2 className="card-title">
+          <MdSolarPower className="card-icon" />
           Solar Panel
         </h2>
         <p className="subtitle">Renewable energy</p>
-        <button className="add-button orange" onClick={() => setActiveSolarPopup(true)}>
+        <button className="add-button btn-solar" onClick={() => setActiveSolarPopup(true)}>
           + Add Solar Details
         </button>
       </div>
 
       {/* Wind */}
-      <div className="card solar-panel">
+      {/* <div className="card wind-card">
         <h2 className="card-title">
-          <GiWindmill className="card-icon" style={{ color: "#D3F3FF" }} />
+          <GiWindmill className="card-icon" />
           Wind Mill
         </h2>
         <p className="subtitle">Renewable energy</p>
-        <button className="add-button orange">
+        <button className="add-button btn-wind">
           + Add WindMill Details
         </button>
-      </div>
+      </div> */}
 
       {/* Hydro */}
-      <div className="card solar-panel">
+      <div className="card hydro-card">
         <h2 className="card-title">
-          <GiWaterMill className="card-icon" style={{ color: "#8ed1e3" }} />
+          <GiWaterMill className="card-icon" />
           Hydro Power
         </h2>
         <p className="subtitle">Renewable energy</p>
-        <button className="add-button d4f1f9" style={{ color: "white" }}>
+        <button className="add-button btn-hydro">
           + Add HydroPower Details
         </button>
       </div>
 
       {/* Carbon Capture */}
-      <div className="card solar-panel">
+      <div className="card capture-card">
         <h2 className="card-title">
-          <GiPowder className="card-icon" style={{ color: "#32454D" }} />
-          Carbon Capture
+          <GiPowder className="card-icon" />
+          Direct Carbon Capture
         </h2>
         <p className="subtitle">Negative emission tech</p>
-        <button className="add-button" style={{ color: "white" }}>
+        <button className="add-button btn-capture" onClick={() => setActiveCapturePopup(true)}>
           + Add CarbonCapture Details
         </button>
       </div>
 
       {/* Thermal */}
-      <div className="card solar-panel">
+      {/* <div className="card thermal-card">
         <h2 className="card-title">
-          <FaFire className="card-icon" style={{ color: "#e25822" }} />
+          <FaFire className="card-icon" />
           Thermal Power
         </h2>
         <p className="subtitle">Energy production</p>
-        <button className="add-button orange" style={{ color: "white" }}>
+        <button className="add-button btn-thermal">
           + Add Thermal Details
         </button>
-      </div>
+      </div> */}
 
       {/* =======================
              POPUPS
@@ -159,9 +165,13 @@ const AddAsset = () => {
         activePlantationPopup={activePlantationPopup}
         setActivePlantationPopup={setActivePlantationPopup}
 
+        activeCapturePopup={activeCapturePopup}
+        setActiveCapturePopup={setActiveCapturePopup}
+
         handleSaveEV={handleSaveEV}
         handleSaveSolar={handleSaveSolar}
         handleSavePlantation={handleSavePlantation}
+        handleSaveCapture={handleSaveCapture}
 
         setEvCount={setEvCount}
         setSolarCount={setSolarCount}

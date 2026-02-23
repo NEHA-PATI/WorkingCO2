@@ -160,7 +160,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const pool = require("../config/db");
 const generateUID = require("../utils/generateUID");
-const sendOTP = require("../utils/sendOTP");
+const { sendMail, MAIL_TYPES } = require("../services/mail");
 const axios = require("axios");
 
 // ✅ Validation helpers
@@ -238,7 +238,11 @@ exports.register = async (req, res) => {
       { expiresIn: "10m" }
     );
 
-    await sendOTP(email, otp);
+    await sendMail({
+      type: MAIL_TYPES.OTP,
+      to: email,
+      data: { otp },
+    });
 
     return res.status(200).json({
       success: true,
@@ -335,8 +339,10 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+
     // Validation
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res.status(400).json({
         success: false,
         message: "Email and password are required",
@@ -344,7 +350,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    if (!validateEmail(email)) {
+    if (!validateEmail(normalizedEmail)) {
       return res.status(400).json({
         success: false,
         message: "Invalid email or password",
@@ -358,14 +364,69 @@ exports.login = async (req, res) => {
        FROM users u 
        LEFT JOIN roles r ON u.role_id = r.id 
        WHERE u.email = $1`,
-      [email.toLowerCase()]
+      [normalizedEmail]
     );
 
     if (userRes.rows.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email or password",
-        data: null,
+      // Fallback: login from organizations table
+      const orgRes = await pool.query(
+        `SELECT
+           org_id,
+           org_mail,
+           password_hash
+         FROM organizations
+         WHERE org_mail = $1`,
+        [normalizedEmail]
+      );
+
+      if (orgRes.rows.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email or password",
+          data: null,
+        });
+      }
+
+      const organization = orgRes.rows[0];
+      const orgPasswordMatch = await bcrypt.compare(
+  password,
+  String(organization.password_hash)
+);
+
+
+      if (!orgPasswordMatch) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email or password",
+          data: null,
+        });
+      }
+
+      const orgToken = jwt.sign(
+        {
+          id: organization.org_id,
+          u_id: organization.org_id,
+          role: "organization",
+          status: "active",
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Welcome back!",
+        data: {
+          token: orgToken,
+          user: {
+            id: organization.org_id,
+            u_id: organization.org_id,
+            email: organization.org_mail,
+            role_name: "organization",
+            verified: true,
+            status: "active",
+          },
+        },
       });
     }
 
@@ -437,7 +498,7 @@ exports.login = async (req, res) => {
           event_type: 'user.login.failed',
           user: {
             id: user.id,
-            email: email.toLowerCase()
+            email: normalizedEmail
           },
           ip_address: req.ip || req.connection.remoteAddress || 'unknown',
           device_info: req.get('user-agent') || 'Unknown device',
@@ -454,7 +515,7 @@ exports.login = async (req, res) => {
             event_type: 'user.account.locked',
             user: {
               id: user.id,
-              email: email.toLowerCase()
+              email: normalizedEmail
             },
             ip_address: req.ip || req.connection.remoteAddress || 'unknown',
             device_info: req.get('user-agent') || 'Unknown device'
@@ -571,7 +632,11 @@ exports.resendOTP = async (req, res) => {
       { expiresIn: "10m" }
     );
 
-    await sendOTP(payload.email, newOtp);
+    await sendMail({
+      type: MAIL_TYPES.OTP,
+      to: payload.email,
+      data: { otp: newOtp },
+    });
 
     return res.status(200).json({
       success: true,

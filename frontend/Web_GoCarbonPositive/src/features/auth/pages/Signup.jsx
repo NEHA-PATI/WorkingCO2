@@ -9,7 +9,7 @@ import { ENV } from "@config/env";
 
 
 const Signup = ({ onClose, onSwitchToLogin }) => {
-  const API_URL = ENV.API_URL;
+  const API_URL = import.meta.env.VITE_AUTH_API || "http://localhost:5002";
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -95,7 +95,7 @@ const { login } = useAuth();
       display: "flex",
       alignItems: isMobile ? "flex-end" : "center",
       justifyContent: "center",
-      zIndex: 999,
+      zIndex: 2000,
       padding: isMobile ? "0" : "20px",
     },
     modal: {

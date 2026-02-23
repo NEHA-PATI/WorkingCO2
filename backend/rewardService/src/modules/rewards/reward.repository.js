@@ -1,4 +1,5 @@
 const pool = require('../../config/db');
+const isMissingUsersTableError = (error) => error?.code === '42P01';
 
 /* ===============================
    MONTHLY POINTS
@@ -52,7 +53,8 @@ const hasEventToday = async (u_id, action_key, action_type) => {
     WHERE u_id = $1
       AND action_key = $2
       AND action_type = $3
-      AND activity_date = CURRENT_DATE
+      AND DATE(activity_date AT TIME ZONE 'Asia/Kolkata')
+    = DATE(NOW() AT TIME ZONE 'Asia/Kolkata')
     LIMIT 1
   `, [u_id, action_key, action_type]);
 
@@ -148,25 +150,33 @@ const getContestTaskCompletions = async (u_id, actionKeys = []) => {
 ================================ */
 const getDailyStreak = async (u_id) => {
   const { rows } = await pool.query(`
-    WITH ordered AS (
+    WITH days AS (
+      SELECT DISTINCT
+        DATE(activity_date AT TIME ZONE 'Asia/Kolkata') AS activity_day
+      FROM user_reward_events
+      WHERE u_id = $1
+        AND action_key = 'daily_checkin'
+        AND action_type = 'daily'
+    ),
+    last_day AS (
+      SELECT MAX(activity_day) AS max_date FROM days
+    ),
+    ordered AS (
       SELECT
-        activity_date,
-        ROW_NUMBER() OVER (ORDER BY activity_date DESC) - 1 AS rn
-      FROM (
-        SELECT DISTINCT activity_date
-        FROM user_reward_events
-        WHERE u_id = $1
-          AND action_key = 'daily_checkin'
-          AND action_type = 'daily'
-      ) dedup
+        activity_day,
+        ROW_NUMBER() OVER (ORDER BY activity_day DESC) - 1 AS rn
+      FROM days
     )
     SELECT COUNT(*) AS streak
-    FROM ordered
-    WHERE activity_date = CURRENT_DATE - rn::INT
+    FROM ordered, last_day
+    WHERE
+      last_day.max_date >= DATE(NOW() AT TIME ZONE 'Asia/Kolkata') - INTERVAL '1 day'
+      AND activity_day = last_day.max_date - rn::INT;
   `, [u_id]);
 
   return Number(rows[0].streak);
 };
+
 
 const getLongestDailyStreak = async (u_id) => {
   const { rows } = await pool.query(`
@@ -212,8 +222,15 @@ const getLastCheckinDate = async (u_id) => {
 ================================ */
 const getAllActiveRules = async () => {
   const { rows } = await pool.query(`
-    SELECT
-      *
+    SELECT 
+      rule_id,
+      action_key,
+      action_type,
+      points,
+      milestone_weeks,
+      max_points_per_day,
+      is_active,
+      rules              -- 👈 ADD THIS LINE
     FROM reward_rules
     WHERE is_active = TRUE
     ORDER BY action_key, action_type, milestone_weeks
@@ -222,47 +239,114 @@ const getAllActiveRules = async () => {
   return rows;
 };
 
+
 /* ===============================
    LEADERBOARD
 ================================ */
 const getMonthlyLeaderboard = async (limit = 10, offset = 0) => {
-  const { rows } = await pool.query(`
-    WITH ranked AS (
+  try {
+    const { rows } = await pool.query(`
+      WITH ranked AS (
+        SELECT
+          u_id,
+          SUM(points) AS total_points,
+          RANK() OVER (ORDER BY SUM(points) DESC) AS rank
+        FROM user_reward_events
+        WHERE created_at >= date_trunc('month', CURRENT_DATE)
+          AND created_at < date_trunc('month', CURRENT_DATE) + INTERVAL '1 month'
+        GROUP BY u_id
+      )
+      SELECT
+        ranked.u_id,
+        COALESCE(users.username, ranked.u_id) AS username,
+        ranked.total_points,
+        ranked.rank
+      FROM ranked
+      LEFT JOIN users ON users.u_id = ranked.u_id
+      ORDER BY ranked.rank
+      LIMIT $1 OFFSET $2
+    `, [limit, offset]);
+
+    return rows;
+  } catch (error) {
+    if (!isMissingUsersTableError(error)) {
+      throw error;
+    }
+
+    const { rows } = await pool.query(`
+      WITH ranked AS (
+        SELECT
+          u_id,
+          SUM(points) AS total_points,
+          RANK() OVER (ORDER BY SUM(points) DESC) AS rank
+        FROM user_reward_events
+        WHERE created_at >= date_trunc('month', CURRENT_DATE)
+          AND created_at < date_trunc('month', CURRENT_DATE) + INTERVAL '1 month'
+        GROUP BY u_id
+      )
       SELECT
         u_id,
-        SUM(points) AS total_points,
-        RANK() OVER (ORDER BY SUM(points) DESC) AS rank
-      FROM user_reward_events
-      WHERE created_at >= date_trunc('month', CURRENT_DATE)
-        AND created_at < date_trunc('month', CURRENT_DATE) + INTERVAL '1 month'
-      GROUP BY u_id
-    )
-    SELECT u_id, total_points, rank
-    FROM ranked
-    ORDER BY rank
-    LIMIT $1 OFFSET $2
-  `, [limit, offset]);
+        u_id AS username,
+        total_points,
+        rank
+      FROM ranked
+      ORDER BY rank
+      LIMIT $1 OFFSET $2
+    `, [limit, offset]);
 
-  return rows;
+    return rows;
+  }
 };
 
 const getLifetimeLeaderboard = async (limit = 10, offset = 0) => {
-  const { rows } = await pool.query(`
-    WITH ranked AS (
+  try {
+    const { rows } = await pool.query(`
+      WITH ranked AS (
+        SELECT
+          u_id,
+          SUM(points) AS total_points,
+          RANK() OVER (ORDER BY SUM(points) DESC) AS rank
+        FROM user_reward_events
+        GROUP BY u_id
+      )
+      SELECT
+        ranked.u_id,
+        COALESCE(users.username, ranked.u_id) AS username,
+        ranked.total_points,
+        ranked.rank
+      FROM ranked
+      LEFT JOIN users ON users.u_id = ranked.u_id
+      ORDER BY ranked.rank
+      LIMIT $1 OFFSET $2
+    `, [limit, offset]);
+
+    return rows;
+  } catch (error) {
+    if (!isMissingUsersTableError(error)) {
+      throw error;
+    }
+
+    const { rows } = await pool.query(`
+      WITH ranked AS (
+        SELECT
+          u_id,
+          SUM(points) AS total_points,
+          RANK() OVER (ORDER BY SUM(points) DESC) AS rank
+        FROM user_reward_events
+        GROUP BY u_id
+      )
       SELECT
         u_id,
-        SUM(points) AS total_points,
-        RANK() OVER (ORDER BY SUM(points) DESC) AS rank
-      FROM user_reward_events
-      GROUP BY u_id
-    )
-    SELECT u_id, total_points, rank
-    FROM ranked
-    ORDER BY rank
-    LIMIT $1 OFFSET $2
-  `, [limit, offset]);
+        u_id AS username,
+        total_points,
+        rank
+      FROM ranked
+      ORDER BY rank
+      LIMIT $1 OFFSET $2
+    `, [limit, offset]);
 
-  return rows;
+    return rows;
+  }
 };
 
 const getMonthlyLeaderboardCount = async () => {
@@ -308,6 +392,24 @@ const getUserMonthlyRank = async (u_id) => {
   return rows[0]?.rank || null;
 };
 
+const getUserLifetimeRank = async (u_id) => {
+  const { rows } = await pool.query(`
+    WITH ranked AS (
+      SELECT
+        u_id,
+        SUM(points) AS total_points,
+        RANK() OVER (ORDER BY SUM(points) DESC) AS rank
+      FROM user_reward_events
+      GROUP BY u_id
+    )
+    SELECT rank
+    FROM ranked
+    WHERE u_id = $1
+  `, [u_id]);
+
+  return rows[0]?.rank || null;
+};
+
 const getTodayStatus = async (u_id) => {
   const { rows } = await pool.query(`
     SELECT
@@ -315,7 +417,8 @@ const getTodayStatus = async (u_id) => {
       SUM(points) AS points
     FROM user_reward_events
     WHERE u_id = $1
-      AND activity_date = CURRENT_DATE
+      AND DATE(activity_date AT TIME ZONE 'Asia/Kolkata')
+    = DATE(NOW() AT TIME ZONE 'Asia/Kolkata')
     GROUP BY action_key
   `, [u_id]);
 
@@ -350,10 +453,17 @@ const getUserRewardHistoryCount = async (u_id) => {
     FROM user_reward_events
     WHERE u_id = $1
   `, [u_id]);
-
   return Number(rows[0].total);
 };
+const getContestStats = async () => {
+  const { rows } = await pool.query(`
+    SELECT action_key, COUNT(*) AS completions
+    FROM user_reward_events
+    GROUP BY action_key
+  `);
 
+  return rows;
+};
 /* ===============================
    REWARD CATALOG
 ================================ */
@@ -364,7 +474,6 @@ const getRewardCatalogItems = async (limit = 12, offset = 0) => {
       name,
       description,
       points,
-      price_inr,
       image_url
     FROM reward_catalog
     WHERE is_active = TRUE
@@ -402,6 +511,67 @@ const getRewardById = async (reward_id) => {
 
   return rows[0] || null;
 };
+/* ===============================
+   CREATE RULE
+================================ */
+const createRule = async ({
+  action_key,
+  action_type,
+  points,
+  milestone_weeks,
+  max_points_per_day,
+  rules = []
+}) => {
+
+  const { rows } = await pool.query(`
+    INSERT INTO reward_rules
+    (action_key, action_type, points, milestone_weeks, max_points_per_day, is_active, rules)
+    VALUES ($1,$2,$3,$4,$5, TRUE, $6)
+    RETURNING *
+  `, [
+    action_key,
+    action_type,
+    points,
+    milestone_weeks,
+    max_points_per_day,
+    JSON.stringify(rules)   // 👈 IMPORTANT
+  ]);
+
+  return rows[0];
+};
+
+
+
+/* ===============================
+   UPDATE RULE
+================================ */
+const updateRule = async (rule_id, {
+  points,
+  max_points_per_day,
+  is_active,
+  rules
+}) => {
+
+  const { rows } = await pool.query(`
+    UPDATE reward_rules
+    SET
+      points = COALESCE($1, points),
+      max_points_per_day = COALESCE($2, max_points_per_day),
+      is_active = COALESCE($3, is_active),
+      rules = COALESCE($4::jsonb, rules)
+    WHERE rule_id = $5
+    RETURNING *
+  `, [
+    points,
+    max_points_per_day,
+    is_active,
+    rules ? JSON.stringify(rules) : null,
+    rule_id
+  ]);
+
+  return rows[0];
+};
+
 
 module.exports = {
   getMonthlyPoints,
@@ -422,10 +592,14 @@ module.exports = {
   getMonthlyLeaderboardCount,
   getLifetimeLeaderboardCount,
   getUserMonthlyRank,
+  getUserLifetimeRank,
   getTodayStatus,
   getUserRewardHistory,
   getUserRewardHistoryCount,
   getRewardCatalogItems,
   getRewardCatalogCount,
-  getRewardById
+  getRewardById,
+  getContestStats,
+  createRule,
+  updateRule
 };
