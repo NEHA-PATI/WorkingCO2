@@ -1,0 +1,185 @@
+.dashboard-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    background: #f5f5f7;
+    padding: 2rem;
+  }
+  
+.dashboard-container .card {
+    --card-tint: #eef4ff;
+    --card-border: #c7d8ff;
+    --card-icon: #2563eb;
+    --btn-from: #93c5fd;
+    --btn-to: #60a5fa;
+    background: #ffffff; /* white background */
+    border-radius: 20px;
+    padding: 1.5rem;
+    color: #000000; /* text black */
+    width: 320px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--card-border);
+    background-image: linear-gradient(160deg, #ffffff 0%, var(--card-tint) 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center; /* center text */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+  }
+  
+  .dashboard-container .card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    filter: brightness(1.03);
+  }
+  
+  .dashboard-container .card-icon {
+    font-size: 1.9rem;
+    color: var(--card-icon) !important; /* fallback */
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    position: static !important;
+    top: auto;
+    right: auto;
+    filter: none;
+    transform: none;
+    z-index: 1;
+  }
+
+  .dashboard-container .card .card-icon {
+    fill: currentColor;
+    stroke: currentColor;
+  }
+  
+  .dashboard-container h2 {
+    margin: 0.5rem 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+  }
+
+  .dashboard-container .card-title {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .dashboard-container .card-title .card-icon {
+    order: -1;
+  }
+
+  .dashboard-container .plantation-logo-icon {
+    font-size: 1.65rem;
+    color: #059669 !important;
+    filter: drop-shadow(0 2px 4px rgba(5, 150, 105, 0.22));
+  }
+  
+  .dashboard-container .subtitle {
+    font-size: 1rem;
+    opacity: 0.85;
+    margin: 0.5rem 0;
+  }
+  
+  .dashboard-container .description {
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    line-height: 1.4;
+  }
+  
+  .dashboard-container .add-button {
+    background: linear-gradient(135deg, var(--btn-from) 0%, var(--btn-to) 100%);
+    color: #0f172a;
+    padding: 0.6rem 1.4rem;
+    border-radius: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .dashboard-container .add-button:hover {
+    filter: brightness(0.95);
+    transform: scale(1.05);
+  }
+  
+  .dashboard-container .blog-points {
+    list-style: none;
+    padding-left: 1rem;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    text-align: left; /* keep bullet points left-aligned */
+  }
+  
+  .dashboard-container .blog-points li::before {
+    content: '•';
+    color: #000;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+  }
+  
+  .dashboard-container .ev-card {
+    --card-tint: #eaf3ff;
+    --card-border: #c9dcff;
+    --card-icon: #3b82f6;
+    --btn-from: #bfdbfe;
+    --btn-to: #60a5fa;
+  }
+
+  .dashboard-container .plantation-card {
+    --card-tint: #ecfff4;
+    --card-border: #b7f0d1;
+    --card-icon: #10b981;
+    --btn-from: #bbf7d0;
+    --btn-to: #34d399;
+  }
+
+  .dashboard-container .solar-card {
+    --card-tint: #fff6e9;
+    --card-border: #fed7aa;
+    --card-icon: #f59e0b;
+    --btn-from: #fde68a;
+    --btn-to: #fb923c;
+  }
+
+  .dashboard-container .wind-card {
+    --card-tint: #f0f7ff;
+    --card-border: #bfdbfe;
+    --card-icon: #0ea5e9;
+    --btn-from: #bae6fd;
+    --btn-to: #38bdf8;
+  }
+
+  .dashboard-container .hydro-card {
+    --card-tint: #ebfbff;
+    --card-border: #a5f3fc;
+    --card-icon: #06b6d4;
+    --btn-from: #99f6e4;
+    --btn-to: #2dd4bf;
+  }
+
+  .dashboard-container .capture-card {
+    --card-tint: #f4f1ff;
+    --card-border: #ddd6fe;
+    --card-icon: #8b5cf6;
+    --btn-from: #c4b5fd;
+    --btn-to: #8b5cf6;
+  }
+
+  .dashboard-container .thermal-card {
+    --card-tint: #fff0ea;
+    --card-border: #fdba74;
+    --card-icon: #f97316;
+    --btn-from: #fdba74;
+    --btn-to: #fb923c;
+  }
+
+  .dashboard-container .btn-hydro,
+  .dashboard-container .btn-capture,
+  .dashboard-container .btn-thermal {
+    color: #ffffff;
+  }

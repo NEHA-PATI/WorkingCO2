@@ -95,6 +95,28 @@ class TreeModel {
     return result.rows;
   }
 
+  static async getAll() {
+    const queryText = `
+      SELECT t.*,
+             COALESCE(
+               json_agg(
+                 json_build_object(
+                   'image_id', ti.image_id,
+                   'image_url', ti.image_url,
+                   'uploaded_at', ti.uploaded_at
+                 )
+               ) FILTER (WHERE ti.image_id IS NOT NULL),
+               '[]'
+             ) as images
+      FROM trees t
+      LEFT JOIN tree_images ti ON t.tid = ti.tid
+      GROUP BY t.tid
+      ORDER BY t.created_at DESC
+    `;
+    const result = await query(queryText);
+    return result.rows;
+  }
+
   /**
    * Get single Tree by ID with images
    */

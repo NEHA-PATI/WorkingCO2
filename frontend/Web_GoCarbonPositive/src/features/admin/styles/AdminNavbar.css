@@ -1,0 +1,218 @@
+.admin-navbar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.14rem;
+  background: transparent;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  margin: 0;
+  padding: 0.9rem 0.6rem 0.6rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  box-shadow: none;
+}
+
+.admin-navbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Nav Items */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.44rem 0.8rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  color: #0f172a;
+  user-select: none;
+  caret-color: transparent;
+}
+
+.nav-item-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-chevron {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: #64748b;
+  transition: transform 0.2s ease;
+}
+
+.nav-chevron.open {
+  transform: rotate(180deg);
+}
+
+.nav-submenu {
+  margin: 0.35rem 0 0.45rem 2.25rem;
+  padding: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.nav-subitem {
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  transition: all 0.2s ease;
+}
+
+.nav-subitem:hover {
+  background: #eaf7ef;
+  color: #16a34a;
+}
+
+.nav-subitem.active {
+  background: #ecfdf5;
+  color: #15803d;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px #86efac;
+}
+
+.nav-item:hover {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+
+/* Active State */
+.nav-item.active {
+  background-color: #ecfdf5;
+  border: 2px solid #16a34a;
+}
+
+/* ICON BASE STYLE */
+.icon {
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+/* DISTINCT ICON COLORS */
+.overview-icon {
+  color: #3b82f6;
+}
+.users-icon {
+  color: #10b981;
+}
+.asset-icon {
+  color: #0ea5e9;
+}
+.support-icon {
+  color: #f59e0b;
+}
+.config-icon {
+  color: #8b5cf6;
+}
+.security-icon {
+  color: #ef4444;
+}
+.organization-icon {
+  color: #f97316;
+}
+.case-study-icon {
+  color: #06b6d4;
+}
+.contest-icon {
+  color: #a855f7;
+}
+.reports-icon {
+  color: #14b8a6;
+}
+.analytics-icon {
+  color: #f59e0b;
+}
+.career-icon {
+  color: #6366f1;
+}
+
+/* HOVER EFFECTS */
+.nav-item:hover .overview-icon {
+  color: #2563eb;
+  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.5));
+}
+.nav-item:hover .users-icon {
+  color: #059669;
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.5));
+}
+.nav-item:hover .asset-icon {
+  color: #0284c7;
+  filter: drop-shadow(0 0 6px rgba(14, 165, 233, 0.45));
+}
+.nav-item:hover .support-icon {
+  color: #d97706;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5));
+}
+.nav-item:hover .config-icon {
+  color: #7c3aed;
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.5));
+}
+.nav-item:hover .security-icon {
+  color: #dc2626;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.5));
+}
+.nav-item:hover .organization-icon {
+  color: #ea580c;
+  filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.5));
+}
+.nav-item:hover .case-study-icon {
+  color: #0891b2;
+  filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.5));
+}
+.nav-item:hover .contest-icon {
+  color: #9333ea;
+  filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.5));
+}
+.nav-item:hover .reports-icon {
+  color: #0f766e;
+  filter: drop-shadow(0 0 6px rgba(20, 184, 166, 0.5));
+}
+.nav-item:hover .analytics-icon {
+  color: #d97706;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.5));
+}
+.nav-item:hover .career-icon {
+  color: #4f46e5;
+  filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.5));
+}
+
+/* ACTIVE STATE ICON EFFECT */
+.nav-item.active .icon {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .admin-navbar {
+    height: auto;
+    padding: 0.75rem;
+  }
+
+  .nav-item {
+    width: 100%;
+  }
+}

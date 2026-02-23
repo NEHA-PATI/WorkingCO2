@@ -11,31 +11,33 @@ const adminTicketRoutes = require("./routes/adminTicketRoutes");
 // App init
 const app = express();
 
+/* ===================== TRUST PROXY (IMPORTANT FOR EC2 / LB) ===================== */
+app.set("trust proxy", 1);
+
 /* ===================== SECURITY ===================== */
 app.use(helmet());
 
 /* ===================== LOGGING ===================== */
-app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+app.use(
+  morgan(process.env.NODE_ENV === "production" ? "combined" : "dev")
+);
 
-/* ===================== CORS ===================== */
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:3000",
-  "http://localhost:3001",
-  process.env.FRONTEND_URL
-].filter(Boolean);
+/* ===================== CORS (PRODUCTION SAFE) ===================== */
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+  : [];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow Postman / curl
+      // Allow Postman / curl / server-to-server calls
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
+      console.log(`❌ CORS Blocked: ${origin}`);
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true
@@ -43,7 +45,7 @@ app.use(
 );
 
 /* ===================== BODY PARSING ===================== */
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 /* ===================== RATE LIMITING ===================== */
@@ -64,6 +66,7 @@ app.get("/health", (req, res) => {
   res.status(200).json({
     status: "success",
     service: "ticket-service",
+    environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString()
   });
 });
@@ -76,9 +79,9 @@ app.use((req, res) => {
   });
 });
 
-/* ===================== ERROR HANDLER ===================== */
+/* ===================== GLOBAL ERROR HANDLER ===================== */
 app.use((err, req, res, next) => {
-  console.error("❌ Error:", err.message);
+  console.error("❌ Ticket Service Error:", err.message);
 
   if (err.message === "Not allowed by CORS") {
     return res.status(403).json({

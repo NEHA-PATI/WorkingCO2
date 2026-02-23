@@ -1,5 +1,5 @@
 const OTP = require("../models/otpLogModel");
-const sendOTP = require("../utils/sendOTP");
+const { sendMail, MAIL_TYPES } = require("./mail");
 
 exports.sendRegistrationOTP = async (user) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -12,7 +12,11 @@ exports.sendRegistrationOTP = async (user) => {
     expires_at: new Date(Date.now() + 10 * 60 * 1000)
   });
 
-  await sendOTP(user.email, otp);
+  await sendMail({
+    type: MAIL_TYPES.OTP,
+    to: user.email,
+    data: { otp },
+  });
 };
 
 exports.verifyRegistrationOTP = async (email, otp) => {
