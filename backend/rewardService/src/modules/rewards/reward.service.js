@@ -650,6 +650,31 @@ const redeemReward = async (u_id, reward_id) => {
   };
 };
 
+const getContestStats = async () => {
+  return await repo.getContestStats();
+};
+
+/* ===============================
+   CREATE RULE
+================================ */
+const createRule = async (data) => {
+
+  // Optional validation logic
+  if (data.action_type === 'consistency' && !data.milestone_weeks) {
+    throw new Error("milestone_weeks required for consistency rule");
+  }
+
+  return await repo.createRule(data);
+};
+
+
+/* ===============================
+   UPDATE RULE
+================================ */
+const updateRule = async (rule_id, data) => {
+  return await repo.updateRule(rule_id, data);
+};
+
 module.exports = {
   awardOneTime,
   awardDailyCheckin,

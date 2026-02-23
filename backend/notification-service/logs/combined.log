@@ -63,3 +63,4 @@
 =======
 {"level":"info","message":"\n        ================================\n        🚀 Notification Service Started\n        ================================\n        Service: notification-service\n        Port: 5001\n        Environment: development\n        Database: localhost:5432/gocarbonpositive\n        CORS: Enabled for http://localhost:3001\n        ================================\n      ","service":"notification-service","timestamp":"2026-02-16 09:52:26"}
 >>>>>>> origin/krishighosh
+{"level":"info","message":"\n        ================================\n        🚀 Notification Service Started\n        ================================\n        Service: notification-service\n        Port: 5001\n        Environment: development\n        Database: localhost:5432/co2\n        CORS: Enabled for http://localhost:3001\n        ================================\n      ","service":"notification-service","timestamp":"2026-02-16 18:39:05"}
