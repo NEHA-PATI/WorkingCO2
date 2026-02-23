@@ -19,6 +19,13 @@ router.post(
 
 // Get all trees for a user
 router.get(
+  "/admin/all",
+  logUserAction("GET_ALL_TREES"),
+  TreeController.getAllTrees
+);
+
+// Get all trees for a user
+router.get(
   "/:userId",
   validateUserId,
   logUserAction("GET_USER_TREES"),

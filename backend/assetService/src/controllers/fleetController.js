@@ -177,6 +177,23 @@ class FleetController {
     }
   }
 
+  static async getAll(req, res) {
+    try {
+      const rows = await FleetModel.getAll();
+      return res.status(200).json({
+        success: true,
+        message: "Fleet entries fetched successfully",
+        data: rows,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch fleet entries",
+        data: { error: error.message },
+      });
+    }
+  }
+
   static async getById(req, res) {
     try {
       const { ev_input_id } = req.params;

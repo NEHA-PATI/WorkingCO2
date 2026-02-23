@@ -108,6 +108,32 @@ class PlantationModel {
     return result.rows;
   }
 
+  static async getAll() {
+    const queryText = `
+      SELECT p.*,
+             MAX(o.org_name) AS org_name,
+             COALESCE(
+               json_agg(
+                 json_build_object(
+                   'id', pbp.id,
+                   'point_order', pbp.point_order,
+                   'lat', pbp.latitude,
+                   'lng', pbp.longitude
+                 ) ORDER BY pbp.point_order
+               ) FILTER (WHERE pbp.id IS NOT NULL),
+               '[]'
+             ) AS points
+      FROM plantations p
+      LEFT JOIN organizations o ON o.org_id = p.org_id
+      LEFT JOIN plantation_boundary_points pbp ON pbp.p_id = p.p_id
+      GROUP BY p.p_id
+      ORDER BY p.created_at DESC
+    `;
+
+    const result = await query(queryText);
+    return result.rows;
+  }
+
   static async getById(pId) {
     const queryText = `
       SELECT p.*,
@@ -129,6 +155,19 @@ class PlantationModel {
     `;
 
     const result = await query(queryText, [pId]);
+    return result.rows[0];
+  }
+
+  static async updateVerificationStatus(pId, verificationStatus) {
+    const queryText = `
+      UPDATE plantations
+      SET verification_status = $1,
+          updated_at = NOW()
+      WHERE p_id = $2
+      RETURNING *
+    `;
+
+    const result = await query(queryText, [verificationStatus, pId]);
     return result.rows[0];
   }
 }
