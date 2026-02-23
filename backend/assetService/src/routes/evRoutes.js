@@ -19,6 +19,13 @@ router.post(
 
 // Get all EVs for a user
 router.get(
+  "/admin/all",
+  logUserAction("GET_ALL_EVS"),
+  EVController.getAllEVs
+);
+
+// Get all EVs for a user
+router.get(
   "/:userId",
   validateUserId,
   logUserAction("GET_USER_EVS"),

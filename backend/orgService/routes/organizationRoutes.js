@@ -4,7 +4,8 @@ const router = express.Router();
 const {
     organizationLogin,
     getAllOrganizations,
-     getOrganizationByOrgId
+    getOrganizationByOrgId,
+    updateOrganizationByOrgId
 } = require("../controllers/organizationController");
 
 // ================= ORGANIZATION =================
@@ -19,4 +20,5 @@ router.get("/", getAllOrganizations);
 
 
 router.get("/:org_id", getOrganizationByOrgId);
+router.put("/:org_id", updateOrganizationByOrgId);
 module.exports = router;

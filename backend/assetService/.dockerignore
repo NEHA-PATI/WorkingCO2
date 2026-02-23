@@ -7,3 +7,5 @@ logs
 Dockerfile
 .dockerignore
 test-env.js
+coverage
+*.md

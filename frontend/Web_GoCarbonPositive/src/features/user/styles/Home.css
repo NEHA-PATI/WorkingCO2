@@ -1,0 +1,754 @@
+/* ===== HomePage.css ===== */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap");
+
+.hp-root {
+  font-family: "Poppins", sans-serif;
+  color: #111;
+  background: #fff;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.hp-root * {
+  box-sizing: border-box;
+}
+
+/* ===== HERO ===== */
+.hp-hero {
+  position: relative;
+  min-height: 520px;
+  background: url("https://images.unsplash.com/photo-1448375240586-882707db888b?w=1600&q=80")
+    center / cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 60px 80px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.hp-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 0;
+}
+
+.hp-tab-switcher {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  background: #1a1a1a;
+  border-radius: 50px;
+  padding: 5px;
+  z-index: 2;
+  gap: 2px;
+}
+
+.hp-tab-switcher-inline {
+  position: static;
+  top: auto;
+  left: auto;
+  transform: none;
+  display: inline-flex;
+  width: fit-content;
+  margin: 0;
+  background: #e7f6ec;
+  border: 1px solid #cfe8d6;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.12);
+}
+
+.hp-tab-switcher-inline .hp-tab-btn {
+  color: #355244;
+}
+
+.hp-tab-switcher-inline .hp-tab-active {
+  background: #111;
+  color: #fff;
+}
+
+.hp-tab-btn {
+  padding: 8px 28px;
+  border: none;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  color: #aaa;
+  transition: all 0.2s;
+  min-width: 180px;
+  text-align: center;
+}
+
+.hp-tab-active {
+  background: #22c55e;
+  color: #fff;
+}
+
+.hp-hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+}
+
+.hp-hero-title {
+  font-size: 58px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.1;
+  margin: 0 0 18px;
+}
+
+.hp-green-text {
+  color: #22c55e;
+}
+
+.hp-hero-desc {
+  color: #ddd;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  max-width: 480px;
+}
+
+.hp-hero-btns {
+  display: flex;
+  gap: 16px;
+}
+
+.hp-btn-primary {
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hp-btn-primary:hover {
+  background: #16a34a;
+}
+
+.hp-btn-outline-org {
+  background: transparent;
+  border: 2px solid #22c55e;
+  color: #22c55e;
+  transition: background 0.22s ease, color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+.hp-btn-outline-org:hover {
+  background: #fff;
+  color: #111;
+  box-shadow: 0 10px 24px rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+/* ===== SECTIONS ===== */
+.hp-section {
+  padding: 70px 80px;
+  width: 100%;
+}
+
+.hp-section-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.hp-section-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #22c55e;
+  margin: 0 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hp-title-icon {
+  flex-shrink: 0;
+}
+
+.hp-dark-title {
+  color: #111;
+}
+
+.hp-section-sub {
+  color: #666;
+  font-size: 15px;
+  margin: 0;
+}
+
+.hp-user-org-question {
+  margin: 0;
+  color: #374151;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.hp-experience-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.hp-rewards-section .hp-section-title.hp-rewards-title {
+  margin-top: 2px;
+  margin-bottom: 12px;
+}
+
+/* ===== REWARDS ===== */
+.hp-rewards-section {
+  background: #fff;
+}
+
+.hp-rewards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.hp-reward-card {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  transition: box-shadow 0.2s;
+}
+
+.hp-reward-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+}
+
+.hp-reward-icon-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.hp-reward-icon {
+  font-size: 24px;
+}
+
+.hp-reward-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.hp-reward-desc {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.hp-coins-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border-radius: 50px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ===== SERVICES ===== */
+.hp-services-section {
+  background: #f9fafb;
+}
+
+.hp-services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.hp-service-card {
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 28px 24px;
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+.hp-service-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  border-color: #22c55e;
+  box-shadow:
+    0 24px 40px rgba(34, 197, 94, 0.18),
+    0 12px 22px rgba(0, 0, 0, 0.12);
+}
+
+.hp-service-highlighted {
+  border: 1.5px solid #e5e7eb;
+}
+
+.hp-service-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.hp-service-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.hp-service-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.hp-service-desc {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.hp-learn-more {
+  color: #16a34a;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hp-learn-more:hover {
+  text-decoration: underline;
+}
+
+/* ===== ANNOUNCEMENTS ===== */
+.hp-announcements-section {
+  background: #fff;
+}
+
+.hp-announcements-list {
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+  padding-left: 20px;
+  border-left: 2px solid #e5e7eb;
+}
+
+.hp-announcement-row {
+  position: relative;
+}
+
+.hp-announcement-dot {
+  width: 12px;
+  height: 12px;
+  background: #22c55e;
+  border-radius: 50%;
+  position: absolute;
+  left: -26px;
+  top: 18px;
+}
+
+.hp-announcement-card {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px 24px;
+  background: #fff;
+}
+
+.hp-announcement-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.hp-announcement-date {
+  font-size: 13px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hp-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 50px;
+  letter-spacing: 0.5px;
+}
+
+.hp-tag-reward {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.hp-tag-feature {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.hp-tag-community {
+  background: #fef9c3;
+  color: #92400e;
+}
+
+.hp-tag-update {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.hp-announcement-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.hp-announcement-desc {
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ===== ABOUT ===== */
+.hp-about-section {
+  background: #f9fafb;
+}
+
+.hp-about-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 48px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.hp-about-icon-wrap {
+  width: 110px;
+  height: 110px;
+  min-width: 110px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hp-about-icon {
+  font-size: 40px;
+}
+
+.hp-about-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 16px;
+}
+
+.hp-about-desc {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.8;
+  margin: 0 0 24px;
+}
+
+/* ===== FAQ ===== */
+.hp-faq-section {
+  background: #fff;
+}
+
+.hp-faq-list {
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hp-faq-item {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px 22px;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.hp-faq-item:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.hp-faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.hp-faq-chevron {
+  color: #888;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hp-faq-answer {
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.7;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .hp-rewards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hp-services-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hp-experience-row {
+    gap: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .hp-user-org-question {
+    font-size: 14px;
+  }
+
+  .hp-tab-switcher-inline {
+    padding: 4px;
+  }
+
+  .hp-tab-switcher-inline .hp-tab-btn {
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hp-section {
+    padding: 36px 14px;
+  }
+
+  .hp-hero {
+    padding: 72px 14px 44px;
+  }
+
+  .hp-hero-title {
+    font-size: 32px;
+  }
+
+  .hp-hero-start-btn {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+
+  .hp-rewards-title {
+    white-space: nowrap;
+    font-size: 1px;
+    font-weight: 500;
+    gap: 0px;
+    line-height: 1;
+  }
+
+  .hp-rewards-title .hp-title-icon {
+    font-size: 0.8em;
+  }
+
+  .hp-rewards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .hp-services-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .hp-about-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hp-section-header {
+    margin-bottom: 28px;
+  }
+
+  .hp-section-title {
+    font-size: 26px;
+  }
+
+  .hp-section-title.hp-rewards-title {
+    font-size: 22px;
+    white-space: nowrap;
+    line-height: 1.1;
+    gap: 4px;
+  }
+
+  .hp-section-sub {
+    font-size: 14px;
+  }
+
+  .hp-user-org-question {
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  .hp-experience-row {
+    width: 100%;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 0;
+    margin-bottom: 16px;
+    row-gap: 10px;
+  }
+
+  .hp-tab-switcher-inline {
+    width: 100%;
+    max-width: 320px;
+    padding: 4px;
+    gap: 4px;
+    border-radius: 18px;
+  }
+
+  .hp-tab-switcher-inline .hp-tab-btn {
+    min-width: 0;
+    flex: 1;
+    padding: 9px 12px;
+    font-size: 14px;
+  }
+
+  .hp-rewards-section .hp-section-title.hp-rewards-title {
+    margin-top: 8px;
+    margin-bottom: 10px;
+  }
+
+  .hp-rewards-section .hp-section-sub {
+    margin: 0 auto;
+    max-width: 300px;
+    line-height: 1.5;
+  }
+
+  .hp-reward-card {
+    padding: 18px 12px;
+  }
+
+  .hp-reward-icon-wrap {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 12px;
+  }
+
+  .hp-reward-title {
+    font-size: 14px;
+  }
+
+  .hp-reward-desc {
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+
+  .hp-coins-badge {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .hp-service-card {
+    padding: 18px 14px;
+  }
+
+  .hp-service-icon-wrap {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 12px;
+  }
+
+  .hp-service-icon {
+    font-size: 28px;
+  }
+
+  .hp-service-title {
+    font-size: 15px;
+  }
+
+  .hp-service-desc {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .hp-announcement-card {
+    padding: 14px 12px;
+  }
+
+  .hp-announcement-title {
+    font-size: 15px;
+  }
+
+  .hp-announcement-desc {
+    font-size: 13px;
+  }
+
+  .hp-about-icon-wrap {
+    width: 78px;
+    height: 78px;
+    min-width: 78px;
+  }
+
+  .hp-about-icon {
+    font-size: 30px;
+  }
+
+  .hp-about-title {
+    font-size: 24px;
+  }
+
+  .hp-about-desc {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .hp-faq-item {
+    padding: 14px 12px;
+  }
+
+  .hp-faq-question {
+    font-size: 14px;
+  }
+
+  .hp-faq-answer {
+    font-size: 13px;
+  }
+}

@@ -1,0 +1,301 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* Global Font */
+.admin-overview-scope * {
+  font-family: "Poppins", sans-serif;
+  color: #111827; /* Default text color */
+}
+
+/* Container */
+.admin-overview-scope .overview-container {
+  padding: 1.5rem 2rem;
+  background-color: #f9fafb;
+  margin-top: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* KPI Cards */
+.admin-overview-scope .overview-cards {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.admin-overview-scope .overview-card {
+  flex: 1;
+  min-width: 180px;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  background: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15); /* ✅ subtle colored shadow */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-overview-scope .overview-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25); /* blue glow on hover */
+}
+
+.admin-overview-scope .overview-card h2 {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.admin-overview-scope .overview-card h1 {
+  font-size: 1.6rem;
+  margin: 0.4rem 0;
+  font-weight: 600;
+}
+
+.admin-overview-scope .overview-card p {
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+/* Icon Colors (only icons) */
+.admin-overview-scope .icon {
+  font-size: 1.3rem;
+}
+.admin-overview-scope .green-icon { color: #16a34a; }
+.admin-overview-scope .blue-icon { color: #2563eb; }
+.admin-overview-scope .yellow-icon { color: #ca8a04; }
+.admin-overview-scope .red-icon { color: #dc2626; }
+.admin-overview-scope .teal-icon { color: #0d9488; }
+.admin-overview-scope .gray-icon { color: #475569; }
+.admin-overview-scope .purple-icon { color: #7c3aed; }
+
+/* Charts */
+.admin-overview-scope .chart-section {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.admin-overview-scope .chart-card {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  min-width: 0;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); /* ✅ light blue shadow */
+}
+
+/* Pie Chart - fully visible */
+.admin-overview-scope .user-distribution .recharts-responsive-container {
+  height: 330px !important;
+}
+
+/* Stats Section */
+.admin-overview-scope .stats-section {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.admin-overview-scope .user-distribution,
+.admin-overview-scope .system-metrics,
+.admin-overview-scope .recent-alerts {
+  flex: 1;
+  min-width: 0;
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15); /* ✅ soft purple shadow */
+}
+
+/* Metrics Bars */
+.admin-overview-scope .progress {
+  background: #e2e8f0;
+  border-radius: 8px;
+  height: 8px;
+  margin: 5px 0 10px;
+}
+.admin-overview-scope .fill {
+  height: 8px;
+  border-radius: 8px;
+}
+.admin-overview-scope .blue { background-color: #3b82f6; }
+.admin-overview-scope .yellow { background-color: #eab308; }
+.admin-overview-scope .green { background-color: #22c55e; }
+.admin-overview-scope .gray { background-color: #9ca3af; }
+
+.admin-overview-scope .metric {
+  float: right;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Alerts */
+.admin-overview-scope .alert {
+  padding: 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 0.7rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+.admin-overview-scope .alert.yellow { background: #fef9c3; }
+.admin-overview-scope .alert.red { background: #fee2e2; }
+.admin-overview-scope .alert.blue { background: #dbeafe; }
+.admin-overview-scope .alert.green { background: #dcfce7; }
+
+.admin-overview-scope .view-all {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #cbd5e1;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+.admin-overview-scope .view-all:hover {
+  background: #f1f5f9;
+}
+
+/* Quick Actions */
+.admin-overview-scope .quick-actions {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15); /* ✅ greenish glow */
+}
+
+.admin-overview-scope .actions-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.admin-overview-scope .action {
+  flex: 1;
+  min-width: 140px;
+  border-radius: 12px;
+  text-align: center;
+  padding: 1rem;
+  font-weight: 500;
+  background: #f9fafb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #111827; /* Text stays black */
+}
+
+.admin-overview-scope .action:hover {
+  transform: scale(1.05);
+  background: #f1f5f9;
+}
+
+@media (max-width: 1100px) {
+  .admin-overview-scope .overview-container {
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+
+  .admin-overview-scope .overview-card {
+    flex: 1 1 calc(50% - 0.6rem);
+  }
+
+  .admin-overview-scope .chart-card,
+  .admin-overview-scope .user-distribution,
+  .admin-overview-scope .system-metrics,
+  .admin-overview-scope .recent-alerts {
+    flex: 1 1 calc(50% - 0.75rem);
+    min-width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-overview-scope .overview-container {
+    padding: 1rem 0.9rem 1.25rem;
+  }
+
+  .admin-overview-scope .overview-cards,
+  .admin-overview-scope .chart-section,
+  .admin-overview-scope .stats-section,
+  .admin-overview-scope .actions-grid {
+    gap: 0.9rem;
+  }
+
+  .admin-overview-scope .overview-card,
+  .admin-overview-scope .chart-card,
+  .admin-overview-scope .user-distribution,
+  .admin-overview-scope .system-metrics,
+  .admin-overview-scope .recent-alerts,
+  .admin-overview-scope .action {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .admin-overview-scope .quick-actions,
+  .admin-overview-scope .chart-card,
+  .admin-overview-scope .user-distribution,
+  .admin-overview-scope .system-metrics,
+  .admin-overview-scope .recent-alerts {
+    padding: 1.1rem;
+  }
+
+  .admin-overview-scope .overview-card h1 {
+    font-size: 1.35rem;
+  }
+
+  .admin-overview-scope .user-distribution .recharts-responsive-container {
+    height: 280px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-overview-scope .overview-card {
+    text-align: left;
+    padding: 0.95rem;
+  }
+
+  .admin-overview-scope .overview-card h2 {
+    justify-content: flex-start;
+    font-size: 0.95rem;
+  }
+
+  .admin-overview-scope .overview-card h1 {
+    font-size: 1.2rem;
+  }
+
+  .admin-overview-scope .overview-card p {
+    font-size: 0.82rem;
+  }
+
+  .admin-overview-scope .chart-card h2,
+  .admin-overview-scope .quick-actions h2,
+  .admin-overview-scope .user-distribution h2,
+  .admin-overview-scope .system-metrics h2,
+  .admin-overview-scope .recent-alerts h2 {
+    font-size: 1rem;
+  }
+
+  .admin-overview-scope .metric {
+    float: none;
+    display: block;
+    margin-top: 0.2rem;
+  }
+
+  .admin-overview-scope .action {
+    justify-content: flex-start;
+    padding: 0.9rem;
+  }
+
+  .admin-overview-scope .user-distribution .recharts-responsive-container {
+    height: 250px !important;
+  }
+}

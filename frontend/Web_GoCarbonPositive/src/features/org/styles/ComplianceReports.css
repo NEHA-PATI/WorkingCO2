@@ -1,0 +1,779 @@
+/* Reset and base styles */
+.org-compliance-root * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.org-compliance-root body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Flex and Alignment Utilities */
+.org-compliance-root .flex {
+    display: flex;
+  }
+  
+  .org-compliance-root .items-center {
+    align-items: center;
+  }
+  
+  .org-compliance-root .justify-between {
+    justify-content: space-between;
+  }
+  
+  /* Spacing Utilities */
+  .org-compliance-root .space-x-3 > * + * {
+    margin-left: var(--spacing-3); /* 0.75rem */
+  }
+  
+  .org-compliance-root .mt-1 {
+    margin-top: var(--spacing-1); /* 0.25rem */
+  }
+  
+  /* Typography Utilities */
+  .org-compliance-root .text-2xl {
+    font-size: var(--font-size-2xl); /* 1.5rem */
+  }
+  
+  .org-compliance-root .font-bold {
+    font-weight: 700;
+  }
+  
+  .org-compliance-root .text-secondary {
+    color: #6b7280 !important;
+    font-weight: 500;
+  }
+  
+  /* Input Styles */
+  .org-compliance-root .input {
+    width: 100%;
+    padding: var(--spacing-3) var(--spacing-4); /* 0.75rem 1rem */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm); /* 8px */
+    background-color: var(--color-bg); /* #ffffff */
+    color: var(--color-text); /* #1a1a1a */
+    font-size: var(--font-size-sm); /* 0.875rem */
+    transition: all var(--transition-fast); /* 0.15s ease-in-out */
+    font-family: inherit;
+  }
+  
+  .org-compliance-root .input:focus {
+    outline: none;
+    border-color: var(--color-primary); /* #3b82f6 */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  /* Button Styles */
+  .org-compliance-root .button {
+    padding: 4px 10px;
+    border-radius: 6px;
+    background-color: transparent;
+    color: var(--color-text); /* #1a1a1a */
+    cursor: pointer;
+    font-size: 0.92em;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2); /* 0.5rem */
+    transition: all var(--transition-fast); /* 0.15s ease-in-out */
+    text-decoration: none;
+    font-family: inherit;
+    line-height: 1;
+    white-space: nowrap;
+    user-select: none;
+  }
+  
+  .org-compliance-root .button:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.15),
+      0 2px 6px rgba(0, 0, 0, 0.1);
+    background-image: linear-gradient(135deg, currentColor 0%, currentColor 100%);
+    background-size: 200% 200%;
+    animation: shimmer 0.5s ease-in-out;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  .org-compliance-root .button:active {
+    transform: translateY(0);
+  }
+  
+  .org-compliance-root .button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .org-compliance-root .button-outline {
+    background-color: transparent;
+    color: var(--color-primary); /* #3b82f6 */
+    border-color: var(--color-primary); /* #3b82f6 */
+  }
+  
+  .org-compliance-root .button-outline:hover {
+    background-color: var(--color-primary); /* #3b82f6 */
+    color: white;
+  }
+  
+  /* Custom padding adjustment for buttons */
+  .org-compliance-root .p-2 {
+    padding: var(--spacing-2); /* 0.5rem */
+  }
+  
+  /* Border and Background Utilities */
+  .org-compliance-root .border {
+    border: 1px solid var(--border-color);
+  }
+  
+  .org-compliance-root .border-gray-300 {
+    border-color: #cbd5e1;
+  }
+  
+  .org-compliance-root .rounded-lg {
+    border-radius: var(--border-radius); /* 12px */
+  }
+
+
+
+
+
+
+
+
+
+
+/* Cards */
+.org-compliance-root .card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+
+.org-compliance-root .card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.org-compliance-root .card-header {
+    padding: 20px 20px 8px 20px;
+}
+
+.org-compliance-root .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.org-compliance-root .card-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.org-compliance-root .card-content {
+    padding: 0 20px 20px 20px;
+}
+
+/* Overview grid */
+.org-compliance-root .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.org-compliance-root .overview-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.org-compliance-root .score-large {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #111827;
+}
+
+.org-compliance-root .score-large.blue {
+    color: #3b82f6;
+}
+
+.org-compliance-root .score-large.orange {
+    color: #f97316;
+}
+
+.org-compliance-root .area-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+/* Icon styles */
+.org-compliance-root .btn-icon {
+    margin-right: 8px;
+    font-size: 0.875rem;
+}
+
+.org-compliance-root .trend-icon {
+    margin-right: 4px;
+    font-size: 0.875rem;
+}
+
+.org-compliance-root .tab-icon {
+    margin-right: 6px;
+    font-size: 0.875rem;
+}
+
+.org-compliance-root .icon-large {
+    font-size: 2rem;
+    color: #6b7280;
+}
+
+.org-compliance-root .metric-icon {
+    font-size: 1.25rem;
+}
+
+.org-compliance-root .overview-grid .card:nth-child(1) .icon-large {
+  color: #10b981;
+}
+
+.org-compliance-root .overview-grid .card:nth-child(2) .icon-large {
+  color: #3b82f6;
+}
+
+.org-compliance-root .overview-grid .card:nth-child(3) .icon-large {
+  color: #f97316;
+}
+
+.org-compliance-root .tab-icon {
+  color: #6366f1;
+}
+
+.org-compliance-root .tab.active .tab-icon {
+  color: #ffffff;
+}
+
+.org-compliance-root .trend-positive {
+    margin-top: 4px;
+    font-size: 0.875rem;
+    color: #059669;
+    display: flex;
+    align-items: center;
+}
+
+/* Badges */
+.org-compliance-root .badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.org-compliance-root .badge-excellent {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.org-compliance-root .badge-good {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.org-compliance-root .badge-poor {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* Chart section */
+.org-compliance-root .chart-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.org-compliance-root .chart-tabs {
+    display: flex;
+    gap: 4px;
+    background-color: #f3f4f6;
+    padding: 4px;
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.org-compliance-root .tab {
+    padding: 8px 16px;
+    border: none;
+    background-color: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.org-compliance-root .tab:hover {
+    background-color: #e5e7eb;
+}
+
+.org-compliance-root .tab.active {
+    background-color: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.org-compliance-root .pie-chart-container {
+    display: flex;
+    justify-content: center;
+}
+
+/* Metrics grid */
+.org-compliance-root .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.org-compliance-root .metric-card {
+    cursor: pointer;
+}
+
+.org-compliance-root .metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.org-compliance-root .icon-container {
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.org-compliance-root .metric-icon {
+    font-size: 1.25rem;
+}
+
+.org-compliance-root .metric-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.org-compliance-root .metric-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.org-compliance-root .metric-score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.org-compliance-root .metric-score {
+    font-size: 1.75rem;
+    font-weight: bold;
+}
+
+.org-compliance-root .metric-trend {
+    font-size: 0.875rem;
+    color: #059669;
+    font-weight: 500;
+}
+
+/* Progress bar */
+.org-compliance-root .progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: #ffffffd2;
+    border-radius: 4px;
+    overflow: visible;
+}
+
+.org-compliance-root .progress-fill {
+    height: 100%;
+    height: 8px;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.org-compliance-root .metric-description {
+    font-size: 0.75rem;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+/* Insights grid */
+.org-compliance-root .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+}
+
+.org-compliance-root .insights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.org-compliance-root .insight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.org-compliance-root .insight-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 8px;
+    flex-shrink: 0;
+}
+
+.org-compliance-root .insight-dot.green {
+    background-color: #8fe8ca;
+}
+
+.org-compliance-root .insight-dot.blue {
+    background-color: #9abcf3;
+}
+
+.org-compliance-root .insight-dot.purple {
+    background-color: #bda5f4;
+}
+
+.org-compliance-root .insight-dot.orange {
+    background-color: #f9bc90;
+}
+
+.org-compliance-root .insight-dot.red {
+    background-color: #f99999;
+}
+
+.org-compliance-root .insight-dot.yellow {
+    background-color: #f7df96;
+}
+
+.org-compliance-root .insight-title {
+    font-weight: 500;
+    color: #111827;
+    margin-bottom: 2px;
+}
+
+.org-compliance-root .insight-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .org-compliance-root .dashboard {
+        padding: 16px;
+    }
+
+    .org-compliance-root .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .org-compliance-root .header-controls {
+        justify-content: flex-start;
+    }
+
+    .org-compliance-root .overview-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .org-compliance-root .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .org-compliance-root .insights-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .org-compliance-root .chart-tabs {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .org-compliance-root .header-controls {
+        flex-direction: column;
+    }
+
+    .org-compliance-root .select,
+    .org-compliance-root .btn {
+        width: 100%;
+    }
+
+    .org-compliance-root .overview-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
+
+/* ========================================
+   Compliance Page Restructure Overrides
+   ======================================== */
+.org-compliance-root {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+}
+
+.org-compliance-root .compliance-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.org-compliance-root .compliance-header-main {
+  min-width: 240px;
+}
+
+.org-compliance-root .compliance-page-title {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.15;
+  font-weight: 800;
+  color: #1f2937;
+  letter-spacing: -0.02em;
+}
+
+.org-compliance-root .compliance-page-subtitle {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.org-compliance-root .compliance-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.org-compliance-root .compliance-period-select {
+  width: auto;
+  min-width: 172px;
+  padding: 9px 12px;
+  border-radius: 10px;
+}
+
+.org-compliance-root .compliance-action-btn {
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.org-compliance-root .compliance-action-btn:hover {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #312e81;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+.org-compliance-root .overview-grid {
+  gap: 16px;
+}
+
+.org-compliance-root .card {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.org-compliance-root .card-header {
+  padding: 18px 18px 8px;
+}
+
+.org-compliance-root .card-content {
+  padding: 0 18px 18px;
+}
+
+.org-compliance-root .compliance-content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
+  align-items: start;
+  gap: 18px;
+}
+
+.org-compliance-root .chart-section .chart-tabs {
+  margin-bottom: 12px;
+}
+
+.org-compliance-root .chart-section .card {
+  width: 100%;
+}
+
+.org-compliance-root .compliance-chart-card {
+  min-height: 510px;
+}
+
+.org-compliance-root .compliance-content-grid .metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.org-compliance-root .metric-card .card-header {
+  padding: 14px 14px 8px;
+}
+
+.org-compliance-root .metric-card .card-content {
+  padding: 0 14px 14px;
+}
+
+.org-compliance-root .metric-title {
+  font-size: 0.95rem;
+}
+
+.org-compliance-root .metric-score {
+  font-size: 1.5rem;
+}
+
+.org-compliance-root .metric-description {
+  font-size: 0.74rem;
+}
+
+.org-compliance-root .pie-chart-container .recharts-responsive-container {
+  max-width: 100% !important;
+}
+
+@media (max-width: 1280px) {
+  .org-compliance-root .compliance-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .org-compliance-root .compliance-content-grid .metrics-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .org-compliance-root {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .org-compliance-root .compliance-page-title {
+    font-size: 1.5rem;
+  }
+
+  .org-compliance-root .compliance-page-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .org-compliance-root .compliance-content-grid .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .org-compliance-root {
+    padding: 12px;
+  }
+
+  .org-compliance-root .compliance-header-controls {
+    width: 100%;
+  }
+
+  .org-compliance-root .compliance-period-select,
+  .org-compliance-root .compliance-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .org-compliance-root .compliance-chart-card {
+    min-height: 430px;
+  }
+
+  .org-compliance-root .compliance-content-grid .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .org-compliance-root .compliance-page-title {
+    font-size: 1.3rem;
+  }
+
+  .org-compliance-root .overview-grid {
+    gap: 10px;
+  }
+
+  .org-compliance-root .card-header {
+    padding: 12px 12px 6px;
+  }
+
+  .org-compliance-root .card-content {
+    padding: 0 12px 12px;
+  }
+
+  .org-compliance-root .chart-section .chart-tabs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .org-compliance-root .tab {
+    justify-content: center;
+    padding: 7px 6px;
+    font-size: 12px;
+  }
+
+  .org-compliance-root .tab-icon {
+    margin-right: 4px;
+    font-size: 12px;
+  }
+
+  .org-compliance-root .score-large {
+    font-size: 1.65rem;
+  }
+
+  .org-compliance-root .area-name {
+    font-size: 0.95rem;
+  }
+
+  .org-compliance-root .icon-large {
+    font-size: 1.6rem;
+  }
+
+  .org-compliance-root .metric-icon {
+    font-size: 1.1rem;
+  }
+
+  .org-compliance-root .compliance-chart-card {
+    min-height: 370px;
+  }
+}
