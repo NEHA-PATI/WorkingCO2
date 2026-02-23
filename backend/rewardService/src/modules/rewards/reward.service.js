@@ -636,6 +636,108 @@ const getRewardCatalog = async (page = 1, limit = 12) => {
   }
 };
 
+const getRewardCatalogAdmin = async (page = 1, limit = 100, search = '') => {
+  const safePage = Math.max(Number(page) || 1, 1);
+  const safeLimit = Math.min(Math.max(Number(limit) || 100, 1), 500);
+  const offset = (safePage - 1) * safeLimit;
+
+  try {
+    const [items, total] = await Promise.all([
+      repo.getRewardCatalogAdminItems(safeLimit, offset, search),
+      repo.getRewardCatalogAdminCount(search)
+    ]);
+
+    return {
+      items,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: Math.max(Math.ceil(total / safeLimit), 1)
+    };
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+
+    return {
+      items: [],
+      total: 0,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: 1
+    };
+  }
+};
+
+const createRewardCatalogItem = async ({
+  reward_id,
+  name,
+  description,
+  points,
+  image_url,
+  is_active
+}) => {
+  const normalizedName = String(name || '').trim();
+  if (!normalizedName) {
+    throw new Error('name is required');
+  }
+
+  const safePoints = toSafeNumber(points, 0);
+  if (safePoints <= 0) {
+    throw new Error('points must be greater than 0');
+  }
+
+  const normalizedId = String(reward_id || '').trim() || `rw_${Date.now()}`;
+
+  return repo.createRewardCatalogItem({
+    reward_id: normalizedId,
+    name: normalizedName,
+    description: description ? String(description).trim() : null,
+    points: safePoints,
+    image_url: image_url ? String(image_url).trim() : null,
+    is_active: typeof is_active === 'boolean' ? is_active : true
+  });
+};
+
+const updateRewardCatalogItem = async (reward_id, payload = {}) => {
+  const normalizedId = String(reward_id || '').trim();
+  if (!normalizedId) {
+    throw new Error('reward_id is required');
+  }
+
+  const updates = {};
+  if (payload.name !== undefined) updates.name = String(payload.name || '').trim();
+  if (payload.description !== undefined) updates.description = payload.description ? String(payload.description).trim() : null;
+  if (payload.points !== undefined) {
+    const safePoints = toSafeNumber(payload.points, 0);
+    if (safePoints <= 0) throw new Error('points must be greater than 0');
+    updates.points = safePoints;
+  }
+  if (payload.image_url !== undefined) updates.image_url = payload.image_url ? String(payload.image_url).trim() : null;
+  if (payload.is_active !== undefined) updates.is_active = Boolean(payload.is_active);
+
+  const updated = await repo.updateRewardCatalogItem(normalizedId, updates);
+  if (!updated) {
+    throw new Error('reward not found');
+  }
+
+  return updated;
+};
+
+const deleteRewardCatalogItem = async (reward_id) => {
+  const normalizedId = String(reward_id || '').trim();
+  if (!normalizedId) {
+    throw new Error('reward_id is required');
+  }
+
+  const deleted = await repo.deleteRewardCatalogItem(normalizedId);
+  if (!deleted) {
+    throw new Error('reward not found');
+  }
+
+  return deleted;
+};
+
 const redeemReward = async (u_id, reward_id) => {
   let reward;
   try {
@@ -709,6 +811,10 @@ module.exports = {
   getTodayTaskStatus,
   getRewardHistory,
   getRewardCatalog,
+  getRewardCatalogAdmin,
+  createRewardCatalogItem,
+  updateRewardCatalogItem,
+  deleteRewardCatalogItem,
   redeemReward,
   getContestStats,
   createRule,
