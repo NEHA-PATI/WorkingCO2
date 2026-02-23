@@ -108,6 +108,19 @@ class FleetModel {
     return result.rows;
   }
 
+  static async getAll() {
+    const queryText = `
+      SELECT
+        f.*,
+        o.org_name
+      FROM fleet f
+      LEFT JOIN organizations o ON o.org_id = f.org_id
+      ORDER BY f.created_at DESC
+    `;
+    const result = await query(queryText);
+    return result.rows;
+  }
+
   static async getById(evInputId) {
     const queryText = `
       SELECT *

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   MdOutlineBusinessCenter,
   MdAccessTime,
@@ -21,98 +21,18 @@ import {
 } from "react-icons/fa";
 import { BsGrid } from "react-icons/bs";
 import OrgCard from "@features/admin/pages/OrgCard";
+import orgAssetApi from "@features/admin/services/orgAssetApi";
 import "@features/admin/styles/OrgAssets.css";
 
 const ALL_ASSETS = [
-  {
-    id: "asset-001",
-    name: "Amazon Reforestation Block A",
-    org: "GreenFuture Holdings",
-    category: "plantation",
-    submitted: "Jan 15, 2026",
-    status: "approved",
-  },
-  {
-    id: "asset-002",
-    name: "Borneo Palm Restoration",
-    org: "EcoVenture Capital",
-    category: "plantation",
-    submitted: "Feb 10, 2026",
-    status: "pending",
-  },
-  {
-    id: "asset-003",
-    name: "Congo Basin Reserve",
-    org: "TerraNova Energy",
-    category: "plantation",
-    submitted: "Jan 28, 2026",
-    status: "rejected",
-  },
-  {
-    id: "asset-004",
-    name: "EV Delivery Fleet - West Region",
-    org: "GreenFuture Holdings",
-    category: "fleet",
-    submitted: "Jan 22, 2026",
-    status: "approved",
-  },
-  {
-    id: "asset-005",
-    name: "Hydrogen Truck Fleet",
-    org: "BlueSky Renewables",
-    category: "fleet",
-    submitted: "Feb 5, 2026",
-    status: "pending",
-  },
-  {
-    id: "asset-006",
-    name: "Urban E-Bike Program",
-    org: "CarbonZero Inc.",
-    category: "fleet",
-    submitted: "Nov 30, 2025",
-    status: "rejected",
-  },
-  {
-    id: "asset-007",
-    name: "Direct Air Capture Unit Alpha",
-    org: "CarbonZero Inc.",
-    category: "carbon",
-    submitted: "Jan 8, 2026",
-    status: "approved",
-  },
-  {
-    id: "asset-008",
-    name: "Industrial CCS Pipeline",
-    org: "TerraNova Energy",
-    category: "carbon",
-    submitted: "Feb 18, 2026",
-    status: "pending",
-  },
-  {
-    id: "asset-009",
-    name: "Mojave Solar Farm",
-    org: "BlueSky Renewables",
-    category: "solar",
-    submitted: "Jan 2, 2026",
-    status: "approved",
-  },
-  {
-    id: "asset-010",
-    name: "Rooftop Solar Portfolio",
-    org: "EcoVenture Capital",
-    category: "solar",
-    submitted: "Feb 14, 2026",
-    status: "approved",
-  },
-  {
-    id: "asset-011",
-    name: "Floating Solar Array",
-    org: "GreenFuture Holdings",
-    category: "solar",
-    submitted: "Dec 5, 2025",
-    status: "rejected",
-  },
 ];
+
+const STATIC_NON_LIVE_ASSETS = ALL_ASSETS.filter(
+  (asset) =>
+    asset.category !== "plantation" &&
+    asset.category !== "fleet" &&
+    asset.category !== "carbon"
+);
 
 const CATEGORY_META = {
   plantation: { label: "Plantation", icon: <GiTreehouse />, color: "plantation" },
@@ -124,6 +44,37 @@ const CATEGORY_META = {
 
 function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function formatCoordinate(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return "-";
+  return num.toFixed(7);
+}
+
+function mapVerificationToUiStatus(value) {
+  const normalized = String(value || "").toLowerCase();
+  if (normalized === "accepted" || normalized === "approved") return "approved";
+  if (normalized === "rejected") return "rejected";
+  return "pending";
+}
+
+function mapGenericStatus(value) {
+  const normalized = String(value || "").toLowerCase();
+  if (normalized === "accepted" || normalized === "approved") return "approved";
+  if (normalized === "rejected") return "rejected";
+  return "pending";
 }
 
 function StatCard({ label, value, sub, iconBg, icon }) {
@@ -142,9 +93,13 @@ function StatCard({ label, value, sub, iconBg, icon }) {
   );
 }
 
-function CategoryBadge({ category }) {
-  const meta = CATEGORY_META[category];
-  return <span className={`cat-badge ${category}`}>{meta?.label || category}</span>;
+function ManagerContactCell({ managerName, managerContact }) {
+  return (
+    <div>
+      <div style={{ fontWeight: 600, color: "#1f2937" }}>{managerName || "-"}</div>
+      <div style={{ fontSize: "12px", color: "#64748b" }}>{managerContact || "-"}</div>
+    </div>
+  );
 }
 
 function StatusBadge({ status }) {
@@ -182,7 +137,10 @@ function AssetRow({
         {asset.org}
       </div>
       <div>
-        <CategoryBadge category={asset.category} />
+        <ManagerContactCell
+          managerName={asset.managerName}
+          managerContact={asset.managerContact}
+        />
       </div>
       <div className="submitted-cell">{asset.submitted}</div>
       <div>
@@ -265,7 +223,9 @@ export default function OrgAssets() {
   const [activeCategory, setActiveCategory] = useState("plantation");
   const [statusFilter, setStatusFilter] = useState("all");
   const [orgFilter, setOrgFilter] = useState("all");
-  const [assets, setAssets] = useState(ALL_ASSETS);
+  const [assets, setAssets] = useState(STATIC_NON_LIVE_ASSETS);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [selectedReviewAsset, setSelectedReviewAsset] = useState(null);
   const [openRevertRows, setOpenRevertRows] = useState({});
@@ -273,7 +233,167 @@ export default function OrgAssets() {
   const [revertReason, setRevertReason] = useState("");
   const [revertError, setRevertError] = useState("");
 
+  useEffect(() => {
+    const loadAssets = async () => {
+      setIsLoading(true);
+      setApiError("");
+      try {
+        const [plantationResult, fleetResult, carbonResult] = await Promise.all([
+          orgAssetApi.getAll(),
+          orgAssetApi.getAllFleet(),
+          orgAssetApi.getAllCarbon(),
+        ]);
+
+        const plantationRows = Array.isArray(plantationResult?.data)
+          ? plantationResult.data
+          : [];
+        const fleetRows = Array.isArray(fleetResult?.data) ? fleetResult.data : [];
+        const carbonRows = Array.isArray(carbonResult?.data) ? carbonResult.data : [];
+
+        const plantationAssets = plantationRows.map((row) => ({
+          id: String(row.p_id || row.plantation_id || row.id || ""),
+          name:
+            row.plantation_name ||
+            row.name ||
+            `Plantation ${row.p_id || row.plantation_id || row.id || "-"}`,
+          org: row.org_name || row.org_id || "Unknown Org",
+          category: "plantation",
+          submitted: formatDate(row.created_at || row.plantation_date),
+          status: mapVerificationToUiStatus(row.verification_status),
+          plantationId: row.p_id || row.plantation_id || row.id || "-",
+          plantationDate: formatDate(row.plantation_date),
+          totalArea: row.total_area,
+          areaUnit: row.area_unit,
+          area: `${row.total_area ?? "-"} ${row.area_unit || ""}`.trim(),
+          species: row.species_name || "-",
+          treesPlanted: row.trees_planted ?? row.total_trees ?? "-",
+          plantAgeYears: row.plant_age_years ?? row.plant_age ?? "-",
+          verificationStatus: row.verification_status || "pending",
+          createdAt: formatDate(row.created_at),
+          managerName: String(row.manager_name || "").trim() || "-",
+          managerContact: String(row.manager_contact || "").trim() || "-",
+          location:
+            Array.isArray(row.points) && row.points.length > 0
+              ? `${formatCoordinate(row.points[0].lat)}, ${formatCoordinate(
+                  row.points[0].lng
+                )}`
+              : "-",
+          boundaryPoints: Array.isArray(row.points)
+            ? row.points.map(
+                (point) =>
+                  `${formatCoordinate(point.lat)}, ${formatCoordinate(point.lng)}`
+              )
+            : [],
+          plantingDate: formatDate(row.plantation_date),
+          raw: row,
+        }));
+
+        const fleetAssets = fleetRows.map((row) => ({
+          id: String(row.ev_input_id || row.id || row.ev_uid || ""),
+          name:
+            [row.manufacturer, row.model].filter(Boolean).join(" ") ||
+            row.ev_uid ||
+            `Fleet ${row.ev_input_id || row.id || "-"}`,
+          org: row.org_name || row.org_id || "Unknown Org",
+          category: "fleet",
+          submitted: formatDate(row.created_at),
+          status: mapGenericStatus(row.status),
+          managerName: String(row.manufacturer || "").trim() || "-",
+          managerContact: String(row.model || "").trim() || "-",
+          fleetId: row.ev_input_id ?? "-",
+          evUid: row.ev_uid || "-",
+          vehicleCategory: row.vehicle_category || "-",
+          subCategory: row.sub_category || "-",
+          powertrainType: row.powertrain_type || "-",
+          manufacturer: row.manufacturer || "-",
+          model: row.model || "-",
+          purchaseYear: row.purchase_year ?? "-",
+          fuelType: row.fuel_type || "-",
+          isFleet: row.is_fleet === true ? "Yes" : "No",
+          numberOfVehicles: row.number_of_vehicles ?? "-",
+          averageDistancePerDayKm: row.average_distance_per_day_km ?? "-",
+          workingDaysPerYear: row.working_days_per_year ?? "-",
+          averageDistancePerVehiclePerYearKm:
+            row.average_distance_per_vehicle_per_year_km ?? "-",
+          fuelEfficiencyKmPerLiter: row.fuel_efficiency_km_per_liter ?? "-",
+          totalFuelConsumedPerYearLiters:
+            row.total_fuel_consumed_per_year_liters ?? "-",
+          batteryCapacityKwh: row.battery_capacity_kwh ?? "-",
+          energyConsumedPerMonthKwh: row.energy_consumed_per_month_kwh ?? "-",
+          chargingType: row.charging_type || "-",
+          gridEmissionFactorKgco2PerKwh:
+            row.grid_emission_factor_kgco2_per_kwh ?? "-",
+          vehicleWeightKg: row.vehicle_weight_kg ?? "-",
+          engineCapacityCc: row.engine_capacity_cc ?? "-",
+          motorPowerKw: row.motor_power_kw ?? "-",
+          chargingTimeHours: row.charging_time_hours ?? "-",
+          raw: row,
+        }));
+
+        const carbonAssets = carbonRows.map((row) => ({
+          id: String(row.capture_id || row.id || row.c_uid || ""),
+          name:
+            row.industry_type
+              ? `${row.industry_type} Carbon Capture`
+              : `Carbon Capture ${row.capture_id || row.id || "-"}`,
+          org: row.org_name || row.org_id || "Unknown Org",
+          category: "carbon",
+          submitted: formatDate(row.created_at),
+          status: mapGenericStatus(row.status),
+          managerName: row.industry_type || "-",
+          managerContact: row.capture_technology || "-",
+          captureId: row.capture_id ?? "-",
+          cUid: row.c_uid || "-",
+          industryType: row.industry_type || "-",
+          totalEmissionTonnesPerYear: row.total_emission_tonnes_per_year ?? "-",
+          captureTechnology: row.capture_technology || "-",
+          captureEfficiencyPercent: row.capture_efficiency_percent ?? "-",
+          raw: row,
+        }));
+
+        setAssets([
+          ...plantationAssets,
+          ...fleetAssets,
+          ...carbonAssets,
+          ...STATIC_NON_LIVE_ASSETS,
+        ]);
+      } catch (error) {
+        setApiError(error?.message || "Failed to load assets");
+        setAssets(STATIC_NON_LIVE_ASSETS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAssets();
+  }, []);
+
+  async function updateAssetStatus(asset, nextStatus, reason = "") {
+    if (!asset?.id) return;
+
+    if (asset.category === "plantation") {
+      await orgAssetApi.updateStatus(asset.id, nextStatus);
+    }
+    if (asset.category === "carbon") {
+      const carbonId = asset.captureId ?? asset.id;
+      await orgAssetApi.updateCarbonStatus(carbonId, nextStatus);
+    }
+
+    setAssets((prev) =>
+      prev.map((a) =>
+        a.id === asset.id
+          ? {
+              ...a,
+              status: nextStatus,
+              rejectionReason: nextStatus === "rejected" ? reason : a.rejectionReason,
+            }
+          : a
+      )
+    );
+  }
+
   const totalAssets = assets.length;
+  const orgCount = new Set(assets.map((a) => a.org).filter(Boolean)).size;
   const pendingCount = assets.filter((a) => a.status === "pending").length;
   const approvedCount = assets.filter((a) => a.status === "approved").length;
   const rejectedCount = assets.filter((a) => a.status === "rejected").length;
@@ -312,17 +432,7 @@ export default function OrgAssets() {
 
   function handleReviewDecision(nextStatus, reason = "") {
     if (!selectedReviewAsset?.id) return;
-    setAssets((prev) =>
-      prev.map((a) =>
-        a.id === selectedReviewAsset.id
-          ? {
-              ...a,
-              status: nextStatus,
-              rejectionReason: nextStatus === "rejected" ? reason : a.rejectionReason,
-            }
-          : a
-      )
-    );
+    updateAssetStatus(selectedReviewAsset, nextStatus, reason);
   }
 
   function handleToggleRevert(id) {
@@ -347,29 +457,21 @@ export default function OrgAssets() {
     setRevertError("");
   }
 
-  function handleConfirmRevert() {
+  async function handleConfirmRevert() {
     if (!revertDialog.asset || !revertDialog.action) return;
     if (revertDialog.action === "rejected" && !revertReason.trim()) {
       setRevertError("Reason is required for rejection.");
       return;
     }
 
-    const targetId = revertDialog.asset.id;
-    setAssets((prev) =>
-      prev.map((a) =>
-        a.id === targetId
-          ? {
-              ...a,
-              status: revertDialog.action,
-              rejectionReason:
-                revertDialog.action === "rejected" ? revertReason.trim() : a.rejectionReason,
-            }
-          : a
-      )
-    );
-
-    setOpenRevertRows((prev) => ({ ...prev, [targetId]: false }));
-    handleCloseRevertDialog();
+    try {
+      await updateAssetStatus(revertDialog.asset, revertDialog.action, revertReason.trim());
+      const targetId = revertDialog.asset.id;
+      setOpenRevertRows((prev) => ({ ...prev, [targetId]: false }));
+      handleCloseRevertDialog();
+    } catch (error) {
+      setRevertError(error?.message || "Failed to update asset status.");
+    }
   }
 
   const categories = ["plantation", "fleet", "carbon", "solar", "hydro"];
@@ -389,7 +491,7 @@ export default function OrgAssets() {
       <div className="stat-cards">
         <StatCard
           label="Organizations"
-          value={5}
+          value={orgCount}
           sub={`${totalAssets} total assets`}
           iconBg="green"
           icon={<MdOutlineBusinessCenter size={22} />}
@@ -507,12 +609,27 @@ export default function OrgAssets() {
             <div className="assets-table-header">
               <span>Asset</span>
               <span>Organization</span>
-              <span>Category</span>
+              <span>Manager / Contact</span>
               <span>Submitted</span>
               <span>Status</span>
               <span style={{ textAlign: "right" }}>Actions</span>
             </div>
-            {filtered.length === 0 ? (
+            {apiError &&
+              (activeCategory === "plantation" ||
+                activeCategory === "fleet" ||
+                activeCategory === "carbon") && (
+              <div className="empty-state" style={{ padding: "20px" }}>
+                <p style={{ color: "#ff8a8a", fontSize: "14px" }}>{apiError}</p>
+              </div>
+            )}
+            {isLoading &&
+            (activeCategory === "plantation" ||
+              activeCategory === "fleet" ||
+              activeCategory === "carbon") ? (
+              <div className="empty-state" style={{ padding: "48px 20px" }}>
+                <p style={{ color: "#aaa", fontSize: "14px" }}>Loading assets...</p>
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="empty-state" style={{ padding: "48px 20px" }}>
                 <p style={{ color: "#aaa", fontSize: "14px" }}>No assets match the current filters.</p>
               </div>

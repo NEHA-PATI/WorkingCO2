@@ -60,9 +60,10 @@ export const getMetrics = async (req, res) => {
 export const getWorkflowAssets = async (req, res) => {
   try {
     const sql = `
-      SELECT
+SELECT
   ev_id::text AS id,
   'EV' AS type,
+  CONCAT(COALESCE(manufacturers, ''), ' ', COALESCE(model, '')) AS asset_name,
   u_id::text AS u_id,
   status::text AS status,
   created_at AS submitted_on,
@@ -75,6 +76,7 @@ UNION ALL
 SELECT
   tid::text AS id,
   'TREE' AS type,
+  treename::text AS asset_name,
   u_id::text AS u_id,
   status::text AS status,
   created_at AS submitted_on,
@@ -87,6 +89,7 @@ UNION ALL
 SELECT
   suid::text AS id,
   'SOLAR' AS type,
+  CONCAT('Solar Panel ', suid::text) AS asset_name,
   u_id::text AS u_id,
   status::text AS status,
   created_at AS submitted_on,
@@ -123,9 +126,10 @@ ORDER BY submitted_on DESC;
 export const getApprovedAssets = async (req, res) => {
   try {
     const sql = `
-      SELECT
+SELECT
   ev_id::text AS id,
   'EV' AS type,
+  CONCAT(COALESCE(manufacturers, ''), ' ', COALESCE(model, '')) AS asset_name,
   u_id::text AS u_id,
   created_at,
   'individual' AS submittedByType
@@ -137,6 +141,7 @@ UNION ALL
 SELECT
   tid::text AS id,
   'TREE' AS type,
+  treename::text AS asset_name,
   u_id::text AS u_id,
   created_at,
   'individual' AS submittedByType
@@ -148,6 +153,7 @@ UNION ALL
 SELECT
   suid::text AS id,
   'SOLAR' AS type,
+  CONCAT('Solar Panel ', suid::text) AS asset_name,
   u_id::text AS u_id,
   created_at,
   'individual' AS submittedByType
@@ -224,6 +230,7 @@ export const getRejectedAssets = async (req, res) => {
       SELECT
         ev_id::text AS id,
         'EV' AS type,
+        CONCAT(COALESCE(manufacturers, ''), ' ', COALESCE(model, '')) AS asset_name,
         u_id::text AS u_id,
         created_at,
         'individual' AS submittedByType
@@ -235,6 +242,7 @@ export const getRejectedAssets = async (req, res) => {
       SELECT
         tid::text AS id,
         'TREE' AS type,
+        treename::text AS asset_name,
         u_id::text AS u_id,
         created_at,
         'individual' AS submittedByType
@@ -246,6 +254,7 @@ export const getRejectedAssets = async (req, res) => {
       SELECT
         suid::text AS id,
         'SOLAR' AS type,
+        CONCAT('Solar Panel ', suid::text) AS asset_name,
         u_id::text AS u_id,
         created_at,
         'individual' AS submittedByType
@@ -267,6 +276,36 @@ export const getRejectedAssets = async (req, res) => {
       success: false,
       message: err.message,
       data: null
+    });
+  }
+};
+
+export const getUserTreeAssets = async (req, res) => {
+  try {
+    const sql = `
+      SELECT
+        t.tid::text AS id,
+        t.t_uid,
+        t.u_id,
+        COALESCE(t.treename, CONCAT('Tree ', t.tid::text)) AS asset_name,
+        COALESCE(LOWER(t.status), 'pending') AS status,
+        t.created_at AS submitted_on
+      FROM trees t
+      ORDER BY t.created_at DESC
+    `;
+
+    const { rows } = await query(sql);
+    res.json({
+      success: true,
+      message: "User tree assets fetched successfully",
+      data: rows,
+    });
+  } catch (err) {
+    console.error("USER TREE ASSETS ERROR:", err.message);
+    res.status(500).json({
+      success: false,
+      message: err.message,
+      data: null,
     });
   }
 };
@@ -306,19 +345,38 @@ export const getAssetDetails = async (req, res) => {
     if (type === "tree") {
       sql = `
         SELECT
-          tid,
-          u_id,
-          treename,
-          botanicalname,
-          plantingdate,
-          height,
-          dbh,
-          location,
-          created_by,
-          status,
-          created_at
-        FROM trees
-        WHERE tid = $1
+          t.tid,
+          t.t_uid,
+          t.u_id,
+          t.treename,
+          t.botanicalname,
+          t.plantingdate,
+          t.height,
+          t.dbh,
+          t.location,
+          t.created_by,
+          t.status,
+          t.created_at,
+          t.updated_at,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'image_id', ti.image_id,
+                'image_url', ti.image_url,
+                'cloudinary_public_id', ti.cloudinary_public_id,
+                'uploaded_at', ti.uploaded_at
+              )
+            ) FILTER (WHERE ti.image_id IS NOT NULL),
+            '[]'
+          ) AS images,
+          COALESCE(
+            json_agg(ti.image_url) FILTER (WHERE ti.image_url IS NOT NULL),
+            '[]'
+          ) AS tree_images
+        FROM trees t
+        LEFT JOIN tree_images ti ON ti.tid = t.tid
+        WHERE t.tid = $1
+        GROUP BY t.tid
       `;
     }
 
