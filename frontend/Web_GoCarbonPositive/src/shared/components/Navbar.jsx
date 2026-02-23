@@ -37,9 +37,8 @@ export default function Navbar() {
 
   const menuDropdownRef = useRef(null);
   const profileDropdownRef = useRef(null);
-  const hideHamburgerOnRoute =
-    location.pathname === "/admin/overview" ||
-    location.pathname === "/admin/users";
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  const showHamburger = !isAdminRoute;
 
   /* ================= HELPERS ================= */
 
@@ -66,6 +65,7 @@ export default function Navbar() {
   /* ================= ACTIONS ================= */
 
   const handleLogout = () => {
+    setProfileOpen(false);
     logout();
     fireToast("AUTH.LOGOUT_SUCCESS", "success");
     localStorage.removeItem("authUser");
@@ -76,10 +76,11 @@ localStorage.removeItem("token");
 
   const handleIconicArenaClick = () => {
     if (!isAuthenticated) {
-      fireToast("AUTH.LOGIN_REQUIRED_REDIRECT", "error", {}, { autoClose: 2500 });
-      setTimeout(() => navigate("/login"), 2500);
+      fireToast("AUTH.LOGIN_REQUIRED_REDIRECT", "error");
+      navigate("/login");
       return;
     }
+    if (role !== "user") return;
     navigate("/arena-standalone");
   };
 
@@ -119,7 +120,7 @@ localStorage.removeItem("token");
     <div className="user-navbar">
       {/* ================= LEFT ================= */}
       <div className="user-left-section">
-          {!hideHamburgerOnRoute && (
+          {showHamburger && (
             <div ref={menuDropdownRef} style={{ position: "relative" }}>
               <FaBars
                 className="user-menu-icon"
@@ -169,20 +170,22 @@ localStorage.removeItem("token");
 
         <div className="user-right-section">
           {/* <ArenaButton /> */}
-          <button
-            className="iconic-arena-button"
-            onClick={handleIconicArenaClick}
-          >
-            <video
-              src="/arena-animation.mp4.webm"
-              className="iconic-arena-video"
-              autoPlay
-              loop
-              muted
-              playsInline
-            />
-            Iconic Arena
-          </button>
+          {(!isAuthenticated || role === "user") && (
+            <button
+              className="iconic-arena-button"
+              onClick={handleIconicArenaClick}
+            >
+              <video
+                src="/arena-animation.mp4"
+                className="iconic-arena-video"
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+              Iconic Arena
+            </button>
+          )}
 
           {/* ====== CHANGE STARTS HERE ONLY ====== */}
 
@@ -297,7 +300,7 @@ localStorage.removeItem("token");
                         className="user-profile-dropdown-item"
                         onClick={() => {
                           setProfileOpen(false);
-                          navigate("/community");
+                          navigate("/my-carbon-footprint");
                         }}
                       >
                         <FaLeaf style={{ color: "#16a34a" }} />

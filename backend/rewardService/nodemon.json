@@ -1,0 +1,6 @@
+{
+  "ignore": [
+    "src/data/**",
+    "src/config/config.json"
+  ]
+}

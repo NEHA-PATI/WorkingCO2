@@ -53,7 +53,8 @@ const hasEventToday = async (u_id, action_key, action_type) => {
     WHERE u_id = $1
       AND action_key = $2
       AND action_type = $3
-      AND activity_date = CURRENT_DATE
+      AND DATE(activity_date AT TIME ZONE 'Asia/Kolkata')
+    = DATE(NOW() AT TIME ZONE 'Asia/Kolkata')
     LIMIT 1
   `, [u_id, action_key, action_type]);
 
@@ -149,25 +150,33 @@ const getContestTaskCompletions = async (u_id, actionKeys = []) => {
 ================================ */
 const getDailyStreak = async (u_id) => {
   const { rows } = await pool.query(`
-    WITH ordered AS (
+    WITH days AS (
+      SELECT DISTINCT
+        DATE(activity_date AT TIME ZONE 'Asia/Kolkata') AS activity_day
+      FROM user_reward_events
+      WHERE u_id = $1
+        AND action_key = 'daily_checkin'
+        AND action_type = 'daily'
+    ),
+    last_day AS (
+      SELECT MAX(activity_day) AS max_date FROM days
+    ),
+    ordered AS (
       SELECT
-        activity_date,
-        ROW_NUMBER() OVER (ORDER BY activity_date DESC) - 1 AS rn
-      FROM (
-        SELECT DISTINCT activity_date
-        FROM user_reward_events
-        WHERE u_id = $1
-          AND action_key = 'daily_checkin'
-          AND action_type = 'daily'
-      ) dedup
+        activity_day,
+        ROW_NUMBER() OVER (ORDER BY activity_day DESC) - 1 AS rn
+      FROM days
     )
     SELECT COUNT(*) AS streak
-    FROM ordered
-    WHERE activity_date = CURRENT_DATE - rn::INT
+    FROM ordered, last_day
+    WHERE
+      last_day.max_date >= DATE(NOW() AT TIME ZONE 'Asia/Kolkata') - INTERVAL '1 day'
+      AND activity_day = last_day.max_date - rn::INT;
   `, [u_id]);
 
   return Number(rows[0].streak);
 };
+
 
 const getLongestDailyStreak = async (u_id) => {
   const { rows } = await pool.query(`
@@ -220,7 +229,8 @@ const getAllActiveRules = async () => {
       points,
       milestone_weeks,
       max_points_per_day,
-      is_active
+      is_active,
+      rules              -- 👈 ADD THIS LINE
     FROM reward_rules
     WHERE is_active = TRUE
     ORDER BY action_key, action_type, milestone_weeks
@@ -228,6 +238,7 @@ const getAllActiveRules = async () => {
 
   return rows;
 };
+
 
 /* ===============================
    LEADERBOARD
@@ -406,7 +417,8 @@ const getTodayStatus = async (u_id) => {
       SUM(points) AS points
     FROM user_reward_events
     WHERE u_id = $1
-      AND activity_date = CURRENT_DATE
+      AND DATE(activity_date AT TIME ZONE 'Asia/Kolkata')
+    = DATE(NOW() AT TIME ZONE 'Asia/Kolkata')
     GROUP BY action_key
   `, [u_id]);
 
@@ -441,74 +453,17 @@ const getUserRewardHistoryCount = async (u_id) => {
     FROM user_reward_events
     WHERE u_id = $1
   `, [u_id]);
-  const getContestStats = async () => {
-    const { rows } = await pool.query(`
+  return Number(rows[0].total);
+};
+const getContestStats = async () => {
+  const { rows } = await pool.query(`
     SELECT action_key, COUNT(*) AS completions
     FROM user_reward_events
     GROUP BY action_key
   `);
 
-    return rows;
-  };
-
-  /* ===============================
-     CREATE RULE
-  ================================ */
-  const createRule = async ({
-    action_key,
-    action_type,
-    points,
-    milestone_weeks,
-    max_points_per_day
-  }) => {
-
-    const { rows } = await pool.query(`
-    INSERT INTO reward_rules
-    (action_key, action_type, points, milestone_weeks, max_points_per_day, is_active)
-    VALUES ($1,$2,$3,$4,$5, TRUE)
-    RETURNING *
-  `, [
-      action_key,
-      action_type,
-      points,
-      milestone_weeks,
-      max_points_per_day
-    ]);
-
-    return rows[0];
-  };
-
-
-  /* ===============================
-     UPDATE RULE
-  ================================ */
-  const updateRule = async (rule_id, {
-    points,
-    max_points_per_day,
-    is_active
-  }) => {
-
-    const { rows } = await pool.query(`
-    UPDATE reward_rules
-    SET
-      points = COALESCE($1, points),
-      max_points_per_day = COALESCE($2, max_points_per_day),
-      is_active = COALESCE($3, is_active)
-    WHERE rule_id = $4
-    RETURNING *
-  `, [
-      points,
-      max_points_per_day,
-      is_active,
-      rule_id
-    ]);
-
-    return rows[0];
-  };
-
-  return Number(rows[0].total);
+  return rows;
 };
-
 /* ===============================
    REWARD CATALOG
 ================================ */
@@ -519,7 +474,6 @@ const getRewardCatalogItems = async (limit = 12, offset = 0) => {
       name,
       description,
       points,
-      price_inr,
       image_url
     FROM reward_catalog
     WHERE is_active = TRUE
@@ -557,18 +511,6 @@ const getRewardById = async (reward_id) => {
 
   return rows[0] || null;
 };
-
-
-const getContestStats = async () => {
-  const { rows } = await pool.query(`
-    SELECT action_key, COUNT(*) AS completions
-    FROM user_reward_events
-    GROUP BY action_key
-  `);
-
-  return rows;
-};
-
 /* ===============================
    CREATE RULE
 ================================ */
@@ -577,20 +519,22 @@ const createRule = async ({
   action_type,
   points,
   milestone_weeks,
-  max_points_per_day
+  max_points_per_day,
+  rules = []
 }) => {
 
   const { rows } = await pool.query(`
     INSERT INTO reward_rules
-    (action_key, action_type, points, milestone_weeks, max_points_per_day, is_active)
-    VALUES ($1,$2,$3,$4,$5, TRUE)
+    (action_key, action_type, points, milestone_weeks, max_points_per_day, is_active, rules)
+    VALUES ($1,$2,$3,$4,$5, TRUE, $6)
     RETURNING *
   `, [
     action_key,
     action_type,
     points,
     milestone_weeks,
-    max_points_per_day
+    max_points_per_day,
+    JSON.stringify(rules)   // 👈 IMPORTANT
   ]);
 
   return rows[0];
@@ -603,7 +547,8 @@ const createRule = async ({
 const updateRule = async (rule_id, {
   points,
   max_points_per_day,
-  is_active
+  is_active,
+  rules
 }) => {
 
   const { rows } = await pool.query(`
@@ -611,13 +556,15 @@ const updateRule = async (rule_id, {
     SET
       points = COALESCE($1, points),
       max_points_per_day = COALESCE($2, max_points_per_day),
-      is_active = COALESCE($3, is_active)
-    WHERE rule_id = $4
+      is_active = COALESCE($3, is_active),
+      rules = COALESCE($4::jsonb, rules)
+    WHERE rule_id = $5
     RETURNING *
   `, [
     points,
     max_points_per_day,
     is_active,
+    rules ? JSON.stringify(rules) : null,
     rule_id
   ]);
 

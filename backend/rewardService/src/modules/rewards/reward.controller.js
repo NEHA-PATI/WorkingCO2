@@ -407,37 +407,22 @@ exports.getContestStats = async (req, res, next) => {
     next(err);
   }
 };
-exports.createRule = async (req, res) => {
-  try {
-    const data = await service.createRule(req.body);
-
-    return res.status(201).json({
-      success: true,
-      data
-    });
-
-  } catch (error) {
-    console.error("Create rule error:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
-
 exports.updateRule = async (req, res) => {
   try {
     const { id } = req.params;
+
     const {
       points,
       max_points_per_day,
-      is_active
+      is_active,
+      rules   // 👈 ADD THIS
     } = req.body;
 
     const updated = await service.updateRule(id, {
       points,
       max_points_per_day,
-      is_active
+      is_active,
+      rules   // 👈 PASS IT FORWARD
     });
 
     return res.status(200).json({
@@ -453,3 +438,38 @@ exports.updateRule = async (req, res) => {
     });
   }
 };
+
+exports.createRule = async (req, res) => {
+  try {
+    const {
+      action_key,
+      action_type,
+      points,
+      milestone_weeks,
+      max_points_per_day,
+      rules   // 👈 ADD THIS
+    } = req.body;
+
+    const data = await service.createRule({
+      action_key,
+      action_type,
+      points,
+      milestone_weeks,
+      max_points_per_day,
+      rules   // 👈 PASS THIS
+    });
+
+    return res.status(201).json({
+      success: true,
+      data
+    });
+
+  } catch (error) {
+    console.error("Create rule error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+

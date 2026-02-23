@@ -8,6 +8,9 @@ const mailRoutes = require("./routes/mailRoutes");
 
 const app = express();
 
+/* ==================== IMPORTANT FOR AWS + DOCKER ==================== */
+app.set("trust proxy", 1); // 🔥 REQUIRED for rate-limit behind proxy
+
 // ==================== SECURITY ====================
 app.use(helmet());
 
@@ -16,11 +19,12 @@ app.use(
   morgan(process.env.NODE_ENV === "production" ? "combined" : "dev")
 );
 
-// ==================== CORS ====================
+// ==================== CORS CONFIGURATION ====================
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
+  "http://localhost",
   "https://www.gocarbonpositive.com",
   process.env.FRONTEND_URL,
 ].filter(Boolean);
@@ -33,10 +37,13 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.log(`❌ CORS blocked: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -44,15 +51,27 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ==================== RATE LIMIT ====================
+// ==================== RATE LIMITING ====================
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
+  message: {
+    status: "error",
+    message: "Too many requests, please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
+  message: {
+    status: "error",
+    message: "Too many authentication attempts, please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 app.use(globalLimiter);
@@ -81,7 +100,7 @@ app.get("/health", (req, res) => {
   });
 });
 
-// ==================== 404 (MUST BE LAST ROUTE) ====================
+// ==================== 404 ====================
 app.use((req, res) => {
   res.status(404).json({
     status: "error",
@@ -89,25 +108,36 @@ app.use((req, res) => {
   });
 });
 
-// ==================== GLOBAL ERROR ====================
+// ==================== ERROR HANDLER ====================
 app.use((err, req, res, next) => {
   console.error("❌ Error:", err);
+
+  if (err.message === "Not allowed by CORS") {
+    return res.status(403).json({
+      status: "error",
+      message: "Origin not allowed",
+    });
+  }
 
   res.status(err.status || 500).json({
     status: "error",
     message: err.message || "Internal server error",
+    ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
   });
 });
 
 // ==================== START SERVER ====================
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5002; // ✅ FALLBACK ADDED
 
 app.listen(PORT, () => {
   console.log(`
-================================
-🚀 Auth Service Started
-Port: ${PORT}
-================================
+    ================================
+    🚀 Auth Service Started
+    ================================
+    Port: ${PORT}
+    Environment: ${process.env.NODE_ENV || "development"}
+    CORS: ${allowedOrigins.length} origins enabled
+    ================================
   `);
 });
 
