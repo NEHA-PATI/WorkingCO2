@@ -4,9 +4,27 @@ import { useNavigate } from "react-router-dom";
 import "@shared/ui/styles/wallet.css";
 // import { fireToast } from "@shared/utils/toastService";
 import { TOAST_MSG } from "@shared/utils/toastMessages";
+import { Web3Auth } from "@web3auth/modal";
+import { CHAIN_NAMESPACES } from "@web3auth/base";
+import { ethers } from "ethers";
 
-const wallet = () => {
+const WEB3AUTH_CLIENT_ID = String(
+  import.meta.env.VITE_WEB3AUTH_CLIENT_ID || "",
+).trim();
+
+const CONFIGURED_WEB3AUTH_NETWORK = String(
+  import.meta.env.VITE_WEB3AUTH_NETWORK || "",
+).trim();
+
+const WEB3AUTH_NETWORK_CANDIDATES = CONFIGURED_WEB3AUTH_NETWORK
+  ? [CONFIGURED_WEB3AUTH_NETWORK]
+  : ["sapphire_devnet", "sapphire_mainnet"];
+
+const Wallet = () => {
   const navigate = useNavigate();
+  const web3authRef = useRef(null);
+  const providerRef = useRef(null);
+  const didInitWeb3AuthRef = useRef(false);
   const [mounted, setMounted] = useState(false);
   const [page, setPage] = useState("landing");
   const [entryFlow, setEntryFlow] = useState("new");
@@ -101,6 +119,61 @@ const wallet = () => {
   const [activityPage, setActivityPage] = useState("dashboard");
 
   useEffect(() => {
+    const init = async () => {
+      if (didInitWeb3AuthRef.current) return;
+      didInitWeb3AuthRef.current = true;
+
+      try {
+        if (!WEB3AUTH_CLIENT_ID) {
+          throw new Error("Missing VITE_WEB3AUTH_CLIENT_ID");
+        }
+        if (WEB3AUTH_CLIENT_ID.length < 80) {
+          throw new Error("Invalid VITE_WEB3AUTH_CLIENT_ID (looks truncated)");
+        }
+
+        let initialized = false;
+        let lastError = null;
+
+        for (const networkName of WEB3AUTH_NETWORK_CANDIDATES) {
+          try {
+            const web3auth = new Web3Auth({
+              clientId: WEB3AUTH_CLIENT_ID,
+              web3AuthNetwork: networkName,
+              chainConfig: {
+                chainNamespace: CHAIN_NAMESPACES.EIP155,
+                chainId: "0x13881", // Polygon Mumbai testnet
+                rpcTarget: "https://rpc-mumbai.maticvigil.com",
+              },
+            });
+
+            if (typeof web3auth.init === "function") {
+              await web3auth.init();
+            } else if (typeof web3auth.initModal === "function") {
+              await web3auth.initModal();
+            } else {
+              throw new Error("Unsupported Web3Auth SDK: init method not found");
+            }
+
+            web3authRef.current = web3auth;
+            initialized = true;
+            break;
+          } catch (error) {
+            lastError = error;
+          }
+        }
+
+        if (!initialized) {
+          throw lastError || new Error("Unable to initialize Web3Auth");
+        }
+      } catch (error) {
+        console.error("Web3Auth init failed:", error);
+      }
+    };
+
+    init();
+  }, []);
+
+  useEffect(() => {
     setMounted(true);
     return () => {
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -151,26 +224,83 @@ const wallet = () => {
     setPage("create");
   };
 
-  const handleCreateWallet = () => {
-    if (!password || !confirmPassword) {
-      showToast(TOAST_MSG.PROFILE.REQUIRED, "error");
+ const handleCreateWallet = async () => {
+  try {
+    setShowLoader(true);
 
-      return;
+    const web3auth = web3authRef.current;
+    if (!web3auth) {
+      throw new Error("Wallet provider not ready. Please try again.");
     }
-    if (password.length < 8) {
-      showToast(TOAST_MSG.RESET.INVALID, "error");
 
-      return;
+    // Force fresh account selection so another login can map to its own Web3Auth identity.
+    if (web3auth.connected || web3auth.cachedConnector) {
+      try {
+        await web3auth.logout({ cleanup: true });
+      } catch {
+        // Ignore logout cleanup errors and continue with fresh connect attempt.
+      }
     }
-    if (password !== confirmPassword) {
-      showToast(TOAST_MSG.RESET.MISMATCH, "error");
 
-      return;
+    const provider = await web3auth.connect();
+    providerRef.current = provider;
+
+    const ethersProvider = new ethers.BrowserProvider(provider);
+    const signer = await ethersProvider.getSigner();
+
+    const walletAddress = await signer.getAddress();
+
+    // 🔹 STEP 1: Get nonce from backend
+    const nonceRes = await fetch(
+      `http://localhost:5050/wallet/nonce?address=${walletAddress}`
+    );
+    const { nonce } = await nonceRes.json();
+
+    // 🔹 STEP 2: Sign nonce
+    const signature = await signer.signMessage(nonce);
+
+    // 🔹 STEP 3: Get idToken
+    const identity = await web3auth.getIdentityToken();
+    const idToken =
+      identity?.idToken ||
+      web3auth.provider?.idToken ||
+      null;
+
+    if (!idToken) {
+      throw new Error("Unable to get Web3Auth idToken");
     }
-    showToast(TOAST_MSG.PROFILE.SAVE_SUCCESS, "success");
 
-    setTimeout(() => setPage("success"), 800);
-  };
+    // 🔹 STEP 4: Register in backend
+    const registerRes = await fetch(
+      "http://localhost:5050/wallet/register",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idToken,
+          walletAddress,
+          signature,
+          nonce,
+        }),
+      }
+    );
+
+    const data = await registerRes.json();
+
+    if (!registerRes.ok) throw new Error(data.message);
+
+    localStorage.setItem("walletToken", data.token);
+
+    setShowLoader(false);
+    setPage("success");
+
+  } catch (error) {
+    setShowLoader(false);
+    showToast(error.message, "error");
+  }
+};
 
   const handleOpenWallet = () => {
     setPage("dashboard");
@@ -744,4 +874,4 @@ const wallet = () => {
   );
 };
 
-export default wallet;
+export default Wallet;
