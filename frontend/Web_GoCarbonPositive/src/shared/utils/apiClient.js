@@ -23,6 +23,9 @@ const API_CONFIG = {
   // Carbon Footprint Service (port 5003 for example)
 CFC_API:
   import.meta.env.VITE_CFC_SERVICE_URL || "http://localhost:8004/api",
+
+  ORG_API:
+    import.meta.env.VITE_ORG_SERVICE_URL || ENV.ORG_SERVICE_URL || "http://localhost:5003",
 };
 
 /**
@@ -161,11 +164,14 @@ export const contactApiClient = createApiClient(
 );
 
 export const ticketApiClient = createApiClient(
-  import.meta.env.VITE_TICKET_API || "http://localhost:5004",
+  (import.meta.env.VITE_TICKET_API || "http://localhost:5004") + "/api",
   "Ticket Service",
 );
 
-
+export const orgApiClient = createApiClient(
+  API_CONFIG.ORG_API,
+  "Organization Service",
+);
 // Default export
 export default assetApiClient;
 
@@ -183,4 +189,60 @@ export const fetchAirportCodes = async (search = "", limit = 300) => {
   });
   return response.data?.data || [];
 };
+
+export const fetchTickets = async () => {
+  const response = await ticketApiClient.get("/tickets");
+  return response.data.data;
+};
+
+export const fetchTicketById = async (ticketId) => {
+  const response = await ticketApiClient.get(`/tickets/${ticketId}`);
+  return response.data.data;
+};
+
+export const createTicket = async (payload) => {
+  const response = await ticketApiClient.post("/tickets", payload);
+  return response.data;
+};
+
+export const updateTicket = async (ticketId, payload) => {
+  const response = await ticketApiClient.put(
+    `/tickets/${ticketId}`,
+    payload
+  );
+  return response.data;
+};
+
+export const deleteTicket = async (ticketId) => {
+  const response = await ticketApiClient.delete(`/tickets/${ticketId}`);
+  return response.data;
+};
+
+// Send OTP
+export const sendOrgOtp = async (email) => {
+  const response = await orgApiClient.post(
+    "/api/org-email-otp/send",
+    { email }
+  );
+  return response.data;
+};
+
+// Verify OTP
+export const verifyOrgOtp = async (email, otp) => {
+  const response = await orgApiClient.post(
+    "/api/org-email-otp/verify",
+    { email, otp }
+  );
+  return response.data;
+};
+
+// Submit Organization Request
+export const submitOrgRequest = async (payload) => {
+  const response = await orgApiClient.post(
+    "/api/org-requests",
+    payload
+  );
+  return response.data;
+};
+
 
