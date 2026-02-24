@@ -102,11 +102,10 @@ export default function ArenaRewardsPage() {
                                 </div>
                                 <div className="arena-reward-body">
                                     <h2 className="arena-reward-name">{reward.name}</h2>
-                                    <p className="arena-reward-description">{reward.description}</p>
+                                    <p className="arena-reward-description">
+                                        {reward.description || 'Unlock this reward using your Arena points.'}
+                                    </p>
                                     <div className="arena-reward-pricing">
-                                        <span className="arena-reward-rupees">
-                                            Rs. {Number(reward.price_inr || 0).toLocaleString('en-IN')}
-                                        </span>
                                         <span className="arena-reward-points">
                                             <Zap className="w-3.5 h-3.5" />
                                             {Number(reward.points || 0).toLocaleString()} pts
@@ -118,7 +117,7 @@ export default function ArenaRewardsPage() {
                                         onClick={() => redeemMutation.mutate(reward.reward_id)}
                                         className="arena-reward-redeem-btn"
                                     >
-                                        Redeem Now
+                                        {redeemMutation.isPending ? 'Redeeming...' : 'Redeem Now'}
                                     </button>
                                 </div>
                             </article>

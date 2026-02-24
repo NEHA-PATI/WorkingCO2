@@ -29,27 +29,27 @@ const HomePage = () => {
   const rewards = [
     {
       icon: <FaLeaf style={{ color: "#16a34a" }} />,
-      title: "Plant a Tree",
-      desc: "Redeem 500 coins to plant a real tree",
-      coins: "500 coins",
+      title: "Complete tasks",
+      desc: "Do various tasks to earn points",
+      
     },
     {
       icon: <FaShieldHeart style={{ color: "#ec4899" }} />,
       title: "Eco Badge",
-      desc: "Unlock exclusive eco warrior badge",
-      coins: "200 coins",
+      desc: "Get badges for your consistency",
+      
     },
     {
       icon: <FaGift style={{ color: "#f97316" }} />,
-      title: "Gift Voucher",
-      desc: "Get sustainable brand gift cards",
-      coins: "1000 coins",
+      title: "Win exclusive rewards",
+      desc: "Get internship, expert consulting , and goodies ",
+      
     },
     {
       icon: <GiRecycle style={{ color: "#14b8a6" }} />,
-      title: "Carbon Offset",
-      desc: "Offset 1 ton of CO2 emissions",
-      coins: "750 coins",
+      title: "Streak Points",
+      desc: "Stay consistent and Earn more points ",
+      
     },
   ];
 
