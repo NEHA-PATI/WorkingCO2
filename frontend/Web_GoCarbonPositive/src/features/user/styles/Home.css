@@ -18,8 +18,9 @@
 .hp-hero {
   position: relative;
   min-height: 520px;
-  background: url("https://images.unsplash.com/photo-1448375240586-882707db888b?w=1600&q=80")
-    center / cover no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -27,6 +28,42 @@
   padding: 60px 60px 80px;
   overflow: hidden;
   width: 100%;
+}
+
+.hp-hero-user {
+  background-image: url("https://images.unsplash.com/photo-1448375240586-882707db888b?w=1600&q=80");
+  animation: hp-hero-swap 820ms ease;
+}
+
+.hp-hero-organisation {
+  background-image: url("https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=1600&q=80");
+  animation: hp-hero-swap 820ms ease;
+}
+
+.hp-tab-switch-anim {
+  animation: hp-tab-fade 700ms ease both;
+}
+
+@keyframes hp-hero-swap {
+  from {
+    opacity: 0.82;
+    transform: scale(1.01);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes hp-tab-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hp-hero-overlay {
