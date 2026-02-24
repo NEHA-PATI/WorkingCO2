@@ -1,19 +1,27 @@
+css
+/* ================================================
+   ARENA REWARDS - STARBUCKS INSPIRED DESIGN
+   ================================================ */
+
+/* Page Background */
 .arena-rewards-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 48%, #f8fafc 100%);
+  background: linear-gradient(180deg, #F7F7F7 0%, #FFFFFF 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 }
 
 .arena-rewards-container {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 32px 16px 44px;
+  padding: 32px 20px 60px;
 }
 
+/* Header */
 .arena-rewards-header {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-bottom: 18px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .arena-rewards-back {
@@ -21,84 +29,134 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #334155;
-  border-radius: 10px;
-  font-size: 13px;
+  padding: 10px 18px;
+  background: #FFFFFF;
+  border: 1px solid #E0E0E0;
+  border-radius: 50px;
+  color: #00704A;
+  font-size: 14px;
   font-weight: 600;
-  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.arena-rewards-back:hover {
+  background: #00704A;
+  color: #FFFFFF;
+  border-color: #00704A;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 112, 74, 0.15);
 }
 
 .arena-rewards-title {
-  font-size: 28px;
-  font-weight: 800;
-  color: #0f172a;
+  font-size: 36px;
+  font-weight: 700;
+  color: #1E3932;
+  letter-spacing: -0.02em;
+  margin: 0;
 }
 
 .arena-rewards-subtitle {
-  font-size: 14px;
-  color: #64748b;
-  margin-top: 4px;
+  font-size: 16px;
+  color: #6B6B6B;
+  margin: 6px 0 0;
+  font-weight: 400;
 }
 
+/* Summary Bar */
 .arena-rewards-summary {
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 12px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
+  padding: 16px 24px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid #F0F0F0;
 }
 
 .arena-rewards-summary-left,
 .arena-rewards-summary-right {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  color: #334155;
-  font-size: 13px;
+  gap: 10px;
+  color: #1E3932;
+  font-size: 14px;
   font-weight: 600;
 }
 
-.arena-rewards-empty {
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #ffffff;
-  color: #64748b;
-  padding: 26px;
-  text-align: center;
-  font-size: 14px;
+.arena-rewards-summary-right {
+  color: #00704A;
 }
 
+/* Empty State */
+.arena-rewards-empty {
+  padding: 60px 24px;
+  text-align: center;
+  color: #6B6B6B;
+  font-size: 16px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* Rewards Grid - 3 Columns */
 .arena-rewards-grid {
   display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 24px;
 }
 
+@media (min-width: 768px) {
+  .arena-rewards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .arena-rewards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Reward Card - Square Design */
 .arena-reward-card {
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  border-radius: 14px;
+  background: #FFFFFF;
+  border-radius: 16px;
   overflow: hidden;
-  display: grid;
-  grid-template-columns: 1fr;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid #F0F0F0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
 }
 
+.arena-reward-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(0, 112, 74, 0.12);
+  border-color: #D4E9E2;
+}
+
+/* Card Image - Square Aspect Ratio */
 .arena-reward-image-wrap {
+  position: relative;
   width: 100%;
-  height: 180px;
-  background: #f8fafc;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #F7F7F7, #EDEBE9);
+  overflow: hidden;
 }
 
 .arena-reward-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.arena-reward-card:hover .arena-reward-image {
+  transform: scale(1.05);
 }
 
 .arena-reward-image-fallback {
@@ -107,110 +165,630 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #94a3b8;
-  font-size: 13px;
+  color: #AEAEAE;
+  font-size: 14px;
+  font-weight: 500;
 }
 
+/* Chips on Image */
+.arena-reward-brand-chip,
+.arena-reward-worth-chip {
+  position: absolute;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.arena-reward-brand-chip {
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #00704A;
+  border: 1px solid rgba(0, 112, 74, 0.2);
+}
+
+.arena-reward-worth-chip {
+  bottom: 12px;
+  right: 12px;
+  background: rgba(203, 162, 88, 0.95);
+  color: #FFFFFF;
+  border: 1px solid rgba(203, 162, 88, 0.3);
+}
+
+/* Card Body */
 .arena-reward-body {
-  padding: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .arena-reward-name {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
-  color: #0f172a;
+  color: #1E3932;
+  line-height: 1.3;
+  margin: 0 0 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .arena-reward-description {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #64748b;
-  min-height: 36px;
+  font-size: 14px;
+  color: #6B6B6B;
+  line-height: 1.5;
+  margin: 0 0 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
+/* Pricing */
 .arena-reward-pricing {
-  margin-top: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  margin-bottom: 16px;
 }
 
 .arena-reward-rupees {
-  font-size: 13px;
-  color: #334155;
+  font-size: 20px;
   font-weight: 700;
+  color: #00704A;
 }
 
 .arena-reward-points {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #f59e0b, #ea580c);
-  color: #ffffff;
-  padding: 5px 10px;
+  gap: 5px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #00704A, #1E3932);
+  color: #FFFFFF;
+  border-radius: 50px;
   font-size: 12px;
   font-weight: 700;
 }
 
-.arena-reward-redeem-btn {
-  margin-top: 12px;
-  width: 100%;
-  height: 38px;
-  border: 0;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #ffffff;
-  background: linear-gradient(90deg, #0f766e, #0e7490);
+/* Details */
+.arena-reward-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.arena-rewards-pagination {
-  margin-top: 18px;
+.arena-reward-details div {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 6px;
+  font-size: 12px;
+  color: #6B6B6B;
+  background: #F7F7F7;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+/* Redeem Button */
+.arena-reward-redeem-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #00704A, #1E3932);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: auto;
+}
+
+.arena-reward-redeem-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #005a3c, #152a25);
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 112, 74, 0.25);
+}
+
+.arena-reward-redeem-btn:disabled {
+  background: #D4D4D4;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Pagination */
+.arena-rewards-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid #F0F0F0;
 }
 
 .arena-rewards-page-btn {
-  height: 36px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #334155;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 0 12px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
+  padding: 10px 20px;
+  background: #FFFFFF;
+  border: 1px solid #E0E0E0;
+  border-radius: 50px;
+  color: #00704A;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.arena-rewards-page-btn:hover:not(:disabled) {
+  background: #00704A;
+  color: #FFFFFF;
+  border-color: #00704A;
+  transform: translateY(-1px);
 }
 
 .arena-rewards-page-btn:disabled {
-  opacity: 0.45;
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .arena-rewards-page-text {
-  color: #475569;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  color: #6B6B6B;
+  font-weight: 500;
 }
 
-@media (min-width: 768px) {
+/* ================================================
+   MODAL STYLES
+   ================================================ */
+
+.arena-redeem-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.arena-redeem-modal {
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #FFFFFF;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.arena-redeem-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #F7F7F7;
+  border: none;
+  color: #6B6B6B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.arena-redeem-close-btn:hover {
+  background: #E0E0E0;
+  color: #1E3932;
+}
+
+.arena-redeem-header {
+  padding: 32px 32px 24px;
+  text-align: center;
+  border-bottom: 1px solid #F0F0F0;
+}
+
+.arena-redeem-header h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #1E3932;
+  margin: 0 0 6px;
+}
+
+.arena-redeem-header p {
+  font-size: 14px;
+  color: #6B6B6B;
+  margin: 0;
+}
+
+/* Reward Preview in Modal */
+.arena-redeem-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 32px;
+  background: linear-gradient(135deg, #D4E9E2, #F2F0EB);
+  border-bottom: 1px solid #F0F0F0;
+}
+
+.arena-redeem-item-image {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #FFFFFF;
+  border: 1px solid #E0E0E0;
+}
+
+.arena-redeem-item-image-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #AEAEAE;
+}
+
+.arena-redeem-item h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1E3932;
+  margin: 0 0 4px;
+}
+
+.arena-redeem-item p {
+  font-size: 14px;
+  color: #00704A;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Form */
+.arena-redeem-form {
+  padding: 24px 32px 32px;
+}
+
+.arena-redeem-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 600px) {
+  .arena-redeem-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .arena-redeem-address-label {
+    grid-column: 1 / -1;
+  }
+}
+
+.arena-redeem-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.arena-redeem-grid label span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1E3932;
+}
+
+.arena-redeem-grid input,
+.arena-redeem-grid textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #D4D4D4;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #1E3932;
+  background: #FFFFFF;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.arena-redeem-grid input:focus,
+.arena-redeem-grid textarea:focus {
+  outline: none;
+  border-color: #00704A;
+  box-shadow: 0 0 0 3px rgba(0, 112, 74, 0.1);
+}
+
+.arena-redeem-grid textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+.arena-redeem-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid #D4D4D4;
+  border-radius: 12px;
+  background: #FFFFFF;
+  transition: all 0.2s ease;
+}
+
+.arena-redeem-input-wrap:focus-within {
+  border-color: #00704A;
+  box-shadow: 0 0 0 3px rgba(0, 112, 74, 0.1);
+}
+
+.arena-redeem-input-wrap svg {
+  color: #AEAEAE;
+  flex-shrink: 0;
+}
+
+.arena-redeem-input-wrap input {
+  flex: 1;
+  padding: 12px 0;
+  border: none;
+  background: transparent;
+}
+
+.arena-redeem-input-wrap input:focus {
+  box-shadow: none;
+}
+
+.arena-redeem-readonly {
+  background: #F7F7F7 !important;
+  color: #00704A !important;
+  font-weight: 700 !important;
+  cursor: not-allowed;
+}
+
+.arena-redeem-location-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 16px;
+  background: #FFFFFF;
+  border: 2px dashed #00704A;
+  border-radius: 12px;
+  color: #00704A;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.arena-redeem-location-btn:hover:not(:disabled) {
+  background: #D4E9E2;
+}
+
+.arena-redeem-location-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.arena-redeem-proceed-btn {
+  width: 100%;
+  padding: 16px;
+  margin-top: 20px;
+  background: linear-gradient(135deg, #00704A, #1E3932);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.arena-redeem-proceed-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #005a3c, #152a25);
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 112, 74, 0.25);
+}
+
+.arena-redeem-proceed-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ================================================
+   SUCCESS POPUP & CONFETTI
+   ================================================ */
+
+.arena-redeem-success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.arena-redeem-confetti-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.arena-redeem-confetti-piece {
+  position: absolute;
+  top: -20px;
+  width: 12px;
+  height: 20px;
+  border-radius: 3px;
+  animation: confettiFall linear forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-10px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0.8;
+  }
+}
+
+.arena-redeem-success-popup {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: #FFFFFF;
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  animation: successBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes successBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) translateY(30px);
+  }
+  50% {
+    transform: scale(1.05) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.arena-redeem-success-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00704A, #CBA258);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  animation: iconPulse 1.5s ease infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.arena-redeem-success-popup h3 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1E3932;
+  margin: 0 0 12px;
+}
+
+.arena-redeem-success-popup p {
+  font-size: 15px;
+  color: #6B6B6B;
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.arena-redeem-success-popup p strong {
+  color: #00704A;
+  font-weight: 700;
+}
+
+.arena-redeem-success-popup button {
+  padding: 14px 40px;
+  background: linear-gradient(135deg, #00704A, #1E3932);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.arena-redeem-success-popup button:hover {
+  background: linear-gradient(135deg, #005a3c, #152a25);
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(0, 112, 74, 0.3);
+}
+
+/* ================================================
+   RESPONSIVE ADJUSTMENTS
+   ================================================ */
+
+@media (max-width: 767px) {
   .arena-rewards-container {
+    padding: 24px 16px 48px;
+  }
+
+  .arena-rewards-title {
+    font-size: 28px;
+  }
+
+  .arena-rewards-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .arena-redeem-modal {
+    max-height: 95vh;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .arena-redeem-header,
+  .arena-redeem-form {
     padding-left: 24px;
     padding-right: 24px;
   }
 
-  .arena-rewards-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1100px) {
-  .arena-rewards-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .arena-redeem-item {
+    padding-left: 24px;
+    padding-right: 24px;
   }
 }
