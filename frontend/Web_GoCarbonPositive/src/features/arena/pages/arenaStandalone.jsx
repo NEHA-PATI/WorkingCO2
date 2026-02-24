@@ -14,7 +14,7 @@ import {
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import arenaApi, { getArenaUserId } from '@features/arena/services/arenaApi';
 import { useCountdown } from '@features/arena/hooks/useCountdown';
-import a4 from "@features/arena/components/photos/a4.jpg";
+import a4 from "@features/arena/components/photos/a4.jpeg";
 import a5 from "@features/arena/components/photos/a5.jpg";
 import a6 from "@features/arena/components/photos/a6.jpg";
 import a7 from "@features/arena/components/photos/a7.jpg";
@@ -903,9 +903,9 @@ const ContestModal = ({
                                             ? `Available in ${cooldownText}`
                                             : contest.taskType === 'sign_up'
                                                 ? 'Redeem Signup Bonus'
-                                            : contestUsesScoreInput
-                                                ? 'Complete & Claim Points'
-                                                : contest.buttonText}
+                                                : contestUsesScoreInput
+                                                    ? 'Complete & Claim Points'
+                                                    : contest.buttonText}
                                 </button>
                             </div>
                         </motion.div>
@@ -1454,85 +1454,85 @@ export default function ArenaStandalone() {
         }, {});
     }, [contestStatusQuery.data]);
 
-   const mergedContests = useMemo(() => {
-  const metadataList = contestMetadataQuery.data || [];
+    const mergedContests = useMemo(() => {
+        const metadataList = contestMetadataQuery.data || [];
 
-  return metadataList.map((metadata, index) => {
-    const backend = statusByTask[metadata.task_type] || {};
-    const backendNextAvailableAt = backend.next_available_at ? new Date(backend.next_available_at).getTime() : null;
-    const localQuizCooldownUntil = metadata.task_type === QUIZ_TASK_KEY ? readQuizCooldownUntil(userId) : null;
-    const effectiveNextAvailableAt = Math.max(
-      backendNextAvailableAt || 0,
-      localQuizCooldownUntil || 0
-    ) || null;
+        return metadataList.map((metadata, index) => {
+            const backend = statusByTask[metadata.task_type] || {};
+            const backendNextAvailableAt = backend.next_available_at ? new Date(backend.next_available_at).getTime() : null;
+            const localQuizCooldownUntil = metadata.task_type === QUIZ_TASK_KEY ? readQuizCooldownUntil(userId) : null;
+            const effectiveNextAvailableAt = Math.max(
+                backendNextAvailableAt || 0,
+                localQuizCooldownUntil || 0
+            ) || null;
 
-    const configuredActionType =
-      metadata.action_type ||
-      backend.action_type ||
-      (metadata.repeatable ? "daily" : "one_time");
+            const configuredActionType =
+                metadata.action_type ||
+                backend.action_type ||
+                (metadata.repeatable ? "daily" : "one_time");
 
-    const theme =
-      EARN_CARD_THEME[metadata.task_type] ||
-      EARN_CARD_THEME.default;
+            const theme =
+                EARN_CARD_THEME[metadata.task_type] ||
+                EARN_CARD_THEME.default;
 
-    return {
-      id: index + 1,
-      taskType: metadata.task_type,
+            return {
+                id: index + 1,
+                taskType: metadata.task_type,
 
-      // ✅ Title auto generated
-      title: humanizeTaskType(metadata.task_type),
+                // ✅ Title auto generated
+                title: humanizeTaskType(metadata.task_type),
 
-      // ✅ Description fallback
-      description:
-        "Complete the task and earn points ",
+                // ✅ Description fallback
+                description:
+                    "Complete the task and earn points ",
 
-      // ✅ Icon logic
-      icon: TASK_ICON_MAP[metadata.task_type] || "Sparkles",
+                // ✅ Icon logic
+                icon: TASK_ICON_MAP[metadata.task_type] || "Sparkles",
 
-      // ✅ Use theme from your theme map
-      theme: {
-        ...DEFAULT_THEME,
-        bg: theme.bg,
-        border: theme.border,
-        iconBg: theme.badge,
-        iconText: "text-white",
-        button: theme.button,
-        gradient: theme.badge
-      },
+                // ✅ Use theme from your theme map
+                theme: {
+                    ...DEFAULT_THEME,
+                    bg: theme.bg,
+                    border: theme.border,
+                    iconBg: theme.badge,
+                    iconText: "text-white",
+                    button: theme.button,
+                    gradient: theme.badge
+                },
 
-      // ✅ Button text
-      buttonText:
-        configuredActionType === "daily"
-          ? "Claim Points"
-          : "Complete Task",
+                // ✅ Button text
+                buttonText:
+                    configuredActionType === "daily"
+                        ? "Claim Points"
+                        : "Complete Task",
 
-      // ✅ RULES from backend metadata
-      rules: Array.isArray(metadata.rules)
-        ? metadata.rules
-        : [],
+                // ✅ RULES from backend metadata
+                rules: Array.isArray(metadata.rules)
+                    ? metadata.rules
+                    : [],
 
-      // ✅ Rewards from backend
-      rewards: [
-        `+${Number(metadata.points ?? 0)} Points`
-      ],
+                // ✅ Rewards from backend
+                rewards: [
+                    `+${Number(metadata.points ?? 0)} Points`
+                ],
 
-      requiredScore: metadata.required_score ?? null,
-      points: Number(metadata.points ?? 0),
+                requiredScore: metadata.required_score ?? null,
+                points: Number(metadata.points ?? 0),
 
-      backend: {
-        ...backend,
-        next_available_at: effectiveNextAvailableAt ? new Date(effectiveNextAvailableAt).toISOString() : null,
-        action_type: configuredActionType,
-        repeatable:
-          metadata.repeatable ??
-          (configuredActionType === "daily"),
-        required_score:
-          metadata.required_score ?? null,
-        points: Number(metadata.points ?? 0)
-      }
-    };
-  });
-}, [contestMetadataQuery.data, statusByTask, userId]);
+                backend: {
+                    ...backend,
+                    next_available_at: effectiveNextAvailableAt ? new Date(effectiveNextAvailableAt).toISOString() : null,
+                    action_type: configuredActionType,
+                    repeatable:
+                        metadata.repeatable ??
+                        (configuredActionType === "daily"),
+                    required_score:
+                        metadata.required_score ?? null,
+                    points: Number(metadata.points ?? 0)
+                }
+            };
+        });
+    }, [contestMetadataQuery.data, statusByTask, userId]);
 
     useEffect(() => {
         const quizContest = mergedContests.find((contest) => contest.taskType === QUIZ_TASK_KEY);
@@ -1607,7 +1607,7 @@ export default function ArenaStandalone() {
                 return headers;
             })();
 
-            const response = await fetch('http://localhost:5006/api/profiles/complete', {
+            const response = await fetch('http://localhost:5009/api/profiles/complete', {
                 headers: authHeaders
             });
 
