@@ -653,7 +653,6 @@ const createRule = async ({
 };
 
 
-
 /* ===============================
    UPDATE RULE
 ================================ */
@@ -683,7 +682,6 @@ const updateRule = async (rule_id, {
 
   return rows[0];
 };
-
 
 module.exports = {
   getMonthlyPoints,
