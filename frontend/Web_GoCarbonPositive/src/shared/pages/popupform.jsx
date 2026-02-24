@@ -254,7 +254,7 @@ const PopupForms = ({
 
       const response = await treeService.createTree(payload);
 
-      if (response.status === "success") {
+      if (response?.success || response?.status === "success") {
         showToast("Tree data saved successfully!", "success");
         toastify.success("Tree planted successfully!");
 
@@ -263,21 +263,29 @@ const PopupForms = ({
         }
 
         // Upload images if any
-        if (
-          treeData.photos &&
-          treeData.photos.length > 0 &&
-          response.data?.tid
-        ) {
-          const blob = dataURLtoBlob(treeData.photos[0]);
-          const file = new File([blob], "tree-image.jpg", {
-            type: "image/jpeg",
-          });
-
+        const createdTreeId = response?.data?.tree?.tid;
+        if (treeData.photos && treeData.photos.length > 0 && createdTreeId) {
           try {
-            await treeService.uploadTreeImage(U_ID, response.data.tid, file);
+            const uploadPromises = treeData.photos.map((photo, index) => {
+              const blob = dataURLtoBlob(photo);
+              const file = new File([blob], `tree-image-${index + 1}.jpg`, {
+                type: "image/jpeg",
+              });
+              return treeService.uploadTreeImage(U_ID, createdTreeId, file);
+            });
+
+            await Promise.all(uploadPromises);
             showToast("Tree image uploaded!", "success");
           } catch (imgError) {
             console.error("Image upload failed:", imgError);
+            showToast(
+              "Tree saved, but image link failed. Please try uploading image again.",
+              "error"
+            );
+            toastify.error(
+              imgError?.message ||
+                "Tree saved, but image upload/link failed."
+            );
           }
         }
 

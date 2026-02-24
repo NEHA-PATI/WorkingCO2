@@ -27,6 +27,34 @@ const PopupForms = ({
 
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
+  const resolveOrgId = () => {
+    const authUserRaw = localStorage.getItem("authUser");
+    const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
+
+    const candidates = [
+      authUser?.org_id,
+      authUser?.orgId,
+      authUser?.organization_id,
+      authUser?.organizationId,
+      authUser?.ORG_ID,
+      authUser?.u_id,
+      authUser?.U_ID,
+      localStorage.getItem("orgId"),
+      localStorage.getItem("organizationId"),
+      localStorage.getItem("ORG_ID"),
+      localStorage.getItem("userId"),
+    ];
+
+    const orgId = candidates.find(
+      (value) =>
+        typeof value === "string" &&
+        value.trim() &&
+        value.trim().toUpperCase().startsWith("ORG")
+    );
+
+    return orgId ? orgId.trim() : null;
+  };
+
   const [solarPanelData, setSolarPanelData] = useState({
     Installed_Capacity: '',
     Installation_Date: '',
@@ -147,16 +175,10 @@ const PopupForms = ({
       return;
     }
 
-    const authUserRaw = localStorage.getItem("authUser");
-    const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
-    const orgId =
-      authUser?.org_id ||
-      authUser?.u_id ||
-      localStorage.getItem("orgId") ||
-      localStorage.getItem("userId");
+    const orgId = resolveOrgId();
 
     if (!orgId) {
-      showToast("Organization ID not found. Please login again.", "error");
+      showToast("Organization ID not found. Please login with an organization account.", "error");
       return;
     }
 
@@ -195,16 +217,13 @@ const PopupForms = ({
     }
   };
   const handlePlantationSubmit = async (payload) => {
-    const authUserRaw = localStorage.getItem("authUser");
-    const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
-    const orgId =
-      authUser?.org_id ||
-      authUser?.u_id ||
-      localStorage.getItem("orgId") ||
-      localStorage.getItem("userId");
+    const orgId = resolveOrgId();
 
     if (!orgId) {
-      showToast("Organization ID not found. Please login again.", "error");
+      showToast(
+        "Organization ID not found. Please login with an organization account.",
+        "error"
+      );
       return;
     }
 
@@ -225,6 +244,7 @@ const PopupForms = ({
       plant_age_years: Number(step2.plantAge),
       points: points.map((pt) => ({ lat: Number(pt.lat), lng: Number(pt.lng) })),
     };
+    console.log("Plantation Payload:", apiPayload); // 👈 YAHAN
 
     try {
       const result = await assetAPI.createPlantation(apiPayload);
@@ -335,16 +355,10 @@ const PopupForms = ({
       return;
     }
 
-    const authUserRaw = localStorage.getItem("authUser");
-    const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
-    const orgId =
-      authUser?.org_id ||
-      authUser?.u_id ||
-      localStorage.getItem("orgId") ||
-      localStorage.getItem("userId");
+    const orgId = resolveOrgId();
 
     if (!orgId) {
-      showToast("Organization ID not found. Please login again.", "error");
+      showToast("Organization ID not found. Please login with an organization account.", "error");
       return;
     }
 
