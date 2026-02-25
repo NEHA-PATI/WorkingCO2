@@ -9,7 +9,7 @@ const config = {
   db: {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT) || 5432,
-    name: process.env.DB_NAME || 'gocarbonpositive',
+    name: process.env.DB_NAME || 'co2',
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || '',
     url: process.env.DATABASE_URL

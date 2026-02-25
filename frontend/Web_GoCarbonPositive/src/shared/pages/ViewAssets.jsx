@@ -268,7 +268,10 @@ const ViewAssets = () => {
       }
 
       const treeId = formData.tid || formData.TID;
-      await treeService.updateTree(treeId, updatedFields);
+      await treeService.updateTree(treeId, {
+        UID: userId,
+        ...updatedFields,
+      });
       toast.success("Tree updated successfully!");
 
       const newFormData = { ...formData, ...updatedFields };
@@ -320,6 +323,44 @@ const ViewAssets = () => {
       return "N/A";
     }
     return value.toString();
+  };
+
+  const getTreeImageUrl = (treeData) => {
+    if (!treeData) return null;
+
+    const directUrl =
+      treeData.imageurl ||
+      treeData.ImageURL ||
+      treeData.imageUrl ||
+      treeData.image_url;
+    if (directUrl) return directUrl;
+
+    const images = treeData.images;
+    if (Array.isArray(images) && images.length > 0) {
+      const firstImage = images[0];
+      if (typeof firstImage === "string") return firstImage;
+      return firstImage?.image_url || firstImage?.url || null;
+    }
+
+    if (typeof images === "string") {
+      try {
+        const parsed = JSON.parse(images);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const firstImage = parsed[0];
+          if (typeof firstImage === "string") return firstImage;
+          return firstImage?.image_url || firstImage?.url || null;
+        }
+      } catch {
+        return images;
+      }
+    }
+
+    const treeImages = treeData.tree_images;
+    if (Array.isArray(treeImages) && treeImages.length > 0) {
+      return treeImages[0];
+    }
+
+    return null;
   };
 
   const renderModalContent = () => {
@@ -509,23 +550,18 @@ const ViewAssets = () => {
                     </p>
                   ))}
                 <div className="tree-photo-gallery">
-                  {formData.imageurl ||
-                    formData.ImageURL ||
-                    formData.imageUrl ||
-                    formData.image_url ? (
-                    <img
-                      src={
-                        formData.imageurl ||
-                        formData.ImageURL ||
-                        formData.imageUrl ||
-                        formData.image_url
-                      }
-                      alt="Tree"
-                      className="tree-photo-thumbnail"
-                    />
-                  ) : (
-                    <p>No photo available.</p>
-                  )}
+                  {(() => {
+                    const imageUrl = getTreeImageUrl(formData);
+                    return imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt="Tree"
+                        className="tree-photo-thumbnail"
+                      />
+                    ) : (
+                      <p>No photo available.</p>
+                    );
+                  })()}
                 </div>
                 <button
                   onClick={() => {
