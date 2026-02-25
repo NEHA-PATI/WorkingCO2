@@ -3,6 +3,7 @@ import {
   Download,
   Edit,
   Eye,
+  ExternalLink,
   Filter,
   Plus,
   RefreshCw,
@@ -10,7 +11,16 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { uploadQuizCSV ,getContestStats,createContest ,updateRule} from "../services/ContestApi";
+import {
+  uploadQuizCSV,
+  getContestStats,
+  createContest,
+  updateRule,
+  getRewardsCatalogAdmin,
+  createRewardCatalogItem,
+  updateRewardCatalogItem,
+  deleteRewardCatalogItem,
+} from "../services/ContestApi";
 import { getContests } from "../services/ContestApi";
 import { useEffect } from "react";
 
@@ -94,6 +104,17 @@ const emptyContest = () => ({
   publishEndAt: "",
 });
 
+const emptyReward = () => ({
+  reward_id: "",
+  name: "",
+  description: "",
+  points: 0,
+  image_url: "",
+  is_active: true,
+  created_at: "",
+  updated_at: "",
+});
+
 export default function ContestManagement() {
   const [activeTab, setActiveTab] = useState("all");
   const [contests, setContests] = useState([]);
@@ -109,6 +130,13 @@ const [loading, setLoading] = useState(true);
     daily: "all",
     taskType: "all",
   });
+  const [rewardsCatalog, setRewardsCatalog] = useState([]);
+  const [rewardsLoading, setRewardsLoading] = useState(false);
+  const [rewardsSearch, setRewardsSearch] = useState("");
+  const [isRewardFormOpen, setIsRewardFormOpen] = useState(false);
+  const [rewardDraft, setRewardDraft] = useState(emptyReward());
+  const [isRewardSaving, setIsRewardSaving] = useState(false);
+  const [isEditingReward, setIsEditingReward] = useState(false);
 
 const loadContests = async () => {
   try {
@@ -189,8 +217,22 @@ const loadContests = async () => {
   }
 };
 
+const loadRewardsCatalog = async (search = "") => {
+  try {
+    setRewardsLoading(true);
+    const res = await getRewardsCatalogAdmin({ page: 1, limit: 500, search });
+    setRewardsCatalog(res?.data || []);
+  } catch (err) {
+    console.error("Failed to load rewards catalog:", err);
+    alert("Failed to load rewards catalog");
+  } finally {
+    setRewardsLoading(false);
+  }
+};
+
  useEffect(() => {
   loadContests();
+  loadRewardsCatalog();
 }, []);
 
 
@@ -218,6 +260,18 @@ const loadContests = async () => {
       return searchHit && statusHit && dailyHit && typeHit;
     });
   }, [contests, filters]);
+
+  const filteredRewards = useMemo(() => {
+    const q = rewardsSearch.trim().toLowerCase();
+    if (!q) return rewardsCatalog;
+
+    return rewardsCatalog.filter((item) => {
+      const name = String(item.name || "").toLowerCase();
+      const description = String(item.description || "").toLowerCase();
+      const rewardId = String(item.reward_id || "").toLowerCase();
+      return name.includes(q) || description.includes(q) || rewardId.includes(q);
+    });
+  }, [rewardsCatalog, rewardsSearch]);
 
   const kpis = useMemo(() => {
     const active = contests.filter((c) => c.status === "active").length;
@@ -346,7 +400,7 @@ const saveDraft = async () => {
     if (selectedContestId && set.has(selectedContestId)) setSelectedContestId(null);
   };
 
-  const setStatus = async (id, status) => {
+const setStatus = async (id, status) => {
   try {
     // Only update if id is a valid number
     if (!id || isNaN(Number(id))) {
@@ -368,6 +422,83 @@ const saveDraft = async () => {
     console.error(err);
   }
 };
+
+  const openCreateReward = () => {
+    setRewardDraft(emptyReward());
+    setIsEditingReward(false);
+    setIsRewardFormOpen(true);
+  };
+
+  const openEditReward = (reward) => {
+    setRewardDraft({
+      reward_id: String(reward.reward_id || ""),
+      name: reward.name || "",
+      description: reward.description || "",
+      points: Number(reward.points || 0),
+      image_url: reward.image_url || "",
+      is_active: Boolean(reward.is_active),
+      created_at: reward.created_at || "",
+      updated_at: reward.updated_at || "",
+    });
+    setIsEditingReward(true);
+    setIsRewardFormOpen(true);
+  };
+
+  const saveRewardDraft = async () => {
+    try {
+      setIsRewardSaving(true);
+      const payload = {
+        name: rewardDraft.name,
+        description: rewardDraft.description,
+        points: Number(rewardDraft.points || 0),
+        image_url: rewardDraft.image_url,
+        is_active: Boolean(rewardDraft.is_active),
+      };
+
+      if (isEditingReward) {
+        await updateRewardCatalogItem(rewardDraft.reward_id, payload);
+      } else {
+        await createRewardCatalogItem({
+          ...payload,
+          reward_id: rewardDraft.reward_id?.trim() || undefined,
+        });
+      }
+
+      setIsRewardFormOpen(false);
+      setRewardDraft(emptyReward());
+      await loadRewardsCatalog(rewardsSearch);
+    } catch (err) {
+      console.error("Failed to save reward:", err);
+      alert(err.message || "Failed to save reward");
+    } finally {
+      setIsRewardSaving(false);
+    }
+  };
+
+  const removeReward = async (rewardId) => {
+    const confirmed = window.confirm("Delete this reward?");
+    if (!confirmed) return;
+
+    try {
+      await deleteRewardCatalogItem(rewardId);
+      await loadRewardsCatalog(rewardsSearch);
+    } catch (err) {
+      console.error("Failed to delete reward:", err);
+      alert(err.message || "Failed to delete reward");
+    }
+  };
+
+  const toggleRewardStatus = async (reward) => {
+    try {
+      await updateRewardCatalogItem(reward.reward_id, {
+        is_active: !reward.is_active,
+      });
+      await loadRewardsCatalog(rewardsSearch);
+    } catch (err) {
+      console.error("Failed to update reward status:", err);
+      alert(err.message || "Failed to update reward status");
+    }
+  };
 
 
 
@@ -448,7 +579,16 @@ const saveDraft = async () => {
           <button onClick={openCreate} className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm">
             <Plus className="w-4 h-4" /> New Contest
           </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm">
+          <button
+            onClick={() => {
+              if (activeTab === "reward-upload") {
+                loadRewardsCatalog(rewardsSearch);
+                return;
+              }
+              loadContests();
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm"
+          >
             <RefreshCw className="w-4 h-4" /> Refresh
           </button>
           <button onClick={handleExportCsv} className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm">
@@ -472,6 +612,8 @@ const saveDraft = async () => {
             { id: "preview", label: "Preview" },
             { id: "analytics", label: "Analytics" },
             { id: "quiz-upload", label: "Quiz Upload" },
+            { id: "reward-upload", label: "Rewards" },
+            { id: "redeem", label: "Redeems" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -517,6 +659,19 @@ const saveDraft = async () => {
               onFileNameChange={setQuizFileName}
             />
           )}
+          {activeTab === "reward-upload" && (
+            <RewardsCatalogPanel
+              rows={filteredRewards}
+              loading={rewardsLoading}
+              search={rewardsSearch}
+              onSearchChange={setRewardsSearch}
+              onSearchSubmit={() => loadRewardsCatalog(rewardsSearch)}
+              onCreate={openCreateReward}
+              onEdit={openEditReward}
+              onDelete={removeReward}
+              onToggleStatus={toggleRewardStatus}
+            />
+          )}
         </div>
       </div>
 
@@ -527,6 +682,15 @@ const saveDraft = async () => {
         onChange={setDraft}
         onClose={() => setIsFormOpen(false)}
         onSave={saveDraft}
+      />
+      <RewardFormDrawer
+        isOpen={isRewardFormOpen}
+        value={rewardDraft}
+        isEditing={isEditingReward}
+        isSaving={isRewardSaving}
+        onChange={setRewardDraft}
+        onClose={() => setIsRewardFormOpen(false)}
+        onSave={saveRewardDraft}
       />
     </div>
   );
@@ -863,7 +1027,7 @@ function ContestHealthAlerts({ contest }) {
   );
 }
 
-function Input({ label, value, onChange, type = "text", textarea = false, hint, hintError = false }) {
+function Input({ label, value, onChange, type = "text", textarea = false, hint, hintError = false, disabled = false }) {
   return (
     <label className="block">
       <span className="text-sm text-slate-600">{label}</span>
@@ -872,6 +1036,7 @@ function Input({ label, value, onChange, type = "text", textarea = false, hint, 
           value={value}
           onChange={(e) => onChange(e.target.value)}
           rows={3}
+          disabled={disabled}
           className="mt-1 w-full px-3 py-2 text-sm border border-slate-200 rounded-lg"
         />
       ) : (
@@ -879,6 +1044,7 @@ function Input({ label, value, onChange, type = "text", textarea = false, hint, 
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          disabled={disabled}
           className={`mt-1 w-full px-3 py-2 text-sm border rounded-lg ${
             hintError ? "border-red-300" : "border-slate-200"
           }`}
@@ -1018,6 +1184,225 @@ function AnalyticsPanel({ contests, selected }) {
       <ContestHealthAlerts contest={selected || contests[0]} />
     </div>
   );
+}
+
+function RewardsCatalogPanel({
+  rows,
+  loading,
+  search,
+  onSearchChange,
+  onSearchSubmit,
+  onCreate,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row md:items-center gap-3">
+        <label className="relative flex-1">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search reward by id, name, description"
+            className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={onSearchSubmit}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white"
+        >
+          <Search className="w-4 h-4" /> Search
+        </button>
+        <button
+          type="button"
+          onClick={onCreate}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm"
+        >
+          <Plus className="w-4 h-4" /> New Reward
+        </button>
+      </div>
+
+      <div className="overflow-x-auto border border-slate-200 rounded-lg">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500">
+            <tr>
+              <th className="px-4 py-3">Reward ID</th>
+              <th className="px-4 py-3">Name</th>
+              <th className="px-4 py-3">Points</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Image</th>
+              <th className="px-4 py-3">Created</th>
+              <th className="px-4 py-3">Updated</th>
+              <th className="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {loading ? (
+              <tr>
+                <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
+                  Loading rewards...
+                </td>
+              </tr>
+            ) : rows.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
+                  No rewards found.
+                </td>
+              </tr>
+            ) : (
+              rows.map((row) => (
+                <tr key={row.reward_id} className="hover:bg-slate-50/60">
+                  <td className="px-4 py-3 font-medium text-slate-900">{row.reward_id}</td>
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-slate-900">{row.name}</p>
+                    <p className="text-xs text-slate-500 line-clamp-2">{row.description || "No description"}</p>
+                  </td>
+                  <td className="px-4 py-3 text-slate-700">{Number(row.points || 0)}</td>
+                  <td className="px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() => onToggleStatus(row)}
+                      className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                        row.is_active
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          : "bg-slate-100 text-slate-600 border border-slate-200"
+                      }`}
+                    >
+                      {row.is_active ? "Active" : "Inactive"}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    {row.image_url ? (
+                      <a
+                        href={row.image_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-sky-700 hover:text-sky-800"
+                        title={row.image_url}
+                      >
+                        View <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    ) : (
+                      <span className="text-slate-400">None</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-slate-500">{formatDateTime(row.created_at)}</td>
+                  <td className="px-4 py-3 text-slate-500">{formatDateTime(row.updated_at)}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => onEdit(row)}
+                        className="p-1.5 border border-slate-200 rounded-md text-slate-600"
+                        title="Edit"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onDelete(row.reward_id)}
+                        className="p-1.5 border border-red-200 rounded-md text-red-600"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function RewardFormDrawer({
+  isOpen,
+  value,
+  isEditing,
+  isSaving,
+  onChange,
+  onClose,
+  onSave,
+}) {
+  if (!isOpen) return null;
+
+  const setField = (key, fieldValue) => onChange((prev) => ({ ...prev, [key]: fieldValue }));
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
+      <div className="absolute inset-0 bg-white shadow-2xl flex flex-col">
+        <div className="p-4 border-b border-slate-200 flex justify-between items-center">
+          <h2 className="text-lg font-semibold">{isEditing ? "Edit Reward" : "Create Reward"}</h2>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-md">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Input
+              label="Reward ID"
+              value={value.reward_id}
+              onChange={(v) => setField("reward_id", v)}
+              disabled={isEditing}
+              hint={isEditing ? "Reward ID cannot be changed." : "Optional. Leave blank for auto-generated id."}
+            />
+            <Input
+              label="Points"
+              type="number"
+              value={value.points}
+              onChange={(v) => setField("points", Number(v || 0))}
+            />
+          </div>
+          <Input label="Name" value={value.name} onChange={(v) => setField("name", v)} />
+          <Input
+            label="Description"
+            value={value.description}
+            onChange={(v) => setField("description", v)}
+            textarea
+          />
+          <Input
+            label="Image URL"
+            value={value.image_url}
+            onChange={(v) => setField("image_url", v)}
+          />
+          <label className="inline-flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={Boolean(value.is_active)}
+              onChange={(e) => setField("is_active", e.target.checked)}
+            />
+            Active reward
+          </label>
+        </div>
+        <div className="p-4 border-t border-slate-200 flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 text-sm border border-slate-200 rounded-lg">
+            Cancel
+          </button>
+          <button
+            onClick={onSave}
+            disabled={isSaving}
+            className="px-4 py-2 text-sm bg-slate-900 text-white rounded-lg disabled:opacity-50"
+          >
+            {isSaving ? "Saving..." : "Save Reward"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function formatDateTime(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleString();
 }
 
 function QuizUploadPanel({ fileName, onFileNameChange }) {
