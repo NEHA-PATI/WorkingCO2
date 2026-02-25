@@ -382,6 +382,7 @@ const HomePage = () => {
               <div className="hp-org-apply-icon-wrap">
                 <FaShieldHeart className="hp-org-apply-icon" />
               </div>
+<<<<<<< HEAD
               <div className="hp-org-apply-content">
                 <p className="hp-org-apply-eyebrow">Organisation Onboarding</p>
                 <h3 className="hp-org-apply-title">Apply as an Organisation</h3>
@@ -439,6 +440,27 @@ const HomePage = () => {
             </div>
           )}
         </div>
+=======
+            ))}
+          </div>
+        ) : (
+          <div className="hp-rewards-grid">
+            {rewards.map((r, i) => (
+              <div className="hp-reward-card" key={i}>
+                <div className="hp-reward-icon-wrap">
+                  <span className="hp-reward-icon">{r.icon}</span>
+                </div>
+                <h3 className="hp-reward-title">{r.title}</h3>
+                <p className="hp-reward-desc">{r.desc}</p>
+                <span className="hp-coins-badge">
+                  <FaCoins style={{ color: "#eab308" }} />
+                  {r.coins}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+>>>>>>> origin/amir484
       </section>
 
       <section className="hp-section hp-services-section">
