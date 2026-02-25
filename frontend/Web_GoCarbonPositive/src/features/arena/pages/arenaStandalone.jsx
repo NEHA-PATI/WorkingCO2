@@ -1321,24 +1321,25 @@ const RewardsShowcase = ({ rewards, isLoading, onSeeMore }) => {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.2 + index * 0.08 }}
-                                        className="bg-white/90 backdrop-blur-sm rounded-xl p-4 border border-amber-200 shadow-sm"
+                                        className="bg-white/90 backdrop-blur-sm rounded-xl p-3 border border-amber-200 shadow-sm hover:shadow-md hover:border-amber-300 transition-all duration-200"
                                     >
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-amber-100 border border-amber-200 flex-shrink-0">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-10 h-10 rounded-lg overflow-hidden bg-amber-100 border border-amber-200 flex-shrink-0">
                                                 {reward.image_url ? (
                                                     <img src={reward.image_url} alt={reward.name} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-amber-700 text-xs font-semibold">IMG</div>
                                                 )}
                                             </div>
-                                            <div className="min-w-0">
-                                                <p className="text-sm font-semibold text-slate-800 truncate">{reward.name}</p>
-                                                <p className="text-xs text-slate-500">Rs. {Number(reward.price_inr || 0).toLocaleString('en-IN')}</p>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-semibold text-slate-800 truncate">{reward.name}</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold">
-                                            <Zap className="w-3 h-3" />
-                                            {Number(reward.points || 0).toLocaleString()} pts
+                                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold shrink-0">
+                                                <Zap className="w-3 h-3" />
+                                                {Number(reward.points || 0).toLocaleString()} pts
+                                            </div>
                                         </div>
                                     </motion.div>
                                 ))}

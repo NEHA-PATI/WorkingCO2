@@ -2,7 +2,7 @@
   "name": "ticketservice",
   "version": "1.0.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --coverage --detectOpenHandles",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
@@ -21,6 +21,9 @@
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
     "pg": "^8.17.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   },
   "nodemonConfig": {
     "quiet": true,

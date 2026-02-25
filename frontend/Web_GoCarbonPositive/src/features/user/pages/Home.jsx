@@ -4,7 +4,9 @@ import useAuth from "@contexts/AuthContext";
 import {
   FaArrowRight,
   FaAward,
+  FaBatteryHalf,
   FaBookOpen,
+  FaBottleWater,
   FaChevronDown,
   FaChevronUp,
   FaClock,
@@ -12,6 +14,7 @@ import {
   FaGift,
   FaGlobe,
   FaLeaf,
+  FaMicrochip,
   FaBullhorn,
   FaShieldHeart,
   FaUserGroup,
@@ -29,27 +32,70 @@ const HomePage = () => {
   const rewards = [
     {
       icon: <FaLeaf style={{ color: "#16a34a" }} />,
-      title: "Plant a Tree",
-      desc: "Redeem 500 coins to plant a real tree",
-      coins: "500 coins",
+      title: "Complete tasks",
+      desc: "Do various tasks to earn points",
+      
     },
     {
       icon: <FaShieldHeart style={{ color: "#ec4899" }} />,
       title: "Eco Badge",
-      desc: "Unlock exclusive eco warrior badge",
-      coins: "200 coins",
+      desc: "Get badges for your consistency",
+      
     },
     {
       icon: <FaGift style={{ color: "#f97316" }} />,
-      title: "Gift Voucher",
-      desc: "Get sustainable brand gift cards",
-      coins: "1000 coins",
+      title: "Win exclusive rewards",
+      desc: "Get internship, expert consulting , and goodies ",
+      
     },
     {
       icon: <GiRecycle style={{ color: "#14b8a6" }} />,
-      title: "Carbon Offset",
-      desc: "Offset 1 ton of CO2 emissions",
-      coins: "750 coins",
+      title: "Streak Points",
+      desc: "Stay consistent and Earn more points ",
+      
+    },
+  ];
+
+  const organisationSolutions = [
+    {
+      icon: <GiChemicalDrop style={{ color: "#2563eb" }} />,
+      title: "Steel and Metal",
+      desc: "Advanced steel manufacturing and metal processing solutions for structural and industrial applications.",
+    },
+    {
+      icon: <FaLeaf style={{ color: "#16a34a" }} />,
+      title: "Renewable Energy",
+      desc: "Solar, wind, and renewable energy integration systems for sustainable power solutions.",
+    },
+    {
+      icon: <FaShieldHeart style={{ color: "#06b6d4" }} />,
+      title: "Water Treatment",
+      desc: "Industrial water purification and recycling technologies for sustainable resource management.",
+    },
+    {
+      icon: <FaGlobe style={{ color: "#0f766e" }} />,
+      title: "Carbon Capture",
+      desc: "Carbon capture and offset solutions for climate-neutral operations and ESG compliance support.",
+    },
+    {
+      icon: <HiMiniChartBar style={{ color: "#4f46e5" }} />,
+      title: "Smart Manufacturing",
+      desc: "IoT-enabled smart factory solutions with AI-powered optimization and real-time analytics.",
+    },
+    {
+      icon: <FaMicrochip style={{ color: "#0ea5e9" }} />,
+      title: "E-Waste Management",
+      desc: "Responsible collection and certified processing of end-of-life electronics to recover valuable materials and reduce landfill impact.",
+    },
+    {
+      icon: <FaBottleWater style={{ color: "#14b8a6" }} />,
+      title: "Plastic Recycling",
+      desc: "Closed-loop plastic recovery programs that sort, clean, and reprocess industrial and post-consumer plastics into reusable feedstock.",
+    },
+    {
+      icon: <FaBatteryHalf style={{ color: "#f59e0b" }} />,
+      title: "Battery Recycling",
+      desc: "Safe battery take-back and material recovery workflows for lithium-ion and lead-acid systems, supporting compliance and circular supply chains.",
     },
   ];
 
@@ -92,7 +138,7 @@ const HomePage = () => {
     },
   ];
 
-  const announcements = [
+  const userAnnouncements = [
     {
       date: "Feb 15, 2026",
       tag: "REWARD",
@@ -137,7 +183,52 @@ const HomePage = () => {
     },
   ];
 
-  const faqs = [
+  const organisationAnnouncements = [
+    {
+      date: "Feb 16, 2026",
+      tag: "POLICY",
+      tagClass: "hp-tag-feature",
+      title: "New Corporate ESG Reporting Templates Added",
+      desc: "Organisations can now generate pre-formatted quarterly ESG reports aligned with global disclosure frameworks.",
+    },
+    {
+      date: "Feb 11, 2026",
+      tag: "FEATURE",
+      tagClass: "hp-tag-update",
+      title: "Industrial Monitoring Dashboard Expanded",
+      desc: "Track water use, energy load, and emissions intensity from a unified operations dashboard in near real time.",
+    },
+    {
+      date: "Feb 6, 2026",
+      tag: "INTEGRATION",
+      tagClass: "hp-tag-community",
+      title: "ERP Data Connectors Released",
+      desc: "New integrations with enterprise ERP systems let teams sync production and utility data automatically.",
+    },
+    {
+      date: "Jan 29, 2026",
+      tag: "UPDATE",
+      tagClass: "hp-tag-update",
+      title: "Supplier Emissions Mapping Improved",
+      desc: "Scope 3 supplier-level emission mapping now includes trend tracking and category-level benchmarking.",
+    },
+    {
+      date: "Jan 22, 2026",
+      tag: "COMPLIANCE",
+      tagClass: "hp-tag-feature",
+      title: "Audit Trail Module Introduced",
+      desc: "A new audit trail provides verifiable change history for operational sustainability data and reports.",
+    },
+    {
+      date: "Jan 14, 2026",
+      tag: "FEATURE",
+      tagClass: "hp-tag-feature",
+      title: "Multi-Site Goal Management Is Live",
+      desc: "Set site-wise reduction goals, assign owners, and compare progress across plants and business units.",
+    },
+  ];
+
+  const userFaqs = [
     {
       q: "What is a carbon footprint?",
       a: "A carbon footprint is the total amount of greenhouse gases, particularly CO2, emitted directly or indirectly by an individual, organisation, event, or product.",
@@ -160,20 +251,77 @@ const HomePage = () => {
     },
   ];
 
+  const organisationFaqs = [
+    {
+      q: "How can an organisation get started on the platform?",
+      a: "Create an organisation account, add your facilities or teams, then connect operational data sources to begin baseline tracking.",
+    },
+    {
+      q: "Does the platform support multi-site operations?",
+      a: "Yes. You can manage multiple sites, assign local owners, and compare sustainability performance across units from one dashboard.",
+    },
+    {
+      q: "Can we track Scope 1, 2, and 3 emissions?",
+      a: "Yes. The platform supports all three scopes with configurable activity data inputs and reporting views for internal and external use.",
+    },
+    {
+      q: "How do compliance and audit workflows work?",
+      a: "Every major data update is logged with timestamps and user metadata, so audit teams can validate and trace reporting changes.",
+    },
+    {
+      q: "Can our teams collaborate on targets and initiatives?",
+      a: "Yes. You can assign sustainability goals, track initiatives, and monitor completion status across departments and locations.",
+    },
+  ];
+
+  const activeAnnouncements =
+    activeTab === "organisation" ? organisationAnnouncements : userAnnouncements;
+  const activeFaqs = activeTab === "organisation" ? organisationFaqs : userFaqs;
+  const heroContent =
+    activeTab === "organisation"
+      ? {
+          titleLine1: "Decarbonising",
+          titleLine2: "Enterprise",
+          highlight: "Operations",
+          description:
+            "Measure, reduce, and report emissions across teams, facilities, and supply chains with a unified sustainability platform.",
+        }
+      : {
+          titleLine1: "Building a",
+          titleLine2: "Sustainable",
+          highlight: "Future",
+          description:
+            "Join us in creating a better world through sustainable development practices and environmental consciousness.",
+        };
   return (
     <div className="hp-root">
-      <section className="hp-hero">
+      <section
+        className={`hp-hero ${activeTab === "organisation" ? "hp-hero-organisation" : "hp-hero-user"}`}
+      >
+        {activeTab === "organisation" && (
+          <video
+            className="hp-hero-video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          >
+            <source
+              src="https://isorepublic.com/wp-content/uploads/2018/06/isorepublic-free-video-wind-turbine-sunrise.mp4"
+              type="video/mp4"
+            />
+          </video>
+        )}
         <div className="hp-hero-overlay" />
-        <div className="hp-hero-content">
+        <div className="hp-hero-content hp-tab-switch-anim" key={`hero-content-${activeTab}`}>
           <h1 className="hp-hero-title">
-            Building a
+            {heroContent.titleLine1}
             <br />
-            Sustainable <span className="hp-green-text">Future</span>
+            {heroContent.titleLine2}{" "}
+            <span className="hp-green-text">{heroContent.highlight}</span>
           </h1>
-          <p className="hp-hero-desc">
-            Join us in creating a better world through sustainable development
-            practices and environmental consciousness.
-          </p>
+          <p className="hp-hero-desc">{heroContent.description}</p>
           {!authLoading && !isAuthenticated && (
             <>
               <div className="hp-hero-btns">
@@ -184,16 +332,6 @@ const HomePage = () => {
                   Get Started <FaArrowRight />
                 </button>
               </div>
-              {activeTab === "organisation" && (
-                <div style={{ marginTop: "12px" }}>
-                  <button
-                    className="hp-btn-primary hp-hero-start-btn hp-btn-outline-org"
-                    onClick={() => navigate("/join-organisation")}
-                  >
-                    Apply as an organisation <FaArrowRight />
-                  </button>
-                </div>
-              )}
             </>
           )}
         </div>
@@ -206,40 +344,100 @@ const HomePage = () => {
             <div className="hp-tab-switcher hp-tab-switcher-inline">
               <button
                 className={`hp-tab-btn ${activeTab === "user" ? "hp-tab-active" : ""}`}
-                onClick={() => setActiveTab("user")}
+                onClick={() => {
+                  setActiveTab("user");
+                  setOpenFaq(null);
+                }}
               >
                 User
               </button>
               <button
                 className={`hp-tab-btn ${activeTab === "organisation" ? "hp-tab-active" : ""}`}
-                onClick={() => setActiveTab("organisation")}
+                onClick={() => {
+                  setActiveTab("organisation");
+                  setOpenFaq(null);
+                }}
               >
                 Organisation
               </button>
             </div>
           </div>
-          <h2 className="hp-section-title hp-rewards-title">
-            <FaAward className="hp-title-icon" style={{ color: "#f59e0b" }} />
-            Join Contest,Earn Rewards
-          </h2>
-          <p className="hp-section-sub">
-            Redeem your hard-earned coins for real-world impact
-          </p>
+          <div className="hp-tab-switch-anim" key={`rewards-header-${activeTab}`}>
+            {activeTab !== "organisation" && (
+              <>
+                <h2 className="hp-section-title hp-rewards-title">
+                  <FaAward className="hp-title-icon" style={{ color: "#f59e0b" }} />
+                  Join Contest,Earn Rewards
+                </h2>
+                <p className="hp-section-sub">
+                  Redeem your hard-earned coins for real-world impact
+                </p>
+              </>
+            )}
+          </div>
         </div>
-        <div className="hp-rewards-grid">
-          {rewards.map((r, i) => (
-            <div className="hp-reward-card" key={i}>
-              <div className="hp-reward-icon-wrap">
-                <span className="hp-reward-icon">{r.icon}</span>
+        <div className="hp-tab-switch-anim" key={`rewards-content-${activeTab}`}>
+          {activeTab === "organisation" && (
+            <div className="hp-org-apply-card">
+              <div className="hp-org-apply-icon-wrap">
+                <FaShieldHeart className="hp-org-apply-icon" />
               </div>
-              <h3 className="hp-reward-title">{r.title}</h3>
-              <p className="hp-reward-desc">{r.desc}</p>
-              <span className="hp-coins-badge">
-                <FaCoins style={{ color: "#eab308" }} />
-                {r.coins}
-              </span>
+              <div className="hp-org-apply-content">
+                <p className="hp-org-apply-eyebrow">Organisation Onboarding</p>
+                <h3 className="hp-org-apply-title">Apply as an Organisation</h3>
+                <p className="hp-org-apply-desc">
+                  Register your organisation to access verified sustainability workflows,
+                  team dashboards, and enterprise carbon reporting tools in one place.
+                </p>
+              </div>
+              <button
+                className="hp-btn-primary hp-org-apply-btn"
+                onClick={() => navigate("/join-organisation")}
+              >
+                Apply as an organisation <FaArrowRight />
+              </button>
             </div>
-          ))}
+          )}
+          {activeTab === "organisation" && (
+            <div className="hp-section-header hp-org-solutions-header">
+              <h2 className="hp-section-title hp-rewards-title">
+                <FaGlobe className="hp-title-icon" style={{ color: "#0ea5e9" }} />
+                Industrial Solutions for Organisations
+              </h2>
+              <p className="hp-section-sub">
+                Comprehensive sustainability-focused solutions designed for industrial operations
+              </p>
+            </div>
+          )}
+          {activeTab === "organisation" ? (
+            <div className="hp-org-solutions-grid">
+              {organisationSolutions.map((solution, i) => (
+                <div className="hp-org-solution-card" key={i}>
+                  <div className="hp-org-solution-top">
+                    <span className="hp-org-solution-icon">{solution.icon}</span>
+                  </div>
+                  <h3 className="hp-org-solution-title">{solution.title}</h3>
+                  <p className="hp-org-solution-desc">{solution.desc}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="hp-rewards-grid">
+              {rewards.map((r, i) => (
+                <div className="hp-reward-card" key={i}>
+                  <div className="hp-reward-icon-wrap">
+                    <span className="hp-reward-icon">{r.icon}</span>
+                  </div>
+                  <h3 className="hp-reward-title">{r.title}</h3>
+                  <p className="hp-reward-desc">{r.desc}</p>
+                  <span className="hp-coins-badge">
+                    <FaCoins style={{ color: "#eab308" }} />
+                    {r.coins}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -275,12 +473,14 @@ const HomePage = () => {
             <FaBullhorn className="hp-title-icon" style={{ color: "#3b82f6" }} />
             Updates and Announcements
           </h2>
-          <p className="hp-section-sub">
-            Stay in the loop with everything happening on the platform
+          <p className="hp-section-sub hp-tab-switch-anim" key={`ann-sub-${activeTab}`}>
+            {activeTab === "organisation"
+              ? "Stay informed about features and updates for enterprise sustainability operations"
+              : "Stay in the loop with everything happening on the platform"}
           </p>
         </div>
-        <div className="hp-announcements-list">
-          {announcements.map((a, i) => (
+        <div className="hp-announcements-list hp-tab-switch-anim" key={`ann-list-${activeTab}`}>
+          {activeAnnouncements.map((a, i) => (
             <div className="hp-announcement-row" key={i}>
               <div className="hp-announcement-dot" />
               <div className="hp-announcement-card">
@@ -328,12 +528,14 @@ const HomePage = () => {
           <h2 className="hp-section-title hp-dark-title">
             Frequently Asked Questions
           </h2>
-          <p className="hp-section-sub">
-            Everything you need to know about the platform
+          <p className="hp-section-sub hp-tab-switch-anim" key={`faq-sub-${activeTab}`}>
+            {activeTab === "organisation"
+              ? "Everything you need to know for your organisation setup and operations"
+              : "Everything you need to know about the platform"}
           </p>
         </div>
-        <div className="hp-faq-list">
-          {faqs.map((f, i) => (
+        <div className="hp-faq-list hp-tab-switch-anim" key={`faq-list-${activeTab}`}>
+          {activeFaqs.map((f, i) => (
             <div
               className="hp-faq-item"
               key={i}

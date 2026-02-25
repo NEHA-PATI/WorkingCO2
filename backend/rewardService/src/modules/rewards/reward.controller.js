@@ -295,6 +295,74 @@ exports.getRewardCatalog = async (req, res, next) => {
   }
 };
 
+exports.getRewardCatalogAdmin = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 100;
+    const search = req.query.search || '';
+
+    const result = await service.getRewardCatalogAdmin(page, limit, search);
+
+    res.json({
+      success: true,
+      data: result.items,
+      page: result.page,
+      limit: result.limit,
+      total: result.total,
+      totalPages: result.totalPages
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.createRewardCatalogItem = async (req, res) => {
+  try {
+    const data = await service.createRewardCatalogItem(req.body || {});
+    return res.status(201).json({
+      success: true,
+      data
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message || 'Unable to create reward'
+    });
+  }
+};
+
+exports.updateRewardCatalogItem = async (req, res) => {
+  try {
+    const data = await service.updateRewardCatalogItem(req.params.reward_id, req.body || {});
+    return res.status(200).json({
+      success: true,
+      data
+    });
+  } catch (error) {
+    const status = String(error.message || '').toLowerCase().includes('not found') ? 404 : 400;
+    return res.status(status).json({
+      success: false,
+      message: error.message || 'Unable to update reward'
+    });
+  }
+};
+
+exports.deleteRewardCatalogItem = async (req, res) => {
+  try {
+    const data = await service.deleteRewardCatalogItem(req.params.reward_id);
+    return res.status(200).json({
+      success: true,
+      data
+    });
+  } catch (error) {
+    const status = String(error.message || '').toLowerCase().includes('not found') ? 404 : 400;
+    return res.status(status).json({
+      success: false,
+      message: error.message || 'Unable to delete reward'
+    });
+  }
+};
+
 /* ===============================
    GET LEADERBOARD
 ================================ */

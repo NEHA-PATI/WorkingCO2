@@ -511,6 +511,118 @@ const getRewardById = async (reward_id) => {
 
   return rows[0] || null;
 };
+
+const getRewardCatalogAdminItems = async (limit = 100, offset = 0, search = '') => {
+  const normalizedSearch = String(search || '').trim();
+  const hasSearch = normalizedSearch.length > 0;
+
+  const { rows } = await pool.query(`
+    SELECT
+      reward_id,
+      name,
+      description,
+      points,
+      image_url,
+      is_active,
+      created_at,
+      updated_at
+    FROM reward_catalog
+    WHERE ($3::boolean = FALSE OR name ILIKE $4 OR description ILIKE $4 OR reward_id ILIKE $4)
+    ORDER BY updated_at DESC, reward_id ASC
+    LIMIT $1 OFFSET $2
+  `, [limit, offset, hasSearch, `%${normalizedSearch}%`]);
+
+  return rows;
+};
+
+const getRewardCatalogAdminCount = async (search = '') => {
+  const normalizedSearch = String(search || '').trim();
+  const hasSearch = normalizedSearch.length > 0;
+
+  const { rows } = await pool.query(`
+    SELECT COUNT(*) AS total
+    FROM reward_catalog
+    WHERE ($1::boolean = FALSE OR name ILIKE $2 OR description ILIKE $2 OR reward_id ILIKE $2)
+  `, [hasSearch, `%${normalizedSearch}%`]);
+
+  return Number(rows[0].total);
+};
+
+const createRewardCatalogItem = async ({
+  reward_id,
+  name,
+  description,
+  points,
+  image_url,
+  is_active = true
+}) => {
+  const { rows } = await pool.query(`
+    INSERT INTO reward_catalog (
+      reward_id,
+      name,
+      description,
+      points,
+      image_url,
+      is_active
+    )
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING
+      reward_id,
+      name,
+      description,
+      points,
+      image_url,
+      is_active,
+      created_at,
+      updated_at
+  `, [reward_id, name, description, points, image_url, is_active]);
+
+  return rows[0];
+};
+
+const updateRewardCatalogItem = async (
+  reward_id,
+  {
+    name,
+    description,
+    points,
+    image_url,
+    is_active
+  }
+) => {
+  const { rows } = await pool.query(`
+    UPDATE reward_catalog
+    SET
+      name = COALESCE($1, name),
+      description = COALESCE($2, description),
+      points = COALESCE($3, points),
+      image_url = COALESCE($4, image_url),
+      is_active = CASE WHEN $5::boolean IS NULL THEN is_active ELSE $5::boolean END,
+      updated_at = NOW()
+    WHERE reward_id = $6
+    RETURNING
+      reward_id,
+      name,
+      description,
+      points,
+      image_url,
+      is_active,
+      created_at,
+      updated_at
+  `, [name, description, points, image_url, is_active, reward_id]);
+
+  return rows[0] || null;
+};
+
+const deleteRewardCatalogItem = async (reward_id) => {
+  const { rows } = await pool.query(`
+    DELETE FROM reward_catalog
+    WHERE reward_id = $1
+    RETURNING reward_id
+  `, [reward_id]);
+
+  return rows[0] || null;
+};
 /* ===============================
    CREATE RULE
 ================================ */
@@ -597,6 +709,11 @@ module.exports = {
   getRewardCatalogItems,
   getRewardCatalogCount,
   getRewardById,
+  getRewardCatalogAdminItems,
+  getRewardCatalogAdminCount,
+  createRewardCatalogItem,
+  updateRewardCatalogItem,
+  deleteRewardCatalogItem,
   getContestStats,
   createRule,
   updateRule
