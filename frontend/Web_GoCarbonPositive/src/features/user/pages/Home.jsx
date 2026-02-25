@@ -4,7 +4,9 @@ import useAuth from "@contexts/AuthContext";
 import {
   FaArrowRight,
   FaAward,
+  FaBatteryHalf,
   FaBookOpen,
+  FaBottleWater,
   FaChevronDown,
   FaChevronUp,
   FaClock,
@@ -12,6 +14,7 @@ import {
   FaGift,
   FaGlobe,
   FaLeaf,
+  FaMicrochip,
   FaBullhorn,
   FaShieldHeart,
   FaUserGroup,
@@ -58,37 +61,41 @@ const HomePage = () => {
       icon: <GiChemicalDrop style={{ color: "#2563eb" }} />,
       title: "Steel and Metal",
       desc: "Advanced steel manufacturing and metal processing solutions for structural and industrial applications.",
-      timestamp: "Updated: Jan 2024",
     },
     {
       icon: <FaLeaf style={{ color: "#16a34a" }} />,
       title: "Renewable Energy",
       desc: "Solar, wind, and renewable energy integration systems for sustainable power solutions.",
-      timestamp: "Updated: Feb 2024",
     },
     {
       icon: <FaShieldHeart style={{ color: "#06b6d4" }} />,
       title: "Water Treatment",
       desc: "Industrial water purification and recycling technologies for sustainable resource management.",
-      timestamp: "Updated: Jan 2024",
     },
     {
       icon: <FaGlobe style={{ color: "#0f766e" }} />,
       title: "Carbon Capture",
       desc: "Carbon capture and offset solutions for climate-neutral operations and ESG compliance support.",
-      timestamp: "Updated: Feb 2024",
     },
     {
       icon: <HiMiniChartBar style={{ color: "#4f46e5" }} />,
       title: "Smart Manufacturing",
       desc: "IoT-enabled smart factory solutions with AI-powered optimization and real-time analytics.",
-      timestamp: "Updated: Mar 2024",
     },
     {
-      icon: <GiRecycle style={{ color: "#65a30d" }} />,
-      title: "Circular Economy",
-      desc: "Zero-waste solutions and material recycling programs for sustainable business models.",
-      timestamp: "Updated: Feb 2024",
+      icon: <FaMicrochip style={{ color: "#0ea5e9" }} />,
+      title: "E-Waste Management",
+      desc: "Responsible collection and certified processing of end-of-life electronics to recover valuable materials and reduce landfill impact.",
+    },
+    {
+      icon: <FaBottleWater style={{ color: "#14b8a6" }} />,
+      title: "Plastic Recycling",
+      desc: "Closed-loop plastic recovery programs that sort, clean, and reprocess industrial and post-consumer plastics into reusable feedstock.",
+    },
+    {
+      icon: <FaBatteryHalf style={{ color: "#f59e0b" }} />,
+      title: "Battery Recycling",
+      desc: "Safe battery take-back and material recovery workflows for lithium-ion and lead-acid systems, supporting compliance and circular supply chains.",
     },
   ];
 
@@ -286,12 +293,26 @@ const HomePage = () => {
           description:
             "Join us in creating a better world through sustainable development practices and environmental consciousness.",
         };
-
   return (
     <div className="hp-root">
       <section
         className={`hp-hero ${activeTab === "organisation" ? "hp-hero-organisation" : "hp-hero-user"}`}
       >
+        {activeTab === "organisation" && (
+          <video
+            className="hp-hero-video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          >
+            <source
+              src="https://isorepublic.com/wp-content/uploads/2018/06/isorepublic-free-video-wind-turbine-sunrise.mp4"
+              type="video/mp4"
+            />
+          </video>
+        )}
         <div className="hp-hero-overlay" />
         <div className="hp-hero-content hp-tab-switch-anim" key={`hero-content-${activeTab}`}>
           <h1 className="hp-hero-title">
@@ -394,7 +415,6 @@ const HomePage = () => {
                 <div className="hp-org-solution-card" key={i}>
                   <div className="hp-org-solution-top">
                     <span className="hp-org-solution-icon">{solution.icon}</span>
-                    <span className="hp-org-solution-time">{solution.timestamp}</span>
                   </div>
                   <h3 className="hp-org-solution-title">{solution.title}</h3>
                   <p className="hp-org-solution-desc">{solution.desc}</p>
