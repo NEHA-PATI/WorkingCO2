@@ -34,25 +34,25 @@ const HomePage = () => {
       icon: <FaLeaf style={{ color: "#16a34a" }} />,
       title: "Complete tasks",
       desc: "Do various tasks to earn points",
-      
+
     },
     {
       icon: <FaShieldHeart style={{ color: "#ec4899" }} />,
       title: "Eco Badge",
       desc: "Get badges for your consistency",
-      
+
     },
     {
       icon: <FaGift style={{ color: "#f97316" }} />,
       title: "Win exclusive rewards",
       desc: "Get internship, expert consulting , and goodies ",
-      
+
     },
     {
       icon: <GiRecycle style={{ color: "#14b8a6" }} />,
       title: "Streak Points",
       desc: "Stay consistent and Earn more points ",
-      
+
     },
   ];
 
@@ -280,19 +280,19 @@ const HomePage = () => {
   const heroContent =
     activeTab === "organisation"
       ? {
-          titleLine1: "Decarbonising",
-          titleLine2: "Enterprise",
-          highlight: "Operations",
-          description:
-            "Measure, reduce, and report emissions across teams, facilities, and supply chains with a unified sustainability platform.",
-        }
+        titleLine1: "Decarbonising",
+        titleLine2: "Enterprise",
+        highlight: "Operations",
+        description:
+          "Measure, reduce, and report emissions across teams, facilities, and supply chains with a unified sustainability platform.",
+      }
       : {
-          titleLine1: "Building a",
-          titleLine2: "Sustainable",
-          highlight: "Future",
-          description:
-            "Join us in creating a better world through sustainable development practices and environmental consciousness.",
-        };
+        titleLine1: "Building a",
+        titleLine2: "Sustainable",
+        highlight: "Future",
+        description:
+          "Join us in creating a better world through sustainable development practices and environmental consciousness.",
+      };
   return (
     <div className="hp-root">
       <section
@@ -376,72 +376,11 @@ const HomePage = () => {
             )}
           </div>
         </div>
-        <div className="hp-tab-switch-anim" key={`rewards-content-${activeTab}`}>
-          {activeTab === "organisation" && (
-            <div className="hp-org-apply-card">
-              <div className="hp-org-apply-icon-wrap">
-                <FaShieldHeart className="hp-org-apply-icon" />
-              </div>
-<<<<<<< HEAD
-              <div className="hp-org-apply-content">
-                <p className="hp-org-apply-eyebrow">Organisation Onboarding</p>
-                <h3 className="hp-org-apply-title">Apply as an Organisation</h3>
-                <p className="hp-org-apply-desc">
-                  Register your organisation to access verified sustainability workflows,
-                  team dashboards, and enterprise carbon reporting tools in one place.
-                </p>
-              </div>
-              <button
-                className="hp-btn-primary hp-org-apply-btn"
-                onClick={() => navigate("/join-organisation")}
-              >
-                Apply as an organisation <FaArrowRight />
-              </button>
+        {activeTab === "organisation" ? (
+          <div className="hp-org-apply-card">
+            <div className="hp-org-apply-icon-wrap">
+              <FaShieldHeart className="hp-org-apply-icon" />
             </div>
-          )}
-          {activeTab === "organisation" && (
-            <div className="hp-section-header hp-org-solutions-header">
-              <h2 className="hp-section-title hp-rewards-title">
-                <FaGlobe className="hp-title-icon" style={{ color: "#0ea5e9" }} />
-                Industrial Solutions for Organisations
-              </h2>
-              <p className="hp-section-sub">
-                Comprehensive sustainability-focused solutions designed for industrial operations
-              </p>
-            </div>
-          )}
-          {activeTab === "organisation" ? (
-            <div className="hp-org-solutions-grid">
-              {organisationSolutions.map((solution, i) => (
-                <div className="hp-org-solution-card" key={i}>
-                  <div className="hp-org-solution-top">
-                    <span className="hp-org-solution-icon">{solution.icon}</span>
-                  </div>
-                  <h3 className="hp-org-solution-title">{solution.title}</h3>
-                  <p className="hp-org-solution-desc">{solution.desc}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="hp-rewards-grid">
-              {rewards.map((r, i) => (
-                <div className="hp-reward-card" key={i}>
-                  <div className="hp-reward-icon-wrap">
-                    <span className="hp-reward-icon">{r.icon}</span>
-                  </div>
-                  <h3 className="hp-reward-title">{r.title}</h3>
-                  <p className="hp-reward-desc">{r.desc}</p>
-                  <span className="hp-coins-badge">
-                    <FaCoins style={{ color: "#eab308" }} />
-                    {r.coins}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-=======
-            ))}
           </div>
         ) : (
           <div className="hp-rewards-grid">
@@ -460,7 +399,6 @@ const HomePage = () => {
             ))}
           </div>
         )}
->>>>>>> origin/amir484
       </section>
 
       <section className="hp-section hp-services-section">
