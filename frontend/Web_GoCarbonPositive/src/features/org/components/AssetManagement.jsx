@@ -2213,9 +2213,3 @@ const AssetManagement = () => {
 };
 
 export default AssetManagement;
-
-
-
-
-
-

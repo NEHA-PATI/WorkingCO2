@@ -369,60 +369,195 @@ const Wallet = () => {
   };
 
   const renderLanding = () => (
-    <div className="wallet-container modern-landing">
-      <div className="hero-wrapper">
-        {/* LEFT CONTENT */}
-        <div className="hero-left">
-          <div className="hero-badge">⭐ Secure • Simple • Sustainable</div>
+    <div className="hero-section">
+      <div className="blob-bg" />
 
-          <h1 className="hero-title">
-            <span>Your Gateway to</span> <br />
-            <span className="green-text">Carbon Positive</span> <br />
-            <span>Digital Finance</span> <br />
-          </h1>
-
-          <p className="hero-desc">
-            Experience the future of sustainable finance with a wallet that's
-            secure by design and positive for the planet.
-          </p>
-
-          <div className="hero-buttons">
-            <button
-              className="btn btn-primary hero-btn"
-              onClick={() => {
-                setEntryFlow("new");
-                startLoadingAndNavigate("create");
-              }}
-            >
-              Create New Wallet →
-            </button>
-
-            <button
-              className="btn btn-outline hero-btn"
-              onClick={() => {
-                setEntryFlow("existing");
-                setVerifyAddressInput("");
-                startLoadingAndNavigate("verifyAddress");
-              }}
-            >
-              + Import Existing Wallet
-            </button>
-          </div>
+      <div className="content">
+        <div className="badge hero-badge-static">
+          <div className="dot" />
+          Secure & Verified
         </div>
 
-        {/* RIGHT ILLUSTRATION */}
-        <div className="hero-right">
-          <div className="wallet-illus">
-            <div className="wallet-body">
-              <div className="wallet-dot"></div>
-            </div>
-            <div className="wallet-top"></div>
-          </div>
+        <h1 className="title">
+          Carbon Credit
+          <br />
+          <span>Wallet</span>
+        </h1>
+        <p className="subtitle">
+          Lorem ipsum dolor sit amet. Consecte-tuer adipiscing elit. Set diam
+          nonummy nibh euismod tincidunt.
+        </p>
+        <div className="btn-group">
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              setEntryFlow("new");
+              startLoadingAndNavigate("create");
+            }}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="2" y="5" width="20" height="14" rx="2" />
+              <line x1="2" y1="10" x2="22" y2="10" />
+            </svg>
+            Create New Wallet
+          </button>
+          <button
+            className="btn btn-outline"
+            onClick={() => {
+              setEntryFlow("existing");
+              setVerifyAddressInput("");
+              startLoadingAndNavigate("verifyAddress");
+            }}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+              <polyline points="10 17 15 12 10 7" />
+              <line x1="15" y1="12" x2="3" y2="12" />
+            </svg>
+            Existing Wallet
+          </button>
+          <button type="button" className="btn btn-outline">
+            Learn More
+          </button>
         </div>
       </div>
+
+      <div className="illustration">
+        <svg viewBox="0 0 560 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="60" y="290" width="440" height="22" rx="6" fill="#c8d0d8" />
+          <rect x="80" y="295" width="400" height="14" rx="4" fill="#aab0b8" />
+
+          <rect x="90" y="80" width="380" height="218" rx="10" fill="#2a2d3a" />
+          <rect x="100" y="90" width="360" height="198" rx="6" fill="#1e2330" />
+
+          <rect x="112" y="100" width="336" height="178" rx="6" fill="#e8f5e9" />
+
+          <circle cx="148" cy="130" r="20" fill="#38b000" opacity="0.2" />
+          <circle cx="148" cy="124" r="9" fill="#38b000" opacity="0.6" />
+          <ellipse cx="148" cy="142" rx="12" ry="7" fill="#38b000" opacity="0.4" />
+
+          <rect x="115" y="108" width="200" height="90" rx="8" fill="#38b000" />
+          <text x="130" y="128" fontSize="10" fill="rgba(255,255,255,0.8)" fontFamily="sans-serif">Balance</text>
+          <text x="130" y="150" fontSize="20" fontWeight="bold" fill="#fff" fontFamily="sans-serif">$4,250</text>
+          <text x="130" y="168" fontSize="9" fill="rgba(255,255,255,0.7)" fontFamily="sans-serif">**** **** **** 4321</text>
+          <text x="130" y="188" fontSize="9" fill="rgba(255,255,255,0.7)" fontFamily="sans-serif">John Doe</text>
+
+          <circle cx="285" cy="148" r="28" fill="rgba(255,255,255,0.15)" />
+          <text x="279" y="154" fontSize="20" fill="#fff" fontFamily="sans-serif" fontWeight="bold">$</text>
+
+          <rect x="118" y="208" width="330" height="14" rx="3" fill="#c8e6c9" />
+          <rect x="118" y="228" width="280" height="14" rx="3" fill="#dcedc8" />
+          <rect x="118" y="248" width="200" height="14" rx="3" fill="#c8e6c9" />
+
+          {[...Array(5)].map((_, row) =>
+            [...Array(12)].map((__, col) => (
+              <rect
+                key={`${row}-${col}`}
+                x={100 + col * 30 + (row % 2 === 0 ? 0 : 5)}
+                y={305 + row * 12}
+                width="26"
+                height="9"
+                rx="2"
+                fill="#3a3f52"
+              />
+            )),
+          )}
+
+          <ellipse cx="310" cy="68" rx="14" ry="18" fill="#ffb74d" />
+          <circle cx="310" cy="44" r="12" fill="#ffcc80" />
+          <rect x="296" y="60" width="28" height="18" rx="3" fill="#42a5f5" />
+
+          <circle cx="58" cy="188" r="12" fill="#ffcc80" />
+          <rect x="46" y="200" width="24" height="36" rx="6" fill="#1565c0" />
+          <rect x="46" y="220" width="24" height="36" rx="3" fill="#0d47a1" />
+          <rect x="70" y="205" width="18" height="22" rx="2" fill="#fff" opacity="0.9" />
+          <rect x="72" y="209" width="14" height="2" rx="1" fill="#ccc" />
+          <rect x="72" y="213" width="14" height="2" rx="1" fill="#ccc" />
+          <rect x="72" y="217" width="10" height="2" rx="1" fill="#ccc" />
+
+          <circle cx="500" cy="185" r="12" fill="#ffcc80" />
+          <rect x="488" y="197" width="24" height="36" rx="6" fill="#2e7d32" />
+          <rect x="488" y="217" width="24" height="36" rx="3" fill="#1b5e20" />
+          <rect x="480" y="200" width="22" height="15" rx="2" fill="#42a5f5" />
+
+          <circle
+            cx="466"
+            cy="52"
+            r="26"
+            fill="rgba(255,255,255,0.15)"
+            stroke="#fff"
+            strokeWidth="2"
+          />
+          <ellipse
+            cx="466"
+            cy="52"
+            rx="12"
+            ry="26"
+            stroke="#fff"
+            strokeWidth="1.5"
+            fill="none"
+          />
+          <line x1="440" y1="52" x2="492" y2="52" stroke="#fff" strokeWidth="1.5" />
+          <circle cx="466" cy="52" r="8" fill="#38b000" />
+          <polyline
+            points="462,52 465,55 470,48"
+            stroke="#fff"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          <polygon points="42,155 56,148 56,162" fill="#38b000" opacity="0.7" />
+          <polygon points="518,130 532,123 532,137" fill="#38b000" opacity="0.7" />
+
+          <ellipse cx="455" cy="285" rx="30" ry="8" fill="#ffd740" />
+          <rect x="425" y="258" width="60" height="27" rx="0" fill="#ffca28" />
+          <ellipse cx="455" cy="258" rx="30" ry="8" fill="#ffd740" />
+          <rect x="425" y="235" width="60" height="23" rx="0" fill="#ffca28" />
+          <ellipse cx="455" cy="235" rx="30" ry="8" fill="#ffd740" />
+          <text x="444" y="273" fontSize="14" fontWeight="bold" fill="#e65100" fontFamily="sans-serif">$</text>
+
+          <rect
+            x="468"
+            y="240"
+            width="60"
+            height="40"
+            rx="6"
+            fill="#1565c0"
+            transform="rotate(-15, 498, 260)"
+          />
+          <rect
+            x="468"
+            y="252"
+            width="60"
+            height="6"
+            rx="1"
+            fill="#0d47a1"
+            transform="rotate(-15, 498, 260)"
+          />
+        </svg>
+      </div>
+
     </div>
   );
-
   const renderVerifyAddress = () => (
     <div className="wallet-container create-wallet-page">
       <div className="create-content">
