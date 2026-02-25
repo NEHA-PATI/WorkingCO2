@@ -316,6 +316,26 @@ exports.getRewardCatalogAdmin = async (req, res, next) => {
   }
 };
 
+exports.getRewardRedeemsAdmin = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 100;
+
+    const result = await service.getRewardRedeemsAdmin(page, limit);
+
+    res.json({
+      success: true,
+      data: result.items,
+      page: result.page,
+      limit: result.limit,
+      total: result.total,
+      totalPages: result.totalPages
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.createRewardCatalogItem = async (req, res) => {
   try {
     const data = await service.createRewardCatalogItem(req.body || {});
