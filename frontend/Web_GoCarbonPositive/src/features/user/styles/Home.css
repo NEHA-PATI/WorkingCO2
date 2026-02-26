@@ -394,8 +394,11 @@
 .hp-org-solution-card {
   border: 1.5px solid #e5e7eb;
   border-radius: 16px;
-  padding: 22px 20px;
   background: #fff;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -409,36 +412,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  margin-bottom: 14px;
+  width: 100%;
+  height: 33%;
+  background: #f8fafc;
 }
 
 .hp-org-solution-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: #f8fafc;
-  font-size: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: #fff;
+  font-size: 24px;
 }
 
-.hp-org-solution-time {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 11px;
-  color: #6b7280;
-  font-weight: 600;
+.hp-org-solution-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  display: block;
+}
+
+.hp-org-solution-body {
+  height: 67%;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .hp-org-solution-title {
   font-size: 16px;
   font-weight: 700;
   color: #111827;
-  margin: 0 0 8px;
+  margin: 0 0 10px;
 }
 
 .hp-org-solution-desc {
@@ -446,6 +455,25 @@
   font-size: 14px;
   color: #4b5563;
   line-height: 1.6;
+}
+
+.hp-org-solution-learn {
+  margin-top: auto;
+  background: transparent;
+  border: none;
+  color: #16a34a;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+}
+
+.hp-org-solution-learn:hover {
+  text-decoration: underline;
 }
 
 /* ===== SERVICES ===== */
@@ -895,7 +923,8 @@
   }
 
   .hp-org-solution-card {
-    padding: 16px 14px;
+    aspect-ratio: auto;
+    min-height: 320px;
   }
 
   .hp-org-solution-title {
@@ -903,6 +932,10 @@
   }
 
   .hp-org-solution-desc {
+    font-size: 13px;
+  }
+
+  .hp-org-solution-learn {
     font-size: 13px;
   }
 
