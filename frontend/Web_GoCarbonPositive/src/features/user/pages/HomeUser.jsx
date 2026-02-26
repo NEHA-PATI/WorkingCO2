@@ -158,6 +158,16 @@ const HomeUser = () => {
   return (
     <div className="hp-root">
       <section className="hp-hero hp-hero-user">
+        <video
+          className="hp-hero-video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+        >
+          <source src="/homeanimation.mp4" type="video/mp4" />
+        </video>
         <div className="hp-hero-overlay" />
         <div className="hp-hero-content hp-tab-switch-anim">
           <h1 className="hp-hero-title">
