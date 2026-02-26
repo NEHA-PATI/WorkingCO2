@@ -35,25 +35,21 @@ const HomePage = ({ forcedTab = null }) => {
       icon: <FaLeaf style={{ color: "#16a34a" }} />,
       title: "Complete tasks",
       desc: "Do various tasks to earn points",
-      
     },
     {
       icon: <FaShieldHeart style={{ color: "#ec4899" }} />,
       title: "Eco Badge",
       desc: "Get badges for your consistency",
-      
     },
     {
       icon: <FaGift style={{ color: "#f97316" }} />,
       title: "Win exclusive rewards",
       desc: "Get internship, expert consulting , and goodies ",
-      
     },
     {
       icon: <GiRecycle style={{ color: "#14b8a6" }} />,
       title: "Streak Points",
       desc: "Stay consistent and Earn more points ",
-      
     },
   ];
 
@@ -281,7 +277,9 @@ const HomePage = ({ forcedTab = null }) => {
   ];
 
   const activeAnnouncements =
-    activeTab === "organisation" ? organisationAnnouncements : userAnnouncements;
+    activeTab === "organisation"
+      ? organisationAnnouncements
+      : userAnnouncements;
   const activeFaqs = activeTab === "organisation" ? organisationFaqs : userFaqs;
   const maxOrgCarouselIndex = Math.max(
     0,
@@ -339,14 +337,14 @@ const HomePage = ({ forcedTab = null }) => {
   };
 
   const heroContent =
-  activeTab === "organisation"
-    ? {
-        titleLine1: "Developing Verified",
-        titleLine2: "Carbon Credit",
-        highlight: "Projects",
-        description:
-          "End-to-end carbon project structuring, feasibility assessment, and registry-aligned certification support for industrial operations.",
-      }
+    activeTab === "organisation"
+      ? {
+          titleLine1: "Developing Verified",
+          titleLine2: "Carbon Credit",
+          highlight: "Projects",
+          description:
+            "End-to-end carbon project structuring, feasibility assessment, and registry-aligned certification support for industrial operations.",
+        }
       : {
           titleLine1: "Building a",
           titleLine2: "Sustainable",
@@ -375,7 +373,10 @@ const HomePage = ({ forcedTab = null }) => {
           </video>
         )}
         <div className="hp-hero-overlay" />
-        <div className="hp-hero-content hp-tab-switch-anim" key={`hero-content-${activeTab}`}>
+        <div
+          className="hp-hero-content hp-tab-switch-anim"
+          key={`hero-content-${activeTab}`}
+        >
           <h1 className="hp-hero-title">
             {heroContent.titleLine1}
             <br />
@@ -387,24 +388,27 @@ const HomePage = ({ forcedTab = null }) => {
             <>
               <div className="hp-hero-btns">
                 {activeTab === "organisation" ? (
-  <button
-    className="hp-btn-primary hp-hero-start-btn"
-    onClick={() =>
-      navigate("/industrial", {
-        state: { openDemo: true, demoIndustry: "Industrial Solutions" },
-      })
-    }
-  >
-    Book Free Feasibility Review <FaArrowRight />
-  </button>
-) : (
-  <button
-    className="hp-btn-primary hp-hero-start-btn"
-    onClick={() => navigate("/signup")}
-  >
-    Get Started <FaArrowRight />
-  </button>
-)}
+                  <button
+                    className="hp-btn-primary hp-hero-start-btn"
+                    onClick={() =>
+                      navigate("/industrial", {
+                        state: {
+                          openDemo: true,
+                          demoIndustry: "Industrial Solutions",
+                        },
+                      })
+                    }
+                  >
+                    Book Free Feasibility Review <FaArrowRight />
+                  </button>
+                ) : (
+                  <button
+                    className="hp-btn-primary hp-hero-start-btn"
+                    onClick={() => navigate("/signup")}
+                  >
+                    Get Started <FaArrowRight />
+                  </button>
+                )}
               </div>
             </>
           )}
@@ -420,7 +424,7 @@ const HomePage = ({ forcedTab = null }) => {
                 className={`hp-tab-btn ${activeTab === "user" ? "hp-tab-active" : ""}`}
                 onClick={() => handleExperienceRoute("user")}
               >
-               Individual
+                Individual
               </button>
               <button
                 className={`hp-tab-btn ${activeTab === "organisation" ? "hp-tab-active" : ""}`}
@@ -430,11 +434,17 @@ const HomePage = ({ forcedTab = null }) => {
               </button>
             </div>
           </div>
-          <div className="hp-tab-switch-anim" key={`rewards-header-${activeTab}`}>
+          <div
+            className="hp-tab-switch-anim"
+            key={`rewards-header-${activeTab}`}
+          >
             {activeTab !== "organisation" && (
               <>
                 <h2 className="hp-section-title hp-rewards-title">
-                  <FaAward className="hp-title-icon" style={{ color: "#f59e0b" }} />
+                  <FaAward
+                    className="hp-title-icon"
+                    style={{ color: "#f59e0b" }}
+                  />
                   Join Contest,Earn Rewards
                 </h2>
                 <p className="hp-section-sub">
@@ -444,7 +454,10 @@ const HomePage = ({ forcedTab = null }) => {
             )}
           </div>
         </div>
-        <div className="hp-tab-switch-anim" key={`rewards-content-${activeTab}`}>
+        <div
+          className="hp-tab-switch-anim"
+          key={`rewards-content-${activeTab}`}
+        >
           {activeTab === "organisation" && (
             <div className="hp-org-apply-card">
               <div className="hp-org-apply-icon-wrap">
@@ -453,10 +466,11 @@ const HomePage = ({ forcedTab = null }) => {
               <div className="hp-org-apply-content">
                 <p className="hp-org-apply-eyebrow">Organisation Onboarding</p>
                 <h3 className="hp-org-apply-title">
- Request a Carbon Project Consultation
-</h3>
+                  Request a Carbon Project Consultation
+                </h3>
                 <p className="hp-org-apply-desc">
-                  Share your organisation details to begin a structured evaluation of your carbon project potential.
+                  Share your organisation details to begin a structured
+                  evaluation of your carbon project potential.
                 </p>
               </div>
               <button
@@ -470,11 +484,15 @@ const HomePage = ({ forcedTab = null }) => {
           {activeTab === "organisation" && (
             <div className="hp-section-header hp-org-solutions-header">
               <h2 className="hp-section-title hp-rewards-title">
-                <FaGlobe className="hp-title-icon" style={{ color: "#0ea5e9" }} />
+                <FaGlobe
+                  className="hp-title-icon"
+                  style={{ color: "#0ea5e9" }}
+                />
                 Industrial Solutions & Strategic Carbon Advisory
               </h2>
               <p className="hp-section-sub">
-                Enabling industrial enterprises to reduce emissions, align with global standards, and unlock long-term carbon value.
+                Enabling industrial enterprises to reduce emissions, align with
+                global standards, and unlock long-term carbon value.
               </p>
             </div>
           )}
@@ -509,12 +527,18 @@ const HomePage = ({ forcedTab = null }) => {
                               loading="lazy"
                             />
                           ) : (
-                            <span className="hp-org-solution-icon">{solution.icon}</span>
+                            <span className="hp-org-solution-icon">
+                              {solution.icon}
+                            </span>
                           )}
                         </div>
                         <div className="hp-org-solution-body">
-                          <h3 className="hp-org-solution-title">{solution.title}</h3>
-                          <p className="hp-org-solution-desc">{solution.desc}</p>
+                          <h3 className="hp-org-solution-title">
+                            {solution.title}
+                          </h3>
+                          <p className="hp-org-solution-desc">
+                            {solution.desc}
+                          </p>
                           <button
                             className="hp-org-solution-learn"
                             onClick={() => navigate("/industrial")}
@@ -587,16 +611,25 @@ const HomePage = ({ forcedTab = null }) => {
       <section className="hp-section hp-announcements-section">
         <div className="hp-section-header">
           <h2 className="hp-section-title hp-dark-title">
-            <FaBullhorn className="hp-title-icon" style={{ color: "#3b82f6" }} />
+            <FaBullhorn
+              className="hp-title-icon"
+              style={{ color: "#3b82f6" }}
+            />
             Updates and Announcements
           </h2>
-          <p className="hp-section-sub hp-tab-switch-anim" key={`ann-sub-${activeTab}`}>
+          <p
+            className="hp-section-sub hp-tab-switch-anim"
+            key={`ann-sub-${activeTab}`}
+          >
             {activeTab === "organisation"
               ? "Stay informed about features and updates for enterprise sustainability operations"
               : "Stay in the loop with everything happening on the platform"}
           </p>
         </div>
-        <div className="hp-announcements-list hp-tab-switch-anim" key={`ann-list-${activeTab}`}>
+        <div
+          className="hp-announcements-list hp-tab-switch-anim"
+          key={`ann-list-${activeTab}`}
+        >
           {activeAnnouncements.map((a, i) => (
             <div className="hp-announcement-row" key={i}>
               <div className="hp-announcement-dot" />
@@ -625,13 +658,18 @@ const HomePage = ({ forcedTab = null }) => {
           </div>
           <div className="hp-about-text">
             <h2 className="hp-about-title">About Us</h2>
-           <p className="hp-about-desc">
-  We specialise in developing structured carbon credit projects for industrial and renewable sectors. 
-  Our focus is on transparent documentation, realistic projections, and registry-aligned methodologies 
-  to help organisations unlock carbon as a strategic asset.
-</p>
-            <button className="hp-btn-primary" onClick={() => navigate("/about")}>Know More <FaArrowRight />
-
+            <p className="hp-about-desc">
+              We specialise in developing structured carbon credit projects for
+              industrial and renewable sectors. Our focus is on transparent
+              documentation, realistic projections, and registry-aligned
+              methodologies to help organisations unlock carbon as a strategic
+              asset.
+            </p>
+            <button
+              className="hp-btn-primary"
+              onClick={() => navigate("/about")}
+            >
+              Know More <FaArrowRight />
             </button>
           </div>
         </div>
@@ -642,13 +680,19 @@ const HomePage = ({ forcedTab = null }) => {
           <h2 className="hp-section-title hp-dark-title">
             Frequently Asked Questions
           </h2>
-          <p className="hp-section-sub hp-tab-switch-anim" key={`faq-sub-${activeTab}`}>
+          <p
+            className="hp-section-sub hp-tab-switch-anim"
+            key={`faq-sub-${activeTab}`}
+          >
             {activeTab === "organisation"
               ? "Everything you need to know for your organisation setup and operations"
               : "Everything you need to know about the platform"}
           </p>
         </div>
-        <div className="hp-faq-list hp-tab-switch-anim" key={`faq-list-${activeTab}`}>
+        <div
+          className="hp-faq-list hp-tab-switch-anim"
+          key={`faq-list-${activeTab}`}
+        >
           {activeFaqs.map((f, i) => (
             <div
               className="hp-faq-item"
