@@ -270,41 +270,56 @@ export default function ArenaRewardsPage() {
                     <div className="arena-rewards-empty">No rewards available right now.</div>
                 ) : (
                     <div className="arena-rewards-grid">
-                        {rewards.map((reward) => (
-                            <article key={reward.reward_id} className="arena-reward-card">
-                                <div className="arena-reward-image-wrap">
-                                    {reward.image_url ? (
-                                        <img
-                                            src={reward.image_url}
-                                            alt={reward.name}
-                                            className="arena-reward-image"
-                                        />
-                                    ) : (
-                                        <div className="arena-reward-image-fallback">No Image</div>
-                                    )}
-                                </div>
-                                <div className="arena-reward-body">
-                                    <h2 className="arena-reward-name">{reward.name}</h2>
-                                    <p className="arena-reward-description">
-                                        {reward.description || 'Unlock this reward using your Arena points.'}
-                                    </p>
-                                    <div className="arena-reward-pricing">
-                                        <span className="arena-reward-points">
-                                            <Zap className="w-3.5 h-3.5" />
-                                            {Number(reward.points || 0).toLocaleString()} pts
-                                        </span>
+                        {rewards.map((reward) => {
+                            const rewardPoints = Number(reward.points || 0);
+                            const canRedeem = myPointsQuery.isError || (!myPointsQuery.isLoading && rewardPoints <= myPoints);
+
+                            return (
+                                <article key={reward.reward_id} className="arena-reward-card">
+                                    <div className="arena-reward-image-wrap">
+                                        {reward.image_url ? (
+                                            <img
+                                                src={reward.image_url}
+                                                alt={reward.name}
+                                                className="arena-reward-image"
+                                            />
+                                        ) : (
+                                            <div className="arena-reward-image-fallback">No Image</div>
+                                        )}
+                                        <div className="arena-reward-brand-chip">
+                                            <Leaf className="w-3.5 h-3.5" />
+                                            Carbon-Positive Pick
+                                        </div>
+                                        <div className="arena-reward-worth-chip">
+                                            <IndianRupee className="w-3.5 h-3.5" />
+                                            Worth Rs. {Number(reward.price_inr || 0).toLocaleString('en-IN')}
+                                        </div>
                                     </div>
-                                    <button
-                                        type="button"
-                                        disabled={redeemMutation.isPending}
-                                        onClick={() => redeemMutation.mutate(reward.reward_id)}
-                                        className="arena-reward-redeem-btn"
-                                    >
-                                        {redeemMutation.isPending ? 'Redeeming...' : 'Redeem Now'}
-                                    </button>
-                                </div>
-                            </article>
-                        ))}
+                                    <div className="arena-reward-body">
+                                        <h2 className="arena-reward-name">{reward.name}</h2>
+                                        <p className="arena-reward-description">{reward.description}</p>
+                                        <div className="arena-reward-pricing">
+                                            <span className="arena-reward-rupees">
+                                                Rs. {Number(reward.price_inr || 0).toLocaleString('en-IN')}
+                                            </span>
+                                            <span className="arena-reward-points">
+                                                <Zap className="w-3.5 h-3.5" />
+                                                {rewardPoints.toLocaleString()} pts
+                                            </span>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            disabled={!canRedeem}
+                                            onClick={() => openRedeemModal(reward)}
+                                            className="arena-reward-redeem-btn"
+                                        >
+                                            {canRedeem ? 'Redeem Gift' : 'Not Enough Points'}
+                                        </button>
+                                    </div>
+                                </article>
+                            );
+                        })}
                     </div>
                 )}
 
