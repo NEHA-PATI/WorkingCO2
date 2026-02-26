@@ -4,9 +4,7 @@ import useAuth from "@contexts/AuthContext";
 import {
   FaArrowRight,
   FaAward,
-  FaBatteryHalf,
   FaBookOpen,
-  FaBottleWater,
   FaChevronDown,
   FaChevronUp,
   FaClock,
@@ -14,7 +12,6 @@ import {
   FaGift,
   FaGlobe,
   FaLeaf,
-  FaMicrochip,
   FaBullhorn,
   FaShieldHeart,
   FaUserGroup,
@@ -58,44 +55,49 @@ const HomePage = () => {
 
   const organisationSolutions = [
     {
+      image: "/e-waste.jpg",
+      title: "E-Waste Management",
+      desc: "Recover valuable metals and components from discarded electronics through certified dismantling and sorting workflows. This reduces landfill burden, lowers raw material extraction pressure, and supports responsible circular manufacturing at scale.",
+    },
+    {
+      image: "/plastic.jpg",
+      title: "Plastic Recycling",
+      desc: "Closed-loop plastic recovery programs sort, clean, and reprocess industrial and post-consumer waste into reusable feedstock. These systems reduce virgin polymer demand, improve material traceability, and help plants meet sustainability targets consistently.",
+    },
+    {
+      image: "/battery.jpg",
+      title: "Battery Recycling",
+      desc: "Safe battery take-back and recovery pipelines process lithium-ion and lead-acid units with controlled handling standards. Recovered materials re-enter production streams, reducing hazardous waste risks and strengthening circular supply chain resilience.",
+    },
+    {
       icon: <GiChemicalDrop style={{ color: "#2563eb" }} />,
+      image: "/steel.jpg",
       title: "Steel and Metal",
-      desc: "Advanced steel manufacturing and metal processing solutions for structural and industrial applications.",
+      desc: "Advanced steel and metal processing solutions improve material efficiency for structural and heavy industrial applications. Modern process controls reduce scrap rates, optimize furnace energy use, and support lower-emission manufacturing outcomes.",
     },
     {
       icon: <FaLeaf style={{ color: "#16a34a" }} />,
+      image: "/renewable.jpg",
       title: "Renewable Energy",
-      desc: "Solar, wind, and renewable energy integration systems for sustainable power solutions.",
+      desc: "Integrated solar, wind, and hybrid renewable systems deliver stable low-carbon power for industrial demand profiles. Smart load balancing and storage coordination improve reliability while reducing dependence on fossil-based electricity.",
     },
     {
       icon: <FaShieldHeart style={{ color: "#06b6d4" }} />,
+      image: "/water.jpg",
       title: "Water Treatment",
-      desc: "Industrial water purification and recycling technologies for sustainable resource management.",
+      desc: "Industrial water purification and recycling technologies enable safer discharge and high reuse ratios across operations. Continuous monitoring and treatment optimization reduce freshwater intake while improving compliance with environmental standards.",
     },
     {
       icon: <FaGlobe style={{ color: "#0f766e" }} />,
+      image: "/cc.jpg",
       title: "Carbon Capture",
-      desc: "Carbon capture and offset solutions for climate-neutral operations and ESG compliance support.",
+      desc: "Carbon capture programs identify, separate, and manage process emissions from high-impact operations. Coupled with verified offsets and reporting frameworks, they accelerate progress toward climate-neutral targets and ESG commitments.",
     },
     {
       icon: <HiMiniChartBar style={{ color: "#4f46e5" }} />,
+      image: "/sm.jpg",
       title: "Smart Manufacturing",
-      desc: "IoT-enabled smart factory solutions with AI-powered optimization and real-time analytics.",
-    },
-    {
-      icon: <FaMicrochip style={{ color: "#0ea5e9" }} />,
-      title: "E-Waste Management",
-      desc: "Responsible collection and certified processing of end-of-life electronics to recover valuable materials and reduce landfill impact.",
-    },
-    {
-      icon: <FaBottleWater style={{ color: "#14b8a6" }} />,
-      title: "Plastic Recycling",
-      desc: "Closed-loop plastic recovery programs that sort, clean, and reprocess industrial and post-consumer plastics into reusable feedstock.",
-    },
-    {
-      icon: <FaBatteryHalf style={{ color: "#f59e0b" }} />,
-      title: "Battery Recycling",
-      desc: "Safe battery take-back and material recovery workflows for lithium-ion and lead-acid systems, supporting compliance and circular supply chains.",
+      desc: "IoT-enabled smart factory architecture uses real-time analytics to optimize throughput, quality, and energy consumption. Predictive insights reduce downtime, improve asset utilization, and support data-driven sustainability decisions.",
     },
   ];
 
@@ -414,10 +416,27 @@ const HomePage = () => {
               {organisationSolutions.map((solution, i) => (
                 <div className="hp-org-solution-card" key={i}>
                   <div className="hp-org-solution-top">
-                    <span className="hp-org-solution-icon">{solution.icon}</span>
+                    {solution.image ? (
+                      <img
+                        src={solution.image}
+                        alt={solution.title}
+                        className="hp-org-solution-image"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span className="hp-org-solution-icon">{solution.icon}</span>
+                    )}
                   </div>
-                  <h3 className="hp-org-solution-title">{solution.title}</h3>
-                  <p className="hp-org-solution-desc">{solution.desc}</p>
+                  <div className="hp-org-solution-body">
+                    <h3 className="hp-org-solution-title">{solution.title}</h3>
+                    <p className="hp-org-solution-desc">{solution.desc}</p>
+                    <button
+                      className="hp-org-solution-learn"
+                      onClick={() => navigate("/industrial")}
+                    >
+                      Learn More <FaArrowRight />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
