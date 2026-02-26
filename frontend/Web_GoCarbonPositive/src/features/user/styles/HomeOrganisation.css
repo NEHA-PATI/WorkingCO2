@@ -1,3 +1,119 @@
 @import "./Home.css";
 
 /* Organisation experience route styles */
+
+.hp-org-services-carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.hp-org-services-arrow {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.hp-org-services-arrow:hover {
+  border-color: #86efac;
+  color: #16a34a;
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.15);
+}
+
+.hp-org-services-stage {
+  position: relative;
+  flex: 1;
+  max-width: 1040px;
+  min-height: 320px;
+  overflow: hidden;
+}
+
+.hp-org-services-item {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(96%, 560px);
+  transition:
+    transform 0.45s ease,
+    opacity 0.45s ease,
+    filter 0.45s ease;
+}
+
+.hp-org-services-item.is-center {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+  z-index: 3;
+  filter: blur(0);
+}
+
+.hp-org-services-item.is-left {
+  transform: translateX(calc(-50% - 335px)) scale(0.9);
+  opacity: 0.52;
+  z-index: 2;
+  filter: blur(0.2px);
+}
+
+.hp-org-services-item.is-right {
+  transform: translateX(calc(-50% + 335px)) scale(0.9);
+  opacity: 0.52;
+  z-index: 2;
+  filter: blur(0.2px);
+}
+
+.hp-org-services-item.is-hidden {
+  transform: translateX(-50%) scale(0.78);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hp-org-service-card {
+  min-height: 0;
+}
+
+@media (max-width: 1024px) {
+  .hp-org-services-item.is-left {
+    transform: translateX(calc(-50% - 260px)) scale(0.88);
+  }
+
+  .hp-org-services-item.is-right {
+    transform: translateX(calc(-50% + 260px)) scale(0.88);
+  }
+}
+
+@media (max-width: 768px) {
+  .hp-org-services-carousel {
+    gap: 8px;
+  }
+
+  .hp-org-services-arrow {
+    width: 34px;
+    height: 34px;
+  }
+
+  .hp-org-services-stage {
+    min-height: 330px;
+  }
+
+  .hp-org-services-item {
+    width: min(95%, 600px);
+  }
+
+  .hp-org-services-item.is-left,
+  .hp-org-services-item.is-right,
+  .hp-org-services-item.is-hidden {
+    transform: translateX(-50%) scale(0.9);
+    opacity: 0;
+    pointer-events: none;
+  }
+}

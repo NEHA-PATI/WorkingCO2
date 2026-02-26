@@ -13,9 +13,7 @@ import {
   FaGlobe,
   FaLeaf,
   FaShieldHeart,
-  FaUserGroup,
 } from "react-icons/fa6";
-import { GiChemicalDrop } from "react-icons/gi";
 import { HiMiniChartBar } from "react-icons/hi2";
 import "@features/user/styles/HomeOrganisation.css";
 
@@ -23,6 +21,8 @@ const HomeOrganisation = () => {
   const [openFaq, setOpenFaq] = useState(null);
   const [orgCarouselIndex, setOrgCarouselIndex] = useState(0);
   const [orgVisibleCount, setOrgVisibleCount] = useState(3);
+  const [servicesCarouselIndex, setServicesCarouselIndex] = useState(0);
+  const [isServicesHovered, setIsServicesHovered] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated, authLoading } = useAuth();
 
@@ -71,39 +71,39 @@ const HomeOrganisation = () => {
 
   const services = [
     {
-      icon: <GiChemicalDrop style={{ color: "#8b5cf6" }} />,
-      title: "Carbon Footprint Calculator",
-      desc: "Measure your personal or organisational carbon footprint with our AI-powered calculator. Get detailed breakdowns and actionable insights.",
+      icon: <FaGlobe style={{ color: "#3b82f6" }} />,
+      title: "Carbon Marketplace and Portfolio",
+      desc: "Source and trade verified carbon credits, compare project quality, and track portfolio performance across registries.",
       highlighted: false,
     },
     {
-      icon: <HiMiniChartBar style={{ color: "#0ea5e9" }} />,
-      title: "Sustainability Analytics",
-      desc: "Track your green journey with real-time dashboards. Visualise your impact over time and benchmark against peers.",
+      icon: <FaShieldHeart style={{ color: "#0ea5e9" }} />,
+      title: "Carbon Project Feasibility",
+      desc: "Evaluate baselines, additionality, investment needs, and expected credit yield before committing to project development.",
       highlighted: false,
     },
     {
       icon: <FaLeaf style={{ color: "#22c55e" }} />,
-      title: "Tree Planting Campaigns",
-      desc: "Participate in community-driven tree planting initiatives. Every coin you redeem plants a real tree somewhere in the world.",
-      highlighted: true,
-    },
-    {
-      icon: <FaGlobe style={{ color: "#3b82f6" }} />,
-      title: "Carbon Offset Marketplace",
-      desc: "Browse verified carbon offset projects and invest your coins towards real environmental change across the globe.",
-      highlighted: false,
-    },
-    {
-      icon: <FaUserGroup style={{ color: "#f59e0b" }} />,
-      title: "Community Challenges",
-      desc: "Join group challenges to reduce carbon emissions together. Compete, collaborate, and make a collective difference.",
+      title: "Sustainability Asset Management",
+      desc: "Manage renewable, efficiency, and nature-based assets with lifecycle tracking, KPI monitoring, and audit-ready records.",
       highlighted: true,
     },
     {
       icon: <FaBookOpen style={{ color: "#ef4444" }} />,
-      title: "Green Learning Hub",
-      desc: "Access curated articles, courses, and resources on sustainability. Earn bonus points while you learn about the planet.",
+      title: "ESG and Compliance",
+      desc: "Align disclosures with ESG frameworks and compliance mandates using structured evidence, controls, and reporting workflows.",
+      highlighted: false,
+    },
+    {
+      icon: <HiMiniChartBar style={{ color: "#f59e0b" }} />,
+      title: "MRV",
+      desc: "Implement Measurement, Reporting, and Verification pipelines for accurate emissions accounting and third-party validation.",
+      highlighted: true,
+    },
+    {
+      icon: <FaClock style={{ color: "#6b7280" }} />,
+      title: "Methodology and Registry Advisory",
+      desc: "Select suitable methodologies and registry pathways to streamline validation, issuance, and long-term project governance.",
       highlighted: false,
     },
   ];
@@ -216,6 +216,34 @@ const HomeOrganisation = () => {
     setOrgCarouselIndex((prev) => Math.min(maxOrgCarouselIndex, prev + 1));
   };
 
+  const getServiceRelativeIndex = (index) => {
+    let relativeIndex = index - servicesCarouselIndex;
+    const total = services.length;
+
+    if (relativeIndex > total / 2) relativeIndex -= total;
+    if (relativeIndex < -total / 2) relativeIndex += total;
+
+    return relativeIndex;
+  };
+
+  const moveServicesPrev = () => {
+    setServicesCarouselIndex((prev) => (prev - 1 + services.length) % services.length);
+  };
+
+  const moveServicesNext = () => {
+    setServicesCarouselIndex((prev) => (prev + 1) % services.length);
+  };
+
+  useEffect(() => {
+    if (isServicesHovered) return undefined;
+
+    const intervalId = setInterval(() => {
+      setServicesCarouselIndex((prev) => (prev + 1) % services.length);
+    }, 2500);
+
+    return () => clearInterval(intervalId);
+  }, [isServicesHovered, services.length]);
+
   return (
     <div className="hp-root">
       <section className="hp-hero hp-hero-organisation">
@@ -303,7 +331,7 @@ const HomeOrganisation = () => {
         <div className="hp-section-header hp-org-solutions-header">
           <h2 className="hp-section-title hp-rewards-title">
             <FaGlobe className="hp-title-icon" style={{ color: "#0ea5e9" }} />
-            Industrial Solutions for Organisations
+            Industrial Solutions & Strategic Carbon Advisory
           </h2>
           <p className="hp-section-sub">
             Comprehensive sustainability-focused solutions designed for industrial
@@ -375,22 +403,60 @@ const HomeOrganisation = () => {
             Tools and resources to empower your sustainable journey
           </p>
         </div>
-        <div className="hp-services-grid">
-          {services.map((s, i) => (
-            <div
-              className={`hp-service-card ${s.highlighted ? "hp-service-highlighted" : ""}`}
-              key={i}
-            >
-              <div className="hp-service-icon-wrap">
-                <span className="hp-service-icon">{s.icon}</span>
-              </div>
-              <h3 className="hp-service-title">{s.title}</h3>
-              <p className="hp-service-desc">{s.desc}</p>
-              <a className="hp-learn-more" href="#">
-                Learn more <FaArrowRight />
-              </a>
-            </div>
-          ))}
+
+        <div className="hp-org-services-carousel">
+          <button
+            type="button"
+            className="hp-org-services-arrow"
+            onClick={moveServicesPrev}
+            aria-label="Previous service"
+          >
+            <FaChevronLeft />
+          </button>
+
+          <div
+            className="hp-org-services-stage"
+            onMouseEnter={() => setIsServicesHovered(true)}
+            onMouseLeave={() => setIsServicesHovered(false)}
+          >
+            {services.map((s, i) => {
+              const relative = getServiceRelativeIndex(i);
+              const positionClass =
+                relative === 0
+                  ? "is-center"
+                  : relative === -1
+                    ? "is-left"
+                    : relative === 1
+                      ? "is-right"
+                      : "is-hidden";
+
+              return (
+                <div className={`hp-org-services-item ${positionClass}`} key={s.title}>
+                  <div
+                    className={`hp-service-card hp-org-service-card ${s.highlighted ? "hp-service-highlighted" : ""}`}
+                  >
+                    <div className="hp-service-icon-wrap">
+                      <span className="hp-service-icon">{s.icon}</span>
+                    </div>
+                    <h3 className="hp-service-title">{s.title}</h3>
+                    <p className="hp-service-desc">{s.desc}</p>
+                    <a className="hp-learn-more" href="#">
+                      Learn more <FaArrowRight />
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            className="hp-org-services-arrow"
+            onClick={moveServicesNext}
+            aria-label="Next service"
+          >
+            <FaChevronRight />
+          </button>
         </div>
       </section>
 
