@@ -371,7 +371,7 @@ export default function JoinOrganisation() {
               onClick={() => navigate(-1)}
               aria-label="Go back"
             >
-              {"<-"}
+              {"<"}
             </button>
             <div>
             <h1 className="join-org-header-title join-org-header-title-link" onClick={() => navigate("/")}>

@@ -586,7 +586,7 @@ const HomePage = ({ forcedTab = null }) => {
         <div className="hp-section-header">
           <h2 className="hp-section-title hp-dark-title">Our Services</h2>
           <p className="hp-section-sub">
-            Tools and resources to empower your sustainable journey
+            Structured digital solutions to support measurable climate action and long-term sustainability engagement.
           </p>
         </div>
         <div className="hp-services-grid">
