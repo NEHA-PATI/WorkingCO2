@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "@features/user/styles/Industrial.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const IndustrialSolutions = () => {
   const [selectedIndustry, setSelectedIndustry] = useState(null);
@@ -19,6 +19,23 @@ const IndustrialSolutions = () => {
     contact_number: "",
   });
   const navigate = useNavigate();
+  const location = useLocation();
+  const autoOpenedForLocationKeyRef = useRef(null);
+
+  useEffect(() => {
+    if (
+      location.state?.openDemo &&
+      autoOpenedForLocationKeyRef.current !== location.key
+    ) {
+      const industryName = location.state.demoIndustry || "Industrial Solutions";
+      setDemoIndustry(industryName);
+      setFormData((prev) => ({
+        ...prev,
+        industry_name: industryName,
+      }));
+      autoOpenedForLocationKeyRef.current = location.key;
+    }
+  }, [location.key, location.state]);
 
   const openDemoForm = (industryName) => {
     setDemoIndustry(industryName);
@@ -66,8 +83,11 @@ const IndustrialSolutions = () => {
       if (response.ok) {
         setToastMessage("Demo request submitted successfully!");
         setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
         closeDemoForm();
+        setTimeout(() => {
+          setShowToast(false);
+          navigate(-1);
+        }, 1200);
       } else {
         setToastMessage(data.message || "Submission failed");
         setShowToast(true);
@@ -270,7 +290,7 @@ const IndustrialSolutions = () => {
             className="modal-content demo-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <button className="close-btn" onClick={closeDemoForm}>
+            <button className="close-btn demo-close-btn" onClick={closeDemoForm}>
               ✕
             </button>
 

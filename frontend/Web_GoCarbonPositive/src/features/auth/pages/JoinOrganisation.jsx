@@ -654,7 +654,6 @@ export default function JoinOrganisation() {
 
                 <div className="join-org-benefits-grid">
                   <div className="join-org-benefit-card">
-                    <div className="join-org-benefit-icon">♻️</div>
                   <h3 className="join-org-benefit-title">
   Carbon Strategy Development
 </h3>
@@ -664,7 +663,6 @@ export default function JoinOrganisation() {
                   </div>
 
                   <div className="join-org-benefit-card">
-                    <div className="join-org-benefit-icon">🌱</div>
                     <h3 className="join-org-benefit-title">
   Documentation & Compliance Guidance
 </h3>
@@ -674,7 +672,6 @@ export default function JoinOrganisation() {
                   </div>
 
                   <div className="join-org-benefit-card">
-                    <div className="join-org-benefit-icon">🌍</div>
                    <h3 className="join-org-benefit-title">
   Long-Term Sustainability Partnership
 </h3>

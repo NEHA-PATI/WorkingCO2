@@ -684,7 +684,8 @@ body {
   }
 
   .toast-notification {
-    bottom: 16px;
+    top: 16px;
+    bottom: auto;
     right: 16px;
   }
 }
@@ -835,6 +836,14 @@ body {
   padding: 10px 10px 10px;
 }
 
+.demo-close-btn {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  transform: none !important;
+  z-index: 2;
+}
+
 .demo-modal-header {
   text-align: center;
   margin-bottom: 9px;
@@ -972,7 +981,8 @@ body {
 /* ===== TOAST NOTIFICATION ===== */
 .toast-notification {
   position: fixed;
-  bottom: 24px;
+  top: 24px;
+  bottom: auto;
   right: 24px;
   z-index: 2000;
   animation: slideInRight 0.3s ease;
