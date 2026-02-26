@@ -18,6 +18,7 @@ import { HiMiniChartBar } from "react-icons/hi2";
 import "@features/user/styles/HomeOrganisation.css";
 
 const HomeOrganisation = () => {
+  const BLOG_VISIBLE_COUNT = 3;
   const [openFaq, setOpenFaq] = useState(null);
   const [orgCarouselIndex, setOrgCarouselIndex] = useState(0);
   const [orgVisibleCount, setOrgVisibleCount] = useState(3);
@@ -110,46 +111,118 @@ const HomeOrganisation = () => {
 
   const organisationAnnouncements = [
     {
-      date: "Feb 16, 2026",
-      tag: "POLICY",
+      date: "Mar 20, 2026",
+      tag: "BLOG",
       tagClass: "hp-tag-feature",
-      title: "New Corporate ESG Reporting Templates Added",
-      desc: "Organisations can now generate pre-formatted quarterly ESG reports aligned with global disclosure frameworks.",
+      title: "New Blog Published: How Enterprises Build Carbon Portfolios",
+      desc: "A practical walkthrough on screening high-integrity projects and balancing risk across registry-backed credits.",
     },
     {
-      date: "Feb 11, 2026",
-      tag: "FEATURE",
-      tagClass: "hp-tag-update",
-      title: "Industrial Monitoring Dashboard Expanded",
-      desc: "Track water use, energy load, and emissions intensity from a unified operations dashboard in near real time.",
+      date: "Mar 16, 2026",
+      tag: "BLOG",
+      tagClass: "hp-tag-feature",
+      title: "New Blog Published: MRV That Stands Up to Verification",
+      desc: "Key data controls, evidence chains, and QA checks are now documented for stronger audit confidence.",
     },
     {
-      date: "Feb 6, 2026",
-      tag: "INTEGRATION",
+      date: "Mar 11, 2026",
+      tag: "BLOG",
+      tagClass: "hp-tag-feature",
+      title: "New Blog Published: From ESG Reporting to Action Plans",
+      desc: "A new guide explains how teams can convert disclosure requirements into measurable site-level initiatives.",
+    },
+    {
+      date: "Mar 8, 2026",
+      tag: "COMMUNITY",
       tagClass: "hp-tag-community",
-      title: "ERP Data Connectors Released",
-      desc: "New integrations with enterprise ERP systems let teams sync production and utility data automatically.",
+      title: "Upcoming Community Spotlight: Industry Network",
+      desc: "Cross-sector collaboration sessions are now open for enterprises and solution partners.",
     },
     {
-      date: "Jan 29, 2026",
-      tag: "UPDATE",
-      tagClass: "hp-tag-update",
-      title: "Supplier Emissions Mapping Improved",
-      desc: "Scope 3 supplier-level emission mapping now includes trend tracking and category-level benchmarking.",
+      date: "Mar 4, 2026",
+      tag: "COMMUNITY",
+      tagClass: "hp-tag-community",
+      title: "Upcoming Community Spotlight: ESG Leaders Circle",
+      desc: "Executive knowledge exchange sessions will focus on governance, reporting strategy, and implementation scale-up.",
     },
     {
-      date: "Jan 22, 2026",
-      tag: "COMPLIANCE",
-      tagClass: "hp-tag-feature",
-      title: "Audit Trail Module Introduced",
-      desc: "A new audit trail provides verifiable change history for operational sustainability data and reports.",
+      date: "Feb 28, 2026",
+      tag: "COMMUNITY",
+      tagClass: "hp-tag-community",
+      title: "Upcoming Community Spotlight: Climate Action Events",
+      desc: "Workshops and live events are scheduled around decarbonisation planning and MRV readiness.",
     },
     {
-      date: "Jan 14, 2026",
-      tag: "FEATURE",
-      tagClass: "hp-tag-feature",
-      title: "Multi-Site Goal Management Is Live",
-      desc: "Set site-wise reduction goals, assign owners, and compare progress across plants and business units.",
+      date: "Feb 24, 2026",
+      tag: "COMMUNITY",
+      tagClass: "hp-tag-community",
+      title: "Upcoming Community Spotlight: Research and Policy Collaboration",
+      desc: "New collaboration tracks align policy, methodology design, and practical on-ground implementation.",
+    },
+  ];
+
+  const blogHighlights = [
+    {
+      image: "https://picsum.photos/seed/gocarbon-blog-1/640/360",
+      title: "How Enterprises Build Carbon Portfolios",
+      excerpt:
+        "A practical walkthrough of screening high-integrity projects and balancing risk across registry-backed credits.",
+      date: "Mar 2026",
+    },
+    {
+      image: "https://picsum.photos/seed/gocarbon-blog-2/640/360",
+      title: "MRV That Stands Up to Verification",
+      excerpt:
+        "Key data controls, evidence chains, and QA checks that improve audit confidence in emissions reporting.",
+      date: "Feb 2026",
+    },
+    {
+      image: "https://picsum.photos/seed/gocarbon-blog-3/640/360",
+      title: "From ESG Reporting to Action Plans",
+      excerpt:
+        "How to translate disclosure requirements into site-level initiatives with measurable outcomes.",
+      date: "Feb 2026",
+    },
+    {
+      image: "https://picsum.photos/seed/gocarbon-blog-4/640/360",
+      title: "Choosing the Right Methodology and Registry",
+      excerpt:
+        "A decision framework for methodology fit, issuance timelines, and long-term governance readiness.",
+      date: "Jan 2026",
+    },
+  ];
+  const communityHighlights = [
+    {
+      image:
+        "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80",
+      title: "Industry Network",
+      subtitle: "Cross-Sector Collaboration",
+      excerpt:
+        "Build partnerships with enterprises, solution providers, and project developers to scale verified sustainability programs across operations.",
+    },
+    {
+      image:
+        "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80",
+      title: "ESG Leaders Circle",
+      subtitle: "Executive Knowledge Exchange",
+      excerpt:
+        "Engage with ESG decision-makers to share governance practices, reporting strategies, and implementation models for measurable outcomes.",
+    },
+    {
+      image:
+        "https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1200&q=80",
+      title: "Climate Action Events",
+      subtitle: "Workshops and Live Sessions",
+      excerpt:
+        "Join curated events focused on decarbonisation planning, MRV readiness, and practical pathways to meet climate commitments.",
+    },
+    {
+      image:
+        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
+      title: "Research and Policy Collaboration",
+      subtitle: "Standards and Policy Alignment",
+      excerpt:
+        "Collaborate on evidence-based frameworks that connect policy updates, methodology design, and on-ground implementation for industry adoption.",
     },
   ];
 
@@ -256,7 +329,7 @@ const HomeOrganisation = () => {
           preload="metadata"
         >
           <source
-            src="https://isorepublic.com/wp-content/uploads/2018/06/isorepublic-free-video-wind-turbine-sunrise.mp4"
+            src="/organimation.mp4"
             type="video/mp4"
           />
         </video>
@@ -471,23 +544,82 @@ const HomeOrganisation = () => {
             operations
           </p>
         </div>
-        <div className="hp-announcements-list hp-tab-switch-anim">
-          {organisationAnnouncements.map((a, i) => (
-            <div className="hp-announcement-row" key={i}>
-              <div className="hp-announcement-dot" />
-              <div className="hp-announcement-card">
-                <div className="hp-announcement-meta">
-                  <span className="hp-announcement-date">
-                    <FaClock style={{ color: "#22c55e" }} />
-                    {a.date}
-                  </span>
-                  <span className={`hp-tag ${a.tagClass}`}>{a.tag}</span>
+        <div className="hp-org-announcements-layout">
+          <div className="hp-org-announcements-primary">
+            <div className="hp-announcements-list hp-tab-switch-anim">
+              {organisationAnnouncements.map((a, i) => (
+                <div className="hp-announcement-row" key={i}>
+                  <div className="hp-announcement-dot" />
+                  <div className="hp-announcement-card">
+                    <div className="hp-announcement-meta">
+                      <span className="hp-announcement-date">
+                        <FaClock style={{ color: "#22c55e" }} />
+                        {a.date}
+                      </span>
+                      <span className={`hp-tag ${a.tagClass}`}>{a.tag}</span>
+                    </div>
+                    <h3 className="hp-announcement-title">{a.title}</h3>
+                    <p className="hp-announcement-desc">{a.desc}</p>
+                  </div>
                 </div>
-                <h3 className="hp-announcement-title">{a.title}</h3>
-                <p className="hp-announcement-desc">{a.desc}</p>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          <div className="hp-org-announcements-side">
+            <aside className="hp-org-blog-panel hp-tab-switch-anim">
+              <h3 className="hp-org-blog-title">Blog Posts</h3>
+              <div className="hp-org-blog-viewport">
+                <div className="hp-org-blog-track hp-org-blog-track-static">
+                  {blogHighlights.slice(0, BLOG_VISIBLE_COUNT).map((post) => (
+                    <article className="hp-org-blog-card" key={post.title}>
+                      <img
+                        src={post.image}
+                        alt={post.title}
+                        className="hp-org-blog-image"
+                        loading="lazy"
+                      />
+                      <div className="hp-org-blog-content">
+                        <span className="hp-org-blog-date">{post.date}</span>
+                        <h4 className="hp-org-blog-card-title">{post.title}</h4>
+                        <p className="hp-org-blog-card-desc">{post.excerpt}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+              <button
+                type="button"
+                className="hp-btn-primary hp-org-blog-view-more"
+                onClick={() => navigate("/blog")}
+              >
+                View More <FaArrowRight />
+              </button>
+            </aside>
+
+            <aside className="hp-org-blog-panel hp-org-community-panel hp-tab-switch-anim">
+              <h3 className="hp-org-blog-title">Upcoming Communities</h3>
+              <div className="hp-org-blog-viewport hp-org-community-viewport">
+                <div className="hp-org-blog-track hp-org-blog-track-static">
+                  {communityHighlights.map((post) => (
+                    <article className="hp-org-blog-card" key={`community-${post.title}`}>
+                      <img
+                        src={post.image}
+                        alt={post.title}
+                        className="hp-org-blog-image"
+                        loading="lazy"
+                      />
+                      <div className="hp-org-blog-content">
+                        <h4 className="hp-org-blog-card-title">{post.title}</h4>
+                        <p className="hp-org-blog-card-subtitle">{post.subtitle}</p>
+                        <p className="hp-org-blog-card-desc">{post.excerpt}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </aside>
+          </div>
         </div>
       </section>
 
