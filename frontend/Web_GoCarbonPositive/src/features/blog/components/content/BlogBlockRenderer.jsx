@@ -6,6 +6,17 @@ import QuoteSectionBlock from "./blocks/QuoteSectionBlock";
 import CallToActionBlock from "./blocks/CallToActionBlock";
 import FullWidthImageBlock from "./blocks/FullWidthImageBlock";
 
+function BasicImageBlock({ value }) {
+  if (!value?.url) return null;
+
+  return (
+    <figure className="blog-inline-image">
+      <img src={value.url} alt={value.alt || ""} loading="lazy" />
+      {value.caption && <figcaption>{value.caption}</figcaption>}
+    </figure>
+  );
+}
+
 const portableTextComponents = {
   block: {
     h1: ({ children }) => <h2 className="blog-h2">{children}</h2>,
@@ -20,49 +31,18 @@ const portableTextComponents = {
     bullet: ({ children }) => <ul className="blog-list-bullet">{children}</ul>,
     number: ({ children }) => <ol className="blog-list-number">{children}</ol>,
   },
+  types: {
+    image: BasicImageBlock,
+    imageText: ({ value }) => <ImageTextBlock block={value} />,
+    gallery: ({ value }) => <GalleryBlock block={value} />,
+    quoteSection: ({ value }) => <QuoteSectionBlock block={value} />,
+    callToAction: ({ value }) => <CallToActionBlock block={value} />,
+    fullWidthImage: ({ value }) => <FullWidthImageBlock block={value} />,
+  },
 };
-
-function BasicImageBlock({ block }) {
-  if (!block?.url) return null;
-
-  return (
-    <figure className="blog-inline-image">
-      <img src={block.url} alt={block.alt || ""} loading="lazy" />
-      {block.caption && <figcaption>{block.caption}</figcaption>}
-    </figure>
-  );
-}
-
-const blockComponents = {
-  block: ({ block }) => (
-    <PortableText value={[block]} components={portableTextComponents} />
-  ),
-  image: BasicImageBlock,
-  imageText: ImageTextBlock,
-  gallery: GalleryBlock,
-  quoteSection: QuoteSectionBlock,
-  callToAction: CallToActionBlock,
-  fullWidthImage: FullWidthImageBlock,
-};
-
-function renderBlock(block) {
-  const BlockComponent = blockComponents[block?._type];
-
-  if (!BlockComponent) return null;
-
-  return <BlockComponent block={block} />;
-}
 
 export default function BlogBlockRenderer({ content }) {
   if (!Array.isArray(content) || content.length === 0) return null;
 
-  return (
-    <>
-      {content.map((block, index) => (
-        <React.Fragment key={block._key || `${block._type}-${index}`}>
-          {renderBlock(block)}
-        </React.Fragment>
-      ))}
-    </>
-  );
+  return <PortableText value={content} components={portableTextComponents} />;
 }

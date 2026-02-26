@@ -6,7 +6,6 @@ import {
   FaQuestionCircle, 
   FaBook, 
   FaTrophy, 
-  FaSearch, 
   FaEye, 
   FaHeart, 
   FaComment,
@@ -27,8 +26,7 @@ import {
 
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedGroup, setSelectedGroup] = useState("all")
+    const [selectedGroup, setSelectedGroup] = useState("all")
   const [viewportWidth, setViewportWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 1200
   )
@@ -204,36 +202,41 @@ export default function CommunityPage() {
   return (
     <div style={styles.container}>
       {/* Hero Section */}
-      <div style={{ ...styles.heroSection, ...(isMobile ? styles.heroSectionMobile : {}) }}>
+      <section style={{ ...styles.heroSection, ...(isMobile ? styles.heroSectionMobile : {}) }}>
+        <div style={{ ...styles.heroCornerAccent, ...(isMobile ? styles.heroCornerAccentMobile : {}) }} />
+
         <div style={{ ...styles.heroContainer, ...(isMobile ? styles.heroContainerMobile : {}) }}>
           <div style={{ ...styles.heroContent, ...(isMobile ? styles.heroContentMobile : {}) }}>
-            <h1 style={{ ...styles.heroTitle, ...(isMobile ? styles.heroTitleMobile : {}) }}>Carbon Positive Community</h1>
+            <h1 style={{ ...styles.heroTitle, ...(isMobile ? styles.heroTitleMobile : {}) }}>Community</h1>
             <p style={{ ...styles.heroDescription, ...(isMobile ? styles.heroDescriptionMobile : {}) }}>
-              Join our thriving global community to connect with like-minded members, share knowledge, 
-              and discover sustainable solutions for a carbon-positive future.
+              Join our mission to build a carbon-positive future. Discover partnership opportunities, climate action initiatives, and stay updated with the latest ESG insights and events.
             </p>
+            <a
+              href={communityJoinLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.heroSignup}
+            >
+              <span style={styles.heroSignupIcon}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true">
+                  <path d="M20 4H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                </svg>
+              </span>
+              <span>Sign up</span>
+              <span style={styles.heroSignupArrow}>{"\u2197"}</span>
+            </a>
           </div>
-          <div style={styles.heroImageContainer}>
-            <img 
-              src="/GoCarbonPositive_LOGO.svg" 
-              alt="Carbon Positive Logo" 
-              style={{ ...styles.heroLogo, ...(isMobile ? styles.heroLogoMobile : {}) }}
+
+          <div style={{ ...styles.heroIllustrationWrap, ...(isMobile ? styles.heroIllustrationWrapMobile : {}) }}>
+            <img
+              src="/community.jpeg"
+              alt="Community"
+              style={styles.heroIllustration}
+              loading="lazy"
             />
           </div>
         </div>
-
-        {/* Search Bar */}
-        <div style={styles.searchContainer}>
-          <FaSearch style={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Search discussions, topics, or members..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ ...styles.searchInput, ...(isSmallMobile ? styles.searchInputSmallMobile : {}) }}
-          />
-        </div>
-      </div>
+      </section>
 
       {/* Join Community Banner */}
       <div style={{ ...styles.joinBannerSection, ...(isMobile ? styles.joinBannerSectionMobile : {}) }}>
@@ -564,117 +567,118 @@ const styles = {
   container: {
     minHeight: '100vh',
     backgroundColor: '#f9fafb',
-    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    fontFamily: "'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
 
   // Hero Section
   heroSection: {
-    background: '#38b000',
-    padding: '48px 24px',
-    borderBottom: '2px solid #10b981',
+    position: 'relative',
+    backgroundColor: '#f4f5f7',
+    overflow: 'hidden',
+    minHeight: '320px',
+    padding: '42px 24px',
+    borderBottom: '1px solid #e5e7eb',
   },
   heroSectionMobile: {
-    padding: '28px 16px',
+    padding: '32px 16px',
+  },
+  heroCornerAccent: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '180px',
+    height: '120px',
+    backgroundColor: '#38b000',
+    clipPath: 'polygon(0 0, 100% 0, 55% 55%, 100% 100%, 0 100%)',
+    zIndex: 0,
+  },
+  heroCornerAccentMobile: {
+    width: '120px',
+    height: '86px',
   },
   heroContainer: {
-    maxWidth: '1400px',
-    margin: '0 auto 32px',
+    position: 'relative',
+    zIndex: 1,
+    maxWidth: '1200px',
+    margin: '0 auto',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: '48px',
+    gap: '56px',
   },
   heroContainerMobile: {
     flexDirection: 'column',
     alignItems: 'flex-start',
-    gap: '20px',
-    marginBottom: '20px',
+    gap: '28px',
   },
   heroContent: {
     flex: '1',
-    maxWidth: '700px',
+    maxWidth: '460px',
   },
   heroContentMobile: {
     maxWidth: '100%',
   },
   heroTitle: {
-    fontSize: '3rem',
+    fontSize: '3.15rem',
     fontWeight: '800',
-    color: '#ffffff',
-    marginBottom: '16px',
-    lineHeight: '1.2',
+    color: '#34495e',
+    margin: '0 0 14px 0',
+    lineHeight: '1.08',
   },
   heroTitleMobile: {
-    fontSize: '2rem',
+    fontSize: '2.4rem',
   },
   heroDescription: {
-    fontSize: '1.125rem',
-    color: '#ffffff',
-    marginBottom: '32px',
-    lineHeight: '1.7',
+    fontSize: '1.15rem',
+    color: '#4b5563',
+    margin: '0 0 26px 0',
+    lineHeight: '1.65',
+    maxWidth: '420px',
   },
   heroDescriptionMobile: {
     fontSize: '1rem',
-    marginBottom: '0',
+    marginBottom: '22px',
+    maxWidth: '100%',
   },
-  heroStats: {
-    display: 'flex',
-    gap: '32px',
-    flexWrap: 'wrap',
-  },
-  statItem: {
-    display: 'flex',
+  heroSignup: {
+    display: 'inline-flex',
     alignItems: 'center',
-    gap: '12px',
-  },
-  statIcon: {
-    fontSize: '32px',
-    color: '#ffffff',
-  },
-  statNumber: {
-    fontSize: '1.5rem',
+    gap: '10px',
+    color: '#334155',
+    textDecoration: 'none',
+    fontSize: '1.15rem',
     fontWeight: '700',
-    color: '#ffffff',
+    lineHeight: '1',
   },
-  statLabel: {
-    fontSize: '0.875rem',
-    color: '#ffffff',
+  heroSignupIcon: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '26px',
+    height: '26px',
+    borderRadius: '4px',
+    backgroundColor: '#ff6f00',
+    flexShrink: 0,
   },
-  heroImageContainer: {
-    flexShrink: '0',
-  },
-  heroLogo: {
-    width: '160px',
-    height: 'auto',
-  },
-  heroLogoMobile: {
-    width: '120px',
-  },
-  searchContainer: {
-    maxWidth: '1400px',
-    margin: '0 auto',
-    position: 'relative',
-  },
-  searchIcon: {
-    position: 'absolute',
-    left: '16px',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    color: '#6b7280',
-    fontSize: '18px',
-  },
-  searchInput: {
-    width: '100%',
-    padding: '14px 16px 14px 48px',
-    border: '2px solid #10b981',
-    borderRadius: '12px',
+  heroSignupArrow: {
+    color: '#475569',
     fontSize: '1rem',
-    outline: 'none',
-    backgroundColor: '#ffffff',
-    transition: 'all 0.3s ease',
+    lineHeight: '1',
   },
-  searchInputSmallMobile: {
-    fontSize: '16px',
+  heroIllustrationWrap: {
+    flexShrink: 0,
+    width: '420px',
+    maxWidth: '45%',
+  },
+  heroIllustrationWrapMobile: {
+    width: '300px',
+    maxWidth: '100%',
+    alignSelf: 'center',
+  },
+  heroIllustration: {
+    width: '100%',
+    height: 'auto',
+    display: 'block',
   },
   joinBannerSection: {
     maxWidth: '1100px',
@@ -1436,3 +1440,14 @@ const styles = {
     flexShrink: '0',
   },
 }
+
+
+
+
+
+
+
+
+
+
+
