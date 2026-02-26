@@ -794,3 +794,25 @@ input[type=number] {
     padding: 0.75rem;
   }
 }
+.join-org-confidential-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  background: rgba(22, 163, 74, 0.06);
+  border: 1px solid rgba(22, 163, 74, 0.15);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.join-org-confidential-icon {
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+.join-org-confidential-text {
+  margin: 0;
+  color: #1f2937;
+}
