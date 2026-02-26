@@ -345,7 +345,7 @@ const HomePage = ({ forcedTab = null }) => {
         titleLine2: "Carbon Credit",
         highlight: "Projects",
         description:
-          "End-to-end carbon project structuring, documentation, and certification support aligned with globally recognised standards.",
+          "End-to-end carbon project structuring, feasibility assessment, and registry-aligned certification support for industrial operations.",
       }
       : {
           titleLine1: "Building a",
@@ -420,7 +420,7 @@ const HomePage = ({ forcedTab = null }) => {
                 className={`hp-tab-btn ${activeTab === "user" ? "hp-tab-active" : ""}`}
                 onClick={() => handleExperienceRoute("user")}
               >
-                User
+               Individual
               </button>
               <button
                 className={`hp-tab-btn ${activeTab === "organisation" ? "hp-tab-active" : ""}`}
@@ -453,18 +453,17 @@ const HomePage = ({ forcedTab = null }) => {
               <div className="hp-org-apply-content">
                 <p className="hp-org-apply-eyebrow">Organisation Onboarding</p>
                 <h3 className="hp-org-apply-title">
-  Schedule a Carbon Project Consultation
+ Request a Carbon Project Consultation
 </h3>
                 <p className="hp-org-apply-desc">
-                  Register your organisation to access verified sustainability workflows,
-                  team dashboards, and enterprise carbon reporting tools in one place.
+                  Share your organisation details to begin a structured evaluation of your carbon project potential.
                 </p>
               </div>
               <button
                 className="hp-btn-primary hp-org-apply-btn"
                 onClick={() => navigate("/join-organisation")}
               >
-                Schedule Consultation <FaArrowRight />
+                Request Consultation <FaArrowRight />
               </button>
             </div>
           )}
@@ -472,10 +471,10 @@ const HomePage = ({ forcedTab = null }) => {
             <div className="hp-section-header hp-org-solutions-header">
               <h2 className="hp-section-title hp-rewards-title">
                 <FaGlobe className="hp-title-icon" style={{ color: "#0ea5e9" }} />
-                Industrial Solutions for Organisations
+                Industrial Solutions & Strategic Carbon Advisory
               </h2>
               <p className="hp-section-sub">
-                Comprehensive sustainability-focused solutions designed for industrial operations
+                Enabling industrial enterprises to reduce emissions, align with global standards, and unlock long-term carbon value.
               </p>
             </div>
           )}
