@@ -278,14 +278,14 @@ const HomePage = () => {
     activeTab === "organisation" ? organisationAnnouncements : userAnnouncements;
   const activeFaqs = activeTab === "organisation" ? organisationFaqs : userFaqs;
   const heroContent =
-    activeTab === "organisation"
-      ? {
-          titleLine1: "Decarbonising",
-          titleLine2: "Enterprise",
-          highlight: "Operations",
-          description:
-            "Measure, reduce, and report emissions across teams, facilities, and supply chains with a unified sustainability platform.",
-        }
+  activeTab === "organisation"
+    ? {
+        titleLine1: "Developing Verified",
+        titleLine2: "Carbon Credit",
+        highlight: "Projects",
+        description:
+          "End-to-end carbon project structuring, documentation, and certification support aligned with globally recognised standards.",
+      }
       : {
           titleLine1: "Building a",
           titleLine2: "Sustainable",
@@ -325,12 +325,21 @@ const HomePage = () => {
           {!authLoading && !isAuthenticated && (
             <>
               <div className="hp-hero-btns">
-                <button
-                  className="hp-btn-primary hp-hero-start-btn"
-                  onClick={() => navigate("/signup")}
-                >
-                  Get Started <FaArrowRight />
-                </button>
+                {activeTab === "organisation" ? (
+  <button
+    className="hp-btn-primary hp-hero-start-btn"
+    onClick={() => navigate("/contact")}
+  >
+    Book Free Feasibility Review <FaArrowRight />
+  </button>
+) : (
+  <button
+    className="hp-btn-primary hp-hero-start-btn"
+    onClick={() => navigate("/signup")}
+  >
+    Get Started <FaArrowRight />
+  </button>
+)}
               </div>
             </>
           )}
@@ -384,7 +393,9 @@ const HomePage = () => {
               </div>
               <div className="hp-org-apply-content">
                 <p className="hp-org-apply-eyebrow">Organisation Onboarding</p>
-                <h3 className="hp-org-apply-title">Apply as an Organisation</h3>
+                <h3 className="hp-org-apply-title">
+  Schedule a Carbon Project Consultation
+</h3>
                 <p className="hp-org-apply-desc">
                   Register your organisation to access verified sustainability workflows,
                   team dashboards, and enterprise carbon reporting tools in one place.
@@ -394,7 +405,7 @@ const HomePage = () => {
                 className="hp-btn-primary hp-org-apply-btn"
                 onClick={() => navigate("/join-organisation")}
               >
-                Apply as an organisation <FaArrowRight />
+                Schedule Consultation <FaArrowRight />
               </button>
             </div>
           )}
@@ -508,14 +519,11 @@ const HomePage = () => {
           </div>
           <div className="hp-about-text">
             <h2 className="hp-about-title">About Us</h2>
-            <p className="hp-about-desc">
-              We are a passionate team committed to building a carbon-positive
-              future. Our platform empowers individuals and organisations to
-              track, reduce, and offset their environmental impact through
-              gamified experiences, community engagement, and cutting-edge
-              sustainability tools. Together, we can make every action count
-              towards a greener planet.
-            </p>
+           <p className="hp-about-desc">
+  We specialise in developing structured carbon credit projects for industrial and renewable sectors. 
+  Our focus is on transparent documentation, realistic projections, and registry-aligned methodologies 
+  to help organisations unlock carbon as a strategic asset.
+</p>
             <button className="hp-btn-primary" onClick={() => navigate("/about")}>Know More <FaArrowRight />
 
             </button>

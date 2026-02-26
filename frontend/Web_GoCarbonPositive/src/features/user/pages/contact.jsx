@@ -159,8 +159,8 @@ const handleQuerySubmit = async (e) => {
               </div>
               <div>
                 <h4>Email Support</h4>
-                <a href="mailto:Debadarsan.Mohanty@gocarbonpositive.com" className="contact-link">
-                  Debadarsan.Mohanty@gocarbonpositive.com
+                <a href="mailto:support@gocarbonpositive.com" className="contact-link">
+                  support@gocarbonpositive.com
                 </a>
               </div>
             </div>
@@ -172,7 +172,7 @@ const handleQuerySubmit = async (e) => {
                 </svg>
               </div>
               <div>
-                <h4>Direct Line</h4>
+                <h4>Contact number </h4>
                 <a href="tel:+918018246346" className="contact-link">+91 8018246346</a>
               </div>
             </div>
