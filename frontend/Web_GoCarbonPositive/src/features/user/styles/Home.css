@@ -320,10 +320,55 @@
   font-weight: 600;
 }
 
-.hp-org-solutions-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+.hp-org-solutions-carousel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hp-org-carousel-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.hp-org-carousel-btn:hover:not(:disabled) {
+  border-color: #86efac;
+  color: #16a34a;
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.15);
+}
+
+.hp-org-carousel-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.hp-org-solutions-viewport {
+  flex: 1;
+  overflow: hidden;
+  margin: 0 -10px;
+}
+
+.hp-org-solutions-track {
+  display: flex;
+  transition: transform 0.35s ease;
+  will-change: transform;
+}
+
+.hp-org-solution-slide {
+  flex: 0 0 33.333333%;
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 
 .hp-org-apply-card {
@@ -396,7 +441,6 @@
   border-radius: 16px;
   background: #fff;
   overflow: hidden;
-  aspect-ratio: 1 / 1;
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
@@ -413,7 +457,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 33%;
+  height: 160px;
   background: #f8fafc;
 }
 
@@ -437,7 +481,6 @@
 }
 
 .hp-org-solution-body {
-  height: 67%;
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
@@ -458,7 +501,7 @@
 }
 
 .hp-org-solution-learn {
-  margin-top: auto;
+  margin-top: 14px;
   background: transparent;
   border: none;
   color: #16a34a;
@@ -737,8 +780,8 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .hp-org-solutions-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .hp-org-solution-slide {
+    flex: 0 0 50%;
   }
 
   .hp-org-apply-card {
@@ -809,9 +852,22 @@
     gap: 12px;
   }
 
-  .hp-org-solutions-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
+  .hp-org-solutions-carousel {
+    gap: 8px;
+  }
+
+  .hp-org-solutions-viewport {
+    margin: 0 -6px;
+  }
+
+  .hp-org-solution-slide {
+    flex: 0 0 100%;
+    padding: 0 6px;
+  }
+
+  .hp-org-carousel-btn {
+    width: 34px;
+    height: 34px;
   }
 
   .hp-org-apply-card {
@@ -923,8 +979,7 @@
   }
 
   .hp-org-solution-card {
-    aspect-ratio: auto;
-    min-height: 320px;
+    min-height: 0;
   }
 
   .hp-org-solution-title {

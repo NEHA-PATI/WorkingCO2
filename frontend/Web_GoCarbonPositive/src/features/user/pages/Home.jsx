@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "@contexts/AuthContext";
 import {
   FaArrowRight,
   FaAward,
   FaBookOpen,
+  FaChevronLeft,
+  FaChevronRight,
   FaChevronDown,
   FaChevronUp,
   FaClock,
@@ -20,9 +22,11 @@ import { GiChemicalDrop, GiRecycle } from "react-icons/gi";
 import { HiMiniChartBar } from "react-icons/hi2";
 import "../styles/Home.css";
 
-const HomePage = () => {
-  const [activeTab, setActiveTab] = useState("user");
+const HomePage = ({ forcedTab = null }) => {
+  const [activeTab, setActiveTab] = useState(forcedTab || "user");
   const [openFaq, setOpenFaq] = useState(null);
+  const [orgCarouselIndex, setOrgCarouselIndex] = useState(0);
+  const [orgVisibleCount, setOrgVisibleCount] = useState(3);
   const navigate = useNavigate();
   const { isAuthenticated, authLoading } = useAuth();
 
@@ -279,6 +283,61 @@ const HomePage = () => {
   const activeAnnouncements =
     activeTab === "organisation" ? organisationAnnouncements : userAnnouncements;
   const activeFaqs = activeTab === "organisation" ? organisationFaqs : userFaqs;
+  const maxOrgCarouselIndex = Math.max(
+    0,
+    organisationSolutions.length - orgVisibleCount,
+  );
+
+  useEffect(() => {
+    if (forcedTab) {
+      setActiveTab(forcedTab);
+      setOpenFaq(null);
+    }
+  }, [forcedTab]);
+
+  useEffect(() => {
+    const updateVisibleCount = () => {
+      if (window.innerWidth <= 768) {
+        setOrgVisibleCount(1);
+        return;
+      }
+      if (window.innerWidth <= 1024) {
+        setOrgVisibleCount(2);
+        return;
+      }
+      setOrgVisibleCount(3);
+    };
+
+    updateVisibleCount();
+    window.addEventListener("resize", updateVisibleCount);
+
+    return () => {
+      window.removeEventListener("resize", updateVisibleCount);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (orgCarouselIndex > maxOrgCarouselIndex) {
+      setOrgCarouselIndex(maxOrgCarouselIndex);
+    }
+  }, [orgCarouselIndex, maxOrgCarouselIndex]);
+
+  const moveOrgCarouselPrev = () => {
+    setOrgCarouselIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const moveOrgCarouselNext = () => {
+    setOrgCarouselIndex((prev) => Math.min(maxOrgCarouselIndex, prev + 1));
+  };
+
+  const handleExperienceRoute = (tab) => {
+    const route =
+      tab === "organisation" ? "/experience/organisation" : "/experience/user";
+    setActiveTab(tab);
+    setOpenFaq(null);
+    navigate(route);
+  };
+
   const heroContent =
   activeTab === "organisation"
     ? {
@@ -330,7 +389,11 @@ const HomePage = () => {
                 {activeTab === "organisation" ? (
   <button
     className="hp-btn-primary hp-hero-start-btn"
-    onClick={() => navigate("/contact")}
+    onClick={() =>
+      navigate("/industrial", {
+        state: { openDemo: true, demoIndustry: "Industrial Solutions" },
+      })
+    }
   >
     Book Free Feasibility Review <FaArrowRight />
   </button>
@@ -355,19 +418,13 @@ const HomePage = () => {
             <div className="hp-tab-switcher hp-tab-switcher-inline">
               <button
                 className={`hp-tab-btn ${activeTab === "user" ? "hp-tab-active" : ""}`}
-                onClick={() => {
-                  setActiveTab("user");
-                  setOpenFaq(null);
-                }}
+                onClick={() => handleExperienceRoute("user")}
               >
                 User
               </button>
               <button
                 className={`hp-tab-btn ${activeTab === "organisation" ? "hp-tab-active" : ""}`}
-                onClick={() => {
-                  setActiveTab("organisation");
-                  setOpenFaq(null);
-                }}
+                onClick={() => handleExperienceRoute("organisation")}
               >
                 Organisation
               </button>
@@ -423,33 +480,64 @@ const HomePage = () => {
             </div>
           )}
           {activeTab === "organisation" ? (
-            <div className="hp-org-solutions-grid">
-              {organisationSolutions.map((solution, i) => (
-                <div className="hp-org-solution-card" key={i}>
-                  <div className="hp-org-solution-top">
-                    {solution.image ? (
-                      <img
-                        src={solution.image}
-                        alt={solution.title}
-                        className="hp-org-solution-image"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <span className="hp-org-solution-icon">{solution.icon}</span>
-                    )}
-                  </div>
-                  <div className="hp-org-solution-body">
-                    <h3 className="hp-org-solution-title">{solution.title}</h3>
-                    <p className="hp-org-solution-desc">{solution.desc}</p>
-                    <button
-                      className="hp-org-solution-learn"
-                      onClick={() => navigate("/industrial")}
-                    >
-                      Learn More <FaArrowRight />
-                    </button>
-                  </div>
+            <div className="hp-org-solutions-carousel">
+              <button
+                type="button"
+                className="hp-org-carousel-btn"
+                onClick={moveOrgCarouselPrev}
+                disabled={orgCarouselIndex === 0}
+                aria-label="Previous solutions"
+              >
+                <FaChevronLeft />
+              </button>
+
+              <div className="hp-org-solutions-viewport">
+                <div
+                  className="hp-org-solutions-track"
+                  style={{
+                    transform: `translateX(-${(orgCarouselIndex * 100) / orgVisibleCount}%)`,
+                  }}
+                >
+                  {organisationSolutions.map((solution, i) => (
+                    <div className="hp-org-solution-slide" key={i}>
+                      <div className="hp-org-solution-card">
+                        <div className="hp-org-solution-top">
+                          {solution.image ? (
+                            <img
+                              src={solution.image}
+                              alt={solution.title}
+                              className="hp-org-solution-image"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="hp-org-solution-icon">{solution.icon}</span>
+                          )}
+                        </div>
+                        <div className="hp-org-solution-body">
+                          <h3 className="hp-org-solution-title">{solution.title}</h3>
+                          <p className="hp-org-solution-desc">{solution.desc}</p>
+                          <button
+                            className="hp-org-solution-learn"
+                            onClick={() => navigate("/industrial")}
+                          >
+                            Learn More <FaArrowRight />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              <button
+                type="button"
+                className="hp-org-carousel-btn"
+                onClick={moveOrgCarouselNext}
+                disabled={orgCarouselIndex === maxOrgCarouselIndex}
+                aria-label="Next solutions"
+              >
+                <FaChevronRight />
+              </button>
             </div>
           ) : (
             <div className="hp-rewards-grid">

@@ -11,6 +11,8 @@ import PrivacyPolicy from "@shared/components/Privacy";
 import TermsAndConditions from "@shared/components/TermsAndConditions";
 
 import Home from "@features/user/pages/Home";
+import HomeUser from "@features/user/pages/HomeUser";
+import HomeOrganisation from "@features/user/pages/HomeOrganisation";
 import About from "@features/user/pages/about";
 import Community from "@features/user/pages/community";
 import Contact from "@features/user/pages/contact";
@@ -136,6 +138,8 @@ const AppRoutes = () => {
 
       <Route element={<BaseLayout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/experience/user" element={<HomeUser />} />
+        <Route path="/experience/organisation" element={<HomeOrganisation />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
