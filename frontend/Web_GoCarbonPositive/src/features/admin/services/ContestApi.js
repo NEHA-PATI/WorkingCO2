@@ -87,3 +87,15 @@ export const deleteRewardCatalogItem = async (rewardId) => {
     method: "DELETE",
   });
 };
+
+export const getRedeemsAdmin = async ({ page = 1, limit = 200 } = {}) => {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  return apiClient({
+    url: `/rewards/redeems-admin?${params.toString()}`,
+    method: "GET",
+  });
+};
