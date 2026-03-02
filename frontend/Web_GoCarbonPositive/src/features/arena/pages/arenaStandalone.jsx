@@ -14,10 +14,10 @@ import {
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import arenaApi, { getArenaUserId } from '@features/arena/services/arenaApi';
 import { useCountdown } from '@features/arena/hooks/useCountdown';
-import a4 from "../../arena/components/photos/a4.jpg";
-import a5 from "../../arena/components/photos/a5.jpg";
-import a6 from "../../arena/components/photos/a6.jpg";
-import a7 from "../../arena/components/photos/a7.jpg";
+import a4 from "../components/photos/a4.jpg";
+import a5 from "../components/photos/a5.jpg";
+import a6 from "../components/photos/a6.jpg";
+import a7 from "../components/photos/a7.jpg";
 
 // Inline Styles
 const styles = `
