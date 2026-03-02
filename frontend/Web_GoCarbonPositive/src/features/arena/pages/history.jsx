@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CalendarClock, ChevronLeft, ChevronRight, CircleDot, Flame, Shield, Trophy, Globe } from 'lucide-react';
+import { ArrowLeft, CalendarClock, ChevronLeft, ChevronRight, Flame, Shield, Trophy, Globe } from 'lucide-react';
 import '@features/arena/styles/arenaglobals.css';
 import '@features/arena/styles/history.css';
 import arenaApi from '@features/arena/services/arenaApi';
@@ -185,7 +185,11 @@ export default function ArenaHistoryPage() {
                                     return (
                                         <article key={item.event_id} className="arena-history-event">
                                             <div className="arena-history-event-marker">
-                                                <CircleDot className="w-4 h-4" />
+                                                <img
+                                                    src="/coins.jpeg"
+                                                    alt="Coin"
+                                                    className="w-8 h-8 rounded-full object-cover"
+                                                />
                                             </div>
                                             <div className="arena-history-event-card">
                                                 <div className="arena-history-event-top">

@@ -139,6 +139,9 @@
 .contest-icon {
   color: #a855f7;
 }
+.mrv-icon {
+  color: #0ea5e9;
+}
 .reports-icon {
   color: #14b8a6;
 }
@@ -185,6 +188,10 @@
 .nav-item:hover .contest-icon {
   color: #9333ea;
   filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.5));
+}
+.nav-item:hover .mrv-icon {
+  color: #0284c7;
+  filter: drop-shadow(0 0 6px rgba(14, 165, 233, 0.45));
 }
 .nav-item:hover .reports-icon {
   color: #0f766e;

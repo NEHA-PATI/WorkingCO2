@@ -17,6 +17,7 @@ import {
   createContest,
   updateRule,
   getRewardsCatalogAdmin,
+  getRedeemsAdmin,
   createRewardCatalogItem,
   updateRewardCatalogItem,
   deleteRewardCatalogItem,
@@ -137,6 +138,8 @@ const [loading, setLoading] = useState(true);
   const [rewardDraft, setRewardDraft] = useState(emptyReward());
   const [isRewardSaving, setIsRewardSaving] = useState(false);
   const [isEditingReward, setIsEditingReward] = useState(false);
+  const [redeems, setRedeems] = useState([]);
+  const [redeemsLoading, setRedeemsLoading] = useState(false);
 
 const loadContests = async () => {
   try {
@@ -230,9 +233,23 @@ const loadRewardsCatalog = async (search = "") => {
   }
 };
 
+const loadRedeems = async () => {
+  try {
+    setRedeemsLoading(true);
+    const res = await getRedeemsAdmin({ page: 1, limit: 500 });
+    setRedeems(res?.data || []);
+  } catch (err) {
+    console.error("Failed to load redeems:", err);
+    alert("Failed to load redeems");
+  } finally {
+    setRedeemsLoading(false);
+  }
+};
+
  useEffect(() => {
   loadContests();
   loadRewardsCatalog();
+  loadRedeems();
 }, []);
 
 
@@ -585,6 +602,10 @@ const setStatus = async (id, status) => {
                 loadRewardsCatalog(rewardsSearch);
                 return;
               }
+              if (activeTab === "redeem") {
+                loadRedeems();
+                return;
+              }
               loadContests();
             }}
             className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm"
@@ -670,6 +691,12 @@ const setStatus = async (id, status) => {
               onEdit={openEditReward}
               onDelete={removeReward}
               onToggleStatus={toggleRewardStatus}
+            />
+          )}
+          {activeTab === "redeem" && (
+            <RedeemsPanel
+              rows={redeems}
+              loading={redeemsLoading}
             />
           )}
         </div>
@@ -1313,6 +1340,72 @@ function RewardsCatalogPanel({
                   </td>
                 </tr>
               ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function RedeemsPanel({ rows, loading }) {
+  return (
+    <div className="space-y-4">
+      <div className="overflow-x-auto border border-slate-200 rounded-lg">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500">
+            <tr>
+              <th className="px-4 py-3">Redeem ID</th>
+              <th className="px-4 py-3">User ID</th>
+              <th className="px-4 py-3">Reward</th>
+              <th className="px-4 py-3">Points Used</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Redeemed At</th>
+              <th className="px-4 py-3">Metadata</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {loading ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                  Loading redeems...
+                </td>
+              </tr>
+            ) : rows.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                  No redeems found.
+                </td>
+              </tr>
+            ) : (
+              rows.map((row) => {
+                const metadataText = row.metadata
+                  ? (typeof row.metadata === "string"
+                      ? row.metadata
+                      : JSON.stringify(row.metadata))
+                  : "-";
+
+                return (
+                  <tr key={row.id} className="hover:bg-slate-50/60">
+                    <td className="px-4 py-3 font-medium text-slate-900">{row.id}</td>
+                    <td className="px-4 py-3 text-slate-700">{row.u_id}</td>
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-slate-900">{row.reward_name || row.reward_id}</p>
+                      <p className="text-xs text-slate-500">{row.reward_id}</p>
+                    </td>
+                    <td className="px-4 py-3 text-slate-700">{Number(row.points_used || 0)}</td>
+                    <td className="px-4 py-3">
+                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        {row.status || "SUCCESS"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-500">{formatDateTime(row.redeemed_at)}</td>
+                    <td className="px-4 py-3 text-slate-500 max-w-[320px]">
+                      <div className="truncate" title={metadataText}>{metadataText}</div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

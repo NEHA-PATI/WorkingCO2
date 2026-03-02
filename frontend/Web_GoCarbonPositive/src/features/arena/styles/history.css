@@ -137,12 +137,10 @@
 
 .arena-history-event-marker {
   color: #0f766e;
-  background: #ffffff;
   z-index: 1;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding-top: 2px;
 }
 
 .arena-history-event-card {

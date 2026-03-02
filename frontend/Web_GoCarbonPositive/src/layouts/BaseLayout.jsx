@@ -30,6 +30,7 @@ export default function BaseLayout() {
     FOOTER_HIDDEN_PREFIXES.some((prefix) =>
       location.pathname.startsWith(prefix)
     );
+  const isAdminRoute = location.pathname.startsWith("/admin");
 
   return (
     <div className="app-container">
@@ -37,7 +38,7 @@ export default function BaseLayout() {
       <Navbar />
 
       {/* Page Content */}
-      <main className="main-content">
+      <main className={`main-content ${isAdminRoute ? "admin-main-content" : ""}`}>
         <Outlet />
       </main>
 

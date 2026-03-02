@@ -9,7 +9,7 @@ const UserProfile = () => {
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(true);
-const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -63,18 +63,18 @@ const [loading, setLoading] = useState(true);
 
   // Optionally sync with primary address country
   useEffect(() => {
-  const addr = addresses?.[0];
-  if (!addr || !addr.countryCode) return;
+    const addr = addresses?.[0];
+    if (!addr || !addr.countryCode) return;
 
-  const c = allCountries.find((c) => c.isoCode === addr.countryCode);
-  if (!c) return;
+    const c = allCountries.find((c) => c.isoCode === addr.countryCode);
+    if (!c) return;
 
-  setFormData((prev) => ({
-    ...prev,
-    phoneCountryIso: addr.countryCode,
-    countryCode: `+${c.phonecode}`,
-  }));
-}, [addresses, allCountries]);
+    setFormData((prev) => ({
+      ...prev,
+      phoneCountryIso: addr.countryCode,
+      countryCode: `+${c.phonecode}`,
+    }));
+  }, [addresses, allCountries]);
 
 
   const handleInputChange = (e) => {
@@ -102,13 +102,13 @@ const [loading, setLoading] = useState(true);
       prev.map((addr) =>
         addr.id === id
           ? {
-              ...addr,
-              countryCode: isoCode,
-              countryName: countryObj?.name || "",
-              stateCode: "",
-              stateName: "",
-              city: "",
-            }
+            ...addr,
+            countryCode: isoCode,
+            countryName: countryObj?.name || "",
+            stateCode: "",
+            stateName: "",
+            city: "",
+          }
           : addr
       )
     );
@@ -126,32 +126,32 @@ const [loading, setLoading] = useState(true);
       prev.map((a) =>
         a.id === id
           ? {
-              ...a,
-              stateCode: stateIso,
-              stateName: stateObj?.name || "",
-              city: "",
-            }
+            ...a,
+            stateCode: stateIso,
+            stateName: stateObj?.name || "",
+            city: "",
+          }
           : a
       )
     );
   };
 
   const handleAddNewAddress = () => {
-  const newAddress = {
-    id: Date.now().toString(),
-    type: "work", // ✅ MUST match DB constraint
-    typeSpecify: "",
-    address: "",
-    countryCode: "",
-    countryName: "",
-    pincode: "",
-    stateCode: "",
-    stateName: "",
-    city: "",
+    const newAddress = {
+      id: Date.now().toString(),
+      type: "work", // ✅ MUST match DB constraint
+      typeSpecify: "",
+      address: "",
+      countryCode: "",
+      countryName: "",
+      pincode: "",
+      stateCode: "",
+      stateName: "",
+      city: "",
+    };
+    setAddresses((prev) => [...prev, newAddress]);
+    setShowAddNewAddress(false);
   };
-  setAddresses((prev) => [...prev, newAddress]);
-  setShowAddNewAddress(false);
-};
 
 
   const handleRemoveAddress = (id) => {
@@ -161,24 +161,24 @@ const [loading, setLoading] = useState(true);
   };
 
   const primaryStates = useMemo(() => {
-  if (!addresses?.length || !addresses[0]?.countryCode) return [];
-  return getStatesForCountry(addresses[0].countryCode);
-}, [addresses]);
+    if (!addresses?.length || !addresses[0]?.countryCode) return [];
+    return getStatesForCountry(addresses[0].countryCode);
+  }, [addresses]);
 
 
-const handleSaveChanges = () => {
-  if (!formData.firstName || !formData.lastName || !formData.email) {
-    fireToast("PROFILE.REQUIRED", "warning");
-    return;
-  }
+  const handleSaveChanges = () => {
+    if (!formData.firstName || !formData.lastName || !formData.email) {
+      fireToast("PROFILE.REQUIRED", "warning");
+      return;
+    }
 
-  if (!addresses[0].address || !addresses[0].countryCode) {
-    fireToast("PROFILE.ADDRESS_REQUIRED", "warning");
-    return;
-  }
+    if (!addresses[0].address || !addresses[0].countryCode) {
+      fireToast("PROFILE.ADDRESS_REQUIRED", "warning");
+      return;
+    }
 
-  setIsEditing(false);
-};
+    setIsEditing(false);
+  };
 
 
   const handleCancel = () => {
@@ -190,170 +190,170 @@ const handleSaveChanges = () => {
   };
 
 
- const handleSubmit = async () => {
-  const storedUserRaw = localStorage.getItem("authUser");
-  const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
-  const u_id = storedUser?.u_id ?? null;
-
-  if (!u_id) {
-    fireToast("API.UNAUTHORIZED", "error");
-    return;
-  }
-
-  const payload = {
-    profile: {
-      first_name: formData.firstName,
-      middle_name: formData.middleName,
-      last_name: formData.lastName,
-      mobile_number: formData.phone,
-      dob: formData.dob,
-    },
-   addresses: addresses.map((addr, index) => ({
-  address_id: addr.id || null,
-  address_type: addr.type.toUpperCase(),
-  address_line: addr.address,
-  country: addr.countryName,
-  country_code: addr.countryCode,   // ✅ ISO
-  state: addr.stateName,             // ✅
-  city: addr.city,                   // ✅
-  pincode: addr.pincode,
-  is_default: index === 0,
-}))
-,
-  };
-
-  try {
-    const res = await fetch(
-      "http://localhost:5006/api/profiles/complete",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-user-id": u_id,
-        },
-        body: JSON.stringify(payload),
-      }
-    );
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      fireToast("PROFILE.SAVE_FAILED", "error");
-      return;
-    }
-
-    fireToast("PROFILE.SAVE_SUCCESS", "success");
-    setIsEditing(false);
-
-  } catch (err) {
-    fireToast("API.NETWORK", "error");
-  }
-};
-
-
-useEffect(() => {
-  const fetchProfile = async () => {
+  const handleSubmit = async () => {
     const storedUserRaw = localStorage.getItem("authUser");
-const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
-const u_id = storedUser?.u_id ?? null;
-
-console.log("🔍 UserProfile localStorage snapshot:", {
-  authUser: localStorage.getItem("authUser"),
-  user: localStorage.getItem("user"),
-  userId: localStorage.getItem("userId"),
-});
-
+    const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
+    const u_id = storedUser?.u_id ?? null;
 
     if (!u_id) {
-      setLoading(false);
+      fireToast("API.UNAUTHORIZED", "error");
       return;
     }
+
+    const payload = {
+      profile: {
+        first_name: formData.firstName,
+        middle_name: formData.middleName,
+        last_name: formData.lastName,
+        mobile_number: formData.phone,
+        dob: formData.dob,
+      },
+      addresses: addresses.map((addr, index) => ({
+        address_id: addr.id || null,
+        address_type: addr.type.toUpperCase(),
+        address_line: addr.address,
+        country: addr.countryName,
+        country_code: addr.countryCode,   // ✅ ISO
+        state: addr.stateName,             // ✅
+        city: addr.city,                   // ✅
+        pincode: addr.pincode,
+        is_default: index === 0,
+      }))
+      ,
+    };
 
     try {
       const res = await fetch(
-        "http://localhost:5006/api/profiles/complete",
+        "http://localhost:5009/api/profiles/complete",
         {
-          headers: { "x-user-id": u_id },
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-user-id": u_id,
+          },
+          body: JSON.stringify(payload),
         }
       );
 
+      const data = await res.json();
+
       if (!res.ok) {
-        // ❗ profile nahi mila → form
-        setIsEditing(true);
+        fireToast("PROFILE.SAVE_FAILED", "error");
         return;
       }
 
-      const data = await res.json();
+      fireToast("PROFILE.SAVE_SUCCESS", "success");
+      setIsEditing(false);
 
-      if (data?.profile) {
-        setFormData({
-  firstName: data.profile.first_name,
-  middleName: data.profile.middle_name || "",
-  lastName: data.profile.last_name,
-  email: data.profile.email || "",
-  phone: data.profile.mobile_number || "",
-  dob: data.profile.dob ? data.profile.dob.slice(0, 10) : "",
-  countryCode: "+91",
-  phoneCountryIso: "IN",
-});
-
-        if (data.addresses && data.addresses.length > 0) {
-  setAddresses(
-    data.addresses.map((a) => ({
-      id: a.address_id,
-      type: a.address_type.toLowerCase(),
-      address: a.address_line,
-      countryName: a.country,
-      countryCode: a.country_code,
-      stateName: a.state,
-      stateCode: "",
-      city: a.city,
-      pincode: a.pincode,
-    }))
-  );
-} else {
-  // 🔥 VERY IMPORTANT fallback for new user
-  setAddresses([
-    {
-      id: null,
-      type: "home",
-      typeSpecify: "",
-      address: "",
-      countryCode: "",
-      countryName: "",
-      pincode: "",
-      stateCode: "",
-      stateName: "",
-      city: "",
-    },
-  ]);
-}
-
-
-
-        setIsEditing(false); // 🔥 CARD SHOW
-      } else {
-        setIsEditing(true);
-      }
     } catch (err) {
-  console.error("Fetch profile failed", err);
-  fireToast("PROFILE.FETCH_FAILED", "error", {}, {
-    toastId: "profile-fetch-failed",
-    style: { whiteSpace: "nowrap" },
-  });
-  setIsEditing(true);
-}
-finally {
-      setLoading(false); // 🔥 VERY IMPORTANT
+      fireToast("API.NETWORK", "error");
     }
   };
 
-  fetchProfile();
-}, []);
 
-if (loading) {
-  return <div style={{ padding: 40 }}>Loading profile...</div>;
-}
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const storedUserRaw = localStorage.getItem("authUser");
+      const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
+      const u_id = storedUser?.u_id ?? null;
+
+      console.log("🔍 UserProfile localStorage snapshot:", {
+        authUser: localStorage.getItem("authUser"),
+        user: localStorage.getItem("user"),
+        userId: localStorage.getItem("userId"),
+      });
+
+
+      if (!u_id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          "http://localhost:5009/api/profiles/complete",
+          {
+            headers: { "x-user-id": u_id },
+          }
+        );
+
+        if (!res.ok) {
+          // ❗ profile nahi mila → form
+          setIsEditing(true);
+          return;
+        }
+
+        const data = await res.json();
+
+        if (data?.profile) {
+          setFormData({
+            firstName: data.profile.first_name,
+            middleName: data.profile.middle_name || "",
+            lastName: data.profile.last_name,
+            email: data.profile.email || "",
+            phone: data.profile.mobile_number || "",
+            dob: data.profile.dob ? data.profile.dob.slice(0, 10) : "",
+            countryCode: "+91",
+            phoneCountryIso: "IN",
+          });
+
+          if (data.addresses && data.addresses.length > 0) {
+            setAddresses(
+              data.addresses.map((a) => ({
+                id: a.address_id,
+                type: a.address_type.toLowerCase(),
+                address: a.address_line,
+                countryName: a.country,
+                countryCode: a.country_code,
+                stateName: a.state,
+                stateCode: "",
+                city: a.city,
+                pincode: a.pincode,
+              }))
+            );
+          } else {
+            // 🔥 VERY IMPORTANT fallback for new user
+            setAddresses([
+              {
+                id: null,
+                type: "home",
+                typeSpecify: "",
+                address: "",
+                countryCode: "",
+                countryName: "",
+                pincode: "",
+                stateCode: "",
+                stateName: "",
+                city: "",
+              },
+            ]);
+          }
+
+
+
+          setIsEditing(false); // 🔥 CARD SHOW
+        } else {
+          setIsEditing(true);
+        }
+      } catch (err) {
+        console.error("Fetch profile failed", err);
+        fireToast("PROFILE.FETCH_FAILED", "error", {}, {
+          toastId: "profile-fetch-failed",
+          style: { whiteSpace: "nowrap" },
+        });
+        setIsEditing(true);
+      }
+      finally {
+        setLoading(false); // 🔥 VERY IMPORTANT
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  if (loading) {
+    return <div style={{ padding: 40 }}>Loading profile...</div>;
+  }
 
   return (
     <div className="pf-wrapper">
@@ -425,7 +425,7 @@ if (loading) {
                   Contact Information
                 </h2>
 
-               
+
 
                 <div className="pf-form-group">
                   <label className="pf-label">
@@ -561,7 +561,7 @@ if (loading) {
 
               {/* Submit Button */}
               <div className="pf-button-group">
-                 <button className="pf-save-btn" onClick={handleSubmit}>
+                <button className="pf-save-btn" onClick={handleSubmit}>
                   Save Changes
                 </button>
                 <button
@@ -707,36 +707,36 @@ function AddressBlock({
   return (
     <div className="pf-address-block">
       <div>
-  <label className="pf-label">
-    Address Type <span className="pf-required">*</span>
-  </label>
-  <div className="pf-select-wrapper">
-    <select
-      value={address.type}
-      onChange={(e) =>
-        onAddressChange(address.id, "type", e.target.value)
-      }
-      className="pf-select"
-    >
-      <option value="home">Home</option>
-      <option value="work">Work</option>
-      <option value="other">Other</option>
-    </select>
-    <ChevronDown className="pf-select-icon" />
-  </div>
+        <label className="pf-label">
+          Address Type <span className="pf-required">*</span>
+        </label>
+        <div className="pf-select-wrapper">
+          <select
+            value={address.type}
+            onChange={(e) =>
+              onAddressChange(address.id, "type", e.target.value)
+            }
+            className="pf-select"
+          >
+            <option value="home">Home</option>
+            <option value="work">Work</option>
+            <option value="other">Other</option>
+          </select>
+          <ChevronDown className="pf-select-icon" />
+        </div>
 
-  {address.type === "other" && (
-    <input
-      type="text"
-      placeholder="Please specify"
-      value={address.typeSpecify}
-      onChange={(e) =>
-        onAddressChange(address.id, "typeSpecify", e.target.value)
-      }
-      className="pf-input pf-input-specify"
-    />
-  )}
-</div>
+        {address.type === "other" && (
+          <input
+            type="text"
+            placeholder="Please specify"
+            value={address.typeSpecify}
+            onChange={(e) =>
+              onAddressChange(address.id, "typeSpecify", e.target.value)
+            }
+            className="pf-input pf-input-specify"
+          />
+        )}
+      </div>
 
 
       <div>

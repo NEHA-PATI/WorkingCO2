@@ -261,6 +261,67 @@
   border: 1px solid #e6eef8;
 }
 
+.config-cfc-table-wrap {
+  margin-top: 14px;
+  overflow: auto;
+  border: 1px solid #e6eef8;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.config-cfc-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+}
+
+.config-cfc-table th,
+.config-cfc-table td {
+  border-bottom: 1px solid #eef3f7;
+  padding: 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.config-cfc-table thead th {
+  background: #f8fafc;
+  font-size: 0.85rem;
+  color: #475569;
+  font-weight: 700;
+}
+
+.config-cfc-table td input {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 7px 8px;
+  font-size: 0.9rem;
+}
+
+.config-cfc-table td input:focus {
+  outline: none;
+  border-color: #cfe3ff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+
+.config-cfc-empty {
+  text-align: center !important;
+  color: #64748b;
+  padding: 16px !important;
+}
+
+.config-cfc-divider {
+  height: 1px;
+  margin: 18px 0;
+  background: #e2e8f0;
+}
+
+.config-inline-actions {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
 /* toast */
 .config-toast {
   position: fixed;

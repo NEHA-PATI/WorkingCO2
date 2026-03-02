@@ -43,11 +43,41 @@ body {
   justify-content: space-between;
 }
 
+.join-org-header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.join-org-back-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid #d4e8e3;
+  background: #f8fbfa;
+  color: #1a5a3a;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.join-org-back-btn:hover {
+  background: #e8f0ed;
+}
+
 .join-org-header-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #1a5a3a;
   margin: 0;
+}
+
+.join-org-header-title-link {
+  cursor: pointer;
 }
 
 .join-org-header-subtitle {
@@ -655,8 +685,9 @@ input[type=number] {
   }
 
   .join-org-header-content {
-    flex-direction: column;
-    text-align: center;
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
     gap: 0.6rem;
   }
 
@@ -793,4 +824,26 @@ input[type=number] {
     font-size: 0.9rem;
     padding: 0.75rem;
   }
+}
+.join-org-confidential-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  background: rgba(22, 163, 74, 0.06);
+  border: 1px solid rgba(22, 163, 74, 0.15);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.join-org-confidential-icon {
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+.join-org-confidential-text {
+  margin: 0;
+  color: #1f2937;
 }
