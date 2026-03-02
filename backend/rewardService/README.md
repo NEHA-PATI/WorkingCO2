@@ -23,6 +23,10 @@ Key variables:
 - `DB_USER`
 - `DB_PASSWORD`
 - `CORS_ORIGINS` (comma-separated frontend origins)
+- `TENANT_ID` (Microsoft Graph tenant id for redeem emails)
+- `CLIENT_ID` (Microsoft Graph app client id)
+- `CLIENT_SECRET` (Microsoft Graph app client secret)
+- `MAILBOX` (Microsoft mailbox/sender, e.g. support@...)
 
 ## Database Requirements
 
