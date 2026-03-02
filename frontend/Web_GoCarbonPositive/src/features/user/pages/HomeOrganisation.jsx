@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuth from "@contexts/AuthContext";
+import blogService from "@features/blog/services/blogService";
 import {
   FaArrowRight,
   FaBookOpen,
@@ -17,13 +18,33 @@ import {
 import { HiMiniChartBar } from "react-icons/hi2";
 import "@features/user/styles/HomeOrganisation.css";
 
+const BLOG_VISIBLE_COUNT = 3;
+
+const formatBlogMonthYear = (dateValue) => {
+  if (!dateValue) return "Latest";
+
+  const parsedDate = new Date(dateValue);
+  if (Number.isNaN(parsedDate.getTime())) return "Latest";
+
+  return parsedDate.toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const getBlogDetailPath = (post) => {
+  const slug =
+    typeof post?.slug === "string" ? post.slug : post?.slug?.current;
+  return slug ? `/blog/${slug}` : "/blog";
+};
+
 const HomeOrganisation = () => {
-  const BLOG_VISIBLE_COUNT = 3;
   const [openFaq, setOpenFaq] = useState(null);
   const [orgCarouselIndex, setOrgCarouselIndex] = useState(0);
   const [orgVisibleCount, setOrgVisibleCount] = useState(3);
   const [servicesCarouselIndex, setServicesCarouselIndex] = useState(0);
   const [isServicesHovered, setIsServicesHovered] = useState(false);
+  const [blogHighlights, setBlogHighlights] = useState([]);
   const navigate = useNavigate();
   const { isAuthenticated, authLoading } = useAuth();
 
@@ -161,36 +182,6 @@ const HomeOrganisation = () => {
     },
   ];
 
-  const blogHighlights = [
-    {
-      image: "https://picsum.photos/seed/gocarbon-blog-1/640/360",
-      title: "How Enterprises Build Carbon Portfolios",
-      excerpt:
-        "A practical walkthrough of screening high-integrity projects and balancing risk across registry-backed credits.",
-      date: "Mar 2026",
-    },
-    {
-      image: "https://picsum.photos/seed/gocarbon-blog-2/640/360",
-      title: "MRV That Stands Up to Verification",
-      excerpt:
-        "Key data controls, evidence chains, and QA checks that improve audit confidence in emissions reporting.",
-      date: "Feb 2026",
-    },
-    {
-      image: "https://picsum.photos/seed/gocarbon-blog-3/640/360",
-      title: "From ESG Reporting to Action Plans",
-      excerpt:
-        "How to translate disclosure requirements into site-level initiatives with measurable outcomes.",
-      date: "Feb 2026",
-    },
-    {
-      image: "https://picsum.photos/seed/gocarbon-blog-4/640/360",
-      title: "Choosing the Right Methodology and Registry",
-      excerpt:
-        "A decision framework for methodology fit, issuance timelines, and long-term governance readiness.",
-      date: "Jan 2026",
-    },
-  ];
   const communityHighlights = [
     {
       image:
@@ -253,6 +244,29 @@ const HomeOrganisation = () => {
     0,
     organisationSolutions.length - orgVisibleCount,
   );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchBlogHighlights = async () => {
+      try {
+        const response = await blogService.getPosts(1, BLOG_VISIBLE_COUNT);
+        if (!isMounted) return;
+        setBlogHighlights(Array.isArray(response?.data) ? response.data : []);
+      } catch (error) {
+        console.error("Failed to load blog highlights on home page:", error);
+        if (isMounted) {
+          setBlogHighlights([]);
+        }
+      }
+    };
+
+    fetchBlogHighlights();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const updateVisibleCount = () => {
@@ -572,29 +586,33 @@ const HomeOrganisation = () => {
               <div className="hp-org-blog-viewport">
                 <div className="hp-org-blog-track hp-org-blog-track-static">
                   {blogHighlights.slice(0, BLOG_VISIBLE_COUNT).map((post) => (
-                    <article className="hp-org-blog-card" key={post.title}>
+                    <Link
+                      className="hp-org-blog-card hp-org-blog-card-link"
+                      key={post._id || post.slug?.current || post.title}
+                      to={getBlogDetailPath(post)}
+                    >
                       <img
-                        src={post.image}
+                        src={post.coverImage || "/renewable.jpg"}
                         alt={post.title}
                         className="hp-org-blog-image"
                         loading="lazy"
                       />
                       <div className="hp-org-blog-content">
-                        <span className="hp-org-blog-date">{post.date}</span>
+                        <span className="hp-org-blog-date">
+                          {formatBlogMonthYear(post.publishedAt || post.createdAt)}
+                        </span>
                         <h4 className="hp-org-blog-card-title">{post.title}</h4>
-                        <p className="hp-org-blog-card-desc">{post.excerpt}</p>
+                        <p className="hp-org-blog-card-desc">
+                          {post.excerpt || post.description || "Read more on our blog."}
+                        </p>
                       </div>
-                    </article>
+                    </Link>
                   ))}
                 </div>
               </div>
-              <button
-                type="button"
-                className="hp-btn-primary hp-org-blog-view-more"
-                onClick={() => navigate("/blog")}
-              >
+              <Link className="hp-btn-primary hp-org-blog-view-more" to="/blog">
                 View More <FaArrowRight />
-              </button>
+              </Link>
             </aside>
 
             <aside className="hp-org-blog-panel hp-org-community-panel hp-tab-switch-anim">
