@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from "react-router-dom";
 import { Country, State } from 'country-state-city';
 import "@features/auth/styles/JoinOrganisation.css";
 import { fireToast } from "@shared/utils/toastService";
@@ -103,6 +104,7 @@ function CustomDropdown({ label, placeholder, options, value, onChange, error, d
 }
 
 export default function JoinOrganisation() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     organizationName: '',
     organizationType: '',
@@ -362,9 +364,21 @@ export default function JoinOrganisation() {
     <div className="join-org-root">
       <header className="join-org-header">
         <div className="join-org-header-content">
-          <div>
-            <h1 className="join-org-header-title">Apply as an Organization</h1>
-            <p className="join-org-header-subtitle">Begin your verified carbon-positive journey</p>
+          <div className="join-org-header-left">
+            <button
+              type="button"
+              className="join-org-back-btn"
+              onClick={() => navigate(-1)}
+              aria-label="Go back"
+            >
+              {"<-"}
+            </button>
+            <div>
+            <h1 className="join-org-header-title join-org-header-title-link" onClick={() => navigate("/")}>
+              Organization Onboarding
+            </h1>
+            <p className="join-org-header-subtitle">Submit your details to explore partnership and carbon development opportunities.</p>
+            </div>
           </div>
         </div>
       </header>
@@ -631,52 +645,60 @@ export default function JoinOrganisation() {
                 </div>
 
                 <button type="submit" className="join-org-submit-button">
-                  Submit
+                  Start the Conversation
                 </button>
+                
               </form>
+              <div className="join-org-confidential-box">
+  <span className="join-org-confidential-icon">🔒</span>
+  <p className="join-org-confidential-text">
+    All information shared will remain strictly confidential and is used solely for internal evaluation and partnership discussions.
+  </p>
+</div>
             </div>
 
             <div className="join-org-right-panel">
               <div className="join-org-right-content">
-                <h2 className="join-org-right-title">Go Carbon Positive</h2>
-                <p className="join-org-right-description">
-                  Join thousands of organizations making a positive environmental impact
-                  while growing your business sustainably.
-                </p>
+               <h2 className="join-org-right-title">
+  Why Partner With Us
+</h2>
+<p className="join-org-right-description">
+  We support organisations in structuring, developing, and navigating carbon and sustainability initiatives with transparency and technical clarity.
+</p>
 
                 <div className="join-org-benefits-grid">
                   <div className="join-org-benefit-card">
-                    <div className="join-org-benefit-icon">♻️</div>
-                    <h3 className="join-org-benefit-title">Carbon Neutral Operations</h3>
-                    <p className="join-org-benefit-text">
-                      Achieve complete carbon neutrality with our integrated sustainability
-                      solutions.
-                    </p>
+                  <h3 className="join-org-benefit-title">
+  Carbon Strategy Development
+</h3>
+<p className="join-org-benefit-text">
+  Explore structured pathways to reduce emissions and unlock carbon value.
+</p>
                   </div>
 
                   <div className="join-org-benefit-card">
-                    <div className="join-org-benefit-icon">🌱</div>
-                    <h3 className="join-org-benefit-title">Sustainable Growth</h3>
-                    <p className="join-org-benefit-text">
-                      Build your business while protecting our planet for future
-                      generations.
-                    </p>
+                    <h3 className="join-org-benefit-title">
+  Documentation & Compliance Guidance
+</h3>
+<p className="join-org-benefit-text">
+ Get support aligning your sustainability initiatives with recognised frameworks.
+</p>
                   </div>
 
                   <div className="join-org-benefit-card">
-                    <div className="join-org-benefit-icon">🌍</div>
-                    <h3 className="join-org-benefit-title">Global Community</h3>
-                    <p className="join-org-benefit-text">
-                      Connect with organizations worldwide committed to environmental
-                      responsibility.
-                    </p>
+                   <h3 className="join-org-benefit-title">
+  Long-Term Sustainability Partnership
+</h3>
+<p className="join-org-benefit-text">
+  Build a structured roadmap toward carbon responsibility and operational resilience.
+</p>
                   </div>
                 </div>
 
                 <div className="join-org-stats-card">
-                  <p className="join-org-stat">✓ Powering sustainability</p>
-                  <p className="join-org-stat">✓ Helping to offset tonnes of CO₂</p>
-                  <p className="join-org-stat">✓ Connecting impact makers</p>
+                  <p className="join-org-stat">✓ Transparent collaboration process  </p>
+                  <p className="join-org-stat">✓ Structured project evaluation </p>
+                  <p className="join-org-stat">✓ Long-term sustainability focus</p>
                 </div>
               </div>
             </div>

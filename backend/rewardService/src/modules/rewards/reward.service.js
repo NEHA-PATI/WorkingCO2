@@ -669,6 +669,39 @@ const getRewardCatalogAdmin = async (page = 1, limit = 100, search = '') => {
   }
 };
 
+const getRewardRedeemsAdmin = async (page = 1, limit = 100) => {
+  const safePage = Math.max(Number(page) || 1, 1);
+  const safeLimit = Math.min(Math.max(Number(limit) || 100, 1), 500);
+  const offset = (safePage - 1) * safeLimit;
+
+  try {
+    const [items, total] = await Promise.all([
+      repo.getRewardRedeemAdminItems(safeLimit, offset),
+      repo.getRewardRedeemAdminCount()
+    ]);
+
+    return {
+      items,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: Math.max(Math.ceil(total / safeLimit), 1)
+    };
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+
+    return {
+      items: [],
+      total: 0,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: 1
+    };
+  }
+};
+
 const createRewardCatalogItem = async ({
   reward_id,
   name,
@@ -760,28 +793,41 @@ const redeemReward = async (u_id, reward_id) => {
     };
   }
 
-  const availablePoints = await repo.getTotalPoints(u_id);
-  if (availablePoints < reward.points) {
+  let redeemResult;
+  try {
+    redeemResult = await repo.redeemReward({
+      u_id,
+      reward_id: reward.reward_id,
+      points_used: toSafeNumber(reward.points, 0),
+      metadata: {
+        name: reward.name,
+        points: toSafeNumber(reward.points, 0)
+      }
+    });
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+
+    return {
+      redeemed: false,
+      reason: 'REDEEM_NOT_CONFIGURED'
+    };
+  }
+
+  if (!redeemResult?.redeemed) {
     return {
       redeemed: false,
       reason: 'INSUFFICIENT_POINTS',
       required_points: reward.points,
-      current_points: availablePoints
+      current_points: toSafeNumber(redeemResult?.availablePoints, 0)
     };
   }
-
-  await repo.insertRewardEvent({
-    u_id,
-    action_key: `redeem_${reward.reward_id}`,
-    action_type: 'one_time',
-    points: -Math.abs(toSafeNumber(reward.points, 0)),
-    activity_date: new Date()
-  });
 
   return {
     redeemed: true,
     reward,
-    current_points: availablePoints - reward.points
+    current_points: redeemResult.current_points
   };
 };
 const createRule = async (data) => {
@@ -812,6 +858,7 @@ module.exports = {
   getRewardHistory,
   getRewardCatalog,
   getRewardCatalogAdmin,
+  getRewardRedeemsAdmin,
   createRewardCatalogItem,
   updateRewardCatalogItem,
   deleteRewardCatalogItem,

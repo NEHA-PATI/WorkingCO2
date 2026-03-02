@@ -11,6 +11,8 @@ import PrivacyPolicy from "@shared/components/Privacy";
 import TermsAndConditions from "@shared/components/TermsAndConditions";
 
 import Home from "@features/user/pages/Home";
+import HomeUser from "@features/user/pages/HomeUser";
+import HomeOrganisation from "@features/user/pages/HomeOrganisation";
 import About from "@features/user/pages/about";
 import Community from "@features/user/pages/community";
 import Contact from "@features/user/pages/contact";
@@ -60,6 +62,7 @@ import AdminAnalytics from "@features/admin/pages/Analytics";
 import AdminCareerManagement from "@features/admin/pages/CareerManagement";
 import AdminCaseStudyManagement from "@features/admin/pages/CaseStudyManagement";
 import AdminReports from "@features/admin/pages/Reports";
+import AdminMRVManagement from "@features/admin/pages/MRVManagement";
 import AdminAssetManagement from "@features/admin/pages/AssetManagement";
 import AdminContestManagement from "@features/admin/pages/ContestManagement";
 import AdminOrganizationManagement from "@features/admin/pages/OrganizationManagement";
@@ -136,6 +139,8 @@ const AppRoutes = () => {
 
       <Route element={<BaseLayout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/experience/user" element={<HomeUser />} />
+        <Route path="/experience/organisation" element={<HomeOrganisation />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -293,6 +298,7 @@ const AppRoutes = () => {
             element={<AdminCaseStudyManagement />}
           />
           <Route path="contest" element={<AdminContestManagement />} />
+          <Route path="mrv-management" element={<AdminMRVManagement />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="" element={<Navigate to="overview" replace />} />

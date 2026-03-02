@@ -1,0 +1,281 @@
+@import "./Home.css";
+
+/* Organisation experience route styles */
+
+.hp-org-services-carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.hp-org-services-arrow {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.hp-org-services-arrow:hover {
+  border-color: #86efac;
+  color: #16a34a;
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.15);
+}
+
+.hp-org-services-stage {
+  position: relative;
+  flex: 1;
+  max-width: 1040px;
+  min-height: 320px;
+  overflow: hidden;
+}
+
+.hp-org-services-item {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(96%, 560px);
+  transition:
+    transform 0.45s ease,
+    opacity 0.45s ease,
+    filter 0.45s ease;
+}
+
+.hp-org-services-item.is-center {
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+  z-index: 3;
+  filter: blur(0);
+}
+
+.hp-org-services-item.is-left {
+  transform: translateX(calc(-50% - 335px)) scale(0.9);
+  opacity: 0.52;
+  z-index: 2;
+  filter: blur(0.2px);
+}
+
+.hp-org-services-item.is-right {
+  transform: translateX(calc(-50% + 335px)) scale(0.9);
+  opacity: 0.52;
+  z-index: 2;
+  filter: blur(0.2px);
+}
+
+.hp-org-services-item.is-hidden {
+  transform: translateX(-50%) scale(0.78);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hp-org-service-card {
+  min-height: 0;
+}
+
+.hp-org-announcements-layout {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.hp-org-announcements-primary .hp-announcements-list {
+  margin: 0;
+  max-height: 900px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+}
+
+.hp-org-announcements-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hp-org-blog-panel {
+  --hp-org-blog-row-height: 124px;
+  --hp-org-blog-row-gap: 10px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.hp-org-blog-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.hp-org-blog-viewport {
+  position: relative;
+  overflow: hidden;
+  height: calc((var(--hp-org-blog-row-height) * 3) + (var(--hp-org-blog-row-gap) * 2));
+  border-radius: 12px;
+}
+
+.hp-org-blog-track {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hp-org-blog-row-gap);
+  transition: transform 0.55s ease;
+}
+
+.hp-org-blog-track-static {
+  transition: none;
+}
+
+.hp-org-blog-card {
+  height: var(--hp-org-blog-row-height);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+}
+
+.hp-org-blog-card-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hp-org-blog-card-link:hover {
+  border-color: #86efac;
+  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.12);
+}
+
+.hp-org-blog-image {
+  width: 128px;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+
+.hp-org-blog-content {
+  padding: 11px 12px;
+}
+
+.hp-org-blog-date {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #16a34a;
+  margin-bottom: 4px;
+}
+
+.hp-org-blog-card-title {
+  margin: 0 0 4px;
+  font-size: 17px;
+  line-height: 1.28;
+  color: #0f172a;
+}
+
+.hp-org-blog-card-subtitle {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #16a34a;
+}
+
+.hp-org-blog-card-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.42;
+  color: #475569;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hp-org-blog-view-more {
+  margin-top: 14px;
+  width: 100%;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.hp-org-community-panel .hp-org-community-viewport {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (max-width: 1024px) {
+  .hp-org-services-item.is-left {
+    transform: translateX(calc(-50% - 260px)) scale(0.88);
+  }
+
+  .hp-org-services-item.is-right {
+    transform: translateX(calc(-50% + 260px)) scale(0.88);
+  }
+
+  .hp-org-announcements-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .hp-org-services-carousel {
+    gap: 8px;
+  }
+
+  .hp-org-services-arrow {
+    width: 34px;
+    height: 34px;
+  }
+
+  .hp-org-services-stage {
+    min-height: 330px;
+  }
+
+  .hp-org-services-item {
+    width: min(95%, 600px);
+  }
+
+  .hp-org-services-item.is-left,
+  .hp-org-services-item.is-right,
+  .hp-org-services-item.is-hidden {
+    transform: translateX(-50%) scale(0.9);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .hp-org-blog-panel {
+    --hp-org-blog-row-height: 118px;
+    --hp-org-blog-row-gap: 9px;
+    padding: 12px;
+  }
+
+  .hp-org-blog-viewport {
+    height: calc((var(--hp-org-blog-row-height) * 3) + (var(--hp-org-blog-row-gap) * 2));
+  }
+
+  .hp-org-blog-image {
+    width: 110px;
+  }
+
+  .hp-org-blog-card-title {
+    font-size: 15px;
+  }
+
+  .hp-org-blog-card-desc {
+    font-size: 13px;
+  }
+}

@@ -17,13 +17,28 @@ const getMonthlyPoints = async (u_id) => {
 };
 
 const getTotalPoints = async (u_id) => {
-  const { rows } = await pool.query(`
-    SELECT COALESCE(SUM(points), 0) AS total
-    FROM user_reward_events
-    WHERE u_id = $1
-  `, [u_id]);
+  try {
+    const { rows } = await pool.query(`
+      SELECT COALESCE(total_points, 0) AS total
+      FROM user_points_balance
+      WHERE u_id = $1
+      LIMIT 1
+    `, [u_id]);
 
-  return Number(rows[0].total);
+    return Number(rows[0]?.total || 0);
+  } catch (error) {
+    if (error?.code !== '42P01') {
+      throw error;
+    }
+
+    const { rows } = await pool.query(`
+      SELECT COALESCE(SUM(points), 0) AS total
+      FROM user_reward_events
+      WHERE u_id = $1
+    `, [u_id]);
+
+    return Number(rows[0].total);
+  }
 };
 
 /* ===============================
@@ -548,6 +563,35 @@ const getRewardCatalogAdminCount = async (search = '') => {
   return Number(rows[0].total);
 };
 
+const getRewardRedeemAdminItems = async (limit = 100, offset = 0) => {
+  const { rows } = await pool.query(`
+    SELECT
+      rr.id,
+      rr.u_id,
+      rr.reward_id,
+      rr.points_used,
+      rr.redeemed_at,
+      rr.status,
+      rr.metadata,
+      rc.name AS reward_name
+    FROM reward_redeem rr
+    LEFT JOIN reward_catalog rc ON rc.reward_id = rr.reward_id
+    ORDER BY rr.redeemed_at DESC, rr.id DESC
+    LIMIT $1 OFFSET $2
+  `, [limit, offset]);
+
+  return rows;
+};
+
+const getRewardRedeemAdminCount = async () => {
+  const { rows } = await pool.query(`
+    SELECT COUNT(*) AS total
+    FROM reward_redeem
+  `);
+
+  return Number(rows[0].total);
+};
+
 const createRewardCatalogItem = async ({
   reward_id,
   name,
@@ -623,6 +667,85 @@ const deleteRewardCatalogItem = async (reward_id) => {
 
   return rows[0] || null;
 };
+
+const redeemReward = async ({
+  u_id,
+  reward_id,
+  points_used,
+  metadata = null
+}) => {
+  const safePoints = Math.abs(Number(points_used) || 0);
+  if (safePoints <= 0) {
+    throw new Error('points_used must be greater than 0');
+  }
+
+  return pool.transaction(async (client) => {
+    let balanceRows = await client.query(`
+      SELECT total_points
+      FROM user_points_balance
+      WHERE u_id = $1
+      FOR UPDATE
+    `, [u_id]);
+
+    if (balanceRows.rows.length === 0) {
+      const earnedRows = await client.query(`
+        SELECT COALESCE(SUM(points), 0) AS total
+        FROM user_reward_events
+        WHERE u_id = $1
+      `, [u_id]);
+
+      const seededTotal = Number(earnedRows.rows[0]?.total || 0);
+
+      await client.query(`
+        INSERT INTO user_points_balance (u_id, total_points, updated_at)
+        VALUES ($1, $2, NOW())
+        ON CONFLICT (u_id) DO NOTHING
+      `, [u_id, seededTotal]);
+
+      balanceRows = await client.query(`
+        SELECT total_points
+        FROM user_points_balance
+        WHERE u_id = $1
+        FOR UPDATE
+      `, [u_id]);
+    }
+
+    const availablePoints = Number(balanceRows.rows[0]?.total_points || 0);
+
+    if (availablePoints < safePoints) {
+      return {
+        redeemed: false,
+        availablePoints
+      };
+    }
+
+    const updateResult = await client.query(`
+      UPDATE user_points_balance
+      SET
+        total_points = total_points - $2,
+        updated_at = NOW()
+      WHERE u_id = $1
+      RETURNING total_points
+    `, [u_id, safePoints]);
+
+    await client.query(`
+      INSERT INTO reward_redeem (
+        u_id,
+        reward_id,
+        points_used,
+        redeemed_at,
+        status,
+        metadata
+      )
+      VALUES ($1, $2, $3, NOW(), 'SUCCESS', $4::jsonb)
+    `, [u_id, reward_id, safePoints, metadata ? JSON.stringify(metadata) : null]);
+
+    return {
+      redeemed: true,
+      current_points: Number(updateResult.rows[0]?.total_points || 0)
+    };
+  });
+};
 /* ===============================
    CREATE RULE
 ================================ */
@@ -651,7 +774,6 @@ const createRule = async ({
 
   return rows[0];
 };
-
 
 
 /* ===============================
@@ -684,7 +806,6 @@ const updateRule = async (rule_id, {
   return rows[0];
 };
 
-
 module.exports = {
   getMonthlyPoints,
   getTotalPoints,
@@ -713,9 +834,12 @@ module.exports = {
   getRewardById,
   getRewardCatalogAdminItems,
   getRewardCatalogAdminCount,
+  getRewardRedeemAdminItems,
+  getRewardRedeemAdminCount,
   createRewardCatalogItem,
   updateRewardCatalogItem,
   deleteRewardCatalogItem,
+  redeemReward,
   getContestStats,
   createRule,
   updateRule
