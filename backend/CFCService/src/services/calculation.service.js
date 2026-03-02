@@ -53,6 +53,20 @@ exports.calculate = async (data) => {
     }));
   }
 
+  // Normalize housing profile payload for report and raw_input_json persistence.
+  data.housing = {
+    electricity_kwh: Number(data.housing?.electricity_kwh || 0),
+    lpg_cylinders: Number(data.housing?.lpg_cylinders || 0),
+    bedrooms: Number(data.housing?.bedrooms || 0),
+    members: {
+      male: Number(data.housing?.members?.male || 0),
+      female: Number(data.housing?.members?.female || 0),
+      child: Number(data.housing?.members?.child || 0)
+    },
+    fridge_count: Number(data.housing?.fridge_count || 0),
+    tv_count: Number(data.housing?.tv_count || 0)
+  };
+
   // =========================
   // HOUSING
   // =========================
@@ -203,7 +217,12 @@ exports.calculate = async (data) => {
   total = round(total);
 
   // 🔥 Generate Report HERE (inside function)
-  const finalReport = reportService.generateReport(total, breakdown, pucInsights);
+  const finalReport = reportService.generateReport(total, breakdown, pucInsights, {
+    bedrooms: data.housing.bedrooms,
+    members: data.housing.members,
+    fridge_count: data.housing.fridge_count,
+    tv_count: data.housing.tv_count
+  });
 
   // =========================
   // SAVE TO DB

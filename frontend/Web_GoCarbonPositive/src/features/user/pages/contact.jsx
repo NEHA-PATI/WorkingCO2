@@ -240,7 +240,7 @@ export default function Contact() {
           </form>
 
           <button className="cp-query-link" onClick={() => setShowQueryModal(true)}>
-            Need help? Raise a support ticket ->
+            Need help? Raise a support ticket 
           </button>
         </div>
       </main>

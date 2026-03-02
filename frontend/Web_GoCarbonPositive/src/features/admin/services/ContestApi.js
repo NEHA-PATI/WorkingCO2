@@ -99,3 +99,11 @@ export const getRedeemsAdmin = async ({ page = 1, limit = 200 } = {}) => {
     method: "GET",
   });
 };
+
+export const updateRedeemCompletionStatus = async (id, is_completed = true) => {
+  return apiClient({
+    url: `/rewards/redeems-admin/${encodeURIComponent(id)}/completion`,
+    method: "PUT",
+    data: { is_completed: Boolean(is_completed) },
+  });
+};

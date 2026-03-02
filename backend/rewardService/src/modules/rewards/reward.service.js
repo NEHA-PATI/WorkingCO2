@@ -1,5 +1,6 @@
 const repo = require('./reward.repository');
 const { MONTHLY_CAP } = require('../../config/constants');
+const { sendRedeemSuccessEmail } = require('./reward.mail');
 
 const HOURS_24_MS = 24 * 60 * 60 * 1000;
 const DAILY_CHECKIN_KEY = 'daily_checkin';
@@ -702,6 +703,26 @@ const getRewardRedeemsAdmin = async (page = 1, limit = 100) => {
   }
 };
 
+const updateRewardRedeemCompletion = async (id, is_completed = true) => {
+  const redeemId = Number(id);
+  if (!Number.isInteger(redeemId) || redeemId <= 0) {
+    throw new Error('valid redeem id is required');
+  }
+
+  try {
+    const updated = await repo.updateRewardRedeemCompletion(redeemId, Boolean(is_completed));
+    if (!updated) {
+      throw new Error('redeem not found');
+    }
+    return updated;
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+    throw new Error('REDEEM_NOT_CONFIGURED');
+  }
+};
+
 const createRewardCatalogItem = async ({
   reward_id,
   name,
@@ -793,6 +814,17 @@ const redeemReward = async (u_id, reward_id) => {
     };
   }
 
+  const userDetails = await repo.getUserRedeemDetails(u_id);
+  const formattedAddress = userDetails
+    ? [
+      userDetails.address_line,
+      userDetails.city,
+      userDetails.state,
+      userDetails.country,
+      userDetails.pincode
+    ].filter(Boolean).join(', ')
+    : null;
+
   let redeemResult;
   try {
     redeemResult = await repo.redeemReward({
@@ -800,8 +832,12 @@ const redeemReward = async (u_id, reward_id) => {
       reward_id: reward.reward_id,
       points_used: toSafeNumber(reward.points, 0),
       metadata: {
-        name: reward.name,
-        points: toSafeNumber(reward.points, 0)
+        reward_name: reward.name,
+        points: toSafeNumber(reward.points, 0),
+        name: userDetails?.name || u_id,
+        email: userDetails?.email || null,
+        contact_number: userDetails?.contact_number || null,
+        address: formattedAddress || null
       }
     });
   } catch (error) {
@@ -824,10 +860,26 @@ const redeemReward = async (u_id, reward_id) => {
     };
   }
 
+  if (userDetails?.email) {
+    sendRedeemSuccessEmail({
+      to: userDetails.email,
+      userName: userDetails.name || u_id,
+      rewardName: reward.name,
+      pointsUsed: toSafeNumber(reward.points, 0),
+      remainingPoints: redeemResult.current_points,
+      redeemId: redeemResult.redeem_id,
+      redeemedAt: redeemResult.redeemed_at
+    }).catch((error) => {
+      console.warn('[reward-service] redeem success email failed:', error?.message || error);
+    });
+  }
+
   return {
     redeemed: true,
     reward,
-    current_points: redeemResult.current_points
+    current_points: redeemResult.current_points,
+    redeem_id: redeemResult.redeem_id,
+    redeemed_at: redeemResult.redeemed_at
   };
 };
 const createRule = async (data) => {
@@ -859,6 +911,7 @@ module.exports = {
   getRewardCatalog,
   getRewardCatalogAdmin,
   getRewardRedeemsAdmin,
+  updateRewardRedeemCompletion,
   createRewardCatalogItem,
   updateRewardCatalogItem,
   deleteRewardCatalogItem,

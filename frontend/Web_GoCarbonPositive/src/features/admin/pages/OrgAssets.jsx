@@ -122,7 +122,16 @@ function AssetRow({
   onToggleRevert,
   isRevertOpen,
   onOpenRevertAction,
+  scanWorkflowStep,
+  onAdvanceScanWorkflow,
 }) {
+  const scanWorkflowLabel =
+    scanWorkflowStep === 1
+      ? "Assign Scan Date"
+      : scanWorkflowStep === 2
+      ? "Start Scan"
+      : "Assign Drone";
+
   return (
     <div className="asset-row">
       <div className="asset-name-cell">
@@ -175,6 +184,11 @@ function AssetRow({
         <button className="action-btn review" onClick={() => onReview(asset)}>
           <FaEye size={13} /> Review
         </button>
+        {asset.status === "approved" && (
+          <button className="action-btn workflow" onClick={() => onAdvanceScanWorkflow(asset.id)}>
+            {scanWorkflowLabel}
+          </button>
+        )}
         {asset.status === "pending" && (
           <>
             <button
@@ -232,6 +246,7 @@ export default function OrgAssets() {
   const [revertDialog, setRevertDialog] = useState({ open: false, asset: null, action: null });
   const [revertReason, setRevertReason] = useState("");
   const [revertError, setRevertError] = useState("");
+  const [scanWorkflowByAsset, setScanWorkflowByAsset] = useState({});
 
   useEffect(() => {
     const loadAssets = async () => {
@@ -433,6 +448,16 @@ export default function OrgAssets() {
   function handleReviewDecision(nextStatus, reason = "") {
     if (!selectedReviewAsset?.id) return;
     updateAssetStatus(selectedReviewAsset, nextStatus, reason);
+  }
+
+  function handleAdvanceScanWorkflow(assetId) {
+    setScanWorkflowByAsset((prev) => {
+      const currentStep = prev[assetId] ?? 0;
+      return {
+        ...prev,
+        [assetId]: Math.min(currentStep + 1, 2),
+      };
+    });
   }
 
   function handleToggleRevert(id) {
@@ -642,6 +667,8 @@ export default function OrgAssets() {
                   onToggleRevert={handleToggleRevert}
                   isRevertOpen={!!openRevertRows[asset.id]}
                   onOpenRevertAction={handleOpenRevertAction}
+                  scanWorkflowStep={scanWorkflowByAsset[asset.id] ?? 0}
+                  onAdvanceScanWorkflow={handleAdvanceScanWorkflow}
                 />
               ))
             )}
