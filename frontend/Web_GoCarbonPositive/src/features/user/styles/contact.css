@@ -151,7 +151,10 @@
 .cp-right {
   width: 50%;
   flex: 0 0 50%;
-  background: var(--green);
+  background:
+    linear-gradient(120deg, rgba(18, 58, 33, 0.82), rgba(18, 58, 33, 0.58)),
+    url("https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1800&q=80")
+      center/cover no-repeat;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
