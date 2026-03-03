@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "@contexts/AuthContext";
 import blogService from "@features/blog/services/blogService";
+import { toSectionId } from "@features/user/config/learnMoreContent";
 import {
   FaArrowRight,
   FaBookOpen,
@@ -527,9 +528,21 @@ const HomeOrganisation = () => {
                     </div>
                     <h3 className="hp-service-title">{s.title}</h3>
                     <p className="hp-service-desc">{s.desc}</p>
-                    <a className="hp-learn-more" href="#">
+                    <button
+                      type="button"
+                      className="hp-learn-more"
+                      onClick={() =>
+                        navigate(
+                          `/learn-more?${new URLSearchParams({
+                            context: "organisation",
+                            section: toSectionId(s.title),
+                            from: "/experience/organisation",
+                          }).toString()}`,
+                        )
+                      }
+                    >
                       Learn more <FaArrowRight />
-                    </a>
+                    </button>
                   </div>
                 </div>
               );
