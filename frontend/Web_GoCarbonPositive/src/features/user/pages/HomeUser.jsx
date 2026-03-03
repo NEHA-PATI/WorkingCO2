@@ -18,6 +18,7 @@ import {
 } from "react-icons/fa6";
 import { GiChemicalDrop, GiRecycle } from "react-icons/gi";
 import { HiMiniChartBar } from "react-icons/hi2";
+import { toSectionId } from "@features/user/config/learnMoreContent";
 import "@features/user/styles/HomeUser.css";
 
 const HomeUser = () => {
@@ -250,9 +251,21 @@ const HomeUser = () => {
               </div>
               <h3 className="hp-service-title">{s.title}</h3>
               <p className="hp-service-desc">{s.desc}</p>
-              <a className="hp-learn-more" href="#">
+              <button
+                type="button"
+                className="hp-learn-more"
+                onClick={() =>
+                  navigate(
+                    `/learn-more?${new URLSearchParams({
+                      context: "user",
+                      section: toSectionId(s.title),
+                      from: "/experience/user",
+                    }).toString()}`,
+                  )
+                }
+              >
                 Learn more <FaArrowRight />
-              </a>
+              </button>
             </div>
           ))}
         </div>

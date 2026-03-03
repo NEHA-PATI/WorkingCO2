@@ -34,7 +34,7 @@
   position: relative;
   flex: 1;
   max-width: 1040px;
-  min-height: 320px;
+  min-height: 390px;
   overflow: hidden;
 }
 
@@ -42,7 +42,7 @@
   position: absolute;
   top: 0;
   left: 50%;
-  width: min(96%, 560px);
+  width: min(90%, 360px);
   transition:
     transform 0.45s ease,
     opacity 0.45s ease,
@@ -57,14 +57,14 @@
 }
 
 .hp-org-services-item.is-left {
-  transform: translateX(calc(-50% - 335px)) scale(0.9);
+  transform: translateX(calc(-50% - 245px)) scale(0.9);
   opacity: 0.52;
   z-index: 2;
   filter: blur(0.2px);
 }
 
 .hp-org-services-item.is-right {
-  transform: translateX(calc(-50% + 335px)) scale(0.9);
+  transform: translateX(calc(-50% + 245px)) scale(0.9);
   opacity: 0.52;
   z-index: 2;
   filter: blur(0.2px);
@@ -79,6 +79,13 @@
 
 .hp-org-service-card {
   min-height: 0;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.hp-org-service-card .hp-learn-more {
+  margin-top: auto;
 }
 
 .hp-org-announcements-layout {
@@ -219,11 +226,11 @@
 
 @media (max-width: 1024px) {
   .hp-org-services-item.is-left {
-    transform: translateX(calc(-50% - 260px)) scale(0.88);
+    transform: translateX(calc(-50% - 210px)) scale(0.88);
   }
 
   .hp-org-services-item.is-right {
-    transform: translateX(calc(-50% + 260px)) scale(0.88);
+    transform: translateX(calc(-50% + 210px)) scale(0.88);
   }
 
   .hp-org-announcements-layout {
@@ -242,11 +249,11 @@
   }
 
   .hp-org-services-stage {
-    min-height: 330px;
+    min-height: 300px;
   }
 
   .hp-org-services-item {
-    width: min(95%, 600px);
+    width: min(92%, 300px);
   }
 
   .hp-org-services-item.is-left,
