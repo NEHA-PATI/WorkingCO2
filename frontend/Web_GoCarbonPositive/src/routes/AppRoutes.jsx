@@ -62,6 +62,7 @@ import AdminAnalytics from "@features/admin/pages/Analytics";
 import AdminCareerManagement from "@features/admin/pages/CareerManagement";
 import AdminCaseStudyManagement from "@features/admin/pages/CaseStudyManagement";
 import AdminReports from "@features/admin/pages/Reports";
+import AdminMRVManagement from "@features/admin/pages/MRVManagement";
 import AdminAssetManagement from "@features/admin/pages/AssetManagement";
 import AdminContestManagement from "@features/admin/pages/ContestManagement";
 import AdminOrganizationManagement from "@features/admin/pages/OrganizationManagement";
@@ -297,6 +298,7 @@ const AppRoutes = () => {
             element={<AdminCaseStudyManagement />}
           />
           <Route path="contest" element={<AdminContestManagement />} />
+          <Route path="mrv-management" element={<AdminMRVManagement />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="" element={<Navigate to="overview" replace />} />

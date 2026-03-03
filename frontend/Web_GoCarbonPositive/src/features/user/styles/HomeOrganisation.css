@@ -147,6 +147,18 @@
   align-items: stretch;
 }
 
+.hp-org-blog-card-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hp-org-blog-card-link:hover {
+  border-color: #86efac;
+  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.12);
+}
+
 .hp-org-blog-image {
   width: 128px;
   height: 100%;
@@ -197,6 +209,7 @@
   margin-top: 14px;
   width: 100%;
   justify-content: center;
+  text-decoration: none;
 }
 
 .hp-org-community-panel .hp-org-community-viewport {
