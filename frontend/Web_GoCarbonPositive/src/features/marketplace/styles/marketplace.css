@@ -1,0 +1,26 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+.marketplace-shell {
+  color: #0f172a;
+  font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(16, 185, 129, 0.08), transparent 35%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.marketplace-shell .font-display {
+  font-family: "Space Grotesk", "Poppins", ui-sans-serif, system-ui, sans-serif;
+}
+
+.marketplace-shell .glass-panel {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 12px 28px -22px rgba(15, 23, 42, 0.48);
+}
+
+.marketplace-tabbar {
+  box-shadow: 0 6px 16px -14px rgba(15, 23, 42, 0.45);
+}
