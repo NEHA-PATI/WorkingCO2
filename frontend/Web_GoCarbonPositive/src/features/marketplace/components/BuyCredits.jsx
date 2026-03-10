@@ -1,12 +1,11 @@
-import React, { useState } from "react";
-import { cn } from "../lib/utils";
+import React, { useMemo, useState } from "react";
 import {
+  Badge,
+  Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  Button,
-  Badge,
   Input,
   Label,
   Select,
@@ -17,550 +16,517 @@ import {
   Switch,
 } from "./ui/basic-ui";
 import {
-  CreditCard,
-  Wallet,
-  Shield,
-  Calculator,
   AlertTriangle,
-  CheckCircle,
-  Receipt,
-  DollarSign,
-  Bitcoin,
-  Banknote,
+  Building2,
+  CheckCircle2,
+  CreditCard,
+  Landmark,
   Lock,
-  ArrowRight,
-  Clock,
-  Star,
-  MapPin,
+  Receipt,
+  Shield,
+  ShoppingCart,
+  Wallet,
 } from "lucide-react";
+import { getMarketplaceCatalog } from "../config/mockMarketplaceData";
 
-const BuyCredits = () => {
-  const [selectedListing, setSelectedListing] = useState("forest-credits");
-  const [quantity, setQuantity] = useState(100);
-  const [paymentMethod, setPaymentMethod] = useState("card");
-  const [autoInvest, setAutoInvest] = useState(false);
-  const [step, setStep] = useState(1); // 1: Select, 2: Payment, 3: Confirmation
+const settlementAccounts = [
+  {
+    id: "treasury_wallet",
+    name: "Corporate Treasury Wallet",
+    type: "Custodial Wallet",
+    balance: 146250.75,
+    currency: "USD",
+  },
+  {
+    id: "registry_escrow",
+    name: "Registry Escrow Account",
+    type: "Escrow Ledger",
+    balance: 98240.5,
+    currency: "USD",
+  },
+  {
+    id: "bank_wire_main",
+    name: "Primary Wire Account",
+    type: "Bank Settlement",
+    balance: 320000.0,
+    currency: "USD",
+  },
+];
 
-  // Mock listings for purchase
-  const listings = {
-    "forest-credits": {
-      title: "Brazilian Rainforest Protection Credits",
-      price: 23.45,
-      seller: "Amazon Conservation Fund",
-      verification: "Gold Standard",
-      location: "Amazon, Brazil",
-      rating: 4.9,
-      available: 5000,
-      description: "High-quality forest conservation credits",
-      features: [
-        "Verified deforestation prevention",
-        "Biodiversity protection",
-        "Community benefits",
-        "Real-time monitoring",
-      ],
-    },
-    "solar-credits": {
-      title: "Solar Farm Renewable Energy Credits",
-      price: 18.75,
-      seller: "SunPower Corp",
-      verification: "Green-e",
-      location: "Arizona, USA",
-      rating: 4.7,
-      available: 3000,
-      description: "Utility-scale solar energy credits",
-      features: [
-        "100% renewable energy",
-        "Grid-connected",
-        "Real-time generation data",
-        "Long-term contracts",
-      ],
-    },
-    "wind-credits": {
-      title: "Offshore Wind Energy Credits",
-      price: 26.8,
-      seller: "WindPower Ltd",
-      verification: "REGO",
-      location: "North Sea, UK",
-      rating: 4.6,
-      available: 2500,
-      description: "Premium offshore wind energy credits",
-      features: [
-        "Offshore wind generation",
-        "High capacity factor",
-        "Minimal environmental impact",
-        "Blockchain verified",
-      ],
-    },
-  };
+const settlementMethods = [
+  { id: "registry_transfer", label: "Registry Transfer Settlement" },
+  { id: "bilateral_netting", label: "Bilateral Netting" },
+  { id: "escrow_settlement", label: "Escrow Settlement" },
+];
 
-  const currentListing = listings[selectedListing];
-  const subtotal = quantity * currentListing.price;
-  const platformFee = subtotal * 0.025; // 2.5% platform fee
-  const carbonNeutralShipping = 2.99;
-  const total = subtotal + platformFee + carbonNeutralShipping;
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const money = (value) => `$${Number(value).toFixed(2)}`;
 
-  const paymentMethods = [
-    {
-      id: "card",
-      name: "Credit Card",
-      icon: CreditCard,
-      description: "Visa, Mastercard, American Express",
-      processingTime: "Instant",
-    },
-    {
-      id: "crypto",
-      name: "Cryptocurrency",
-      icon: Bitcoin,
-      description: "Bitcoin, Ethereum, USDC",
-      processingTime: "5-10 minutes",
-    },
-    {
-      id: "wire",
-      name: "Wire Transfer",
-      icon: Banknote,
-      description: "Bank transfer",
-      processingTime: "1-3 business days",
-    },
-    {
-      id: "wallet",
-      name: "Carbon Wallet",
-      icon: Wallet,
-      description: "Use your platform balance",
-      processingTime: "Instant",
-      balance: 1250.75,
-    },
-  ];
+export default function BuyCredits() {
+  const catalog = useMemo(() => getMarketplaceCatalog(), []);
+  const [selectedListingId, setSelectedListingId] = useState(
+    () => catalog[0]?.listing.id || "",
+  );
+  const [step, setStep] = useState(1);
+  const [orderType, setOrderType] = useState("market");
+  const [quantity, setQuantity] = useState(1);
+  const [limitPrice, setLimitPrice] = useState(0);
+  const [registryConfirmed, setRegistryConfirmed] = useState(false);
+  const [accountId, setAccountId] = useState(settlementAccounts[0].id);
+  const [settlementMethod, setSettlementMethod] = useState("registry_transfer");
+  const [retireOnSettlement, setRetireOnSettlement] = useState(false);
+  const [agreedRisk, setAgreedRisk] = useState(false);
+  const [orderResult, setOrderResult] = useState(null);
 
-  const handlePurchase = () => {
-    setStep(3);
-    // Here you would integrate with actual payment processing
-    setTimeout(() => {
-      console.log("Purchase completed!");
-    }, 2000);
-  };
+  const selectedBundle = useMemo(
+    () => catalog.find((entry) => entry.listing.id === selectedListingId) ?? catalog[0],
+    [catalog, selectedListingId],
+  );
+  const selectedAccount = useMemo(
+    () =>
+      settlementAccounts.find((account) => account.id === accountId) ??
+      settlementAccounts[0],
+    [accountId],
+  );
 
-  if (step === 3) {
+  if (!selectedBundle) {
     return (
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <CardContent className="p-8 text-center">
-            <div className="mb-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Purchase Successful!
-              </h2>
-              <p className="text-gray-600">
-                Your carbon credits have been successfully purchased and added
-                to your portfolio.
-              </p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600">Credits Purchased:</span>
-                  <p className="font-semibold">{quantity} credits</p>
-                </div>
-                <div>
-                  <span className="text-gray-600">Total Paid:</span>
-                  <p className="font-semibold">${total.toFixed(2)}</p>
-                </div>
-                <div>
-                  <span className="text-gray-600">Transaction ID:</span>
-                  <p className="font-semibold text-xs">
-                    TX-{Math.random().toString(36).substring(2, 15)}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-gray-600">Verification:</span>
-                  <Badge variant="secondary" className="text-xs">
-                    <Shield className="h-3 w-3 mr-1" />
-                    {currentListing.verification}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <Button className="w-full">
-                <Receipt className="h-4 w-4 mr-2" />
-                Download Receipt
-              </Button>
-              <Button variant="outline" className="w-full">
-                View Portfolio
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardContent className="p-6">
+          <p className="text-sm text-slate-600">No marketplace listings available.</p>
+        </CardContent>
+      </Card>
     );
   }
 
+  const { listing, project, registry } = selectedBundle;
+  const minPurchase = listing.minimum_purchase || 1;
+  const maxPurchase = listing.quantity;
+  const finalQty = clamp(Number(quantity) || minPurchase, minPurchase, maxPurchase);
+  const slippagePct = Number(
+    Math.max(0.15, (100 - listing.liquidity_score) / 130).toFixed(2),
+  );
+  const executionPrice =
+    orderType === "market"
+      ? Number((listing.price_per_tonne * (1 + slippagePct / 100)).toFixed(2))
+      : Number(limitPrice || listing.price_per_tonne);
+  const subtotal = finalQty * executionPrice;
+  const platformFee = subtotal * 0.025;
+  const settlementFee = subtotal * 0.0045;
+  const total = subtotal + platformFee + settlementFee;
+
+  const canMoveToStep2 = registryConfirmed;
+  const canConfirm = agreedRisk;
+
+  const goToStep2 = () => {
+    if (!canMoveToStep2) return;
+    setStep(2);
+  };
+
+  const goToStep3 = () => {
+    if (!canConfirm) return;
+    const now = new Date();
+    setOrderResult({
+      orderId: `MKT-BUY-${String(now.getTime()).slice(-6)}`,
+      quantity: finalQty,
+      executionPrice,
+      total,
+      settlementMethod:
+        settlementMethods.find((method) => method.id === settlementMethod)?.label ||
+        settlementMethod,
+      accountName: selectedAccount.name,
+      retireOnSettlement,
+      createdAt: now.toISOString(),
+    });
+    setStep(3);
+  };
+
+  const resetFlow = () => {
+    setStep(1);
+    setRegistryConfirmed(false);
+    setAgreedRisk(false);
+    setOrderResult(null);
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Credit Selection */}
-      <div className="lg:col-span-2 space-y-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="space-y-4">
+        <Card className="border-slate-200 bg-white">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <ShoppingCart className="h-5 w-5 text-emerald-600" />
+              Unified Buy Flow
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              {[1, 2, 3].map((n) => (
+                <span
+                  key={n}
+                  className={`inline-flex items-center rounded-full px-2.5 py-1 font-semibold ${
+                    step === n
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-slate-100 text-slate-600"
+                  }`}
+                >
+                  Step {n}
+                </span>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
         {step === 1 && (
-          <>
-            {/* Listing Selection */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Calculator className="h-5 w-5 text-green-600" />
-                  <span>Select Credits</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="listing-select">Choose Credit Type</Label>
-                  <Select
-                    value={selectedListing}
-                    onValueChange={setSelectedListing}
-                  >
+          <Card className="border-slate-200 bg-white">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">1. Setup Order</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Listing</Label>
+                <Select
+                  value={selectedListingId}
+                  onValueChange={(value) => {
+                    setSelectedListingId(value);
+                    const next = catalog.find((entry) => entry.listing.id === value);
+                    const nextMin = next?.listing.minimum_purchase || 1;
+                    setQuantity(nextMin);
+                    setLimitPrice(next?.listing.price_per_tonne || 0);
+                    setRegistryConfirmed(false);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose listing" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {catalog.map((entry) => (
+                      <SelectItem key={entry.listing.id} value={entry.listing.id}>
+                        {entry.project.name} ({entry.registry?.code}) -{" "}
+                        {money(entry.listing.price_per_tonne)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-semibold text-slate-900">{project.name}</p>
+                <p className="text-xs text-slate-600">
+                  {project.project_type} | {registry?.name} | Rating {listing.score}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Badge variant="secondary">{project.country}</Badge>
+                  <Badge variant="outline">
+                    Available {listing.quantity.toLocaleString()} t
+                  </Badge>
+                  <Badge variant="outline">Min {minPurchase} t</Badge>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Quantity (tons)</Label>
+                  <Input
+                    type="number"
+                    min={minPurchase}
+                    max={maxPurchase}
+                    value={finalQty}
+                    onChange={(event) => setQuantity(Number(event.target.value))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Order Type</Label>
+                  <Select value={orderType} onValueChange={setOrderType}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(listings).map(([key, listing]) => (
-                        <SelectItem key={key} value={key}>
-                          <div className="flex items-center justify-between w-full">
-                            <span>{listing.title}</span>
-                            <span className="text-green-600 font-semibold ml-2">
-                              ${listing.price}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="market">Market</SelectItem>
+                      <SelectItem value="limit">Limit</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
 
-                {/* Selected Listing Details */}
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h4 className="font-semibold">{currentListing.title}</h4>
-                      <p className="text-sm text-gray-600 flex items-center mt-1">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {currentListing.location}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-green-600">
-                        ${currentListing.price}
-                      </p>
-                      <div className="flex items-center">
-                        <Star className="h-3 w-3 text-yellow-400 fill-current mr-1" />
-                        <span className="text-sm">{currentListing.rating}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-gray-600 mb-3">
-                    {currentListing.description}
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    {currentListing.features.map((feature, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center text-xs text-gray-600"
-                      >
-                        <CheckCircle className="h-3 w-3 text-green-500 mr-1" />
-                        {feature}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t">
-                    <span className="text-sm text-gray-600">Available:</span>
-                    <span className="text-sm font-semibold">
-                      {currentListing.available.toLocaleString()} credits
-                    </span>
-                  </div>
-                </div>
-
-                {/* Quantity Selection */}
-                <div>
-                  <Label htmlFor="quantity">Quantity (Credits)</Label>
+              {orderType === "limit" && (
+                <div className="space-y-2">
+                  <Label>Limit Price (USD)</Label>
                   <Input
-                    id="quantity"
                     type="number"
-                    value={quantity}
-                    onChange={(e) => setQuantity(Number(e.target.value))}
-                    min="1"
-                    max={currentListing.available}
-                    className="mt-1"
+                    value={limitPrice}
+                    onChange={(event) => setLimitPrice(Number(event.target.value))}
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Maximum: {currentListing.available.toLocaleString()} credits
+                </div>
+              )}
+
+              <div className="flex items-center justify-between rounded-xl border border-slate-200 p-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    Registry Confirmation
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    Verify {registry?.name} ({registry?.code}) details before continue.
                   </p>
                 </div>
+                <Switch
+                  checked={registryConfirmed}
+                  onCheckedChange={setRegistryConfirmed}
+                />
+              </div>
 
-                {/* Auto Investment */}
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <Label htmlFor="auto-invest" className="font-medium">
-                      Auto-Invest
-                    </Label>
-                    <p className="text-sm text-gray-600">
-                      Automatically purchase more credits monthly
-                    </p>
-                  </div>
-                  <Switch
-                    id="auto-invest"
-                    checked={autoInvest}
-                    onCheckedChange={setAutoInvest}
-                  />
+              <div className="rounded-xl bg-slate-50 p-3 text-sm">
+                <p>Estimated execution: {money(executionPrice)}</p>
+                <p>Slippage estimate: {slippagePct}%</p>
+                <p>Platform fee (2.5%): {money(platformFee)}</p>
+                <p>Settlement fee (0.45%): {money(settlementFee)}</p>
+              </div>
+
+              {!canMoveToStep2 && (
+                <div className="flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                  Confirm registry details to move to settlement account step.
                 </div>
-              </CardContent>
-            </Card>
-          </>
+              )}
+            </CardContent>
+          </Card>
         )}
 
         {step === 2 && (
-          <>
-            {/* Payment Method Selection */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <CreditCard className="h-5 w-5 text-green-600" />
-                  <span>Payment Method</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {paymentMethods.map((method) => {
-                    const Icon = method.icon;
-                    return (
-                      <div
-                        key={method.id}
-                        className={cn(
-                          "border rounded-lg p-4 cursor-pointer transition-colors",
-                          paymentMethod === method.id
-                            ? "border-green-500 bg-green-50"
-                            : "border-gray-200 hover:bg-gray-50",
-                        )}
-                        onClick={() => setPaymentMethod(method.id)}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <Icon className="h-5 w-5 text-gray-600" />
-                          <div className="flex-1">
-                            <h4 className="font-medium">{method.name}</h4>
-                            <p className="text-sm text-gray-600">
-                              {method.description}
-                            </p>
-                            <div className="flex items-center justify-between mt-2">
-                              <span className="text-xs text-gray-500 flex items-center">
-                                <Clock className="h-3 w-3 mr-1" />
-                                {method.processingTime}
-                              </span>
-                              {method.balance && (
-                                <span className="text-xs text-green-600 font-medium">
-                                  Balance: ${method.balance}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+          <Card className="border-slate-200 bg-white">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">
+                2. Account & Settlement Controls
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Settlement Account</Label>
+                <Select value={accountId} onValueChange={setAccountId}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {settlementAccounts.map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Account Type</p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {selectedAccount.type}
+                  </p>
                 </div>
-
-                {/* Payment Form */}
-                {paymentMethod === "card" && (
-                  <div className="space-y-4 pt-4 border-t">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="card-number">Card Number</Label>
-                        <Input
-                          id="card-number"
-                          placeholder="1234 5678 9012 3456"
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="card-name">Cardholder Name</Label>
-                        <Input
-                          id="card-name"
-                          placeholder="John Doe"
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="expiry">Expiry Date</Label>
-                        <Input
-                          id="expiry"
-                          placeholder="MM/YY"
-                          className="mt-1"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="cvv">CVV</Label>
-                        <Input
-                          id="cvv"
-                          placeholder="123"
-                          type="password"
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {paymentMethod === "crypto" && (
-                  <div className="space-y-4 pt-4 border-t">
-                    <div>
-                      <Label htmlFor="crypto-type">Cryptocurrency</Label>
-                      <Select defaultValue="usdc">
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="usdc">USDC</SelectItem>
-                          <SelectItem value="eth">Ethereum (ETH)</SelectItem>
-                          <SelectItem value="btc">Bitcoin (BTC)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="wallet-address">Wallet Address</Label>
-                      <Input
-                        id="wallet-address"
-                        placeholder="0x..."
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Security Notice */}
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3 text-sm">
-                  <Lock className="h-4 w-4 text-green-600" />
-                  <span className="text-gray-600">
-                    Your payment information is secure and encrypted. We use
-                    industry-standard security measures to protect your data.
-                  </span>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Available Balance</p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {money(selectedAccount.balance)}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          </>
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs text-slate-500">Currency</p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {selectedAccount.currency}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Settlement Method</Label>
+                <Select value={settlementMethod} onValueChange={setSettlementMethod}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {settlementMethods.map((method) => (
+                      <SelectItem key={method.id} value={method.id}>
+                        {method.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between rounded-xl border border-slate-200 p-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    Retire on Settlement
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    Retire credits immediately after successful settlement.
+                  </p>
+                </div>
+                <Switch
+                  checked={retireOnSettlement}
+                  onCheckedChange={setRetireOnSettlement}
+                />
+              </div>
+
+              <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                <input
+                  id="risk-consent"
+                  type="checkbox"
+                  checked={agreedRisk}
+                  onChange={(event) => setAgreedRisk(event.target.checked)}
+                />
+                <label htmlFor="risk-consent">
+                  I understand market volatility and spread changes can impact
+                  execution.
+                </label>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {step === 3 && orderResult && (
+          <Card className="border-emerald-200 bg-emerald-50">
+            <CardHeader className="border-emerald-200 pb-3">
+              <CardTitle className="flex items-center gap-2 text-base text-emerald-900">
+                <CheckCircle2 className="h-5 w-5" />
+                3. Order Confirmed
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div className="rounded-lg border border-emerald-200 bg-white p-3">
+                  <p className="text-xs text-slate-500">Order ID</p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {orderResult.orderId}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-emerald-200 bg-white p-3">
+                  <p className="text-xs text-slate-500">Total</p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {money(orderResult.total)}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-emerald-200 bg-white p-3">
+                  <p className="text-xs text-slate-500">Settlement</p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {orderResult.settlementMethod}
+                  </p>
+                </div>
+                <div className="rounded-lg border border-emerald-200 bg-white p-3">
+                  <p className="text-xs text-slate-500">Account</p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {orderResult.accountName}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap justify-end gap-2">
+                <Button variant="outline">
+                  <Receipt className="mr-2 h-4 w-4" />
+                  Download Receipt
+                </Button>
+                <Button onClick={resetFlow}>Place Another Order</Button>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
 
-      {/* Order Summary */}
-      <div>
-        <Card className="sticky top-4">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Receipt className="h-5 w-5 text-green-600" />
-              <span>Order Summary</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm">Credits ({quantity}x)</span>
-                <span className="text-sm">${subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Platform Fee (2.5%)</span>
-                <span className="text-sm">${platformFee.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm">Carbon Neutral Shipping</span>
-                <span className="text-sm">${carbonNeutralShipping}</span>
-              </div>
-              <div className="border-t pt-3">
-                <div className="flex justify-between">
-                  <span className="font-semibold">Total</span>
-                  <span className="font-semibold text-green-600">
-                    ${total.toFixed(2)}
-                  </span>
-                </div>
+      <Card className="h-fit border-slate-200 bg-white lg:sticky lg:top-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <CreditCard className="h-5 w-5 text-emerald-600" />
+            Order Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p className="font-semibold text-slate-900">{project.name}</p>
+            <p className="text-xs text-slate-600">
+              {registry?.name} | {project.project_type}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span>Quantity</span>
+              <span>{finalQty.toLocaleString()} t</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Execution Price</span>
+              <span>{money(executionPrice)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{money(subtotal)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Platform Fee</span>
+              <span>{money(platformFee)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Settlement Fee</span>
+              <span>{money(settlementFee)}</span>
+            </div>
+            <div className="border-t border-slate-200 pt-2">
+              <div className="flex justify-between font-semibold text-slate-900">
+                <span>Total</span>
+                <span>{money(total)}</span>
               </div>
             </div>
+          </div>
 
-            {/* Environmental Impact */}
-            <div className="bg-green-50 rounded-lg p-3">
-              <h4 className="font-medium text-green-800 mb-2">
-                Environmental Impact
-              </h4>
-              <div className="space-y-1 text-sm text-green-700">
-                <div className="flex justify-between">
-                  <span>CO₂ Offset:</span>
-                  <span className="font-semibold">{quantity} tons</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Equivalent:</span>
-                  <span className="font-semibold">
-                    {Math.round(quantity * 2.3)} trees planted
-                  </span>
-                </div>
-              </div>
-            </div>
+          <div className="rounded-xl bg-emerald-50 p-3 text-xs text-emerald-800">
+            <p className="font-semibold">Environmental Impact</p>
+            <p className="mt-1">Offset volume: {finalQty.toLocaleString()} tCO2e</p>
+            <p>Equivalent tree estimate: {Math.round(finalQty * 2.3).toLocaleString()}</p>
+          </div>
 
-            {/* Action Buttons */}
+          {step === 1 && (
+            <Button className="w-full" onClick={goToStep2} disabled={!canMoveToStep2}>
+              Continue to Account Step
+            </Button>
+          )}
+
+          {step === 2 && (
             <div className="space-y-2">
-              {step === 1 && (
-                <Button
-                  className="w-full"
-                  onClick={() => setStep(2)}
-                  disabled={quantity === 0}
-                >
-                  Continue to Payment
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              )}
-
-              {step === 2 && (
-                <>
-                  <Button className="w-full" onClick={handlePurchase}>
-                    <Lock className="h-4 w-4 mr-2" />
-                    Complete Purchase
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => setStep(1)}
-                  >
-                    Back to Selection
-                  </Button>
-                </>
-              )}
+              <Button className="w-full" onClick={goToStep3} disabled={!canConfirm}>
+                <Lock className="mr-2 h-4 w-4" />
+                Confirm Order
+              </Button>
+              <Button variant="outline" className="w-full" onClick={() => setStep(1)}>
+                Back to Setup
+              </Button>
             </div>
+          )}
 
-            {/* Trust Signals */}
-            <div className="pt-4 border-t">
-              <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
-                <div className="flex items-center">
-                  <Shield className="h-3 w-3 mr-1" />
-                  <span>Verified</span>
-                </div>
-                <div className="flex items-center">
-                  <Lock className="h-3 w-3 mr-1" />
-                  <span>Secure</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  <span>Guaranteed</span>
-                </div>
-              </div>
+          {step === 3 && (
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full">
+                <Landmark className="mr-2 h-4 w-4" />
+                View Settlement Activity
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Wallet className="mr-2 h-4 w-4" />
+                Open Portfolio
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+
+          <div className="flex items-center justify-center gap-3 border-t border-slate-100 pt-3 text-[11px] text-slate-500">
+            <span className="inline-flex items-center gap-1">
+              <Shield className="h-3.5 w-3.5" />
+              Verified
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Lock className="h-3.5 w-3.5" />
+              Secure
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Building2 className="h-3.5 w-3.5" />
+              Registry Linked
+            </span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
-};
-
-export default BuyCredits;
+}

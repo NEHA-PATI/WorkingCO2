@@ -623,12 +623,25 @@ export function DialogContent({ className, children, ...props }) {
     return () => document.removeEventListener("keydown", handleEscape);
   }, [open, setOpen]);
 
+  useEffect(() => {
+    if (!open || typeof document === "undefined") {
+      return undefined;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
   if (!open || typeof document === "undefined") {
     return null;
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[2147483000] isolate flex items-start justify-center overflow-y-auto p-3 sm:items-center sm:p-4">
       <button
         type="button"
         aria-label="Close dialog overlay"
@@ -639,7 +652,8 @@ export function DialogContent({ className, children, ...props }) {
         role="dialog"
         aria-modal="true"
         className={cn(
-          "relative z-10 w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-soft",
+          "relative z-10 my-6 w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-soft",
+          "max-h-[calc(100vh-2.5rem)] overflow-y-auto",
           className,
         )}
         {...props}

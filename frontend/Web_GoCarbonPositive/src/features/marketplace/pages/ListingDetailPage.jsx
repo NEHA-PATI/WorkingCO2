@@ -40,10 +40,16 @@ import {
 import {
   AlertTriangle,
   ArrowLeft,
+  Building2,
   CheckCircle2,
+  CreditCard,
   FileText,
+  Landmark,
+  Lock,
   Receipt,
+  Shield,
   ShoppingCart,
+  Wallet,
 } from "lucide-react";
 import {
   Area,
@@ -72,6 +78,36 @@ const scoreClasses = {
   BB: "bg-rose-100 text-rose-700 border-rose-200",
 };
 
+const settlementAccounts = [
+  {
+    id: "treasury_wallet",
+    name: "Corporate Treasury Wallet",
+    type: "Custodial Wallet",
+    balance: 146250.75,
+    currency: "USD",
+  },
+  {
+    id: "registry_escrow",
+    name: "Registry Escrow Account",
+    type: "Escrow Ledger",
+    balance: 98240.5,
+    currency: "USD",
+  },
+  {
+    id: "bank_wire_main",
+    name: "Primary Wire Account",
+    type: "Bank Settlement",
+    balance: 320000.0,
+    currency: "USD",
+  },
+];
+
+const settlementMethods = [
+  { id: "registry_transfer", label: "Registry Transfer Settlement" },
+  { id: "bilateral_netting", label: "Bilateral Netting" },
+  { id: "escrow_settlement", label: "Escrow Settlement" },
+];
+
 const money = (value) => `$${Number(value).toFixed(2)}`;
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
@@ -86,8 +122,12 @@ export default function ListingDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [limitPrice, setLimitPrice] = useState(0);
   const [registryConfirmed, setRegistryConfirmed] = useState(false);
+  const [settlementAccountId, setSettlementAccountId] = useState(
+    settlementAccounts[0].id,
+  );
   const [settlementMethod, setSettlementMethod] = useState("registry_transfer");
   const [retireOnSettlement, setRetireOnSettlement] = useState(false);
+  const [riskAcknowledged, setRiskAcknowledged] = useState(false);
   const [orderResult, setOrderResult] = useState(null);
 
   useEffect(() => {
@@ -96,6 +136,14 @@ export default function ListingDetailPage() {
     setQuantity(min);
     setLimitPrice(bundle.listing.price_per_tonne);
   }, [bundle]);
+
+  useEffect(() => {
+    if (orderOpen) return;
+    setStep(1);
+    setRegistryConfirmed(false);
+    setRiskAcknowledged(false);
+    setOrderResult(null);
+  }, [orderOpen]);
 
   if (!bundle) {
     return (
@@ -118,16 +166,26 @@ export default function ListingDetailPage() {
       ? Number((listing.price_per_tonne * (1 + slippagePct / 100)).toFixed(2))
       : Number(limitPrice || listing.price_per_tonne);
   const subtotal = finalQty * executionPrice;
-  const fee = subtotal * 0.025;
-  const total = subtotal + fee;
+  const platformFee = subtotal * 0.025;
+  const settlementFee = subtotal * 0.0045;
+  const total = subtotal + platformFee + settlementFee;
   const orderBook = getOrderBook(listing.id);
   const depth = getLiquidityDepthSeries(orderBook);
   const similar = getSimilarCredits(listing.id);
+  const selectedSettlementAccount =
+    settlementAccounts.find((account) => account.id === settlementAccountId) ??
+    settlementAccounts[0];
+  const selectedSettlementMethod =
+    settlementMethods.find((method) => method.id === settlementMethod) ??
+    settlementMethods[0];
   const spreadBps =
     orderBook.mid > 0 ? Number(((orderBook.spread / orderBook.mid) * 10000).toFixed(1)) : 0;
+  const canMoveToStep2 = registryConfirmed;
+  const canConfirmOrder = riskAcknowledged;
+  const equivalentTrees = Math.round(finalQty * 2.3);
 
   const goNext = () => {
-    if (!registryConfirmed) {
+    if (!canMoveToStep2) {
       toast.error("Please confirm registry details.");
       return;
     }
@@ -135,6 +193,11 @@ export default function ListingDetailPage() {
   };
 
   const confirmOrder = () => {
+    if (!canConfirmOrder) {
+      toast.error("Please acknowledge risk disclosure.");
+      return;
+    }
+
     const now = new Date();
     const result = {
       orderId: `ORD-${listing.id}-${String(now.getTime()).slice(-6)}`,
@@ -148,6 +211,8 @@ export default function ListingDetailPage() {
       total,
       quantity: finalQty,
       executionPrice,
+      settlementAccountName: selectedSettlementAccount.name,
+      settlementMethodLabel: selectedSettlementMethod.label,
     };
     setOrderResult(result);
     setStep(3);
@@ -164,6 +229,7 @@ export default function ListingDetailPage() {
       `Execution Price: ${money(orderResult.executionPrice)}`,
       `Total: ${money(orderResult.total)}`,
       `Settlement: ${orderResult.settlementTimeline}`,
+      `Settlement Account: ${orderResult.settlementAccountName}`,
       `Retire On Settlement: ${retireOnSettlement ? "Yes" : "No"}`,
     ].join("\n");
     const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
@@ -287,49 +353,410 @@ export default function ListingDetailPage() {
             </Card>
           </div>
 
-          <Card className="h-fit lg:sticky lg:top-6">
-            <CardHeader><CardTitle>Purchase Credits</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-4xl font-bold">{money(listing.price_per_tonne)}</p>
-              <p className="text-sm text-slate-600">Liquidity {listing.liquidity_score}/100 | Volatility {listing.volatility_score}/100</p>
-              <Button className="w-full" onClick={() => setOrderOpen(true)}><ShoppingCart className="mr-2 h-4 w-4" />Initiate Buy Order</Button>
-              <div className="flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-xs text-amber-900"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />Execution can vary based on live spread and market depth.</div>
-            </CardContent>
-          </Card>
+	          <Card className="h-fit lg:sticky lg:top-6">
+	            <CardHeader><CardTitle>Purchase Credits</CardTitle></CardHeader>
+	            <CardContent className="space-y-4">
+	              <p className="text-4xl font-bold">{money(listing.price_per_tonne)}</p>
+	              <p className="text-sm text-slate-600">Liquidity {listing.liquidity_score}/100 | Volatility {listing.volatility_score}/100</p>
+	              <Button className="w-full" onClick={() => setOrderOpen(true)}><ShoppingCart className="mr-2 h-4 w-4" />Initiate Buy Order</Button>
+	              <div className="flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-xs text-amber-900"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />Execution can vary based on live spread and market depth.</div>
+	            </CardContent>
+	          </Card>
         </div>
 
         <Dialog open={orderOpen} onOpenChange={setOrderOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader><DialogTitle>Institutional Buy Flow</DialogTitle></DialogHeader>
-            {step === 1 && <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div><Label>Quantity (tons)</Label><Input type="number" min={minPurchase} max={listing.quantity} value={finalQty} onChange={(e) => setQuantity(Number(e.target.value))} /></div>
-                <div><Label>Order Type</Label><Select value={orderType} onValueChange={setOrderType}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="market">Market</SelectItem><SelectItem value="limit">Limit</SelectItem></SelectContent></Select></div>
-              </div>
-              {orderType === "limit" && <div><Label>Limit Price (USD)</Label><Input type="number" value={limitPrice} onChange={(e) => setLimitPrice(Number(e.target.value))} /></div>}
-              <div className="flex items-center justify-between rounded-lg border p-3"><div><p className="text-sm font-semibold">Registry Confirmation</p><p className="text-xs text-slate-600">{registry?.name} ({registry?.code})</p></div><Switch checked={registryConfirmed} onCheckedChange={setRegistryConfirmed} /></div>
-              <div className="rounded-lg bg-slate-50 p-3 text-sm">
-                <p>Estimated execution price: {money(executionPrice)}</p>
-                <p>Slippage estimate: {slippagePct}%</p>
-                <p>Fee (2.5%): {money(fee)}</p>
-                <p className="font-semibold text-emerald-700">Estimated total: {money(total)}</p>
-              </div>
-              <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setOrderOpen(false)}>Cancel</Button><Button onClick={goNext}>Continue</Button></div>
-            </div>}
+          <DialogContent className="max-h-[90vh] max-w-5xl overflow-y-auto border-slate-200 bg-slate-50 p-4 sm:p-6">
+            <DialogHeader className="sr-only">
+              <DialogTitle>Unified Buy Flow</DialogTitle>
+            </DialogHeader>
 
-            {step === 2 && <div className="space-y-4">
-              <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900"><p className="font-semibold">Risk Disclosure</p><p>Market volatility and spread shifts may impact final execution and settlement timing.</p></div>
-              <div className="rounded-lg border p-3 text-sm"><p className="font-semibold">Volatility Warning</p><p>Volatility score {listing.volatility_score}/100 with liquidity {listing.liquidity_score}/100.</p></div>
-              <div><Label>Settlement Method</Label><Select value={settlementMethod} onValueChange={setSettlementMethod}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="registry_transfer">Registry Transfer Settlement</SelectItem><SelectItem value="bilateral_netting">Bilateral Netting</SelectItem><SelectItem value="escrow_settlement">Escrow Settlement</SelectItem></SelectContent></Select></div>
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900"><p className="font-semibold">ESG Impact Summary</p><p>{finalQty.toLocaleString()} tCO2e linked to {project.project_type} in {project.country}.</p></div>
-              <div className="flex justify-between"><Button variant="outline" onClick={() => setStep(1)}>Back</Button><Button onClick={confirmOrder}>Confirm Order</Button></div>
-            </div>}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="space-y-4">
+                <Card className="border-slate-200 bg-white">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <ShoppingCart className="h-5 w-5 text-emerald-600" />
+                      Unified Buy Flow
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      {[1, 2, 3].map((flowStep) => (
+                        <span
+                          key={flowStep}
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 font-semibold ${
+                            step === flowStep
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-slate-100 text-slate-600"
+                          }`}
+                        >
+                          Step {flowStep}
+                        </span>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
 
-            {step === 3 && orderResult && <div className="space-y-4">
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3"><p className="font-semibold text-emerald-900">Order ID: {orderResult.orderId}</p><p className="text-sm text-emerald-800">Registry transfer mechanism: {orderResult.transferMechanism}</p><p className="text-sm text-emerald-800">Settlement timeline: {orderResult.settlementTimeline}</p></div>
-              <div className="rounded-lg border p-3"><div className="flex items-center justify-between"><div><p className="text-sm font-semibold">Retirement Option</p><p className="text-xs text-slate-600">Retire credits immediately after settlement.</p></div><Switch checked={retireOnSettlement} onCheckedChange={setRetireOnSettlement} /></div></div>
-              <div className="flex flex-wrap justify-end gap-2"><Button variant="outline" onClick={downloadInvoice}><Receipt className="mr-2 h-4 w-4" />Download Invoice</Button><Button onClick={() => { setOrderOpen(false); setStep(1); setOrderResult(null); }}>Done</Button></div>
-            </div>}
+                {step === 1 && (
+                  <Card className="border-slate-200 bg-white">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">1. Setup Order</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                        <p className="text-sm font-semibold text-slate-900">{project.name}</p>
+                        <p className="text-xs text-slate-600">
+                          {project.project_type} | {registry?.name} | Rating {listing.score}
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <Badge variant="secondary">{project.country}</Badge>
+                          <Badge variant="outline">
+                            Available {listing.quantity.toLocaleString()} t
+                          </Badge>
+                          <Badge variant="outline">Min {minPurchase} t</Badge>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label>Quantity (tons)</Label>
+                          <Input
+                            type="number"
+                            min={minPurchase}
+                            max={listing.quantity}
+                            value={finalQty}
+                            onChange={(e) => setQuantity(Number(e.target.value))}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Order Type</Label>
+                          <Select value={orderType} onValueChange={setOrderType}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="market">Market</SelectItem>
+                              <SelectItem value="limit">Limit</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      {orderType === "limit" && (
+                        <div className="space-y-2">
+                          <Label>Limit Price (USD)</Label>
+                          <Input
+                            type="number"
+                            value={limitPrice}
+                            onChange={(e) => setLimitPrice(Number(e.target.value))}
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between rounded-xl border border-slate-200 p-3">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">
+                            Registry Confirmation
+                          </p>
+                          <p className="text-xs text-slate-600">
+                            Verify {registry?.name} ({registry?.code}) details before continue.
+                          </p>
+                        </div>
+                        <Switch
+                          checked={registryConfirmed}
+                          onCheckedChange={setRegistryConfirmed}
+                        />
+                      </div>
+
+                      <div className="rounded-xl bg-slate-50 p-3 text-sm">
+                        <p>Estimated execution: {money(executionPrice)}</p>
+                        <p>Slippage estimate: {slippagePct}%</p>
+                        <p>Platform fee (2.5%): {money(platformFee)}</p>
+                        <p>Settlement fee (0.45%): {money(settlementFee)}</p>
+                      </div>
+
+                      {!canMoveToStep2 && (
+                        <div className="flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-900">
+                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                          Confirm registry details to move to settlement account step.
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {step === 2 && (
+                  <Card className="border-slate-200 bg-white">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">
+                        2. Account & Settlement Controls
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Settlement Account</Label>
+                        <Select
+                          value={settlementAccountId}
+                          onValueChange={setSettlementAccountId}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {settlementAccounts.map((account) => (
+                              <SelectItem key={account.id} value={account.id}>
+                                {account.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                          <p className="text-xs text-slate-500">Account Type</p>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {selectedSettlementAccount.type}
+                          </p>
+                        </div>
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                          <p className="text-xs text-slate-500">Available Balance</p>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {money(selectedSettlementAccount.balance)}
+                          </p>
+                        </div>
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                          <p className="text-xs text-slate-500">Currency</p>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {selectedSettlementAccount.currency}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Settlement Method</Label>
+                        <Select value={settlementMethod} onValueChange={setSettlementMethod}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {settlementMethods.map((method) => (
+                              <SelectItem key={method.id} value={method.id}>
+                                {method.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex items-center justify-between rounded-xl border border-slate-200 p-3">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">
+                            Retire on Settlement
+                          </p>
+                          <p className="text-xs text-slate-600">
+                            Retire credits immediately after successful settlement.
+                          </p>
+                        </div>
+                        <Switch
+                          checked={retireOnSettlement}
+                          onCheckedChange={setRetireOnSettlement}
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                        <input
+                          id="risk-consent"
+                          type="checkbox"
+                          checked={riskAcknowledged}
+                          onChange={(event) => setRiskAcknowledged(event.target.checked)}
+                        />
+                        <label htmlFor="risk-consent">
+                          I understand market volatility and spread changes can impact
+                          execution.
+                        </label>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {step === 3 && orderResult && (
+                  <Card className="border-emerald-200 bg-emerald-50">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center gap-2 text-base text-emerald-900">
+                        <CheckCircle2 className="h-5 w-5" />
+                        3. Order Confirmed
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <div className="rounded-lg border border-emerald-200 bg-white p-3">
+                          <p className="text-xs text-slate-500">Order ID</p>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {orderResult.orderId}
+                          </p>
+                        </div>
+                        <div className="rounded-lg border border-emerald-200 bg-white p-3">
+                          <p className="text-xs text-slate-500">Total</p>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {money(orderResult.total)}
+                          </p>
+                        </div>
+                        <div className="rounded-lg border border-emerald-200 bg-white p-3">
+                          <p className="text-xs text-slate-500">Settlement</p>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {orderResult.settlementMethodLabel}
+                          </p>
+                        </div>
+                        <div className="rounded-lg border border-emerald-200 bg-white p-3">
+                          <p className="text-xs text-slate-500">Account</p>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {orderResult.settlementAccountName}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Button variant="outline" onClick={downloadInvoice}>
+                          <Receipt className="mr-2 h-4 w-4" />
+                          Download Invoice
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setStep(1);
+                            setRegistryConfirmed(false);
+                            setRiskAcknowledged(false);
+                            setOrderResult(null);
+                          }}
+                        >
+                          Place Another Order
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              <Card className="h-fit border-slate-200 bg-white lg:sticky lg:top-4">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <CreditCard className="h-5 w-5 text-emerald-600" />
+                    Order Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <p className="font-semibold text-slate-900">{project.name}</p>
+                    <p className="text-xs text-slate-600">
+                      {registry?.name} | {project.project_type}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>Quantity</span>
+                      <span>{finalQty.toLocaleString()} t</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Execution Price</span>
+                      <span>{money(executionPrice)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Subtotal</span>
+                      <span>{money(subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Platform Fee</span>
+                      <span>{money(platformFee)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Settlement Fee</span>
+                      <span>{money(settlementFee)}</span>
+                    </div>
+                    <div className="border-t border-slate-200 pt-2">
+                      <div className="flex justify-between font-semibold text-slate-900">
+                        <span>Total</span>
+                        <span>{money(total)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-emerald-50 p-3 text-xs text-emerald-800">
+                    <p className="font-semibold">Environmental Impact</p>
+                    <p className="mt-1">Offset volume: {finalQty.toLocaleString()} tCO2e</p>
+                    <p>Equivalent tree estimate: {equivalentTrees.toLocaleString()}</p>
+                  </div>
+
+                  {step === 1 && (
+                    <div className="space-y-2">
+                      <Button className="w-full" onClick={goNext} disabled={!canMoveToStep2}>
+                        Continue to Account Step
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => setOrderOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+
+                  {step === 2 && (
+                    <div className="space-y-2">
+                      <Button
+                        className="w-full"
+                        onClick={confirmOrder}
+                        disabled={!canConfirmOrder}
+                      >
+                        <Lock className="mr-2 h-4 w-4" />
+                        Confirm Order
+                      </Button>
+                      <Button variant="outline" className="w-full" onClick={() => setStep(1)}>
+                        Back to Setup
+                      </Button>
+                    </div>
+                  )}
+
+                  {step === 3 && (
+                    <div className="space-y-2">
+                      <Button variant="outline" className="w-full">
+                        <Landmark className="mr-2 h-4 w-4" />
+                        View Settlement Activity
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                        <Wallet className="mr-2 h-4 w-4" />
+                        Open Portfolio
+                      </Button>
+                      <Button
+                        className="w-full"
+                        onClick={() => {
+                          setOrderOpen(false);
+                          setStep(1);
+                          setOrderResult(null);
+                        }}
+                      >
+                        Done
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-center gap-3 border-t border-slate-100 pt-3 text-[11px] text-slate-500">
+                    <span className="inline-flex items-center gap-1">
+                      <Shield className="h-3.5 w-3.5" />
+                      Verified
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Lock className="h-3.5 w-3.5" />
+                      Secure
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Building2 className="h-3.5 w-3.5" />
+                      Registry Linked
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
