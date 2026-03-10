@@ -31,6 +31,8 @@ import {
 import BrowseListings from "../components/BrowseListings";
 import BuyCredits from "../components/BuyCredits";
 import ExchangeDashboard from "../components/ExchangeDashboard";
+import MarketplaceEntryModal from "../components/MarketplaceEntryModal";
+import MarketplaceLanding from "../components/MarketplaceLanding";
 import ProjectTypeSegmentation from "../components/ProjectTypeSegmentation";
 import RegistryComparison from "../components/RegistryComparison";
 import OffsetCalculator from "../components/OffsetCalculator";
@@ -42,6 +44,8 @@ import TransactionHistory from "../components/TransactionHistory";
 import TransferCredits from "../components/TransferCredits";
 import Watchlist from "../components/Watchlist";
 import { getExchangeMetrics } from "../config/mockMarketplaceData";
+
+const SESSION_KEY = "marketplace_ui_session_v1";
 
 const tabs = [
   {
@@ -138,9 +142,32 @@ const tabs = [
   },
 ];
 
+function readSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (_error) {
+    return null;
+  }
+}
+
+function writeSession(value) {
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(value));
+  } catch (_error) {
+    // ignore localStorage write errors
+  }
+}
+
 const Marketplace = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
+  const [entryOpen, setEntryOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [requestedTab, setRequestedTab] = useState("overview");
+  const [session, setSession] = useState(() => readSession());
 
   const activeTabConfig = useMemo(
     () => tabs.find((tab) => tab.id === activeTab) ?? tabs[0],
@@ -175,129 +202,177 @@ const Marketplace = () => {
   );
 
   useEffect(() => {
-    const requestedTab = new URLSearchParams(location.search).get("tab");
-    if (!requestedTab) return;
-    if (tabs.some((tab) => tab.id === requestedTab)) {
-      setActiveTab(requestedTab);
+    const requested = new URLSearchParams(location.search).get("tab");
+    if (!requested) return;
+    if (tabs.some((tab) => tab.id === requested)) {
+      setActiveTab(requested);
+      setRequestedTab(requested);
     }
   }, [location.search]);
 
+  const openEntryFlow = (tabId = "overview") => {
+    const nextTab = tabs.some((tab) => tab.id === tabId) ? tabId : "overview";
+    setRequestedTab(nextTab);
+    setEntryOpen(true);
+  };
+
+  const handleEntryComplete = (payload) => {
+    const nextSession = {
+      loggedIn: true,
+      mode: payload.mode,
+      name: payload.account?.name || "Marketplace User",
+      email: payload.account?.email || "",
+      onboardingCompleted:
+        payload.onboardingCompleted || session?.onboardingCompleted || false,
+      details: payload.details || session?.details || null,
+      updatedAt: new Date().toISOString(),
+    };
+
+    writeSession(nextSession);
+    setSession(nextSession);
+    setEntryOpen(false);
+    setActiveTab(
+      tabs.some((tab) => tab.id === payload.requestedTab)
+        ? payload.requestedTab
+        : requestedTab,
+    );
+    setDashboardOpen(true);
+  };
+
   return (
-    <div className="marketplace-shell min-h-screen pb-2 pt-0">
+    <div className="marketplace-shell min-h-screen w-full p-0">
       <main className="w-full">
-        <section
-          className="marketplace-tabbar sticky z-20 border-b border-slate-200 bg-white"
-          style={{ top: "var(--navbar-height, 72px)" }}
-        >
-          <nav className="flex items-center gap-1 overflow-x-auto px-2 py-1">
-            {visibleTabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "inline-flex min-w-fit items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm transition-colors",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2",
-                    isActive
-                      ? "bg-emerald-50 text-emerald-900"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
-                  )}
-                >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="font-medium">{tab.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </section>
-
-        {activeTab === "overview" ? (
-          <section className="space-y-2 px-2 py-2">
-            <section className="glass-panel animate-fade-up rounded-xl p-4 sm:p-5">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div className="max-w-2xl space-y-4">
-                  <Badge className="inline-flex bg-brand-100 text-brand-800">
-                    <Sparkles className="mr-1.5 h-3 w-3" />
-                    Live Carbon Exchange
-                  </Badge>
-                  <h1 className="font-display text-3xl font-semibold leading-tight text-slate-900 sm:text-[2.15rem]">
-                    Carbon Credit Marketplace
-                  </h1>
-                  <p className="text-sm text-slate-600 sm:text-base">
-                    Discover, trade, and track verified carbon credits with
-                    transparent pricing and measurable climate impact.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
-                    <TrendingUp className="mr-1 h-3 w-3" />
-                    Market Active
-                  </Badge>
-                  <Button variant="outline" size="sm">
-                    <Shield className="mr-2 h-4 w-4" />
-                    Blockchain Verified
-                  </Button>
-                </div>
-              </div>
-
-              <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-3">
-                {summaryCards.map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="rounded-xl border border-slate-200/70 bg-white/85 p-3"
-                  >
-                    <p className="text-xs uppercase tracking-[0.14em] text-slate-500">
-                      {stat.label}
-                    </p>
-                    <p className="mt-2 text-2xl font-bold text-slate-900">
-                      {stat.value}
-                    </p>
-                    <p className="mt-1 text-sm text-brand-700">{stat.delta}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="animate-fade-up [animation-delay:180ms]">
-              <Card className="rounded-xl border-slate-200 bg-white shadow-sm">
-                <CardHeader className="space-y-1.5 border-slate-100 pb-3">
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <activeTabConfig.icon className="h-5 w-5 text-brand-700" />
-                    <span>{activeTabConfig.label}</span>
-                  </CardTitle>
-                  <p className="text-sm text-slate-600">
-                    {activeTabConfig.description}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <ActiveComponent />
-                </CardContent>
-              </Card>
-            </section>
+        {!dashboardOpen ? (
+          <section className="animate-fade-up">
+            <MarketplaceLanding onAction={openEntryFlow} />
           </section>
         ) : (
-          <section className="animate-fade-up [animation-delay:180ms] px-2 py-2">
-            <Card className="rounded-xl border-slate-200 bg-white shadow-sm">
-              <CardHeader className="space-y-1.5 border-slate-100 pb-3">
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <activeTabConfig.icon className="h-5 w-5 text-brand-700" />
-                  <span>{activeTabConfig.label}</span>
-                </CardTitle>
-                <p className="text-sm text-slate-600">
-                  {activeTabConfig.description}
-                </p>
-              </CardHeader>
-              <CardContent>
-                <ActiveComponent />
-              </CardContent>
-            </Card>
-          </section>
+          <>
+            <section
+              className="marketplace-tabbar sticky top-0 z-20 border-b border-slate-200 bg-white"
+            >
+              <nav className="flex items-center gap-1 overflow-x-auto px-2 py-1">
+                {visibleTabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={cn(
+                        "inline-flex min-w-fit items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm transition-colors",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2",
+                        isActive
+                          ? "bg-emerald-50 text-emerald-900"
+                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                      )}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span className="font-medium">{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </section>
+
+            {activeTab === "overview" ? (
+              <section className="space-y-2 px-2 py-2">
+                <section className="glass-panel animate-fade-up rounded-xl p-4 sm:p-5">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="max-w-2xl space-y-4">
+                      <Badge className="inline-flex bg-brand-100 text-brand-800">
+                        <Sparkles className="mr-1.5 h-3 w-3" />
+                        Live Carbon Exchange
+                      </Badge>
+                      <h1 className="font-display text-3xl font-semibold leading-tight text-slate-900 sm:text-[2.15rem]">
+                        Carbon Credit Marketplace
+                      </h1>
+                      <p className="text-sm text-slate-600 sm:text-base">
+                        Discover, trade, and track verified carbon credits with
+                        transparent pricing and measurable climate impact.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <Badge
+                        variant="secondary"
+                        className="bg-emerald-100 text-emerald-800"
+                      >
+                        <TrendingUp className="mr-1 h-3 w-3" />
+                        Market Active
+                      </Badge>
+                      <Button variant="outline" size="sm">
+                        <Shield className="mr-2 h-4 w-4" />
+                        Blockchain Verified
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-3">
+                    {summaryCards.map((stat) => (
+                      <div
+                        key={stat.label}
+                        className="rounded-xl border border-slate-200/70 bg-white/85 p-3"
+                      >
+                        <p className="text-xs uppercase tracking-[0.14em] text-slate-500">
+                          {stat.label}
+                        </p>
+                        <p className="mt-2 text-2xl font-bold text-slate-900">
+                          {stat.value}
+                        </p>
+                        <p className="mt-1 text-sm text-brand-700">{stat.delta}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="animate-fade-up [animation-delay:180ms]">
+                  <Card className="rounded-xl border-slate-200 bg-white shadow-sm">
+                    <CardHeader className="space-y-1.5 border-slate-100 pb-3">
+                      <CardTitle className="flex items-center gap-2 text-xl">
+                        <activeTabConfig.icon className="h-5 w-5 text-brand-700" />
+                        <span>{activeTabConfig.label}</span>
+                      </CardTitle>
+                      <p className="text-sm text-slate-600">
+                        {activeTabConfig.description}
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <ActiveComponent />
+                    </CardContent>
+                  </Card>
+                </section>
+              </section>
+            ) : (
+              <section className="animate-fade-up [animation-delay:180ms] px-2 py-2">
+                <Card className="rounded-xl border-slate-200 bg-white shadow-sm">
+                  <CardHeader className="space-y-1.5 border-slate-100 pb-3">
+                    <CardTitle className="flex items-center gap-2 text-xl">
+                      <activeTabConfig.icon className="h-5 w-5 text-brand-700" />
+                      <span>{activeTabConfig.label}</span>
+                    </CardTitle>
+                    <p className="text-sm text-slate-600">
+                      {activeTabConfig.description}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <ActiveComponent />
+                  </CardContent>
+                </Card>
+              </section>
+            )}
+          </>
         )}
       </main>
+
+      <MarketplaceEntryModal
+        open={entryOpen}
+        onOpenChange={setEntryOpen}
+        requestedTab={requestedTab}
+        requireOnboarding={!session?.onboardingCompleted}
+        onComplete={handleEntryComplete}
+      />
     </div>
   );
 };
