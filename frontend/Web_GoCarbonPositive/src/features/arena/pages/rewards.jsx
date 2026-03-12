@@ -307,20 +307,7 @@ export default function ArenaRewardsPage() {
                                                 {rewardPoints.toLocaleString()} pts
                                             </span>
                                         </div>
-                                        <div className="arena-reward-details">
-                                            <div>
-                                                <ShieldCheck className="w-3.5 h-3.5" />
-                                                Verified sustainability reward
-                                            </div>
-                                            <div>
-                                                <Clock3 className="w-3.5 h-3.5" />
-                                                Typical delivery in 5-7 days
-                                            </div>
-                                            <div>
-                                                <Sparkles className="w-3.5 h-3.5" />
-                                                Approx. {Math.max(1, Math.round(rewardPoints / 25))}kg CO2 impact score
-                                            </div>
-                                        </div>
+                                       
                                         <button
                                             type="button"
                                             disabled={!canRedeem}

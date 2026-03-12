@@ -66,6 +66,8 @@ const categoryMeta = {
 
 export default function CarbonDashboard({ resultData }) {
   const [activeDetailKey, setActiveDetailKey] = useState(null);
+  const housingProfile = resultData?.housing_profile || {};
+  const members = housingProfile.members || {};
 
   const safeBreakdown = {
     housing: resultData?.breakdown?.housing || {},
@@ -121,6 +123,12 @@ export default function CarbonDashboard({ resultData }) {
       rows: [
         { label: "Electricity", value: `${safeBreakdown.housing.electricity || 0} kg` },
         { label: "LPG", value: `${safeBreakdown.housing.lpg || 0} kg` },
+        { label: "Bedrooms", value: housingProfile.bedrooms || 0 },
+        { label: "Members (Male)", value: members.male || 0 },
+        { label: "Members (Female)", value: members.female || 0 },
+        { label: "Members (Child)", value: members.child || 0 },
+        { label: "Fridge Count", value: housingProfile.fridge_count || 0 },
+        { label: "TV Count", value: housingProfile.tv_count || 0 },
       ],
     },
     {

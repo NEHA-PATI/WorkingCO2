@@ -331,6 +331,28 @@ const getErrorMessage = (error, fallback = 'Something went wrong') => {
     return error?.message || fallback;
 };
 
+const resolveMyPoints = (payload) => {
+    const candidates = [
+        payload?.totalPoints,
+        payload?.monthlyPoints,
+        payload?.points,
+        payload?.total_points,
+        payload?.balance,
+        payload?.data?.totalPoints,
+        payload?.data?.monthlyPoints,
+        payload?.data?.points,
+        payload?.data?.total_points,
+        payload?.data?.balance,
+        payload?.data?.available_points
+    ];
+
+    const firstFinite = candidates
+        .map((value) => Number(value))
+        .find((value) => Number.isFinite(value));
+
+    return firstFinite ?? 0;
+};
+
 const rankEmoji = (rank) => {
     if (rank === 1) return '\u{1F3C6}';
     if (rank === 2) return '\u{1F525}';
@@ -352,11 +374,11 @@ const isScoreTask = (contest) => {
 const HeroSlider = () => {
     const [current, setCurrent] = useState(0);
     const banners = [
-        { id: 1, title: "Welcome to the Arena", subtitle: "Compete, Earn & Win Amazing Rewards", gradient: "from-violet-600 via-purple-600 to-indigo-700", icon: Trophy, accent: "bg-yellow-400", image: a4 },
-        { id: 2, title: "Weekly Challenge Live", subtitle: "Top 10 winners get exclusive prizes", gradient: "from-emerald-500 via-teal-500 to-cyan-600", icon: Zap, accent: "bg-emerald-300", image: a5 },
-        { id: 3, title: "Streak Bonus Active", subtitle: "Maintain your streak for 5x multiplier", gradient: "from-orange-500 via-amber-500 to-yellow-500", icon: Sparkles, accent: "bg-orange-300", image: a6 },
-        { id: 4, title: "Referral Rewards", subtitle: "Invite friends & earn 1000 points each", gradient: "from-pink-500 via-rose-500 to-red-500", icon: Gift, accent: "bg-pink-300", image: a7 },
-        { id: 5, title: "New Milestone Unlocked", subtitle: "Complete all tasks to become a Legend", gradient: "from-blue-600 via-indigo-600 to-violet-700", icon: Star, accent: "bg-blue-300", image: a4 }
+        { id: 1, title: "Welcome to the Arena", subtitle: "Compete, Earn & Win Amazing Rewards", gradient: "from-violet-600 via-purple-600 to-indigo-700", icon: Trophy, accent: "bg-yellow-400", image: arenaBannerImages.a4 },
+        { id: 2, title: "Weekly Challenge Live", subtitle: "Top 10 winners get exclusive prizes", gradient: "from-emerald-500 via-teal-500 to-cyan-600", icon: Zap, accent: "bg-emerald-300", image: arenaBannerImages.a5 },
+        { id: 3, title: "Streak Bonus Active", subtitle: "Maintain your streak for 5x multiplier", gradient: "from-orange-500 via-amber-500 to-yellow-500", icon: Sparkles, accent: "bg-orange-300", image: arenaBannerImages.a6 },
+        { id: 4, title: "Referral Rewards", subtitle: "Invite friends & earn 1000 points each", gradient: "from-pink-500 via-rose-500 to-red-500", icon: Gift, accent: "bg-pink-300", image: arenaBannerImages.a7 },
+        { id: 5, title: "New Milestone Unlocked", subtitle: "Complete all tasks to become a Legend", gradient: "from-blue-600 via-indigo-600 to-violet-700", icon: Star, accent: "bg-blue-300", image: arenaBannerImages.a4 }
     ];
 
     useEffect(() => {
@@ -624,8 +646,12 @@ const Leaderboard = ({ leaderboardData, isLoading, myRank, onSeeMore }) => {
                                         <span className="font-medium text-slate-800 text-sm truncate">{user.name}</span>
                                     </div>
                                     <div className="flex items-center gap-1 mt-0.5">
-                                        <Sparkles className={`w-3 h-3 ${isTop ? 'text-amber-500' : 'text-violet-400'}`} />
-                                        <span className="text-xs text-slate-500">{user.points.toLocaleString()} pts</span>
+                                        <img
+                                            src="/coins.jpeg"
+                                            alt="Coin"
+                                            className="w-8 h-8 rounded-full object-cover"
+                                        />
+                                        <span className="text-xs text-slate-500">{user.points.toLocaleString()}</span>
                                     </div>
                                 </div>
                                 <div className="text-emerald-500">
@@ -919,6 +945,92 @@ const ContestModal = ({
 const pointsHistoryButtonStyles = `
   .pts-btn-wrap * { box-sizing: border-box; }
 
+  .pts-history-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .pts-total-chip {
+    font-family: "Outfit", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px 10px 12px;
+    border-radius: 14px;
+    border: 1.5px solid #93c5fd;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(255,255,255,0.95), rgba(255,255,255,0) 45%),
+      linear-gradient(145deg, #eff6ff 0%, #dbeafe 52%, #c7d2fe 100%);
+    color: #1e3a8a;
+    box-shadow: 0 1px 3px rgba(59,130,246,0.12), 0 10px 24px rgba(59,130,246,0.18);
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .pts-total-chip::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.45) 35%, transparent 70%);
+    transform: translateX(-120%);
+    animation: ptsChipSweep 3.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes ptsChipSweep {
+    0%, 55%, 100% { transform: translateX(-120%); }
+    75% { transform: translateX(130%); }
+  }
+
+  .pts-total-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #93c5fd;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 2px 6px rgba(59,130,246,0.25);
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .pts-total-icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .pts-total-copy {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 3px;
+    z-index: 1;
+  }
+
+  .pts-total-value {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: #1e3a8a;
+  }
+
+  .pts-total-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #334155;
+    opacity: 0.92;
+  }
+
   .pts-btn {
     font-family: "Outfit", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     position: relative;
@@ -1191,11 +1303,16 @@ const PointsRipple = ({ x, y, onDone }) => {
     );
 };
 
-const PointsHistoryButton = ({ onOpen }) => {
+const PointsHistoryButton = ({ onOpen, totalPoints = 0, isLoading = false, isError = false }) => {
     const [particles, setParticles] = useState([]);
     const [ripples, setRipples] = useState([]);
     const btnRef = useRef(null);
     const navigateTimerRef = useRef(null);
+    const totalPointsLabel = isLoading
+        ? '...'
+        : isError
+            ? '--'
+            : Number(totalPoints || 0).toLocaleString();
 
     useEffect(() => () => {
         if (navigateTimerRef.current) {
@@ -1235,41 +1352,53 @@ const PointsHistoryButton = ({ onOpen }) => {
                 <PointsRipple
                     key={ripple.id}
                     x={ripple.x}
+                    
                     y={ripple.y}
                     onDone={() => setRipples((prev) => prev.filter((item) => item.id !== ripple.id))}
                 />
             ))}
-            <div className="pts-btn-wrap">
-                <button
-                    ref={btnRef}
-                    type="button"
-                    className="pts-btn"
-                    onClick={handleClick}
-                >
-                    <div className="pts-btn-shine" />
-                    <div className="pts-coin-icon">
-                        <div className="c c2" />
-                        <div className="c c1" />
-                        <div className="c-sym">*</div>
-                    </div>
-                    <span>View Points History</span>
-                    <span className="pts-leaf">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path
-                                d="M12 2C6.5 2 2 8 2 13.5C2 17.09 4.24 20.14 7.4 21.5C7 19.5 7 17 8.5 15C10 13 12 13 12 13C12 13 14 13 15.5 15C17 17 17 19.5 16.6 21.5C19.76 20.14 22 17.09 22 13.5C22 8 17.5 2 12 2Z"
-                                fill="#34d399"
-                                stroke="#059669"
-                                strokeWidth="0.5"
-                            />
-                            <path d="M12 13 L12 22" stroke="#059669" strokeWidth="1.2" strokeLinecap="round" />
-                        </svg>
+            <div className="pts-history-row">
+                <div className="pts-total-chip" aria-live="polite">
+                    <span className="pts-total-icon">
+                        <img src="/coins.jpeg" alt="Coins" className="pts-total-icon-img" />
                     </span>
-                    <span className="pts-arrow">
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                            <path d="M3 8h10M9 4l4 4-4 4" stroke="#065f46" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
+                    <span className="pts-total-copy">
+                        <strong className="pts-total-value">{totalPointsLabel}</strong>
+                        <span className="pts-total-label">Total Points</span>
                     </span>
-                </button>
+                </div>
+                <div className="pts-btn-wrap">
+                    <button
+                        ref={btnRef}
+                        type="button"
+                        className="pts-btn"
+                        onClick={handleClick}
+                    >
+                        <div className="pts-btn-shine" />
+                        <div className="pts-coin-icon">
+                            <div className="c c2" />
+                            <div className="c c1" />
+                            <div className="c-sym">*</div>
+                        </div>
+                        <span>View Points History</span>
+                        <span className="pts-leaf">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M12 2C6.5 2 2 8 2 13.5C2 17.09 4.24 20.14 7.4 21.5C7 19.5 7 17 8.5 15C10 13 12 13 12 13C12 13 14 13 15.5 15C17 17 17 19.5 16.6 21.5C19.76 20.14 22 17.09 22 13.5C22 8 17.5 2 12 2Z"
+                                    fill="#34d399"
+                                    stroke="#059669"
+                                    strokeWidth="0.5"
+                                />
+                                <path d="M12 13 L12 22" stroke="#059669" strokeWidth="1.2" strokeLinecap="round" />
+                            </svg>
+                        </span>
+                        <span className="pts-arrow">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                                <path d="M3 8h10M9 4l4 4-4 4" stroke="#065f46" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </span>
+                    </button>
+                </div>
             </div>
         </>
     );
@@ -1321,24 +1450,25 @@ const RewardsShowcase = ({ rewards, isLoading, onSeeMore }) => {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.2 + index * 0.08 }}
-                                        className="bg-white/90 backdrop-blur-sm rounded-xl p-4 border border-amber-200 shadow-sm"
+                                        className="bg-white/90 backdrop-blur-sm rounded-xl p-3 border border-amber-200 shadow-sm hover:shadow-md hover:border-amber-300 transition-all duration-200"
                                     >
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-amber-100 border border-amber-200 flex-shrink-0">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-10 h-10 rounded-lg overflow-hidden bg-amber-100 border border-amber-200 flex-shrink-0">
                                                 {reward.image_url ? (
                                                     <img src={reward.image_url} alt={reward.name} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-amber-700 text-xs font-semibold">IMG</div>
                                                 )}
                                             </div>
-                                            <div className="min-w-0">
-                                                <p className="text-sm font-semibold text-slate-800 truncate">{reward.name}</p>
-                                                <p className="text-xs text-slate-500">Rs. {Number(reward.price_inr || 0).toLocaleString('en-IN')}</p>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-semibold text-slate-800 truncate">{reward.name}</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold">
-                                            <Zap className="w-3 h-3" />
-                                            {Number(reward.points || 0).toLocaleString()} pts
+                                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold shrink-0">
+                                                <Zap className="w-3 h-3" />
+                                                {Number(reward.points || 0).toLocaleString()} pts
+                                            </div>
                                         </div>
                                     </motion.div>
                                 ))}
@@ -1413,6 +1543,17 @@ export default function ArenaStandalone() {
         queryKey: ['arenaRewardPreview', 1, 4],
         queryFn: () => arenaApi.getRewardCatalog({ page: 1, limit: 4 })
     });
+    const myPointsQuery = useQuery({
+        queryKey: ['arenaMyPoints'],
+        queryFn: () => arenaApi.getMyPoints(),
+        enabled: hasAuthUser,
+        retry: false,
+        refetchInterval: 30 * 1000
+    });
+    const myTotalPoints = useMemo(
+        () => resolveMyPoints(myPointsQuery.data),
+        [myPointsQuery.data]
+    );
 
     const invalidateArenaData = useCallback(() => {
         queryClient.invalidateQueries({ queryKey: ['arenaContestStatus'] });
@@ -1420,6 +1561,7 @@ export default function ArenaStandalone() {
         queryClient.invalidateQueries({ queryKey: ['arenaLeaderboard'] });
         queryClient.invalidateQueries({ queryKey: ['arenaMyRank'] });
         queryClient.invalidateQueries({ queryKey: ['arenaRewardPreview'] });
+        queryClient.invalidateQueries({ queryKey: ['arenaMyPoints'] });
     }, [queryClient]);
 
     const completeTaskMutation = useMutation({
@@ -1841,7 +1983,12 @@ export default function ArenaStandalone() {
                                 <h2 className="text-2xl font-bold text-slate-800">Earn Points</h2>
                                 <p className="text-slate-500 mt-1">Complete challenges to climb the leaderboard</p>
                             </div>
-                            <PointsHistoryButton onOpen={() => navigate('/arena/history')} />
+                            <PointsHistoryButton
+                                onOpen={() => navigate('/arena/history')}
+                                totalPoints={myTotalPoints}
+                                isLoading={myPointsQuery.isLoading}
+                                isError={myPointsQuery.isError}
+                            />
 
 
                         </motion.div>
@@ -1915,4 +2062,5 @@ export default function ArenaStandalone() {
         </>
     );
 }
+
 
