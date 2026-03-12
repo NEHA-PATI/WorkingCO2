@@ -5,15 +5,17 @@ import {
   FaArrowRight,
   FaAward,
   FaBookOpen,
+  FaFireFlameCurved,
   FaChevronLeft,
   FaChevronRight,
   FaChevronDown,
   FaChevronUp,
+  FaClipboardCheck,
   FaClock,
-  FaCoins,
   FaGift,
   FaGlobe,
   FaLeaf,
+  FaMedal,
   FaBullhorn,
   FaShieldHeart,
   FaUserGroup,
@@ -33,12 +35,12 @@ const HomePage = ({ forcedTab = null }) => {
 
   const rewards = [
     {
-      icon: <FaLeaf style={{ color: "#16a34a" }} />,
+      icon: <FaClipboardCheck style={{ color: "#16a34a" }} />,
       title: "Complete tasks",
       desc: "Do various tasks to earn points",
     },
     {
-      icon: <FaShieldHeart style={{ color: "#ec4899" }} />,
+      icon: <FaAward style={{ color: "#ec4899" }} />,
       title: "Eco Badge",
       desc: "Get badges for your consistency",
     },
@@ -48,7 +50,7 @@ const HomePage = ({ forcedTab = null }) => {
       desc: "Get internship, expert consulting , and goodies ",
     },
     {
-      icon: <GiRecycle style={{ color: "#14b8a6" }} />,
+      icon: <FaFireFlameCurved style={{ color: "#14b8a6" }} />,
       title: "Streak Points",
       desc: "Stay consistent and Earn more points ",
     },
@@ -449,7 +451,7 @@ const HomePage = ({ forcedTab = null }) => {
                   Join Contest,Earn Rewards
                 </h2>
                 <p className="hp-section-sub">
-                  Redeem your hard-earned coins for real-world impact
+                  Redeem your hard-earned rewards for real-world impact
                 </p>
               </>
             )}
@@ -566,16 +568,16 @@ const HomePage = ({ forcedTab = null }) => {
           ) : (
             <div className="hp-rewards-grid">
               {rewards.map((r, i) => (
-                <div className="hp-reward-card" key={i}>
+                <div
+                  className="hp-reward-card hp-reward-card-animated"
+                  style={{ animationDelay: `${i * 120}ms` }}
+                  key={i}
+                >
                   <div className="hp-reward-icon-wrap">
                     <span className="hp-reward-icon">{r.icon}</span>
                   </div>
                   <h3 className="hp-reward-title">{r.title}</h3>
                   <p className="hp-reward-desc">{r.desc}</p>
-                  <span className="hp-coins-badge">
-                    <FaCoins style={{ color: "#eab308" }} />
-                    {r.coins}
-                  </span>
                 </div>
               ))}
             </div>
