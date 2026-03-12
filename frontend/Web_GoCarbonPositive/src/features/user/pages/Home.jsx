@@ -38,21 +38,25 @@ const HomePage = ({ forcedTab = null }) => {
       icon: <FaClipboardCheck style={{ color: "#16a34a" }} />,
       title: "Complete tasks",
       desc: "Do various tasks to earn points",
+      
     },
     {
       icon: <FaAward style={{ color: "#ec4899" }} />,
       title: "Eco Badge",
       desc: "Get badges for your consistency",
+      
     },
     {
       icon: <FaGift style={{ color: "#f97316" }} />,
       title: "Win exclusive rewards",
       desc: "Get internship, expert consulting , and goodies ",
+      
     },
     {
       icon: <FaFireFlameCurved style={{ color: "#14b8a6" }} />,
       title: "Streak Points",
       desc: "Stay consistent and Earn more points ",
+      
     },
   ];
 
@@ -340,14 +344,14 @@ const HomePage = ({ forcedTab = null }) => {
   };
 
   const heroContent =
-    activeTab === "organisation"
-      ? {
-          titleLine1: "Developing Verified",
-          titleLine2: "Carbon Credit",
-          highlight: "Projects",
-          description:
-            "End-to-end carbon project structuring, feasibility assessment, and registry-aligned certification support for industrial operations.",
-        }
+  activeTab === "organisation"
+    ? {
+        titleLine1: "Developing Verified",
+        titleLine2: "Carbon Credit",
+        highlight: "Projects",
+        description:
+          "End-to-end carbon project structuring, documentation, and certification support aligned with globally recognised standards.",
+      }
       : {
           titleLine1: "Building a",
           titleLine2: "Sustainable",
@@ -355,7 +359,6 @@ const HomePage = ({ forcedTab = null }) => {
           description:
             "Join us in creating a better world through sustainable development practices and environmental consciousness.",
         };
-
   const heroVideoSource =
     activeTab === "organisation"
       ? "https://isorepublic.com/wp-content/uploads/2018/06/isorepublic-free-video-wind-turbine-sunrise.mp4"
@@ -391,27 +394,20 @@ const HomePage = ({ forcedTab = null }) => {
             <>
               <div className="hp-hero-btns">
                 {activeTab === "organisation" ? (
-                  <button
-                    className="hp-btn-primary hp-hero-start-btn"
-                    onClick={() =>
-                      navigate("/industrial", {
-                        state: {
-                          openDemo: true,
-                          demoIndustry: "Industrial Solutions",
-                        },
-                      })
-                    }
-                  >
-                    Book Free Feasibility Review <FaArrowRight />
-                  </button>
-                ) : (
-                  <button
-                    className="hp-btn-primary hp-hero-start-btn"
-                    onClick={() => navigate("/signup")}
-                  >
-                    Get Started <FaArrowRight />
-                  </button>
-                )}
+  <button
+    className="hp-btn-primary hp-hero-start-btn"
+    onClick={() => navigate("/contact")}
+  >
+    Book Free Feasibility Review <FaArrowRight />
+  </button>
+) : (
+  <button
+    className="hp-btn-primary hp-hero-start-btn"
+    onClick={() => navigate("/signup")}
+  >
+    Get Started <FaArrowRight />
+  </button>
+)}
               </div>
             </>
           )}
@@ -469,8 +465,8 @@ const HomePage = ({ forcedTab = null }) => {
               <div className="hp-org-apply-content">
                 <p className="hp-org-apply-eyebrow">Organisation Onboarding</p>
                 <h3 className="hp-org-apply-title">
-                  Request a Carbon Project Consultation
-                </h3>
+  Schedule a Carbon Project Consultation
+</h3>
                 <p className="hp-org-apply-desc">
                   Share your organisation details to begin a structured
                   evaluation of your carbon project potential.
@@ -673,18 +669,13 @@ const HomePage = ({ forcedTab = null }) => {
           </div>
           <div className="hp-about-text">
             <h2 className="hp-about-title">About Us</h2>
-            <p className="hp-about-desc">
-              We specialise in developing structured carbon credit projects for
-              industrial and renewable sectors. Our focus is on transparent
-              documentation, realistic projections, and registry-aligned
-              methodologies to help organisations unlock carbon as a strategic
-              asset.
-            </p>
-            <button
-              className="hp-btn-primary"
-              onClick={() => navigate("/about")}
-            >
-              Know More <FaArrowRight />
+           <p className="hp-about-desc">
+  We specialise in developing structured carbon credit projects for industrial and renewable sectors. 
+  Our focus is on transparent documentation, realistic projections, and registry-aligned methodologies 
+  to help organisations unlock carbon as a strategic asset.
+</p>
+            <button className="hp-btn-primary" onClick={() => navigate("/about")}>Know More <FaArrowRight />
+
             </button>
           </div>
         </div>
