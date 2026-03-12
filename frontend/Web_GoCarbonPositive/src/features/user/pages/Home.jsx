@@ -353,26 +353,26 @@ const HomePage = ({ forcedTab = null }) => {
           description:
             "Join us in creating a better world through sustainable development practices and environmental consciousness.",
         };
+
+  const heroVideoSource =
+    activeTab === "organisation"
+      ? "https://isorepublic.com/wp-content/uploads/2018/06/isorepublic-free-video-wind-turbine-sunrise.mp4"
+      : "/homeanimation.mp4";
   return (
     <div className="hp-root">
       <section
         className={`hp-hero ${activeTab === "organisation" ? "hp-hero-organisation" : "hp-hero-user"}`}
       >
-        {activeTab === "organisation" && (
-          <video
-            className="hp-hero-video"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-          >
-            <source
-              src="https://isorepublic.com/wp-content/uploads/2018/06/isorepublic-free-video-wind-turbine-sunrise.mp4"
-              type="video/mp4"
-            />
-          </video>
-        )}
+        <video
+          className="hp-hero-video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+        >
+          <source src={heroVideoSource} type="video/mp4" />
+        </video>
         <div className="hp-hero-overlay" />
         <div
           className="hp-hero-content hp-tab-switch-anim"
