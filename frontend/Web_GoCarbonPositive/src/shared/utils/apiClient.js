@@ -10,7 +10,7 @@ const API_CONFIG = {
     "/api/v1",
 
   // Auth Service (port 5002)
-  AUTH_API: import.meta.env.VITE_AUTH_SERVICE_URL || "http://localhost:5002",
+  AUTH_API: import.meta.env.VITE_AUTH_API || "http://localhost:5002",
 
   // Notification Service (port 5001)
   NOTIFICATION_API:
