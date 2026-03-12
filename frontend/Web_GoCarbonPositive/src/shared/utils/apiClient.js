@@ -154,7 +154,7 @@ export const careerApiClient = createApiClient(
 
 // Blog Service (port 4000)
 export const blogApiClient = createApiClient(
-  import.meta.env.VITE_BLOG_API_URL || "http://localhost:4000/api/blog",
+  ENV.BLOG_API_URL,
   "Blog Service",
 );
 
