@@ -382,7 +382,7 @@ const HomeOrganisation = () => {
             <p className="hp-user-org-question">Choose your experience</p>
             <div className="hp-tab-switcher hp-tab-switcher-inline">
               <button className="hp-tab-btn" onClick={() => navigate("/experience/user")}>
-                User
+                Individual
               </button>
               <button
                 className="hp-tab-btn hp-tab-active"
