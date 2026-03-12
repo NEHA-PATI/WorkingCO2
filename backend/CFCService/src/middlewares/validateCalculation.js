@@ -5,7 +5,15 @@ const schema = Joi.object({
 
   housing: Joi.object({
     electricity_kwh: Joi.number().min(0).required(),
-    lpg_cylinders: Joi.number().min(0).required()
+    lpg_cylinders: Joi.number().min(0).required(),
+    bedrooms: Joi.number().integer().min(0).optional(),
+    members: Joi.object({
+      male: Joi.number().integer().min(0).optional(),
+      female: Joi.number().integer().min(0).optional(),
+      child: Joi.number().integer().min(0).optional()
+    }).optional(),
+    fridge_count: Joi.number().integer().min(0).optional(),
+    tv_count: Joi.number().integer().min(0).optional()
   }).required(),
 
   food: Joi.array().items(

@@ -164,6 +164,12 @@ export const USER_ORG_MENU = {
       color: "#06b6d4",
     },
     {
+      label: "MRV Management",
+      path: "/admin/mrv-management",
+      iconKey: "analytics",
+      color: "#0ea5e9",
+    },
+    {
       label: "Reports",
       path: "/admin/reports",
       iconKey: "workspace",
