@@ -60,20 +60,17 @@ export default function HamburgerMenu({ role, close, handleLogout }) {
           <div
             key={item.label}
             className="sidebar-item"
-            style={{ "--sidebar-icon-color": item.color || "#111" }}
             onClick={() => handleItemClick(item)}
           >
             {Icon && (
               <Icon
-                className="sidebar-icon"
-                color={item.color}
+                className="sidebar-icon sidebar-icon-outline"
                 style={{
-                  fontSize: "1.7rem",
-                  minWidth: "26px",
+                  fontSize: "1.1rem",
+                  minWidth: "18px",
                 }}
               />
             )}
-
             <span>{item.label}</span>
           </div>
         );
