@@ -237,7 +237,7 @@ export default function BlogDetailPage() {
       {/* Main Content */}
       <main className="blog-detail-main">
         <article className="blog-article">
-          <div className="blog-article-content">
+          <div className="blog-article-content post-content">
             {blog.content && (
               <BlogBlockRenderer content={blog.content} />
             )}
@@ -329,3 +329,4 @@ export default function BlogDetailPage() {
     </div>
   );
 }
+

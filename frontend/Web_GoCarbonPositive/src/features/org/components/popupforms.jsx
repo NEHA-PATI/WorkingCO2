@@ -977,16 +977,3 @@ const PopupForms = ({
   );
 };
 export default PopupForms;
-
-
-
-
-
-
-
-
-
-
-
-
-

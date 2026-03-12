@@ -38,6 +38,8 @@ export default function Navbar() {
   const menuDropdownRef = useRef(null);
   const profileDropdownRef = useRef(null);
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const isOrganisationExperienceRoute =
+    location.pathname === "/experience/organisation";
   const showHamburger = !isAdminRoute;
 
   /* ================= HELPERS ================= */
@@ -170,7 +172,7 @@ localStorage.removeItem("token");
 
         <div className="user-right-section">
           {/* <ArenaButton /> */}
-          {(!isAuthenticated || role === "user") && (
+          {(!isAuthenticated || role === "user") && !isOrganisationExperienceRoute && (
             <button
               className="iconic-arena-button"
               onClick={handleIconicArenaClick}

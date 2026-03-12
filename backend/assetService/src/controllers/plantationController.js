@@ -64,10 +64,18 @@ class PlantationController {
         data: created,
       });
     } catch (error) {
+      if (error.code === "23503") {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid organization id. Please use a valid org_id from organizations table.",
+          data: { error: error.message, detail: error.detail },
+        });
+      }
+
       return res.status(500).json({
         success: false,
         message: "Failed to create plantation",
-        data: { error: error.message },
+        data: { error: error.message, code: error.code },
       });
     }
   }

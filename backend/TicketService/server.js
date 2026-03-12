@@ -18,31 +18,49 @@ app.set("trust proxy", 1);
 app.use(helmet());
 
 /* ===================== LOGGING ===================== */
-app.use(
-  morgan(process.env.NODE_ENV === "production" ? "combined" : "dev")
-);
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
-/* ===================== CORS (PRODUCTION SAFE) ===================== */
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",")
+/* ===================== CORS ===================== */
+const envOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean)
   : [];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow Postman / curl / server-to-server calls
-      if (!origin) return callback(null, true);
+const devDefaultOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000"
+];
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      console.log(`❌ CORS Blocked: ${origin}`);
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true
-  })
+const allowedOrigins = Array.from(
+  new Set([
+    ...envOrigins,
+    ...(process.env.NODE_ENV === "production" ? [] : devDefaultOrigins)
+  ])
 );
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow server-to-server/curl/postman requests
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    console.log(`CORS blocked origin: ${origin}`);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
+
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 /* ===================== BODY PARSING ===================== */
 app.use(express.json({ limit: "10mb" }));
@@ -81,7 +99,7 @@ app.use((req, res) => {
 
 /* ===================== GLOBAL ERROR HANDLER ===================== */
 app.use((err, req, res, next) => {
-  console.error("❌ Ticket Service Error:", err.message);
+  console.error("Ticket Service Error:", err.message);
 
   if (err.message === "Not allowed by CORS") {
     return res.status(403).json({
@@ -90,7 +108,7 @@ app.use((err, req, res, next) => {
     });
   }
 
-  res.status(500).json({
+  return res.status(500).json({
     status: "error",
     message: "Internal server error"
   });
@@ -100,14 +118,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5004;
 
 app.listen(PORT, () => {
-  console.log(`
-====================================
-🎫 Ticket Service Started
-====================================
-Port: ${PORT}
-Environment: ${process.env.NODE_ENV || "development"}
-====================================
-`);
+  console.log(`\n====================================\nTicket Service Started\n====================================\nPort: ${PORT}\nEnvironment: ${process.env.NODE_ENV || "development"}\n====================================\n`);
 });
 
 module.exports = app;

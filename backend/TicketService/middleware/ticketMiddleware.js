@@ -4,8 +4,8 @@ const verifyUser = async (req, res, next) => {
   try {
     const u_id =
       req.headers["x-user-id"] ||
-      req.body.u_id ||
-      req.query.u_id;
+      req.body?.u_id ||
+      req.query?.u_id;
 
     if (!u_id) {
       return res.status(401).json({

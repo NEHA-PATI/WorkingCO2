@@ -44,12 +44,11 @@ const OAuthSuccess = () => {
       fireToast("OAUTH.SUCCESS", "success");
 
       navigate("/user/dashboard", { replace: true });
-
     } catch (err) {
       console.error("OAuth decode error", err);
-
+      
       fireToast("OAUTH.INVALID", "error");
-
+      
       navigate("/", { replace: true });
     }
   }, [login, navigate, params, isAuthenticated]);
