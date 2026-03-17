@@ -14,6 +14,7 @@ import {
 import { fireToast } from "@shared/utils/toastService";
 import { USER_ORG_MENU } from "@config/menuConfig";
 import HamburgerMenu from "./HamburgerMenu";
+import CurrencyToggle from "@features/marketplace/components/CurrencyToggle";
 
 import useAuth from "@contexts/AuthContext";
 
@@ -463,6 +464,7 @@ export default function Navbar() {
         {/* ================= RIGHT ================= */}
 
         <div className="user-right-section">
+          <CurrencyToggle />
           {/* <ArenaButton /> */}
           {(!isAuthenticated || normalizedRole === "user") && (
             <button

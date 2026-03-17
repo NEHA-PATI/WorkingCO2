@@ -23,6 +23,8 @@ import {
 } from "recharts";
 import { Building2, Gauge, ShieldCheck, Waves } from "lucide-react";
 import { credits, getRegistryComparisonData } from "../config/mockMarketplaceData";
+import useCurrency from "../hooks/useCurrency";
+import { formatPriceFromUSD } from "../lib/currencyUtils";
 
 function mean(values) {
   if (!values.length) return 0;
@@ -30,6 +32,8 @@ function mean(values) {
 }
 
 export default function RegistryComparison() {
+  const { currency, fxRate } = useCurrency();
+  const money = (value, options = {}) => formatPriceFromUSD(value, currency, fxRate, options);
   const comparisonRows = useMemo(() => getRegistryComparisonData(), []);
 
   const highlights = useMemo(() => {
@@ -152,7 +156,12 @@ export default function RegistryComparison() {
                       {row.code}
                     </Badge>
                   </TableCell>
-                  <TableCell>${row.averagePrice.toFixed(2)}</TableCell>
+                  <TableCell>
+                    {money(row.averagePrice, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </TableCell>
                   <TableCell>{row.volume.toLocaleString()} t</TableCell>
                   <TableCell>{row.dominantProjectType}</TableCell>
                   <TableCell>{row.liquidityDepth.toLocaleString()} t</TableCell>
@@ -178,7 +187,13 @@ export default function RegistryComparison() {
               <Tooltip
                 formatter={(value, name) => {
                   if (name === "averagePrice") {
-                    return [`$${Number(value).toFixed(2)}`, "Average Price"];
+                    return [
+                      money(value, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }),
+                      "Average Price",
+                    ];
                   }
                   if (name === "volatility") {
                     return [`${Number(value).toFixed(2)}%`, "Volatility"];
