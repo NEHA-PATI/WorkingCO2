@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Badge, Button, Card, CardContent, CardHeader } from "./ui/basic-ui";
 import { Calendar, ChevronRight, Heart, MapPin } from "lucide-react";
 import { cn } from "../lib/utils";
+import PriceDisplay from "./PriceDisplay";
 
 const qualityColors = {
   premium: "bg-gradient-to-r from-purple-600 to-indigo-600 text-white",
@@ -97,12 +98,12 @@ export default function CreditListingCard({
           <div className="flex items-end justify-between">
             <div>
               <div className="mb-1 text-xs text-slate-500">Price per tonne</div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-slate-900">
-                  ${listing.price_per_tonne}
-                </span>
-                <span className="text-sm text-slate-500">USD</span>
-              </div>
+              <PriceDisplay
+                priceUSD={listing.price_usd ?? listing.price_per_tonne}
+                unit="tCO2e"
+                showApprox
+                size="lg"
+              />
             </div>
             <div className="text-right">
               <div className="text-xs text-slate-500">Available</div>

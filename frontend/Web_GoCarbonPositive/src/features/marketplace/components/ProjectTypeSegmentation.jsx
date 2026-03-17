@@ -37,6 +37,8 @@ import {
   getProjectTypes,
   ratingPremiumMultipliers,
 } from "../config/mockMarketplaceData";
+import useCurrency from "../hooks/useCurrency";
+import { formatPriceFromUSD } from "../lib/currencyUtils";
 
 const scoreOrder = ["AAA", "AA", "A", "BBB", "BB"];
 
@@ -49,11 +51,23 @@ const scoreClasses = {
 };
 
 export default function ProjectTypeSegmentation() {
+  const { currency, fxRate } = useCurrency();
   const projectTypes = useMemo(() => getProjectTypes(), []);
   const [projectType, setProjectType] = useState(projectTypes[0] || "");
+  const money = (value, options = {}) => formatPriceFromUSD(value, currency, fxRate, options);
   const data = useMemo(
     () => getProjectSegmentationData(projectType),
     [projectType],
+  );
+  const priceDistribution = useMemo(
+    () =>
+      data.priceDistribution.map((item) => ({
+        ...item,
+        bucketLabel: `${money(item.from, { maximumFractionDigits: 0 })}-${money(item.to, {
+          maximumFractionDigits: 0,
+        })}`,
+      })),
+    [currency, data.priceDistribution, fxRate],
   );
 
   const orderedRatings = useMemo(() => {
@@ -98,7 +112,10 @@ export default function ProjectTypeSegmentation() {
           <CardContent className="p-4">
             <p className="text-xs uppercase tracking-[0.08em] text-slate-500">Avg Price</p>
             <p className="text-2xl font-bold text-slate-900">
-              ${data.summary.averagePrice.toFixed(2)}
+              {money(data.summary.averagePrice, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </p>
           </CardContent>
         </Card>
@@ -137,9 +154,9 @@ export default function ProjectTypeSegmentation() {
           </CardHeader>
           <CardContent className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.priceDistribution}>
+              <BarChart data={priceDistribution}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
+                <XAxis dataKey="bucketLabel" tick={{ fontSize: 11 }} />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="count" fill="#10b981" radius={[6, 6, 0, 0]} />
@@ -284,7 +301,12 @@ export default function ProjectTypeSegmentation() {
                       {credit.score}
                     </Badge>
                   </TableCell>
-                  <TableCell>${credit.currentPrice.toFixed(2)}</TableCell>
+                  <TableCell>
+                    {money(credit.currentPrice, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </TableCell>
                   <TableCell>{credit.liquidityScore}/100</TableCell>
                   <TableCell>{credit.volatilityScore.toFixed(1)}%</TableCell>
                 </TableRow>

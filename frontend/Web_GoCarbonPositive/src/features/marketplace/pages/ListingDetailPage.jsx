@@ -62,6 +62,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import useCurrency from "../hooks/useCurrency";
+import { formatPriceFromUSD } from "../lib/currencyUtils";
 
 const qualityGradients = {
   premium: "from-purple-600 to-indigo-600",
@@ -108,13 +110,18 @@ const settlementMethods = [
   { id: "escrow_settlement", label: "Escrow Settlement" },
 ];
 
-const money = (value) => `$${Number(value).toFixed(2)}`;
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 export default function ListingDetailPage() {
   const navigate = useNavigate();
   const { listingId } = useParams();
+  const { currency, fxRate } = useCurrency();
   const bundle = useMemo(() => getListingBundle(listingId), [listingId]);
+  const money = (value) =>
+    formatPriceFromUSD(value, currency, fxRate, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   const [orderOpen, setOrderOpen] = useState(false);
   const [step, setStep] = useState(1);

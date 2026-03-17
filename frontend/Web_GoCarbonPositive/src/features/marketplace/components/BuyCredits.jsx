@@ -28,6 +28,8 @@ import {
   Wallet,
 } from "lucide-react";
 import { getMarketplaceCatalog } from "../config/mockMarketplaceData";
+import useCurrency from "../hooks/useCurrency";
+import { formatPriceFromUSD } from "../lib/currencyUtils";
 
 const settlementAccounts = [
   {
@@ -60,10 +62,15 @@ const settlementMethods = [
 ];
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-const money = (value) => `$${Number(value).toFixed(2)}`;
 
 export default function BuyCredits() {
+  const { currency, fxRate } = useCurrency();
   const catalog = useMemo(() => getMarketplaceCatalog(), []);
+  const money = (value) =>
+    formatPriceFromUSD(value, currency, fxRate, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   const [selectedListingId, setSelectedListingId] = useState(
     () => catalog[0]?.listing.id || "",
   );

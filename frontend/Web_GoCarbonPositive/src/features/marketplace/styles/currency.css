@@ -1,0 +1,64 @@
+.currency-toggle {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 2px;
+  background: #f8fafc;
+}
+
+.currency-toggle__btn {
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.38rem 0.72rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.currency-toggle__btn:hover {
+  color: #0f172a;
+}
+
+.currency-toggle__btn--active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.2);
+}
+
+.price-display {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.price-display__primary {
+  color: #0f172a;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.price-display__secondary {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.price-display--sm .price-display__primary {
+  font-size: 0.95rem;
+}
+
+.price-display--sm .price-display__secondary {
+  font-size: 0.74rem;
+}
+
+.price-display--md .price-display__primary {
+  font-size: 1.25rem;
+}
+
+.price-display--lg .price-display__primary {
+  font-size: 1.75rem;
+}

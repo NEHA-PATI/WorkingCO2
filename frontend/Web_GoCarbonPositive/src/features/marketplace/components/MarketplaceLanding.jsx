@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
   ArrowRight,
@@ -16,6 +16,8 @@ import HowItWorks from "./landing/HowItWorks";
 import MarketPreview from "./landing/MarketPreview";
 import ParticleField from "./landing/ParticleField";
 import RegistryLogos from "./landing/RegistryLogos";
+import useCurrency from "../hooks/useCurrency";
+import { convertPrice } from "../lib/currencyUtils";
 
 const sampleProjects = [
   {
@@ -93,8 +95,10 @@ const testimonials = [
 ];
 
 export default function MarketplaceLanding({ onAction }) {
+  const { currency, fxRate } = useCurrency();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef(null);
+  const currencyPrefix = currency === "INR" ? "₹" : "$";
 
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0.86]);
@@ -107,6 +111,27 @@ export default function MarketplaceLanding({ onAction }) {
       y: ((event.clientY - rect.top) / rect.height - 0.5) * 2,
     });
   }, []);
+
+  const landingStats = useMemo(
+    () => [
+      {
+        label: "Market Cap",
+        value: convertPrice(2.4, currency, fxRate),
+        prefix: currencyPrefix,
+        suffix: "B",
+        decimals: 1,
+      },
+      { label: "Credits Traded", value: 187, suffix: "M", decimals: 0 },
+      {
+        label: "Avg. Credit Price",
+        value: convertPrice(14.82, currency, fxRate),
+        prefix: currencyPrefix,
+        decimals: 2,
+      },
+      { label: "Active Projects", value: 3400, suffix: "+", decimals: 0 },
+    ],
+    [currency, currencyPrefix, fxRate],
+  );
 
   return (
     <div
@@ -230,12 +255,7 @@ export default function MarketplaceLanding({ onAction }) {
 
       <section className="relative border-y border-slate-100 bg-white px-6 py-16">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 md:grid-cols-4">
-          {[
-            { label: "Market Cap", value: 2.4, prefix: "$", suffix: "B", decimals: 1 },
-            { label: "Credits Traded", value: 187, suffix: "M", decimals: 0 },
-            { label: "Avg. Credit Price", value: 14.82, prefix: "$", decimals: 2 },
-            { label: "Active Projects", value: 3400, suffix: "+", decimals: 0 },
-          ].map((stat, index) => (
+          {landingStats.map((stat, index) => (
             <motion.div
               key={stat.label}
               className="text-center"

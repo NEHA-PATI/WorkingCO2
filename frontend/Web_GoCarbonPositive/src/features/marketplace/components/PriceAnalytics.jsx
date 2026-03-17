@@ -42,10 +42,15 @@ import {
   Target,
   Zap,
 } from "lucide-react";
+import useCurrency from "../hooks/useCurrency";
+import { formatPriceFromUSD } from "../lib/currencyUtils";
 
 const PriceAnalytics = () => {
+  const { currency, fxRate } = useCurrency();
   const [timeframe, setTimeframe] = useState("7d");
   const [chartType, setChartType] = useState("price");
+  const money = (value, options = {}) =>
+    formatPriceFromUSD(value, currency, fxRate, options);
 
   // Mock data for different timeframes
   const priceData = {
@@ -141,8 +146,10 @@ const PriceAnalytics = () => {
           <YAxis yAxisId="volume" orientation="right" />
           <Tooltip
             formatter={(value, name) => [
-              name === "price" ? `$${value}` : value.toLocaleString(),
-              name === "price" ? "Price" : "Volume",
+              name === "price" || name === "prediction"
+                ? money(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : value.toLocaleString(),
+              name === "price" ? "Price" : name === "prediction" ? "Prediction" : "Volume",
             ]}
           />
           <Area
@@ -255,7 +262,9 @@ const PriceAnalytics = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Current Price</p>
-                <p className="text-xl font-bold">$23.76</p>
+                <p className="text-xl font-bold">
+                  {money(23.76, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
                 <p className="text-xs text-green-600 flex items-center">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   +1.4%
@@ -271,8 +280,12 @@ const PriceAnalytics = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">24h High</p>
-                <p className="text-xl font-bold">$24.12</p>
-                <p className="text-xs text-gray-500">vs $22.89 low</p>
+                <p className="text-xl font-bold">
+                  {money(24.12, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+                <p className="text-xs text-gray-500">
+                  vs {money(22.89, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} low
+                </p>
               </div>
               <TrendingUp className="h-8 w-8 text-blue-600" />
             </div>

@@ -1,6 +1,8 @@
 import React from "react";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/basic-ui";
 import { SlidersHorizontal, X } from "lucide-react";
+import useCurrency from "../hooks/useCurrency";
+import { formatPriceFromUSD } from "../lib/currencyUtils";
 
 const projectTypes = [
   "Nature-Based Solutions",
@@ -33,7 +35,10 @@ function updateRangePair(range, index, value) {
 }
 
 export default function MarketplaceFilters({ filters, setFilters, registries }) {
+  const { currency, fxRate } = useCurrency();
   const handleClearFilters = () => setFilters(DEFAULT_FILTERS);
+  const priceLabel = (value) =>
+    formatPriceFromUSD(value, currency, fxRate, { maximumFractionDigits: 0 });
 
   const hasActiveFilters =
     filters.search ||
@@ -197,7 +202,7 @@ export default function MarketplaceFilters({ filters, setFilters, registries }) 
 
         <div className="space-y-3">
           <Label className="text-sm font-medium text-slate-700">
-            Price per tonne (USD)
+            Price per tonne ({currency})
           </Label>
           <div className="space-y-2 px-1">
             <input
@@ -230,8 +235,8 @@ export default function MarketplaceFilters({ filters, setFilters, registries }) 
             />
           </div>
           <div className="flex justify-between text-sm text-slate-600">
-            <span>${filters.priceRange[0]}</span>
-            <span>${filters.priceRange[1]}</span>
+            <span>{priceLabel(filters.priceRange[0])}</span>
+            <span>{priceLabel(filters.priceRange[1])}</span>
           </div>
         </div>
 

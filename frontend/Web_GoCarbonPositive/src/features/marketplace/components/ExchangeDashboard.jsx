@@ -51,10 +51,12 @@ import {
   getTradeTicker,
 } from "../config/mockMarketplaceData";
 import { cn } from "../lib/utils";
+import useCurrency from "../hooks/useCurrency";
+import { formatPriceFromUSD } from "../lib/currencyUtils";
 
 const timeframeOptions = ["1D", "1W", "1M", "6M", "1Y", "ALL"];
 
-function ExchangeTooltip({ active, payload, label }) {
+function ExchangeTooltip({ active, payload, label, money }) {
   if (!active || !payload?.length) return null;
   const point = payload[0]?.payload;
   if (!point) return null;
@@ -74,7 +76,7 @@ function ExchangeTooltip({ active, payload, label }) {
           {point.volumeTraded.toLocaleString()} t
         </span>
         <span className="text-slate-500">Trade Price</span>
-        <span className="font-medium text-slate-900">${point.tradePrice}</span>
+        <span className="font-medium text-slate-900">{money(point.tradePrice)}</span>
       </div>
     </div>
   );
@@ -109,6 +111,7 @@ function MetricCard({ title, value, hint, trend = "neutral" }) {
 }
 
 export default function ExchangeDashboard() {
+  const { currency, fxRate } = useCurrency();
   const [timeframe, setTimeframe] = useState("1M");
   const [chartMode, setChartMode] = useState("candlestick");
   const [selectedListingId, setSelectedListingId] = useState(credits[0]?.id || "");
@@ -121,6 +124,11 @@ export default function ExchangeDashboard() {
   const issuanceTrend = useMemo(() => getIssuanceTrend(), []);
   const orderBook = useMemo(() => getOrderBook(selectedListingId), [selectedListingId]);
   const depthSeries = useMemo(() => getLiquidityDepthSeries(orderBook), [orderBook]);
+  const money = (value) =>
+    formatPriceFromUSD(value, currency, fxRate, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -148,14 +156,14 @@ export default function ExchangeDashboard() {
         />
         <MetricCard
           title="Avg Market Price"
-          value={`$${metrics.averageMarketPrice}`}
+          value={money(metrics.averageMarketPrice)}
           hint={`Last ${timeframe}`}
           trend={metrics.priceChangePct >= 0 ? "up" : "down"}
         />
         <MetricCard
           title="Highest Registry"
-          value={metrics.highestRegistryPrice.split(" ")[0]}
-          hint={metrics.highestRegistryPrice}
+          value={money(metrics.highestRegistryAveragePrice || 0)}
+          hint={metrics.highestRegistryName || "N/A"}
           trend="up"
         />
         <MetricCard
@@ -224,7 +232,7 @@ export default function ExchangeDashboard() {
               <ComposedChart data={series}>
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                 <YAxis yAxisId="price" orientation="right" tick={{ fontSize: 11 }} />
-                <Tooltip content={<ExchangeTooltip />} />
+                <Tooltip content={<ExchangeTooltip money={money} />} />
                 {chartMode === "line" ? (
                   <>
                     <Area
@@ -296,7 +304,9 @@ export default function ExchangeDashboard() {
                   ))}
                 </SelectContent>
               </Select>
-              <Badge variant="outline">Spread {orderBook.spread} (${spreadBps} bps)</Badge>
+              <Badge variant="outline">
+                Spread {money(orderBook.spread)} ({spreadBps} bps)
+              </Badge>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -314,9 +324,9 @@ export default function ExchangeDashboard() {
                   const ask = orderBook.asks[index];
                   return (
                     <TableRow key={`${bid.level}-${ask?.level || index}`}>
-                      <TableCell className="text-emerald-700">${bid.price}</TableCell>
+                      <TableCell className="text-emerald-700">{money(bid.price)}</TableCell>
                       <TableCell className="text-right">{bid.volume.toLocaleString()}</TableCell>
-                      <TableCell className="text-rose-700">${ask?.price}</TableCell>
+                      <TableCell className="text-rose-700">{money(ask?.price || 0)}</TableCell>
                       <TableCell className="text-right">
                         {(ask?.volume || 0).toLocaleString()}
                       </TableCell>
@@ -340,7 +350,14 @@ export default function ExchangeDashboard() {
               <ComposedChart data={depthSeries}>
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
+                <Tooltip
+                  formatter={(value, name) => {
+                    if (name === "bidPrice" || name === "askPrice") {
+                      return [money(value), name];
+                    }
+                    return [`${Number(value).toLocaleString()} t`, name];
+                  }}
+                />
                 <Area type="monotone" dataKey="bidDepth" stroke="#059669" fill="#bbf7d0" />
                 <Area type="monotone" dataKey="askDepth" stroke="#dc2626" fill="#fecaca" />
                 <Line type="monotone" dataKey="bidPrice" stroke="#10b981" strokeDasharray="4 4" dot={false} />
@@ -374,7 +391,7 @@ export default function ExchangeDashboard() {
               <div>{item.projectType}</div>
               <div className="mt-1 flex items-center justify-between">
                 <span>{item.volume.toLocaleString()} t</span>
-                <span className="font-semibold">${item.price}</span>
+                <span className="font-semibold">{money(item.price)}</span>
               </div>
             </div>
           ))}

@@ -33,9 +33,17 @@ import {
   BarChart3,
   Info,
 } from "lucide-react";
+import useCurrency from "../hooks/useCurrency";
+import { formatPriceFromUSD } from "../lib/currencyUtils";
 
 const OffsetCalculator = () => {
+  const { currency, fxRate } = useCurrency();
   const [results, setResults] = useState(null);
+  const money = (value) =>
+    formatPriceFromUSD(value, currency, fxRate, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   // Travel Calculator State
   const [travel, setTravel] = useState({
@@ -727,7 +735,7 @@ const OffsetCalculator = () => {
                 <div className="flex items-center justify-between mb-4">
                   <span>Estimated Cost:</span>
                   <span className="text-2xl font-bold text-green-700">
-                    ${results.offsetCost}
+                    {money(results.offsetCost)}
                   </span>
                 </div>
 

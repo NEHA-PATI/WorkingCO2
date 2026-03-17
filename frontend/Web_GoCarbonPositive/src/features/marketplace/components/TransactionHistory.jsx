@@ -44,13 +44,18 @@ import {
   FileText,
   BarChart3,
 } from "lucide-react";
+import useCurrency from "../hooks/useCurrency";
+import { formatPriceFromUSD } from "../lib/currencyUtils";
 
 const TransactionHistory = () => {
+  const { currency, fxRate } = useCurrency();
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const money = (value, options = {}) =>
+    formatPriceFromUSD(value, currency, fxRate, options);
 
   // Mock transaction data
   const transactions = [
@@ -257,7 +262,7 @@ const TransactionHistory = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Value</p>
                 <p className="text-2xl font-bold">
-                  ${summary.totalValue.toLocaleString()}
+                  {money(summary.totalValue, { maximumFractionDigits: 0 })}
                 </p>
               </div>
               <DollarSign className="h-8 w-8 text-purple-600" />
@@ -271,7 +276,10 @@ const TransactionHistory = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Fees</p>
                 <p className="text-2xl font-bold">
-                  ${summary.totalFees.toFixed(2)}
+                  {money(summary.totalFees, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </p>
               </div>
               <Hash className="h-8 w-8 text-orange-600" />
@@ -415,18 +423,26 @@ const TransactionHistory = () => {
                       </span>
                     </TableCell>
                     <TableCell>
-                      {transaction.price > 0 ? `$${transaction.price}` : "-"}
+                      {transaction.price > 0
+                        ? money(transaction.price, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : "-"}
                     </TableCell>
                     <TableCell>
                       <div>
                         <div className="font-medium">
                           {transaction.total > 0
-                            ? `$${transaction.total.toLocaleString()}`
+                            ? money(transaction.total, { maximumFractionDigits: 0 })
                             : "-"}
                         </div>
                         {transaction.fee > 0 && (
                           <div className="text-xs text-gray-500">
-                            Fee: ${transaction.fee}
+                            Fee: {money(transaction.fee, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
                           </div>
                         )}
                       </div>
@@ -572,21 +588,31 @@ const TransactionHistory = () => {
                     {selectedTransaction.price > 0 && (
                       <div className="flex justify-between">
                         <span>Price per credit:</span>
-                        <span>${selectedTransaction.price}</span>
+                        <span>
+                          {money(selectedTransaction.price, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>
                       </div>
                     )}
                     {selectedTransaction.total > 0 && (
                       <div className="flex justify-between">
                         <span>Subtotal:</span>
                         <span>
-                          ${selectedTransaction.total.toLocaleString()}
+                          {money(selectedTransaction.total, { maximumFractionDigits: 0 })}
                         </span>
                       </div>
                     )}
                     {selectedTransaction.fee > 0 && (
                       <div className="flex justify-between">
                         <span>Fee:</span>
-                        <span>${selectedTransaction.fee}</span>
+                        <span>
+                          {money(selectedTransaction.fee, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </span>
                       </div>
                     )}
                   </div>

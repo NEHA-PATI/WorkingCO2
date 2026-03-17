@@ -44,6 +44,8 @@ import TransactionHistory from "../components/TransactionHistory";
 import TransferCredits from "../components/TransferCredits";
 import Watchlist from "../components/Watchlist";
 import { getExchangeMetrics } from "../config/mockMarketplaceData";
+import useCurrency from "../hooks/useCurrency";
+import { formatPriceFromUSD } from "../lib/currencyUtils";
 
 const SESSION_KEY = "marketplace_ui_session_v1";
 
@@ -55,13 +57,13 @@ const tabs = [
     component: Overview,
     description: "Marketplace overview, broad metrics, and featured activity",
   },
-  {
-    id: "exchange",
-    label: "Exchange",
-    icon: CandlestickChart,
-    component: ExchangeDashboard,
-    description: "Institutional market tape, depth, spread, and execution flow",
-  },
+  // {
+  //   id: "exchange",
+  //   label: "Exchange",
+  //   icon: CandlestickChart,
+  //   component: ExchangeDashboard,
+  //   description: "Institutional market tape, depth, spread, and execution flow",
+  // },
   {
     id: "registries",
     label: "Registries",
@@ -168,6 +170,7 @@ const Marketplace = () => {
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [requestedTab, setRequestedTab] = useState("overview");
   const [session, setSession] = useState(() => readSession());
+  const { currency, fxRate } = useCurrency();
 
   const activeTabConfig = useMemo(
     () => tabs.find((tab) => tab.id === activeTab) ?? tabs[0],
@@ -178,7 +181,10 @@ const Marketplace = () => {
     () => [
       {
         label: "Market Price",
-        value: `$${exchangeMetrics.lastPrice.toFixed(2)}`,
+        value: formatPriceFromUSD(exchangeMetrics.lastPrice, currency, fxRate, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }),
         delta: `${exchangeMetrics.priceChangePct >= 0 ? "+" : ""}${exchangeMetrics.priceChangePct.toFixed(2)}% in 24h`,
       },
       {
@@ -192,7 +198,7 @@ const Marketplace = () => {
         delta: `${exchangeMetrics.mostTradedProjectType} leading`,
       },
     ],
-    [exchangeMetrics],
+    [currency, exchangeMetrics, fxRate],
   );
 
   const ActiveComponent = activeTabConfig.component;
@@ -248,32 +254,32 @@ const Marketplace = () => {
           </section>
         ) : (
           <>
-            <section
-              className="marketplace-tabbar sticky top-0 z-20 border-b border-slate-200 bg-white"
-            >
-              <nav className="flex items-center gap-1 overflow-x-auto px-2 py-1">
-                {visibleTabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveTab(tab.id)}
-                      className={cn(
-                        "inline-flex min-w-fit items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm transition-colors",
-                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2",
-                        isActive
-                          ? "bg-emerald-50 text-emerald-900"
-                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
-                      )}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      <span className="font-medium">{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </nav>
+            <section className="marketplace-tabbar">
+              <div className="marketplace-tabbar__inner">
+                <nav className="marketplace-tabbar__nav">
+                  {visibleTabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setActiveTab(tab.id)}
+                        className={cn(
+                          "marketplace-tabbar__button",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2",
+                          isActive
+                            ? "bg-emerald-50 text-emerald-900"
+                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                        )}
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span className="font-medium">{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
             </section>
 
             {activeTab === "overview" ? (

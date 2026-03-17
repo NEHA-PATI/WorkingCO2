@@ -18,6 +18,7 @@ import {
 } from "../config/mockMarketplaceData";
 import CreditListingCard from "./CreditListingCard";
 import MarketplaceFilters from "./MarketplaceFilters";
+import PriceDisplay from "./PriceDisplay";
 
 const DEFAULT_FILTERS = {
   search: "",
@@ -29,18 +30,21 @@ const DEFAULT_FILTERS = {
   priceRange: [0, 260],
 };
 
+const getListingPriceUSD = (listing) =>
+  Number(listing?.price_usd ?? listing?.price_per_tonne ?? 0);
+
 function applySort(items, sortBy) {
   const next = [...items];
 
   if (sortBy === "price_asc") {
     return next.sort(
-      (a, b) => a.listing.price_per_tonne - b.listing.price_per_tonne,
+      (a, b) => getListingPriceUSD(a.listing) - getListingPriceUSD(b.listing),
     );
   }
 
   if (sortBy === "price_desc") {
     return next.sort(
-      (a, b) => b.listing.price_per_tonne - a.listing.price_per_tonne,
+      (a, b) => getListingPriceUSD(b.listing) - getListingPriceUSD(a.listing),
     );
   }
 
@@ -86,9 +90,10 @@ export default function BrowseListings() {
       const matchesVintage =
         listing.vintage_year >= filters.vintageYear[0] &&
         listing.vintage_year <= filters.vintageYear[1];
+      const listingPrice = getListingPriceUSD(listing);
       const matchesPrice =
-        listing.price_per_tonne >= filters.priceRange[0] &&
-        listing.price_per_tonne <= filters.priceRange[1];
+        listingPrice >= filters.priceRange[0] &&
+        listingPrice <= filters.priceRange[1];
 
       return (
         matchesSearch &&
@@ -113,7 +118,7 @@ export default function BrowseListings() {
       filteredCatalog.length === 0
         ? 0
         : filteredCatalog.reduce(
-            (sum, entry) => sum + entry.listing.price_per_tonne,
+            (sum, entry) => sum + getListingPriceUSD(entry.listing),
             0,
           ) / filteredCatalog.length;
     return { totalTonnage, avgPrice };
@@ -150,9 +155,18 @@ export default function BrowseListings() {
                   {filteredCatalog.length} Listings
                 </h3>
                 <p className="text-sm text-slate-600">
-                  {resultsSummary.totalTonnage.toLocaleString()} t available | Avg $
-                  {resultsSummary.avgPrice.toFixed(2)}/t
+                  {resultsSummary.totalTonnage.toLocaleString()} t available
                 </p>
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="mr-1 text-xs uppercase tracking-[0.08em] text-slate-500">
+                    Avg
+                  </span>
+                  <PriceDisplay
+                    priceUSD={resultsSummary.avgPrice}
+                    unit="tCO2e"
+                    size="sm"
+                  />
+                </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">

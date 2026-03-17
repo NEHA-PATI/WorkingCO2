@@ -2,6 +2,8 @@ import React, { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Activity, TrendingDown, TrendingUp } from "lucide-react";
+import useCurrency from "../../hooks/useCurrency";
+import { formatPriceFromUSD } from "../../lib/currencyUtils";
 
 const generateChartData = () => {
   const data = [];
@@ -54,9 +56,15 @@ const mockAssets = [
 ];
 
 export default function MarketPreview() {
+  const { currency, fxRate } = useCurrency();
   const [chartData] = useState(generateChartData);
   const ref = useRef(null);
   const inView = useInView(ref, { once: true });
+  const money = (value) =>
+    formatPriceFromUSD(value, currency, fxRate, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   return (
     <motion.div
@@ -90,7 +98,7 @@ export default function MarketPreview() {
 
       <div className="px-6 pb-2 pt-6">
         <div className="mb-4 flex items-end gap-4">
-          <span className="text-3xl font-bold text-slate-900">$14.82</span>
+          <span className="text-3xl font-bold text-slate-900">{money(14.82)}</span>
           <span className="mb-1 flex items-center gap-1 text-sm font-medium text-emerald-600">
             <TrendingUp className="h-3 w-3" /> +3.2%
           </span>
@@ -115,6 +123,10 @@ export default function MarketPreview() {
                   color: "#1e293b",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                 }}
+                formatter={(value, name) => [
+                  name === "price" ? money(value) : Number(value).toLocaleString(),
+                  name === "price" ? "Price" : "Volume",
+                ]}
               />
               <Area
                 type="monotone"
@@ -161,7 +173,7 @@ export default function MarketPreview() {
                   {asset.registry}
                 </td>
                 <td className="py-3 text-right font-mono text-sm font-semibold text-slate-800">
-                  ${asset.price.toFixed(2)}
+                  {money(asset.price)}
                 </td>
                 <td className="py-3 text-right">
                   <span
