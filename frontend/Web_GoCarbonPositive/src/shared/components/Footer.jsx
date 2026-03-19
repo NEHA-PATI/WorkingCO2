@@ -91,7 +91,7 @@ const Footer = () => {
 
           {/* CENTER: Copyright */}
           <div className="footer__copyright">
-            © 2025 GoCarbon Positive | All rights reserved.
+            © 2026 Debadarsan Consulting Private Limited. All rights reserved.
           </div>
 
           {/* RIGHT: Legal Links */}
