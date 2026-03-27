@@ -86,6 +86,12 @@ export const USER_ORG_MENU = {
       iconKey: "carbon_footprint",
       color: "#16a34a",
     },
+    {
+      label: "Marketplace",
+      path: "/marketplace",
+      iconKey: "marketplace",
+      color: "#ff9225",
+    },
     { label: "Community", path: "/community", iconKey: "users", color: "#28a745" },
     { label: "Blog", path: "/blog", iconKey: "blog", color: "#ff5722" },
     {
@@ -117,15 +123,17 @@ export const USER_ORG_MENU = {
       iconKey: "dashboard",
       color: "#2e7d32",
     },
-    { label: "Users Management", 
-      path: "/admin/users", 
-      iconKey: "users", 
-      color: "#6b1258" 
+    {
+      label: "Users Management",
+      path: "/admin/users",
+      iconKey: "users",
+      color: "#6b1258"
     },
-      { label: "Asset Management", 
-      path: "/admin/asset-management", 
-      iconKey: "users", 
-      color: "#3b82f6" 
+    {
+      label: "Asset Management",
+      path: "/admin/asset-management",
+      iconKey: "users",
+      color: "#3b82f6"
     },
     {
       label: "Support Management",

@@ -140,8 +140,8 @@ export default function ArenaRewardsPage() {
     const pointsLabel = myPointsQuery.isLoading
         ? 'Loading points...'
         : myPointsQuery.isError
-          ? 'Points unavailable'
-          : `${myPoints.toLocaleString()} available points`;
+            ? 'Points unavailable'
+            : `${myPoints.toLocaleString()} available points`;
 
     const pageLabel = useMemo(() => {
         const start = (page - 1) * PAGE_SIZE + 1;
@@ -307,7 +307,7 @@ export default function ArenaRewardsPage() {
                                                 {rewardPoints.toLocaleString()} pts
                                             </span>
                                         </div>
-                                       
+
                                         <button
                                             type="button"
                                             disabled={!canRedeem}

@@ -28,6 +28,7 @@ const app = express();
  * GLOBAL MIDDLEWARE
  * ========================================
  */
+app.set("trust proxy", 1);
 
 // Security headers & CORS
 app.use(configureHelmet());
