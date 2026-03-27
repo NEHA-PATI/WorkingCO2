@@ -10,6 +10,15 @@ const corsOptions = {
     // allow non-browser tools (Thunder, Postman)
     if (!origin) return callback(null, true);
 
+    const normalizedOrigin = origin.replace(/\/+$/, "");
+    const allowedOrigins = Array.isArray(config.cors?.origins)
+      ? config.cors.origins.map((value) => value.replace(/\/+$/, ""))
+      : [];
+
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
     // allow all localhost ports (3000, 3001, etc.)
     if (
       origin.startsWith("http://localhost") ||

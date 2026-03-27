@@ -224,83 +224,83 @@ const Wallet = () => {
     setPage("create");
   };
 
- const handleCreateWallet = async () => {
-  try {
-    setShowLoader(true);
+  const handleCreateWallet = async () => {
+    try {
+      setShowLoader(true);
 
-    const web3auth = web3authRef.current;
-    if (!web3auth) {
-      throw new Error("Wallet provider not ready. Please try again.");
-    }
-
-    // Force fresh account selection so another login can map to its own Web3Auth identity.
-    if (web3auth.connected || web3auth.cachedConnector) {
-      try {
-        await web3auth.logout({ cleanup: true });
-      } catch {
-        // Ignore logout cleanup errors and continue with fresh connect attempt.
+      const web3auth = web3authRef.current;
+      if (!web3auth) {
+        throw new Error("Wallet provider not ready. Please try again.");
       }
-    }
 
-    const provider = await web3auth.connect();
-    providerRef.current = provider;
-
-    const ethersProvider = new ethers.BrowserProvider(provider);
-    const signer = await ethersProvider.getSigner();
-
-    const walletAddress = await signer.getAddress();
-
-    // 🔹 STEP 1: Get nonce from backend
-    const nonceRes = await fetch(
-      `http://localhost:5050/wallet/nonce?address=${walletAddress}`
-    );
-    const { nonce } = await nonceRes.json();
-
-    // 🔹 STEP 2: Sign nonce
-    const signature = await signer.signMessage(nonce);
-
-    // 🔹 STEP 3: Get idToken
-    const identity = await web3auth.getIdentityToken();
-    const idToken =
-      identity?.idToken ||
-      web3auth.provider?.idToken ||
-      null;
-
-    if (!idToken) {
-      throw new Error("Unable to get Web3Auth idToken");
-    }
-
-    // 🔹 STEP 4: Register in backend
-    const registerRes = await fetch(
-      "http://localhost:5050/wallet/register",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          idToken,
-          walletAddress,
-          signature,
-          nonce,
-        }),
+      // Force fresh account selection so another login can map to its own Web3Auth identity.
+      if (web3auth.connected || web3auth.cachedConnector) {
+        try {
+          await web3auth.logout({ cleanup: true });
+        } catch {
+          // Ignore logout cleanup errors and continue with fresh connect attempt.
+        }
       }
-    );
 
-    const data = await registerRes.json();
+      const provider = await web3auth.connect();
+      providerRef.current = provider;
 
-    if (!registerRes.ok) throw new Error(data.message);
+      const ethersProvider = new ethers.BrowserProvider(provider);
+      const signer = await ethersProvider.getSigner();
 
-    localStorage.setItem("walletToken", data.token);
+      const walletAddress = await signer.getAddress();
 
-    setShowLoader(false);
-    setPage("success");
+      // 🔹 STEP 1: Get nonce from backend
+      const nonceRes = await fetch(
+        `http://localhost:5050/wallet/nonce?address=${walletAddress}`
+      );
+      const { nonce } = await nonceRes.json();
 
-  } catch (error) {
-    setShowLoader(false);
-    showToast(error.message, "error");
-  }
-};
+      // 🔹 STEP 2: Sign nonce
+      const signature = await signer.signMessage(nonce);
+
+      // 🔹 STEP 3: Get idToken
+      const identity = await web3auth.getIdentityToken();
+      const idToken =
+        identity?.idToken ||
+        web3auth.provider?.idToken ||
+        null;
+
+      if (!idToken) {
+        throw new Error("Unable to get Web3Auth idToken");
+      }
+
+      // 🔹 STEP 4: Register in backend
+      const registerRes = await fetch(
+        "http://localhost:5050/wallet/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            idToken,
+            walletAddress,
+            signature,
+            nonce,
+          }),
+        }
+      );
+
+      const data = await registerRes.json();
+
+      if (!registerRes.ok) throw new Error(data.message);
+
+      localStorage.setItem("walletToken", data.token);
+
+      setShowLoader(false);
+      setPage("success");
+
+    } catch (error) {
+      setShowLoader(false);
+      showToast(error.message, "error");
+    }
+  };
 
   const handleOpenWallet = () => {
     setPage("dashboard");

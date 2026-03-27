@@ -256,44 +256,121 @@
 .hp-rewards-section .hp-section-title.hp-rewards-title {
   margin-top: 2px;
   margin-bottom: 12px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  color: #16a34a;
+}
+
+.hp-rewards-section .hp-section-sub {
+  color: #5b6b7f;
 }
 
 /* ===== REWARDS ===== */
 .hp-rewards-section {
-  background: #fff;
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #f5fbf6 45%, #ffffff 100%);
   padding-top: 54px;
+  overflow: hidden;
+}
+
+.hp-rewards-section::before,
+.hp-rewards-section::after {
+  content: "";
+  position: absolute;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  z-index: 0;
+}
+
+.hp-rewards-section::before {
+  top: -180px;
+  left: -120px;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.45), transparent 65%);
+}
+
+.hp-rewards-section::after {
+  bottom: -180px;
+  right: -120px;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.35), transparent 70%);
 }
 
 .hp-rewards-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  gap: 26px;
+  position: relative;
+  z-index: 1;
 }
 
 .hp-reward-card {
-  border: 1.5px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 32px 24px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 20px;
+  padding: 34px 26px;
   text-align: center;
-  transition: box-shadow 0.2s;
+  background: #ffffff;
+  box-shadow:
+    0 16px 28px rgba(15, 23, 42, 0.08),
+    0 4px 10px rgba(15, 23, 42, 0.05);
+  position: relative;
+  overflow: hidden;
+  transform: translateY(0);
+  transition: transform 0.32s ease, box-shadow 0.32s ease, border-color 0.32s ease;
+}
+
+.hp-reward-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .hp-reward-card:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+  transform: translateY(-6px);
+  border-color: rgba(34, 197, 94, 0.45);
+  box-shadow:
+    0 24px 44px rgba(15, 23, 42, 0.16),
+    0 12px 22px rgba(34, 197, 94, 0.18);
+}
+
+.hp-reward-card:hover::after {
+  opacity: 1;
+}
+
+.hp-reward-card-animated {
+  opacity: 0;
+  animation: hp-reward-fade 0.7s ease forwards;
 }
 
 .hp-reward-icon-wrap {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 20px;
+  margin: 0 auto 18px;
+  background: transparent;
+  box-shadow: none;
+  transition: transform 0.3s ease;
+  position: relative;
 }
 
 .hp-reward-icon {
-  font-size: 24px;
+  font-size: 28px;
+  color: #16a34a;
+  filter: drop-shadow(0 8px 12px rgba(22, 163, 74, 0.25));
+  animation: hp-float 4.5s ease-in-out infinite;
+}
+
+.hp-reward-card:hover .hp-reward-icon-wrap {
+  transform: translateY(-2px) scale(1.05);
 }
 
 .hp-reward-title {
@@ -304,21 +381,42 @@
 
 .hp-reward-desc {
   font-size: 13px;
-  color: #666;
-  margin: 0 0 20px;
+  color: #516073;
+  margin: 0;
   line-height: 1.5;
 }
 
-.hp-coins-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #f0fdf4;
-  color: #16a34a;
-  border-radius: 50px;
-  padding: 8px 18px;
-  font-size: 14px;
-  font-weight: 600;
+@keyframes hp-reward-fade {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hp-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.hp-reward-card:nth-child(2) .hp-reward-icon {
+  animation-delay: 0.4s;
+}
+
+.hp-reward-card:nth-child(3) .hp-reward-icon {
+  animation-delay: 0.8s;
+}
+
+.hp-reward-card:nth-child(4) .hp-reward-icon {
+  animation-delay: 1.2s;
 }
 
 .hp-org-solutions-carousel {
@@ -1012,11 +1110,6 @@
   .hp-reward-desc {
     font-size: 12px;
     margin-bottom: 12px;
-  }
-
-  .hp-coins-badge {
-    padding: 6px 12px;
-    font-size: 12px;
   }
 
   .hp-service-card {

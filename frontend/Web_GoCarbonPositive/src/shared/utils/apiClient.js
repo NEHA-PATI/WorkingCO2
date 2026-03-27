@@ -6,8 +6,12 @@ import { ENV } from "@config/env";
 const API_CONFIG = {
   // Asset Service (port 5000)
   ASSET_API:
-    (import.meta.env.VITE_ASSET_SERVICE_URL || "http://localhost:5000") +
-    "/api/v1",
+    (
+      import.meta.env.VITE_ASSET_SERVICE_URL ||
+      (import.meta.env.PROD
+        ? "https://asset-service2026.onrender.com"
+        : "http://localhost:5000")
+    ) + "/api/v1",
 
   // Auth Service (port 5002)
   AUTH_API: import.meta.env.VITE_AUTH_API || "http://localhost:5002",
@@ -150,7 +154,7 @@ export const careerApiClient = createApiClient(
 
 // Blog Service (port 4000)
 export const blogApiClient = createApiClient(
-  import.meta.env.VITE_BLOG_API_URL || "http://localhost:4000/api/blog",
+  ENV.BLOG_API_URL,
   "Blog Service",
 );
 
