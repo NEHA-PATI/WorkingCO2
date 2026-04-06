@@ -32,8 +32,8 @@ import Blog from "@features/blog/pages/blog";
 import BlogDetailPage from "@features/blog/pages/blog-detail";
 import Careers from "@features/careers/pages/Careers";
 import MyCarbonFootprint from "@features/calculator/pages/MyCarbonFootprint";
-import MarketplacePage from "@features/marketplace/pages/MarketplacePage";
-import ListingDetailPage from "@features/marketplace/pages/ListingDetailPage";
+import MarketplacePage from "@features/marketplace1/pages/MarketplacePage";
+import ListingDetailPage from "@features/marketplace1/pages/ListingDetailPage";
 
 import ViewAssets from "@shared/pages/ViewAssets";
 import WalletPage from "@shared/pages/wallet";
@@ -134,6 +134,46 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/marketplace"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace/login"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace/logout"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace/signup/*"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace1"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace1/login"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace1/logout"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace1/signup/*"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace/listing/:listingId"
+        element={<ListingDetailPage />}
+      />
+      <Route
+        path="/marketplace1/listing/:listingId"
+        element={<ListingDetailPage />}
+      />
 
       <Route element={<BaseLayout />}>
         <Route path="/" element={<Home />} />
@@ -157,22 +197,6 @@ const AppRoutes = () => {
         <Route path="/industrial" element={<IndustrialSolutions />} />
         <Route path="/faq" element={<Faq />} />
 
-        <Route
-          path="/marketplace"
-          element={
-            <ProtectedRoute allowedRoles={["user", "organization", "admin"]}>
-              <MarketplacePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/marketplace/listing/:listingId"
-          element={
-            <ProtectedRoute allowedRoles={["user", "organization", "admin"]}>
-              <ListingDetailPage />
-            </ProtectedRoute>
-          }
-        />
         <Route
           path="/upload"
           element={
