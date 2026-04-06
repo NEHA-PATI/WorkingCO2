@@ -572,6 +572,8 @@ const getRewardRedeemAdminItems = async (limit = 100, offset = 0) => {
       rr.points_used,
       rr.redeemed_at,
       rr.status,
+      rr.is_completed,
+      rr.completed_at,
       rr.metadata,
       rc.name AS reward_name
     FROM reward_redeem rr
@@ -581,6 +583,28 @@ const getRewardRedeemAdminItems = async (limit = 100, offset = 0) => {
   `, [limit, offset]);
 
   return rows;
+};
+
+const updateRewardRedeemCompletion = async (id, is_completed = true) => {
+  const { rows } = await pool.query(`
+    UPDATE reward_redeem
+    SET
+      is_completed = $1::boolean,
+      completed_at = CASE WHEN $1::boolean = TRUE THEN NOW() ELSE NULL END
+    WHERE id = $2
+    RETURNING
+      id,
+      u_id,
+      reward_id,
+      points_used,
+      redeemed_at,
+      status,
+      is_completed,
+      completed_at,
+      metadata
+  `, [Boolean(is_completed), id]);
+
+  return rows[0] || null;
 };
 
 const getRewardRedeemAdminCount = async () => {
@@ -668,6 +692,94 @@ const deleteRewardCatalogItem = async (reward_id) => {
   return rows[0] || null;
 };
 
+const getUserRedeemDetails = async (u_id) => {
+  const base = {
+    u_id,
+    name: u_id,
+    email: null,
+    contact_number: null,
+    address_line: null,
+    city: null,
+    state: null,
+    country: null,
+    pincode: null
+  };
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        u_id,
+        COALESCE(NULLIF(TRIM(username), ''), u_id) AS name,
+        email
+      FROM users
+      WHERE u_id = $1
+      LIMIT 1
+    `, [u_id]);
+
+    if (rows[0]) {
+      base.name = rows[0].name || base.name;
+      base.email = rows[0].email || null;
+    }
+  } catch (error) {
+    if (!(error?.code === '42P01' || error?.code === '42703')) {
+      throw error;
+    }
+  }
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        first_name,
+        middle_name,
+        last_name,
+        mobile_number
+      FROM user_profile
+      WHERE u_id = $1
+      LIMIT 1
+    `, [u_id]);
+
+    if (rows[0]) {
+      const fullName = [rows[0].first_name, rows[0].middle_name, rows[0].last_name]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+
+      if (fullName) {
+        base.name = fullName;
+      }
+      base.contact_number = rows[0].mobile_number || null;
+    }
+  } catch (error) {
+    if (!(error?.code === '42P01' || error?.code === '42703')) {
+      throw error;
+    }
+  }
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT address_line, city, state, country, pincode
+      FROM user_address
+      WHERE u_id = $1
+      ORDER BY is_default DESC, address_id ASC
+      LIMIT 1
+    `, [u_id]);
+
+    if (rows[0]) {
+      base.address_line = rows[0].address_line || null;
+      base.city = rows[0].city || null;
+      base.state = rows[0].state || null;
+      base.country = rows[0].country || null;
+      base.pincode = rows[0].pincode || null;
+    }
+  } catch (error) {
+    if (!(error?.code === '42P01' || error?.code === '42703')) {
+      throw error;
+    }
+  }
+
+  return base;
+};
+
 const redeemReward = async ({
   u_id,
   reward_id,
@@ -728,7 +840,7 @@ const redeemReward = async ({
       RETURNING total_points
     `, [u_id, safePoints]);
 
-    await client.query(`
+    const redeemInsert = await client.query(`
       INSERT INTO reward_redeem (
         u_id,
         reward_id,
@@ -738,11 +850,14 @@ const redeemReward = async ({
         metadata
       )
       VALUES ($1, $2, $3, NOW(), 'SUCCESS', $4::jsonb)
+      RETURNING id, redeemed_at
     `, [u_id, reward_id, safePoints, metadata ? JSON.stringify(metadata) : null]);
 
     return {
       redeemed: true,
-      current_points: Number(updateResult.rows[0]?.total_points || 0)
+      current_points: Number(updateResult.rows[0]?.total_points || 0),
+      redeem_id: redeemInsert.rows[0]?.id || null,
+      redeemed_at: redeemInsert.rows[0]?.redeemed_at || null
     };
   });
 };
@@ -836,9 +951,11 @@ module.exports = {
   getRewardCatalogAdminCount,
   getRewardRedeemAdminItems,
   getRewardRedeemAdminCount,
+  updateRewardRedeemCompletion,
   createRewardCatalogItem,
   updateRewardCatalogItem,
   deleteRewardCatalogItem,
+  getUserRedeemDetails,
   redeemReward,
   getContestStats,
   createRule,

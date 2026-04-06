@@ -1,15 +1,144 @@
 "use client";
 
 import { useState } from "react";
+import {
+  FaRecycle,
+  FaCogs,
+  FaSolarPanel,
+  FaTint,
+  FaRobot,
+  FaSyncAlt,
+  FaTruck,
+  FaClipboardCheck,
+  FaArrowRight,
+  FaPhone,
+  FaCheckCircle,
+  FaLeaf,
+} from "react-icons/fa";
 import "@features/user/styles/Industrial.css";
 import { useNavigate } from "react-router-dom";
 
+const cards = [
+  {
+    icon: <FaRecycle />,
+    tag: "Compliance-Ready",
+    title: "E-Waste Management",
+    subtitle: "Responsible Electronics Lifecycle",
+    desc: "End-to-end certified e-waste collection, data destruction, and material recovery services ensuring zero landfill.",
+    points: [
+      "Certified ITAD & data destruction",
+      "Material recovery & refurbishment",
+      "Compliance with E-Waste Rules 2022",
+      "Chain-of-custody audit reports",
+    ],
+    tagColor: "#2e7d5e",
+  },
+  {
+    icon: <FaCogs />,
+    tag: "High Impact",
+    title: "Steel & Metal",
+    subtitle: "Advanced Metallurgical Solutions",
+    desc: "Advanced steel manufacturing and metal processing solutions for structural and industrial applications.",
+    points: [
+      "Custom alloy & grade sourcing",
+      "Carbon footprint per heat/batch",
+      "Scrap optimization & recycled content",
+      "CBAM readiness for steel exports",
+    ],
+    tagColor: "#7c3aed",
+  },
+  {
+    icon: <FaSolarPanel />,
+    tag: "Net-Zero Enabler",
+    title: "Renewable Energy",
+    subtitle: "Clean Power Integration",
+    desc: "Solar, wind, and renewable energy integration systems for sustainable power solutions across industrial facilities.",
+    points: [
+      "On-site solar & wind feasibility",
+      "REC & green tariff management",
+      "Grid stability & storage planning",
+      "RE100 procurement support",
+    ],
+    tagColor: "#d97706",
+  },
+  {
+    icon: <FaTint />,
+    tag: "Resource Efficiency",
+    title: "Water Treatment",
+    subtitle: "Industrial Water Stewardship",
+    desc: "Industrial water purification and recycling technologies to achieve zero liquid discharge targets.",
+    points: [
+      "Zero Liquid Discharge (ZLD) systems",
+      "Effluent treatment & reuse",
+      "Water footprint accounting",
+      "Regulatory discharge compliance",
+    ],
+    tagColor: "#0369a1",
+  },
+  {
+    icon: <FaRobot />,
+    tag: "Industry 4.0",
+    title: "Smart Manufacturing",
+    subtitle: "AI-Powered Factory Intelligence",
+    desc: "IoT-enabled smart factory solutions with AI-powered optimization and real-time analytics via digital twin technology.",
+    points: [
+      "IoT sensor integration & SCADA",
+      "AI-driven energy optimization",
+      "Digital twin for process simulation",
+      "OEE & carbon KPI dashboards",
+    ],
+    tagColor: "#db2777",
+  },
+  {
+    icon: <FaSyncAlt />,
+    tag: "Waste Elimination",
+    title: "Circular Economy",
+    subtitle: "Zero-Waste Business Models",
+    desc: "Zero-waste solutions and material recycling programs. Map material flows and design take-back programs.",
+    points: [
+      "Material flow analysis & mapping",
+      "Industrial symbiosis matching",
+      "EPR compliance & take-back programs",
+      "Circularity KPI reporting",
+    ],
+    tagColor: "#059669",
+  },
+  {
+    icon: <FaTruck />,
+    tag: "Supply Chain",
+    title: "Green Logistics",
+    subtitle: "Low-Carbon Supply Chain",
+    desc: "Decarbonize your freight and logistics operations with shipment-level carbon tracking and fleet electrification.",
+    points: [
+      "GLEC-standard freight carbon accounting",
+      "EV fleet transition modeling",
+      "Green lane certification",
+      "Shipper ESG reporting packs",
+    ],
+    tagColor: "#0891b2",
+  },
+  {
+    icon: <FaClipboardCheck />,
+    tag: "Regulatory",
+    title: "ESG & Compliance",
+    subtitle: "Regulatory Reporting Automation",
+    desc: "Stay ahead of BRSR, SEBI ESG, GRI, TCFD, CBAM, and CSRD with automated data collection and audit-ready packages.",
+    points: [
+      "BRSR Core & SEBI ESG reporting",
+      "CBAM carbon cost exposure analysis",
+      "GRI / TCFD disclosure automation",
+      "Third-party assurance readiness",
+    ],
+    tagColor: "#b45309",
+  },
+];
+
 const IndustrialSolutions = () => {
+  const [hoveredCard, setHoveredCard] = useState(null);
   const [selectedIndustry, setSelectedIndustry] = useState(null);
   const [demoIndustry, setDemoIndustry] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  const [isExpanded, setIsExpanded] = useState(false); // NEW
   const [formData, setFormData] = useState({
     industry_name: "",
     industry_size_range: "",
@@ -22,15 +151,14 @@ const IndustrialSolutions = () => {
 
   const openDemoForm = (industryName) => {
     setDemoIndustry(industryName);
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       industry_name: industryName,
-    });
+    }));
   };
 
   const closeDemoForm = () => {
     setDemoIndustry(null);
-    setIsExpanded(false); // RESET
     setFormData({
       industry_name: "",
       industry_size_range: "",
@@ -43,10 +171,10 @@ const IndustrialSolutions = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
   const handleFormSubmit = async (e) => {
@@ -79,174 +207,111 @@ const IndustrialSolutions = () => {
     }
   };
 
-
-  const industries = [
-    {
-      id: 1,
-      name: "Steel & Metal",
-      logo: "⚙️",
-      color: "card-blue",
-      description:
-        "Advanced steel manufacturing and metal processing solutions for structural and industrial applications.",
-      details:
-        "Our steel and metal solutions provide cutting-edge technology for manufacturing, processing, and refinement. We deliver sustainable practices with zero-waste production methods, ensuring maximum efficiency and minimal environmental impact. Perfect for construction, automotive, and heavy machinery industries.",
-      timestamp: "Updated: Jan 2024",
-      features: [
-        "High-grade steel production",
-        "Advanced metallurgy",
-        "Eco-friendly processing",
-        "Quality assurance",
-      ],
-    },
-    {
-      id: 2,
-      name: "Renewable Energy",
-      logo: "☀️",
-      color: "card-green",
-      description:
-        "Solar, wind, and renewable energy integration systems for sustainable power solutions.",
-      details:
-        "Transform your energy infrastructure with our renewable solutions. We specialize in solar panel installation, wind turbine integration, and energy storage systems. Our platform reduces carbon footprint by up to 80% while optimizing energy efficiency across operations.",
-      timestamp: "Updated: Feb 2024",
-      features: [
-        "Solar integration",
-        "Wind energy systems",
-        "Battery storage",
-        "Grid optimization",
-      ],
-    },
-    {
-      id: 3,
-      name: "Water Treatment",
-      logo: "💧",
-      color: "card-cyan",
-      description:
-        "Industrial water purification and recycling technologies for sustainable resource management.",
-      details:
-        "Our water treatment solutions combine advanced filtration, purification, and recycling technologies. We help industries reduce water consumption by 60% while ensuring compliance with international environmental standards.",
-      timestamp: "Updated: Jan 2024",
-      features: [
-        "Advanced filtration",
-        "Wastewater recycling",
-        "Quality monitoring",
-        "Compliance ready",
-      ],
-    },
-    {
-      id: 4,
-      name: "Carbon Capture",
-      logo: "🌍",
-      color: "card-teal",
-      description:
-        "Cutting-edge carbon capture and offset solutions for climate-neutral operations.",
-      details:
-        "Achieve net-zero emissions with our comprehensive carbon capture technology. We remove atmospheric CO2 and permanently store it, helping your company become carbon positive while generating ESG credits.",
-      timestamp: "Updated: Feb 2024",
-      features: [
-        "CO2 capture",
-        "Permanent storage",
-        "ESG reporting",
-        "Compliance support",
-      ],
-    },
-    {
-      id: 5,
-      name: "Smart Manufacturing",
-      logo: "🤖",
-      color: "card-indigo",
-      description:
-        "IoT-enabled smart factory solutions with AI-powered optimization and real-time analytics.",
-      details:
-        "Industry 4.0 ready manufacturing with IoT sensors, AI analytics, and predictive maintenance. Reduce downtime by 45%, increase productivity by 35%, and gain real-time visibility into your entire operation.",
-      timestamp: "Updated: Mar 2024",
-      features: [
-        "IoT integration",
-        "AI analytics",
-        "Predictive maintenance",
-        "Real-time monitoring",
-      ],
-    },
-    {
-      id: 6,
-      name: "Circular Economy",
-      logo: "♻️",
-      color: "card-lime",
-      description:
-        "Zero-waste solutions and material recycling programs for sustainable business models.",
-      details:
-        "Transform your business model with circular economy principles. We help you design zero-waste processes, implement material recycling programs, and create value from waste streams.",
-      timestamp: "Updated: Feb 2024",
-      features: [
-        "Waste reduction",
-        "Material recycling",
-        "Supply chain optimization",
-        "Sustainability tracking",
-      ],
-    },
-  ];
+  const scrollToSolutions = () => {
+    const section = document.getElementById("is-solutions");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   return (
-    <div className="industrial-container">
-      {/* Header Section */}
-      <header className="header">
-        <div className="header-top">
-          <button className="contact-btn" onClick={() => navigate("/contact")}>
-            CONTACT US
-          </button>
+    <div className="is-root">
+      <section className="is-hero">
+        <div className="is-hero-bg">
+          <img
+            className="is-hero-image"
+            src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=1800&q=80"
+            alt="Modern industrial sustainability solutions"
+          />
+          <div className="is-hero-overlay"></div>
         </div>
 
-        <div className="hero-section">
-          <div className="hero-content">
-            {/* <div className="hero-number">01</div> */}
-            <h2 className="hero-title">
-              WE BUILD A SUSTAINABLE
-              <br />
-              <span className="hero-title-center">FUTURE</span>
-            </h2>
-            <p className="hero-subtitle">
-              Industrial solutions that transform your business while protecting
-              our planet
-            </p>
-            <button className="explore-btn">START EXPLORING</button>
+        <div className="is-hero-content">
+          <div className="is-hero-badge">
+            <span className="is-badge-dot"></span>
+            Industry-Specific Carbon Solutions
           </div>
-          <div className="hero-image-placeholder">
-            <div className="image-box">💼</div>
+          <h1 className="is-hero-title">
+            Engineering <span className="is-hero-green">Clean Industry</span> for Lasting Impact
+          </h1>
+          <p className="is-hero-desc">
+            Industrial solutions that transform your business while protecting our
+            planet - tailored to your sector&apos;s specific regulations,
+            operations, and ESG demands.
+          </p>
+          <div className="is-hero-actions">
+            <button className="is-btn-primary" onClick={scrollToSolutions}>
+              START EXPLORING <FaArrowRight />
+            </button>
+            <button className="is-btn-ghost" onClick={() => navigate("/contact")}>
+              <FaPhone /> Contact Us
+            </button>
           </div>
         </div>
-      </header>
 
-      {/* Solutions Section */}
-      <section id="solutions" className="solutions-section">
-        <div className="solutions-header">
-          <h2 className="section-title">Our Industrial Solutions</h2>
-          <p className="section-subtitle">
-            Comprehensive sustainability-focused solutions across industries
+      </section>
+
+      <section className="is-cards-section" id="is-solutions">
+        <div className="is-cards-header">
+          <div className="is-section-badge">
+            <FaLeaf /> Our Solutions
+          </div>
+          <h2 className="is-cards-title">Industry-Specific Carbon Solutions</h2>
+          <p className="is-cards-subtitle">
+            Tailored sustainability solutions across 8+ industrial verticals
           </p>
         </div>
-
-        <div className="cards-grid">
-          {industries.map((industry) => (
+        <div className="is-cards-grid">
+          {cards.map((card, i) => (
             <div
-              key={industry.id}
-              className={`industry-card ${industry.color}`}
+              className={`is-card ${hoveredCard === i ? "is-card-hovered" : ""}`}
+              key={i}
+              onMouseEnter={() => setHoveredCard(i)}
+              onMouseLeave={() => setHoveredCard(null)}
+              style={{ "--tag-color": card.tagColor }}
             >
-              <div className="ribbon">{industry.timestamp}</div>
-              <div className="card-logo">{industry.logo}</div>
-              <h3 className="card-title">{industry.name}</h3>
-              <p className="card-description">{industry.description}</p>
-              <div className="card-actions">
-                <button
-                  className="btn-read-more"
-                  onClick={() => {
-                    setSelectedIndustry(industry);
-                    setIsExpanded(true);
+              <div className="is-card-top">
+                <div
+                  className="is-card-icon-wrap"
+                  style={{ background: `${card.tagColor}18` }}
+                >
+                  <span style={{ color: card.tagColor }}>{card.icon}</span>
+                </div>
+                <span
+                  className="is-card-tag"
+                  style={{
+                    color: card.tagColor,
+                    borderColor: `${card.tagColor}44`,
+                    background: `${card.tagColor}12`,
                   }}
+                >
+                  {card.tag}
+                </span>
+              </div>
+              <h3 className="is-card-title">{card.title}</h3>
+              <p className="is-card-subtitle" style={{ color: card.tagColor }}>
+                {card.subtitle}
+              </p>
+              <p className="is-card-desc">{card.desc}</p>
+              <ul className="is-card-points">
+                {card.points.map((p, j) => (
+                  <li key={j}>
+                    <FaCheckCircle style={{ color: card.tagColor }} /> {p}
+                  </li>
+                ))}
+              </ul>
+              <div className="is-card-actions">
+                <button
+                  className="is-card-btn-primary"
+                  type="button"
+                  onClick={() => setSelectedIndustry(card)}
                 >
                   Read More
                 </button>
                 <button
-                  className="btn-demo"
-                  onClick={() => openDemoForm(industry.name)}
+                  className="is-card-btn-outline"
+                  type="button"
+                  onClick={() => openDemoForm(card.title)}
                 >
                   Book a Demo
                 </button>
@@ -256,53 +321,69 @@ const IndustrialSolutions = () => {
         </div>
       </section>
 
-      {/* Toast Notification */}
+      <section className="is-cta-section">
+        <h2 className="is-cta-title">
+          Let&apos;s Build Your Industry-Specific
+          <span className="is-cta-highlight">Carbon Roadmap</span>
+        </h2>
+        <p className="is-cta-desc">
+          Get a tailored demo scoped to your sector&apos;s regulations, data
+          sources, and reduction opportunities - not a generic product tour.
+        </p>
+        <div className="is-cta-actions">
+          <button
+            className="is-cta-btn-primary"
+            type="button"
+            onClick={() => openDemoForm("Sector Specialist Demo")}
+          >
+            Request a Sector Demo <FaArrowRight />
+          </button>
+        </div>
+      </section>
+
       {showToast && (
-        <div className="toast-notification">
-          <div className="toast-content">✓ {toastMessage}</div>
+        <div className="is-toast-notification">
+          <div className="is-toast-content">OK {toastMessage}</div>
         </div>
       )}
 
-      {/* Demo Form Modal */}
       {demoIndustry && (
-        <div className="modal-overlay" onClick={closeDemoForm}>
+        <div className="is-modal-overlay" onClick={closeDemoForm}>
           <div
-            className="modal-content demo-modal"
+            className="is-modal-content is-demo-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <button className="close-btn" onClick={closeDemoForm}>
-              ✕
+            <button className="is-close-btn" onClick={closeDemoForm}>
+              x
             </button>
 
-            <div className="demo-modal-header">
-              <h2 className="demo-modal-title">Book a Demo</h2>
-              <p className="demo-modal-subtitle">
+            <div className="is-demo-modal-header">
+              <h2 className="is-demo-modal-title">Book a Demo</h2>
+              <p className="is-demo-modal-subtitle">
                 Get started with {demoIndustry}
               </p>
             </div>
 
-            <form className="demo-form" onSubmit={handleFormSubmit}>
-              {/* Industry Name - Pre-filled */}
-              <div className="form-group">
-                <label className="form-label">Industry</label>
+            <form className="is-demo-form" onSubmit={handleFormSubmit}>
+              <div className="is-form-group">
+                <label className="is-form-label">Industry</label>
                 <input
                   type="text"
                   value={formData.industry_name}
                   disabled
-                  className="form-input disabled"
+                  className="is-form-input is-disabled"
                 />
               </div>
 
-              {/* Industry Size Range */}
-              <div className="form-group">
-                <label className="form-label">
-                  Company Size <span className="required">*</span>
+              <div className="is-form-group">
+                <label className="is-form-label">
+                  Company Size <span className="is-required">*</span>
                 </label>
                 <select
                   name="industry_size_range"
                   value={formData.industry_size_range}
                   onChange={handleFormChange}
-                  className="form-select"
+                  className="is-form-select"
                   required
                 >
                   <option value="">Select company size</option>
@@ -314,16 +395,15 @@ const IndustrialSolutions = () => {
                 </select>
               </div>
 
-              {/* Industry Revenue Range */}
-              <div className="form-group">
-                <label className="form-label">
-                  Annual Revenue <span className="required">*</span>
+              <div className="is-form-group">
+                <label className="is-form-label">
+                  Annual Revenue <span className="is-required">*</span>
                 </label>
                 <select
                   name="industry_revenue_range"
                   value={formData.industry_revenue_range}
                   onChange={handleFormChange}
-                  className="form-select"
+                  className="is-form-select"
                   required
                 >
                   <option value="">Select revenue range</option>
@@ -334,53 +414,46 @@ const IndustrialSolutions = () => {
                 </select>
               </div>
 
-              {/* Contact Person Name */}
-              <div className="form-group">
-                <label className="form-label">
-                  Contact Person <span className="required">*</span>
+              <div className="is-form-group">
+                <label className="is-form-label">
+                  Contact Person <span className="is-required">*</span>
                 </label>
                 <input
                   type="text"
                   name="contact_person_name"
                   value={formData.contact_person_name}
                   onChange={handleFormChange}
-                  className="form-input"
-                 
+                  className="is-form-input"
                   required
                 />
               </div>
 
-              {/* Contact Email */}
-              <div className="form-group">
-                <label className="form-label">
-                  Contact Email <span className="required">*</span>
+              <div className="is-form-group">
+                <label className="is-form-label">
+                  Contact Email <span className="is-required">*</span>
                 </label>
                 <input
                   type="email"
                   name="contact_email"
                   value={formData.contact_email}
                   onChange={handleFormChange}
-                  className="form-input"
-               
+                  className="is-form-input"
                   required
                 />
               </div>
 
-              {/* Contact Number */}
-              <div className="form-group">
-                <label className="form-label">Contact Number</label>
+              <div className="is-form-group">
+                <label className="is-form-label">Contact Number</label>
                 <input
                   type="tel"
                   name="contact_number"
                   value={formData.contact_number}
                   onChange={handleFormChange}
-                  className="form-input"
-              
+                  className="is-form-input"
                 />
               </div>
 
-              {/* Submit Button */}
-              <button type="submit" className="btn-form-submit">
+              <button type="submit" className="is-btn-form-submit">
                 Submit Request
               </button>
             </form>
@@ -388,77 +461,56 @@ const IndustrialSolutions = () => {
         </div>
       )}
 
-      {/* Detailed View Modal */}
       {selectedIndustry && (
-        <div
-          className="modal-overlay"
-          onClick={() => {
-            setSelectedIndustry(null);
-            setIsExpanded(false);
-          }}
-        >
-          <div
-            className={`modal-content ${isExpanded ? "modal-expanded" : ""}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-top-actions">
-              {/* EXISTING CLOSE */}
+        <div className="is-detail-overlay" onClick={() => setSelectedIndustry(null)}>
+          <div className="is-detail-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="is-close-btn" onClick={() => setSelectedIndustry(null)}>
+              x
+            </button>
+            <div className="is-detail-header">
+              <div
+                className="is-detail-icon"
+                style={{ background: `${selectedIndustry.tagColor}18`, color: selectedIndustry.tagColor }}
+              >
+                {selectedIndustry.icon}
+              </div>
+              <h3 className="is-detail-title">{selectedIndustry.title}</h3>
+              <p className="is-detail-subtitle" style={{ color: selectedIndustry.tagColor }}>
+                {selectedIndustry.subtitle}
+              </p>
+            </div>
+            <div className="is-detail-body">
+              <h4 className="is-detail-heading">Overview</h4>
+              <p className="is-detail-text">{selectedIndustry.desc}</p>
+              <h4 className="is-detail-heading">Key Features</h4>
+              <ul className="is-detail-features">
+                {selectedIndustry.points.map((feature, idx) => (
+                  <li key={idx}>
+                    <FaCheckCircle style={{ color: selectedIndustry.tagColor }} /> {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="is-detail-actions">
               <button
-                className="close-btn"
+                className="is-detail-primary"
                 onClick={() => {
+                  const industryName = selectedIndustry.title;
                   setSelectedIndustry(null);
-                  setIsExpanded(false);
+                  openDemoForm(industryName);
                 }}
               >
-                ✕
+                Book a Demo Now
               </button>
-            </div>
-
-            <div className="modal-header">
-              <div className="modal-logo">{selectedIndustry.logo}</div>
-              <h2 className="modal-title">{selectedIndustry.name}</h2>
-              <p className="modal-timestamp">{selectedIndustry.timestamp}</p>
-            </div>
-
-            <div className="modal-body">
-              <div className="modal-section">
-                <h3 className="modal-section-title">Overview</h3>
-                <p className="modal-text">{selectedIndustry.details}</p>
-              </div>
-
-              <div className="modal-section">
-                <h3 className="modal-section-title">Key Features</h3>
-                <ul className="features-list">
-                  {selectedIndustry.features.map((feature, idx) => (
-                    <li key={idx} className="feature-item">
-                      ✓ {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="modal-actions">
-                <button
-                  className="btn-demo-full"
-                  onClick={() => {
-                    setSelectedIndustry(null);
-                    openDemoForm(selectedIndustry.name);
-                  }}
-                >
-                  Book a Demo Now
-                </button>
-
-                <button className="btn-contact-full">Contact Sales</button>
-              </div>
+              <button className="is-detail-outline" onClick={() => navigate("/contact")}>
+                Contact Sales
+              </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Footer */}
     </div>
   );
 };
 
 export default IndustrialSolutions;
-

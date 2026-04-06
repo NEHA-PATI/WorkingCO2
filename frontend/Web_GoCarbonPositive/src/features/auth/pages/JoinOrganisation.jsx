@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from "react-router-dom";
 import { Country, State } from 'country-state-city';
 import "@features/auth/styles/JoinOrganisation.css";
 import { fireToast } from "@shared/utils/toastService";
@@ -103,6 +104,7 @@ function CustomDropdown({ label, placeholder, options, value, onChange, error, d
 }
 
 export default function JoinOrganisation() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     organizationName: '',
     organizationType: '',
@@ -362,9 +364,21 @@ export default function JoinOrganisation() {
     <div className="join-org-root">
       <header className="join-org-header">
         <div className="join-org-header-content">
-          <div>
-            <h1 className="join-org-header-title">Organization Onboarding</h1>
+          <div className="join-org-header-left">
+            <button
+              type="button"
+              className="join-org-back-btn"
+              onClick={() => navigate(-1)}
+              aria-label="Go back"
+            >
+              {"<"}
+            </button>
+            <div>
+            <h1 className="join-org-header-title join-org-header-title-link" onClick={() => navigate("/")}>
+              Organization Onboarding
+            </h1>
             <p className="join-org-header-subtitle">Submit your details to explore partnership and carbon development opportunities.</p>
+            </div>
           </div>
         </div>
       </header>
@@ -654,7 +668,6 @@ export default function JoinOrganisation() {
 
                 <div className="join-org-benefits-grid">
                   <div className="join-org-benefit-card">
-                    <div className="join-org-benefit-icon">♻️</div>
                   <h3 className="join-org-benefit-title">
   Carbon Strategy Development
 </h3>
@@ -664,7 +677,6 @@ export default function JoinOrganisation() {
                   </div>
 
                   <div className="join-org-benefit-card">
-                    <div className="join-org-benefit-icon">🌱</div>
                     <h3 className="join-org-benefit-title">
   Documentation & Compliance Guidance
 </h3>
@@ -674,7 +686,6 @@ export default function JoinOrganisation() {
                   </div>
 
                   <div className="join-org-benefit-card">
-                    <div className="join-org-benefit-icon">🌍</div>
                    <h3 className="join-org-benefit-title">
   Long-Term Sustainability Partnership
 </h3>

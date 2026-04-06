@@ -29,6 +29,7 @@ router.get('/contest-status', auth, controller.getContestStatus);
 router.get('/catalog', controller.getRewardCatalog);
 router.get('/catalog-admin', auth, controller.getRewardCatalogAdmin);
 router.get('/redeems-admin', auth, controller.getRewardRedeemsAdmin);
+router.put('/redeems-admin/:id/completion', auth, controller.updateRewardRedeemCompletion);
 router.post('/catalog-admin', auth, controller.createRewardCatalogItem);
 router.put('/catalog-admin/:reward_id', auth, controller.updateRewardCatalogItem);
 router.delete('/catalog-admin/:reward_id', auth, controller.deleteRewardCatalogItem);

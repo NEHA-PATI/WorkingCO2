@@ -44,6 +44,8 @@ export default function Navbar() {
   const navOpenTimerRef = useRef(null);
   const navCloseTimerRef = useRef(null);
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const isOrganisationExperienceRoute =
+    location.pathname === "/experience/organisation";
   const showHamburger = !isAdminRoute;
   const normalizedRole = (role || "").toLowerCase();
   const menuRole = isAuthenticated ? normalizedRole || "guest" : "guest";
@@ -117,6 +119,14 @@ export default function Navbar() {
   const caseStudiesItem = toNavItem(getMenuItem("Case Studies"));
   const careersItem = toNavItem(getMenuItem("Careers"));
   const marketplaceRootItem = toNavItem(getMenuItem("Marketplace"));
+  const internshipItem = careersItem
+    ? {
+        label: "Internship",
+        path: "/careers/internship",
+        action: null,
+        isChild: true,
+      }
+    : null;
 
   const enterpriseItems = [
     addAssetItem,
@@ -146,6 +156,7 @@ export default function Navbar() {
     contactItem,
     caseStudiesItem,
     careersItem,
+    internshipItem,
   ].filter(Boolean);
 
   const canUseMarketplace =
@@ -447,10 +458,14 @@ export default function Navbar() {
                         <button
                           key={`${section.key}-${item.label}`}
                           type="button"
-                          className={`tf-nav-dropdown-item tf-nav-dropdown-item--${section.key}`}
+                          className={`tf-nav-dropdown-item tf-nav-dropdown-item--${section.key} ${
+                            item.isChild ? "tf-nav-dropdown-item--child" : ""
+                          }`}
                           onClick={() => handleNavItemClick(item)}
                         >
-                          {item.label}
+                          <span className="tf-nav-dropdown-item-label">
+                            {item.label}
+                          </span>
                         </button>
                       ))}
                     </div>

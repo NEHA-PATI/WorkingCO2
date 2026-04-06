@@ -336,6 +336,34 @@ exports.getRewardRedeemsAdmin = async (req, res, next) => {
   }
 };
 
+exports.updateRewardRedeemCompletion = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const is_completed = req.body?.is_completed !== undefined
+      ? Boolean(req.body.is_completed)
+      : true;
+
+    const data = await service.updateRewardRedeemCompletion(id, is_completed);
+    return res.status(200).json({
+      success: true,
+      data
+    });
+  } catch (error) {
+    const message = String(error.message || '');
+    const lower = message.toLowerCase();
+    const status = lower.includes('not found')
+      ? 404
+      : lower.includes('valid redeem id')
+        ? 400
+        : 500;
+
+    return res.status(status).json({
+      success: false,
+      message: message || 'Unable to update redeem completion status'
+    });
+  }
+};
+
 exports.createRewardCatalogItem = async (req, res) => {
   try {
     const data = await service.createRewardCatalogItem(req.body || {});

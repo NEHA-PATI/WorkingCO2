@@ -14,10 +14,12 @@ import {
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import arenaApi, { getArenaUserId } from '@features/arena/services/arenaApi';
 import { useCountdown } from '@features/arena/hooks/useCountdown';
-import a4 from "@features/arena/components/photos/a4.jpg";
-import a5 from "@features/arena/components/photos/a5.jpg";
-import a6 from "@features/arena/components/photos/a6.jpg";
-import a7 from "@features/arena/components/photos/a7.jpg";
+const arenaBannerImages = {
+    a4: "/arena/a4.jpg",
+    a5: "/arena/a5.jpg",
+    a6: "/arena/a6.jpg",
+    a7: "/arena/a7.jpg"
+};
 
 // Inline Styles
 const styles = `
@@ -374,11 +376,11 @@ const isScoreTask = (contest) => {
 const HeroSlider = () => {
     const [current, setCurrent] = useState(0);
     const banners = [
-        { id: 1, title: "Welcome to the Arena", subtitle: "Compete, Earn & Win Amazing Rewards", gradient: "from-violet-600 via-purple-600 to-indigo-700", icon: Trophy, accent: "bg-yellow-400", image: a4 },
-        { id: 2, title: "Weekly Challenge Live", subtitle: "Top 10 winners get exclusive prizes", gradient: "from-emerald-500 via-teal-500 to-cyan-600", icon: Zap, accent: "bg-emerald-300", image: a5 },
-        { id: 3, title: "Streak Bonus Active", subtitle: "Maintain your streak for 5x multiplier", gradient: "from-orange-500 via-amber-500 to-yellow-500", icon: Sparkles, accent: "bg-orange-300", image: a6 },
-        { id: 4, title: "Referral Rewards", subtitle: "Invite friends & earn 1000 points each", gradient: "from-pink-500 via-rose-500 to-red-500", icon: Gift, accent: "bg-pink-300", image: a7 },
-        { id: 5, title: "New Milestone Unlocked", subtitle: "Complete all tasks to become a Legend", gradient: "from-blue-600 via-indigo-600 to-violet-700", icon: Star, accent: "bg-blue-300", image: a4 }
+        { id: 1, title: "Welcome to the Arena", subtitle: "Compete, Earn & Win Amazing Rewards", gradient: "from-violet-600 via-purple-600 to-indigo-700", icon: Trophy, accent: "bg-yellow-400", image: arenaBannerImages.a4 },
+        { id: 2, title: "Weekly Challenge Live", subtitle: "Top 10 winners get exclusive prizes", gradient: "from-emerald-500 via-teal-500 to-cyan-600", icon: Zap, accent: "bg-emerald-300", image: arenaBannerImages.a5 },
+        { id: 3, title: "Streak Bonus Active", subtitle: "Maintain your streak for 5x multiplier", gradient: "from-orange-500 via-amber-500 to-yellow-500", icon: Sparkles, accent: "bg-orange-300", image: arenaBannerImages.a6 },
+        { id: 4, title: "Referral Rewards", subtitle: "Invite friends & earn 1000 points each", gradient: "from-pink-500 via-rose-500 to-red-500", icon: Gift, accent: "bg-pink-300", image: arenaBannerImages.a7 },
+        { id: 5, title: "New Milestone Unlocked", subtitle: "Complete all tasks to become a Legend", gradient: "from-blue-600 via-indigo-600 to-violet-700", icon: Star, accent: "bg-blue-300", image: arenaBannerImages.a4 }
     ];
 
     useEffect(() => {
