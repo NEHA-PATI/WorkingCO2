@@ -6098,7 +6098,7 @@ victory-vendor@^37.0.2:
     d3-time "^3.0.0"
     d3-timer "^3.0.1"
 
-viem@^2.31.4, viem@^2.44.4, viem@^2.46.3, viem@>=2.23, viem@>=2.29, viem@>=2.45.0:
+viem@^2.31.4, viem@^2.44.4, viem@>=2.23, viem@>=2.29, viem@>=2.45.0:
   version "2.46.3"
   resolved "https://registry.npmjs.org/viem/-/viem-2.46.3.tgz"
   integrity sha512-2LJS+Hyh2sYjHXQtzfv1kU9pZx9dxFzvoU/ZKIcn0FNtOU0HQuIICuYdWtUDFHaGXbAdVo8J1eCvmjkL9JVGwg==
