@@ -9,7 +9,7 @@ const config = {
   db: {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT) || 5432,
-    name: process.env.DB_NAME || 'gocarbonpositive',
+    name: process.env.DB_NAME || 'co2',
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || '',
     url: process.env.DATABASE_URL
@@ -22,19 +22,20 @@ const config = {
   },
   
   cors: {
-  origins: process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(",")
-    : [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://localhost:5173",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",
-        "http://[::1]:3000",
-        "http://[::1]:3001"
-      ]
-}
-,
+    origins: process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(",")
+          .map((origin) => origin.trim())
+          .filter(Boolean)
+      : [
+          "http://localhost:3000",
+          "http://localhost:3001",
+          "http://localhost:5173",
+          "http://127.0.0.1:3000",
+          "http://127.0.0.1:3001",
+          "http://[::1]:3000",
+          "http://[::1]:3001",
+        ],
+  },
   
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000,

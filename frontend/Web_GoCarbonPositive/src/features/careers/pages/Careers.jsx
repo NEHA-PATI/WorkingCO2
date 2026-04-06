@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { fetchActiveJobs, submitApplication } from "@features/careers/services/careerApi";
 import "@features/careers/styles/Careers.css";
 import {
@@ -12,6 +13,7 @@ import {
 } from "react-icons/fa";
 
 const CareersPage = () => {
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +41,20 @@ const CareersPage = () => {
     };
     loadJobs();
   }, []);
+
+  useEffect(() => {
+    if (!location.hash) return undefined;
+
+    const targetId = location.hash.replace("#", "");
+    const timeoutId = window.setTimeout(() => {
+      const section = document.getElementById(targetId);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 420);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [location.hash]);
 
   const scrollToSection = (id) => {
     const section = document.getElementById(id);
@@ -151,6 +167,35 @@ const CareersPage = () => {
       </section>
 
       {/* Openings Section */}
+      <section id="careers-internships" className="careers-internships-section">
+        <div className="careers-internships-card">
+          <span className="careers-internships-badge">Linked with Careers</span>
+          <h2>Internship Opportunities</h2>
+          <p>
+            Explore internship roles designed for students and early-career
+            builders who want hands-on experience in climate, product, and
+            sustainability work.
+          </p>
+          <div className="careers-internships-actions">
+            <button
+              onClick={() => {
+                setAppForm({ ...appForm, role: "Internship" });
+                scrollToSection("careers-apply");
+              }}
+            >
+              Apply for Internship
+            </button>
+            <button
+              type="button"
+              className="careers-internships-secondary"
+              onClick={() => scrollToSection("careers-openings")}
+            >
+              View All Openings
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section id="careers-openings" className="careers-openings-section">
         <h2>Current Openings</h2>
         <p>Find your place in our mission-driven team.</p>

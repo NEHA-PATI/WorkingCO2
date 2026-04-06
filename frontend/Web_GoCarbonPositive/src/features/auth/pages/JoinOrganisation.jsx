@@ -1,10 +1,16 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from "react-router-dom";
 import { Country, State } from 'country-state-city';
 import "@features/auth/styles/JoinOrganisation.css";
 import { fireToast } from "@shared/utils/toastService";
 import { ENV } from "@config/env";
+import {
+  sendOrgOtp,
+  verifyOrgOtp,
+  submitOrgRequest
+} from "@shared/utils/apiClient";
 
 const dropdownArrowSvg =
   `data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a5a3a' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e`;
@@ -98,6 +104,7 @@ function CustomDropdown({ label, placeholder, options, value, onChange, error, d
 }
 
 export default function JoinOrganisation() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     organizationName: '',
     organizationType: '',
@@ -207,93 +214,72 @@ export default function JoinOrganisation() {
   };
 
   const handleVerifyEmail = async () => {
-    if (!formData.email) {
-      setErrors(prev => ({ ...prev, email: 'Email is required' }));
-      return;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setErrors(prev => ({ ...prev, email: 'Please enter a valid email' }));
-      return;
-    }
-    try {
-      const response = await fetch(`${ORG_API_URL}/api/org-email-otp/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email })
-      });
+  if (!formData.email) {
+    setErrors(prev => ({ ...prev, email: 'Email is required' }));
+    return;
+  }
 
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        setErrors(prev => ({ ...prev, email: data.message || "Failed to send OTP" }));
-        return;
-      }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(formData.email)) {
+    setErrors(prev => ({ ...prev, email: 'Please enter a valid email' }));
+    return;
+  }
 
-      setShowOTP(true);
-      setOtp(['', '', '', '', '', '']);
-      setOtpError('');
-      setOtpSuccess(false);
-      setTimer(30);
-      setCanResend(false);
-    } catch (err) {
-      setErrors(prev => ({ ...prev, email: "Unable to send OTP. Please try again." }));
-    }
-  };
+  try {
+    await sendOrgOtp(formData.email);
+
+    setShowOTP(true);
+    setOtp(['', '', '', '', '', '']);
+    setOtpError('');
+    setOtpSuccess(false);
+    setTimer(30);
+    setCanResend(false);
+  } catch (err) {
+    setErrors(prev => ({
+      ...prev,
+      email: err.message || "Failed to send OTP"
+    }));
+  }
+};
 
   const handleResendOtp = async () => {
-    try {
-      const response = await fetch(`${ORG_API_URL}/api/org-email-otp/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email })
-      });
+  try {
+    await sendOrgOtp(formData.email);
 
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        setOtpError(data.message || "Failed to resend OTP");
-        return;
-      }
+    setOtp(['', '', '', '', '', '']);
+    setTimer(30);
+    setCanResend(false);
+    setOtpError('');
+    setOtpSuccess(false);
 
-      setOtp(['', '', '', '', '', '']);
-      setTimer(30);
-      setCanResend(false);
-      setOtpError('');
-      setOtpSuccess(false);
-    } catch (err) {
-      setOtpError("Unable to resend OTP. Please try again.");
-    }
-  };
+  } catch (err) {
+    setOtpError(err.message || "Failed to resend OTP");
+  }
+};
 
   const handleSubmitOtp = async () => {
-    const otpValue = otp.join('');
-    if (otpValue.length !== 6) {
-      setOtpError('Please enter all 6 digits');
-      return;
-    }
-    try {
-      const response = await fetch(`${ORG_API_URL}/api/org-email-otp/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email, otp: otpValue })
-      });
+  const otpValue = otp.join('');
 
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        setOtpError(data.message || "Invalid OTP. Please try again.");
-        setOtp(['', '', '', '', '', '']);
-        return;
-      }
+  if (otpValue.length !== 6) {
+    setOtpError('Please enter all 6 digits');
+    return;
+  }
 
-      setOtpSuccess(true);
-      setOtpError('');
-      setTimeout(() => {
-        setEmailVerified(true);
-        setShowOTP(false);
-      }, 1500);
-    } catch (err) {
-      setOtpError("Unable to verify OTP. Please try again.");
-    }
-  };
+  try {
+    await verifyOrgOtp(formData.email, otpValue);
+
+    setOtpSuccess(true);
+    setOtpError('');
+
+    setTimeout(() => {
+      setEmailVerified(true);
+      setShowOTP(false);
+    }, 1500);
+  } catch (err) {
+    setOtpError(err.message || "Invalid OTP");
+    setOtp(['', '', '', '', '', '']);
+  }
+};
 
   const validateForm = () => {
     const newErrors = {};
@@ -332,26 +318,17 @@ export default function JoinOrganisation() {
     };
 
     try {
-      const response = await fetch(`${ORG_API_URL}/api/org-requests`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+  await submitOrgRequest(payload);
 
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        fireToast("ORG.REQUEST_FAILED", "error");
-        return;
-      }
+  fireToast("ORG.REQUEST_SUBMITTED", "success");
 
-      console.log('Form submitted:', payload);
-      fireToast("ORG.REQUEST_SUBMITTED", "success");
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 2000);
-    } catch (err) {
-      fireToast("ORG.REQUEST_FAILED", "error");
-    }
+  setTimeout(() => {
+    window.location.href = '/';
+  }, 2000);
+
+} catch (err) {
+  fireToast("ORG.REQUEST_FAILED", "error");
+}
   };
 
   const countryOptions = countries
@@ -387,9 +364,21 @@ export default function JoinOrganisation() {
     <div className="join-org-root">
       <header className="join-org-header">
         <div className="join-org-header-content">
-          <div>
-            <h1 className="join-org-header-title">Apply as an Organization</h1>
-            <p className="join-org-header-subtitle">Begin your verified carbon-positive journey</p>
+          <div className="join-org-header-left">
+            <button
+              type="button"
+              className="join-org-back-btn"
+              onClick={() => navigate(-1)}
+              aria-label="Go back"
+            >
+              {"<"}
+            </button>
+            <div>
+            <h1 className="join-org-header-title join-org-header-title-link" onClick={() => navigate("/")}>
+              Organization Onboarding
+            </h1>
+            <p className="join-org-header-subtitle">Submit your details to explore partnership and carbon development opportunities.</p>
+            </div>
           </div>
         </div>
       </header>
@@ -656,52 +645,60 @@ export default function JoinOrganisation() {
                 </div>
 
                 <button type="submit" className="join-org-submit-button">
-                  Submit
+                  Start the Conversation
                 </button>
+                
               </form>
+              <div className="join-org-confidential-box">
+  <span className="join-org-confidential-icon">🔒</span>
+  <p className="join-org-confidential-text">
+    All information shared will remain strictly confidential and is used solely for internal evaluation and partnership discussions.
+  </p>
+</div>
             </div>
 
             <div className="join-org-right-panel">
               <div className="join-org-right-content">
-                <h2 className="join-org-right-title">Go Carbon Positive</h2>
-                <p className="join-org-right-description">
-                  Join thousands of organizations making a positive environmental impact
-                  while growing your business sustainably.
-                </p>
+               <h2 className="join-org-right-title">
+  Why Partner With Us
+</h2>
+<p className="join-org-right-description">
+  We support organisations in structuring, developing, and navigating carbon and sustainability initiatives with transparency and technical clarity.
+</p>
 
                 <div className="join-org-benefits-grid">
                   <div className="join-org-benefit-card">
-                    <div className="join-org-benefit-icon">♻️</div>
-                    <h3 className="join-org-benefit-title">Carbon Neutral Operations</h3>
-                    <p className="join-org-benefit-text">
-                      Achieve complete carbon neutrality with our integrated sustainability
-                      solutions.
-                    </p>
+                  <h3 className="join-org-benefit-title">
+  Carbon Strategy Development
+</h3>
+<p className="join-org-benefit-text">
+  Explore structured pathways to reduce emissions and unlock carbon value.
+</p>
                   </div>
 
                   <div className="join-org-benefit-card">
-                    <div className="join-org-benefit-icon">🌱</div>
-                    <h3 className="join-org-benefit-title">Sustainable Growth</h3>
-                    <p className="join-org-benefit-text">
-                      Build your business while protecting our planet for future
-                      generations.
-                    </p>
+                    <h3 className="join-org-benefit-title">
+  Documentation & Compliance Guidance
+</h3>
+<p className="join-org-benefit-text">
+ Get support aligning your sustainability initiatives with recognised frameworks.
+</p>
                   </div>
 
                   <div className="join-org-benefit-card">
-                    <div className="join-org-benefit-icon">🌍</div>
-                    <h3 className="join-org-benefit-title">Global Community</h3>
-                    <p className="join-org-benefit-text">
-                      Connect with organizations worldwide committed to environmental
-                      responsibility.
-                    </p>
+                   <h3 className="join-org-benefit-title">
+  Long-Term Sustainability Partnership
+</h3>
+<p className="join-org-benefit-text">
+  Build a structured roadmap toward carbon responsibility and operational resilience.
+</p>
                   </div>
                 </div>
 
                 <div className="join-org-stats-card">
-                  <p className="join-org-stat">✓ Powering sustainability</p>
-                  <p className="join-org-stat">✓ Helping to offset tonnes of CO₂</p>
-                  <p className="join-org-stat">✓ Connecting impact makers</p>
+                  <p className="join-org-stat">✓ Transparent collaboration process  </p>
+                  <p className="join-org-stat">✓ Structured project evaluation </p>
+                  <p className="join-org-stat">✓ Long-term sustainability focus</p>
                 </div>
               </div>
             </div>

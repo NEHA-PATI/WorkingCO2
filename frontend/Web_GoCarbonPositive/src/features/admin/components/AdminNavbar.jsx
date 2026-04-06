@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { IoAnalyticsSharp, IoSettingsSharp } from "react-icons/io5";
 import { FaUserFriends, FaTrophy, FaBriefcase } from "react-icons/fa";
-import { MdSupportAgent } from "react-icons/md";
+import { MdSupportAgent, MdFactCheck } from "react-icons/md";
 import { GiSettingsKnobs } from "react-icons/gi";
 import { BsShieldCheck } from "react-icons/bs";
 import { FaBoxesStacked } from "react-icons/fa6";
@@ -30,6 +30,7 @@ const AdminNavbar = () => {
     if (path.includes("/admin/case-study-management"))
       return "case-study-management";
     if (path.includes("/admin/contest")) return "contest";
+    if (path.includes("/admin/mrv-management")) return "mrv-management";
     if (path.includes("/admin/reports")) return "reports";
     return "overview"; // default
   };
@@ -143,6 +144,12 @@ const AdminNavbar = () => {
       label: "Contest Management",
       icon: <FaTrophy className="icon contest-icon" />,
       path: "/admin/contest",
+    },
+    {
+      id: "mrv-management",
+      label: "MRV Management",
+      icon: <MdFactCheck className="icon mrv-icon" />,
+      path: "/admin/mrv-management",
     },
     {
       id: "reports",

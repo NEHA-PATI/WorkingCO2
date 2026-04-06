@@ -65,4 +65,19 @@ router.patch(
   TreeController.updateTreeStatus
 );
 
+// Add image to tree
+router.post(
+  "/:tid/image",
+  validateUserId,
+  logUserAction("ADD_TREE_IMAGE"),
+  TreeController.addTreeImage
+);
+
+// Delete tree image
+router.delete(
+  "/image/:imageId",
+  logUserAction("DELETE_TREE_IMAGE"),
+  TreeController.deleteTreeImage
+);
+
 module.exports = router;
