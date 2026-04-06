@@ -18,6 +18,7 @@ import About from "@features/user/pages/about";
 import Community from "@features/user/pages/community";
 import Contact from "@features/user/pages/contact";
 import CaseStudy from "@features/user/pages/CaseStudy";
+import Internship from "@features/user/pages/Internship";
 import IndustrialSolutions from "@features/user/pages/Industrial";
 import Faq from "@features/user/pages/FAQ";
 import NotFoundAnimation from "@features/user/pages/NotFoundAnimation";
@@ -155,6 +156,7 @@ const AppRoutes = () => {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:id" element={<BlogDetailPage />} />
         <Route path="/careers" element={<Careers />} />
+        <Route path="/careers/internship" element={<Internship />} />
         <Route path="/community" element={<Community />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/case-studies" element={<CaseStudy />} />
