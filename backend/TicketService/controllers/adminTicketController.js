@@ -84,11 +84,17 @@ exports.getAllTickets = async (req, res) => {
         const result = await pool.query(
             `SELECT 
                 t.*,
-                u.name,
+                COALESCE(
+                  NULLIF(TRIM(CONCAT_WS(' ', up.first_name, up.middle_name, up.last_name)), ''),
+                  u.username,
+                  t.u_id
+                ) AS name,
                 u.email
              FROM admin_tickets t
-             JOIN users u
+             LEFT JOIN users u
                ON t.u_id = u.u_id
+             LEFT JOIN user_profile up
+               ON t.u_id = up.u_id
              ORDER BY t.created_at DESC`
         );
 
@@ -119,11 +125,17 @@ exports.getTicketById = async (req, res) => {
         const result = await pool.query(
             `SELECT 
                 t.*,
-                u.name,
+                COALESCE(
+                  NULLIF(TRIM(CONCAT_WS(' ', up.first_name, up.middle_name, up.last_name)), ''),
+                  u.username,
+                  t.u_id
+                ) AS name,
                 u.email
              FROM admin_tickets t
-             JOIN users u
+             LEFT JOIN users u
                ON t.u_id = u.u_id
+             LEFT JOIN user_profile up
+               ON t.u_id = up.u_id
              WHERE t.ticket_id = $1`,
             [ticket_id]
         );

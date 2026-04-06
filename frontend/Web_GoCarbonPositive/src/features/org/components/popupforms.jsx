@@ -151,12 +151,10 @@ const PopupForms = ({
     const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
     const orgId =
       authUser?.org_id ||
-      authUser?.u_id ||
-      localStorage.getItem("orgId") ||
-      localStorage.getItem("userId");
+      localStorage.getItem("orgId");
 
     if (!orgId) {
-      showToast("Organization ID not found. Please login again.", "error");
+      showToast("Organization ID not found. Please login as an organization account.", "error");
       return;
     }
 
@@ -226,6 +224,27 @@ const PopupForms = ({
       points: points.map((pt) => ({ lat: Number(pt.lat), lng: Number(pt.lng) })),
     };
 
+    const missingFields = [];
+    if (!apiPayload.plantation_name) missingFields.push("plantation_name");
+    if (!apiPayload.plantation_date) missingFields.push("plantation_date");
+    if (!Number.isFinite(apiPayload.total_area)) missingFields.push("total_area");
+    if (!apiPayload.area_unit) missingFields.push("area_unit");
+    if (!apiPayload.manager_name) missingFields.push("manager_name");
+    if (!apiPayload.manager_contact) missingFields.push("manager_contact");
+    if (!Number.isFinite(apiPayload.trees_planted)) missingFields.push("trees_planted");
+    if (!apiPayload.species_name) missingFields.push("species_name");
+    if (!Number.isFinite(apiPayload.plant_age_years)) missingFields.push("plant_age_years");
+
+    if (missingFields.length > 0) {
+      showToast(`Missing fields: ${missingFields.join(", ")}`, "error");
+      return false;
+    }
+
+    if (!Array.isArray(apiPayload.points) || apiPayload.points.length < 3) {
+      showToast("Please add at least 3 boundary points.", "error");
+      return false;
+    }
+
     try {
       const result = await assetAPI.createPlantation(apiPayload);
       if (result?.success) {
@@ -238,7 +257,12 @@ const PopupForms = ({
         return false;
       }
     } catch (error) {
-      showToast(error?.message || "Server error while saving plantation", "error");
+      showToast(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Server error while saving plantation",
+        "error"
+      );
       return false;
     }
   };
@@ -977,16 +1001,3 @@ const PopupForms = ({
   );
 };
 export default PopupForms;
-
-
-
-
-
-
-
-
-
-
-
-
-

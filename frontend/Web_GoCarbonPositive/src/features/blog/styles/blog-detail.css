@@ -244,9 +244,6 @@
 }
 
 .blog-article-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
   color: #333;
   line-height: 1.8;
   font-size: 1.125rem;
@@ -269,12 +266,58 @@
   margin-bottom: 0.75rem;
 }
 
+
 .blog-paragraph {
-  color: #444;
-  line-height: 1.8;
-  font-size: 1.125rem;
+  color: #3b4148;
+  font-size: 1.1rem;
+  line-height: 1.66;
+  margin: 0;
+  letter-spacing: 0.01em;
 }
 
+/* Keep paragraph rhythm professional without touching headings/lists */
+.blog-article-content .blog-paragraph + .blog-paragraph {
+  margin-top: 18px;
+}
+
+/* Fallback if a plain p is ever rendered by rich-text blocks */
+.blog-article-content > p + p {
+  margin-top: 18px;
+}
+/* Corporate paragraph typography: scoped to post body only */
+.post-content .blog-paragraph,
+.post-content > p,
+.blog-article-content .blog-paragraph {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  overflow-wrap: break-word;
+  word-break: normal;
+  line-height: 1.66;
+}
+
+.post-content .blog-paragraph + .blog-paragraph,
+.post-content > p + p,
+.blog-article-content .blog-paragraph + .blog-paragraph {
+  margin-top: 18px;
+}
+
+/* Mobile: preserve readability and avoid stretched spacing artifacts */
+@media (max-width: 768px) {
+  .post-content .blog-paragraph,
+  .post-content > p,
+  .blog-article-content .blog-paragraph {
+    text-align: left;
+    hyphens: none;
+    line-height: 1.62;
+  }
+
+  .post-content .blog-paragraph + .blog-paragraph,
+  .post-content > p + p,
+  .blog-article-content .blog-paragraph + .blog-paragraph {
+    margin-top: 16px;
+  }
+}
 /* Author Card */
 .author-card {
   background: linear-gradient(135deg, #ffffff, #f8f9fa);
@@ -465,3 +508,6 @@
     font-size: 1rem;
   }
 }
+
+
+

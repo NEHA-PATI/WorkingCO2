@@ -39,6 +39,20 @@ const MENU_ICONS = {
 export default function HamburgerMenu({ role, close, handleLogout }) {
   const navigate = useNavigate();
   const menu = USER_ORG_MENU[role] || [];
+  const careersIndex = menu.findIndex((item) => item.label === "Careers");
+  const menuItems =
+    careersIndex >= 0
+      ? [
+          ...menu.slice(0, careersIndex + 1),
+          {
+            label: "Internship",
+            path: "/careers/internship",
+            iconKey: "careers",
+            isChild: true,
+          },
+          ...menu.slice(careersIndex + 1),
+        ]
+      : menu;
 
   const handleItemClick = (item) => {
     close();
@@ -53,28 +67,25 @@ export default function HamburgerMenu({ role, close, handleLogout }) {
 
   return (
     <div className="sidebar-dropdown">
-      {menu.map((item) => {
+      {menuItems.map((item) => {
         const Icon = MENU_ICONS[item.iconKey];
 
         return (
           <div
             key={item.label}
-            className="sidebar-item"
-            style={{ "--sidebar-icon-color": item.color || "#111" }}
+            className={`sidebar-item ${item.isChild ? "sidebar-item-child" : ""}`}
             onClick={() => handleItemClick(item)}
           >
             {Icon && (
               <Icon
-                className="sidebar-icon"
-                color={item.color}
+                className="sidebar-icon sidebar-icon-outline"
                 style={{
-                  fontSize: "1.7rem",
-                  minWidth: "26px",
+                  fontSize: "1.1rem",
+                  minWidth: "18px",
                 }}
               />
             )}
-
-            <span>{item.label}</span>
+            <span className="sidebar-item-label">{item.label}</span>
           </div>
         );
       })}

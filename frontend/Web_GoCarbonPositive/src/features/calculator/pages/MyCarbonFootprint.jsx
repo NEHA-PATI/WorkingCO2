@@ -67,6 +67,12 @@ const [loading, setLoading] = useState(false);
   const [housingForm, setHousingForm] = useState({
     electricityKwh: "",
     lpgCylinders: "",
+    bedrooms: "",
+    membersMale: "",
+    membersFemale: "",
+    membersChild: "",
+    fridgeCount: "",
+    tvCount: "",
   });
   const [foodEntries, setFoodEntries] = useState([
     { category: "", daysConsumed: "", avgConsumptionPerDay: "" },
@@ -165,7 +171,13 @@ const handleFinalSubmit = async () => {
 
     const hasHousingData =
       Number(housingForm.electricityKwh || 0) > 0 ||
-      Number(housingForm.lpgCylinders || 0) > 0;
+      Number(housingForm.lpgCylinders || 0) > 0 ||
+      Number(housingForm.bedrooms || 0) > 0 ||
+      Number(housingForm.membersMale || 0) > 0 ||
+      Number(housingForm.membersFemale || 0) > 0 ||
+      Number(housingForm.membersChild || 0) > 0 ||
+      Number(housingForm.fridgeCount || 0) > 0 ||
+      Number(housingForm.tvCount || 0) > 0;
 
     const validFoodEntries = foodEntries.filter(
       (f) =>
@@ -255,6 +267,14 @@ const handleFinalSubmit = async () => {
       housing: {
         electricity_kwh: Number(housingForm.electricityKwh || 0),
         lpg_cylinders: Number(housingForm.lpgCylinders || 0),
+        bedrooms: Number(housingForm.bedrooms || 0),
+        members: {
+          male: Number(housingForm.membersMale || 0),
+          female: Number(housingForm.membersFemale || 0),
+          child: Number(housingForm.membersChild || 0),
+        },
+        fridge_count: Number(housingForm.fridgeCount || 0),
+        tv_count: Number(housingForm.tvCount || 0),
       },
 
       food: validFoodEntries.map((f) => ({
@@ -760,6 +780,103 @@ const handleFinalSubmit = async () => {
                     onChange={handleHousingChange}
                     className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
                   />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1.5">
+                      No. of Bedrooms
+                    </label>
+                    <input
+                      type="number"
+                      name="bedrooms"
+                      min="0"
+                      placeholder="e.g. 3"
+                      value={housingForm.bedrooms}
+                      onChange={handleHousingChange}
+                      className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-1.5">
+                      No. of Fridge
+                    </label>
+                    <input
+                      type="number"
+                      name="fridgeCount"
+                      min="0"
+                      placeholder="e.g. 1"
+                      value={housingForm.fridgeCount}
+                      onChange={handleHousingChange}
+                      className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold mb-1.5">
+                      No. of TV
+                    </label>
+                    <input
+                      type="number"
+                      name="tvCount"
+                      min="0"
+                      placeholder="e.g. 2"
+                      value={housingForm.tvCount}
+                      onChange={handleHousingChange}
+                      className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+                  <p className="text-sm font-semibold text-slate-700 mb-2">Members Split</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-sm font-semibold mb-1.5">
+                        Male
+                      </label>
+                      <input
+                        type="number"
+                        name="membersMale"
+                        min="0"
+                        placeholder="e.g. 2"
+                        value={housingForm.membersMale}
+                        onChange={handleHousingChange}
+                        className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold mb-1.5">
+                        Female
+                      </label>
+                      <input
+                        type="number"
+                        name="membersFemale"
+                        min="0"
+                        placeholder="e.g. 2"
+                        value={housingForm.membersFemale}
+                        onChange={handleHousingChange}
+                        className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold mb-1.5">
+                        Child
+                      </label>
+                      <input
+                        type="number"
+                        name="membersChild"
+                        min="0"
+                        placeholder="e.g. 1"
+                        value={housingForm.membersChild}
+                        onChange={handleHousingChange}
+                        className="w-full px-3.5 py-2.5 text-sm sm:text-base rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#13ec5b] outline-none"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

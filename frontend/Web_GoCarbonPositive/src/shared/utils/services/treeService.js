@@ -6,8 +6,8 @@ export const treeService = {
     return response.data;
   },
 
-  getTree: async (userId, treeId) => {
-    const response = await apiClient.get(`/tree/${userId}/${treeId}`);
+  getTree: async (treeId) => {
+    const response = await apiClient.get(`/tree/single/${treeId}`);
     return response.data;
   },
 
@@ -16,23 +16,41 @@ export const treeService = {
     return response.data;
   },
 
-  updateTree: async (userId, treeId, treeData) => {
-    const response = await apiClient.put(`/tree/${userId}/${treeId}`, treeData);
+  updateTree: async (treeId, treeData) => {
+    const response = await apiClient.put(`/tree/${treeId}`, treeData);
     return response.data;
   },
 
-  deleteTree: async (userId, treeId) => {
-    const response = await apiClient.delete(`/tree/${userId}/${treeId}`);
+  deleteTree: async (treeId, userId) => {
+    const response = await apiClient.delete(`/tree/${treeId}`, {
+      data: { UID: userId },
+    });
     return response.data;
   },
 
   uploadTreeImage: async (userId, treeId, imageFile) => {
     const formData = new FormData();
-    formData.append('image', imageFile);
-    const response = await apiClient.post(`/tree/${userId}/${treeId}/upload`, formData, {
+    formData.append("images", imageFile);
+
+    const uploadResponse = await apiClient.post("/image/upload", formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response.data;
+
+    const firstImage = uploadResponse?.data?.data?.images?.[0];
+    if (!firstImage?.url) {
+      throw new Error("Image upload succeeded but image URL was not returned");
+    }
+
+    const linkResponse = await apiClient.post(`/tree/${treeId}/image`, {
+      UID: userId,
+      image_url: firstImage.url,
+      cloudinary_public_id: firstImage.public_id || null,
+    });
+
+    return {
+      upload: uploadResponse.data,
+      treeImage: linkResponse.data,
+    };
   },
 };
 

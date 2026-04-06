@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css2?family=Epilogue:wght@400;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@400;600;700;800&display=swap");
+
+.marketplace1-root {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+.marketplace1-headline {
+  font-family: "Epilogue", "Inter", system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.marketplace1-auth-headline {
+  font-family: "Manrope", "Inter", system-ui, sans-serif;
+  letter-spacing: -0.015em;
+}
+
+.marketplace1-glass {
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.marketplace1-auth-backdrop {
+  background: rgba(25, 28, 27, 0.28);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.marketplace1-no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.marketplace1-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.marketplace1-marquee-track {
+  animation: marketplace1Marquee 22s linear infinite;
+  min-width: max-content;
+}
+
+.marketplace1-orbit-spin {
+  animation: marketplace1OrbitSpin 60s linear infinite;
+}
+
+.marketplace1-auth-dialog {
+  font-size: 0.95rem;
+  animation: marketplace1AuthEntry 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.marketplace1-auth-dialog .text-sm {
+  font-size: 0.82rem;
+}
+
+@keyframes marketplace1AuthEntry {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes marketplace1Marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marketplace1OrbitSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

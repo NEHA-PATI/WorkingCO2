@@ -11,10 +11,14 @@ import PrivacyPolicy from "@shared/components/Privacy";
 import TermsAndConditions from "@shared/components/TermsAndConditions";
 
 import Home from "@features/user/pages/Home";
+import HomeUser from "@features/user/pages/HomeUser";
+import HomeOrganisation from "@features/user/pages/HomeOrganisation";
+import LearnMore from "@features/user/pages/LearnMore";
 import About from "@features/user/pages/about";
 import Community from "@features/user/pages/community";
 import Contact from "@features/user/pages/contact";
 import CaseStudy from "@features/user/pages/CaseStudy";
+import Internship from "@features/user/pages/Internship";
 import IndustrialSolutions from "@features/user/pages/Industrial";
 import Faq from "@features/user/pages/FAQ";
 import NotFoundAnimation from "@features/user/pages/NotFoundAnimation";
@@ -32,8 +36,9 @@ import Blog from "@features/blog/pages/blog";
 import BlogDetailPage from "@features/blog/pages/blog-detail";
 import Careers from "@features/careers/pages/Careers";
 import MyCarbonFootprint from "@features/calculator/pages/MyCarbonFootprint";
+import MarketplacePage from "@features/marketplace1/pages/MarketplacePage";
+import ListingDetailPage from "@features/marketplace1/pages/ListingDetailPage";
 
-// import MarketplacePage from "@features/marketplace/pages/MarketplacePage";
 import ViewAssets from "@shared/pages/ViewAssets";
 import WalletPage from "@shared/pages/wallet";
 import Upload from "@shared/pages/upload";
@@ -60,6 +65,7 @@ import AdminAnalytics from "@features/admin/pages/Analytics";
 import AdminCareerManagement from "@features/admin/pages/CareerManagement";
 import AdminCaseStudyManagement from "@features/admin/pages/CaseStudyManagement";
 import AdminReports from "@features/admin/pages/Reports";
+import AdminMRVManagement from "@features/admin/pages/MRVManagement";
 import AdminAssetManagement from "@features/admin/pages/AssetManagement";
 import AdminContestManagement from "@features/admin/pages/ContestManagement";
 import AdminOrganizationManagement from "@features/admin/pages/OrganizationManagement";
@@ -133,9 +139,52 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/marketplace"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace/login"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace/logout"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace/signup/*"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace1"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace1/login"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace1/logout"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace1/signup/*"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace/listing/:listingId"
+        element={<ListingDetailPage />}
+      />
+      <Route
+        path="/marketplace1/listing/:listingId"
+        element={<ListingDetailPage />}
+      />
 
       <Route element={<BaseLayout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/experience/user" element={<HomeUser />} />
+        <Route path="/experience/organisation" element={<HomeOrganisation />} />
+        <Route path="/learn-more" element={<LearnMore />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -147,6 +196,7 @@ const AppRoutes = () => {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:id" element={<BlogDetailPage />} />
         <Route path="/careers" element={<Careers />} />
+        <Route path="/careers/internship" element={<Internship />} />
         <Route path="/community" element={<Community />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/case-studies" element={<CaseStudy />} />
@@ -156,14 +206,6 @@ const AppRoutes = () => {
         <Route path="/industrial" element={<IndustrialSolutions />} />
         <Route path="/faq" element={<Faq />} />
 
-        {/* <Route
-          path="/marketplace"
-          element={
-            <ProtectedRoute allowedRoles={["user", "organization", "admin"]}>
-              <MarketplacePage />
-            </ProtectedRoute>
-          }
-        /> */}
         <Route
           path="/upload"
           element={
@@ -293,6 +335,7 @@ const AppRoutes = () => {
             element={<AdminCaseStudyManagement />}
           />
           <Route path="contest" element={<AdminContestManagement />} />
+          <Route path="mrv-management" element={<AdminMRVManagement />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="" element={<Navigate to="overview" replace />} />

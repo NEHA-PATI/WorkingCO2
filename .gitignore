@@ -68,3 +68,6 @@ frontend/**/.cache/
 
 # Sanity / PortableText temp
 **/.sanity/
+
+
+backup.sql

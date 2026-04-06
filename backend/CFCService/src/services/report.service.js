@@ -1,4 +1,4 @@
-exports.generateReport = (total, breakdown, pucInsights = {}) => {
+exports.generateReport = (total, breakdown, pucInsights = {}, housingProfile = {}) => {
   const sum = (obj) =>
     Object.values(obj || {}).reduce((a, b) => a + b, 0);
 
@@ -147,6 +147,16 @@ exports.generateReport = (total, breakdown, pucInsights = {}) => {
   return {
     total,
     breakdown,
+    housing_profile: {
+      bedrooms: Number(housingProfile.bedrooms || 0),
+      members: {
+        male: Number(housingProfile.members?.male || 0),
+        female: Number(housingProfile.members?.female || 0),
+        child: Number(housingProfile.members?.child || 0)
+      },
+      fridge_count: Number(housingProfile.fridge_count || 0),
+      tv_count: Number(housingProfile.tv_count || 0)
+    },
     percentages: {
       housing: percentage(housing),
       food: percentage(food),
