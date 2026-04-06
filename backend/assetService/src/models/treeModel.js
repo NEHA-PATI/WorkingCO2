@@ -46,13 +46,29 @@ class TreeModel {
       const treeResult = await client.query(treeQuery, treeValues);
       const tree = treeResult.rows[0];
 
-      // Insert images if provided
+      // Insert images if provided.
+      // Accept both string URLs and objects with image_url/url + public_id.
       if (imageIds && imageIds.length > 0) {
-        for (const imageUrl of imageIds) {
+        for (const imageItem of imageIds) {
+          let imageUrl = null;
+          let publicId = null;
+
+          if (typeof imageItem === "string") {
+            imageUrl = imageItem;
+          } else if (imageItem && typeof imageItem === "object") {
+            imageUrl = imageItem.image_url || imageItem.url || null;
+            publicId =
+              imageItem.cloudinary_public_id ||
+              imageItem.public_id ||
+              null;
+          }
+
+          if (!imageUrl) continue;
+
           await client.query(
             `INSERT INTO tree_images (tid, image_url, cloudinary_public_id)
              VALUES ($1, $2, $3)`,
-            [tree.tid, imageUrl, null]
+            [tree.tid, imageUrl, publicId]
           );
         }
       }

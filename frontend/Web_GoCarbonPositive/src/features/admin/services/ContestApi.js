@@ -48,3 +48,62 @@ export const updateRule = async (id, data) => {
     data
   });
 };
+
+export const getRewardsCatalogAdmin = async ({ page = 1, limit = 200, search = "" } = {}) => {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  if (search && String(search).trim()) {
+    params.set("search", String(search).trim());
+  }
+
+  return apiClient({
+    url: `/rewards/catalog-admin?${params.toString()}`,
+    method: "GET",
+  });
+};
+
+export const createRewardCatalogItem = async (payload) => {
+  return apiClient({
+    url: "/rewards/catalog-admin",
+    method: "POST",
+    data: payload,
+  });
+};
+
+export const updateRewardCatalogItem = async (rewardId, payload) => {
+  return apiClient({
+    url: `/rewards/catalog-admin/${encodeURIComponent(rewardId)}`,
+    method: "PUT",
+    data: payload,
+  });
+};
+
+export const deleteRewardCatalogItem = async (rewardId) => {
+  return apiClient({
+    url: `/rewards/catalog-admin/${encodeURIComponent(rewardId)}`,
+    method: "DELETE",
+  });
+};
+
+export const getRedeemsAdmin = async ({ page = 1, limit = 200 } = {}) => {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  return apiClient({
+    url: `/rewards/redeems-admin?${params.toString()}`,
+    method: "GET",
+  });
+};
+
+export const updateRedeemCompletionStatus = async (id, is_completed = true) => {
+  return apiClient({
+    url: `/rewards/redeems-admin/${encodeURIComponent(id)}/completion`,
+    method: "PUT",
+    data: { is_completed: Boolean(is_completed) },
+  });
+};

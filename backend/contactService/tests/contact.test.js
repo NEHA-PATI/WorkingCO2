@@ -35,7 +35,9 @@ describe("Contact Service - Controller Unit Tests", () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
+        success: false,
         message: "Name, email and message are required",
+        data: null,
       });
       expect(pool.query).not.toHaveBeenCalled();
     });
@@ -61,8 +63,9 @@ describe("Contact Service - Controller Unit Tests", () => {
       expect(pool.query).toHaveBeenCalledTimes(2);
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
+        success: true,
         message: "Message sent successfully",
-        contact_id: "CNT000006",
+        data: { contact_id: "CNT000006" },
       });
     });
 
@@ -82,7 +85,9 @@ describe("Contact Service - Controller Unit Tests", () => {
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
+        success: false,
         message: "Internal server error",
+        data: null,
       });
     });
   });
@@ -98,7 +103,11 @@ describe("Contact Service - Controller Unit Tests", () => {
       await getAllContactMessages(req, res);
 
       expect(pool.query).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith(rows);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: "Contact messages fetched successfully",
+        data: rows,
+      });
     });
 
     test("Empty result -> 200 with empty array", async () => {
@@ -109,7 +118,11 @@ describe("Contact Service - Controller Unit Tests", () => {
 
       await getAllContactMessages(req, res);
 
-      expect(res.json).toHaveBeenCalledWith([]);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: "Contact messages fetched successfully",
+        data: [],
+      });
     });
 
     test("Database error -> 500", async () => {
@@ -122,7 +135,9 @@ describe("Contact Service - Controller Unit Tests", () => {
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
+        success: false,
         message: "Internal server error",
+        data: null,
       });
     });
   });
@@ -138,7 +153,9 @@ describe("Contact Service - Controller Unit Tests", () => {
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
+        success: false,
         message: "Message not found",
+        data: null,
       });
     });
 
@@ -151,7 +168,11 @@ describe("Contact Service - Controller Unit Tests", () => {
 
       await getContactById(req, res);
 
-      expect(res.json).toHaveBeenCalledWith(row);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: "Contact message fetched successfully",
+        data: row,
+      });
     });
 
     test("Database error -> 500", async () => {
@@ -164,7 +185,9 @@ describe("Contact Service - Controller Unit Tests", () => {
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
+        success: false,
         message: "Internal server error",
+        data: null,
       });
     });
   });

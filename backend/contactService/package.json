@@ -21,6 +21,9 @@
     "nodemon": "^3.1.11",
     "pg": "^8.17.2"
   },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
   "nodemonConfig": {
     "quiet": true,
     "ignore": [

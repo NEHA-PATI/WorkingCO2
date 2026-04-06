@@ -1,5 +1,5 @@
 // src/pages/Configuration.jsx
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   FaSave,
   FaUndo,
@@ -9,8 +9,11 @@ import {
   FaDollarSign,
   FaDatabase,
   FaCog,
+  FaLeaf,
+  FaCloudUploadAlt,
 } from "react-icons/fa";
 import "@features/admin/styles/Configuration.css";
+import { carbonApiClient } from "@shared/utils/apiClient";
 
 const initialCreditRules = {
   evRate: "0.8",
@@ -56,6 +59,23 @@ const Configuration = () => {
   const [fees, setFees] = useState(initialFees);
   const [system, setSystem] = useState(initialSystem);
   const [apiKeys, setApiKeys] = useState(fakeApiKeys);
+  const [cfcFactors, setCfcFactors] = useState([]);
+  const [cfcLoading, setCfcLoading] = useState(false);
+  const [cfcSavingId, setCfcSavingId] = useState(null);
+  const [cfcSearch, setCfcSearch] = useState("");
+  const [airports, setAirports] = useState([]);
+  const [airportsLoading, setAirportsLoading] = useState(false);
+  const [airportSavingCode, setAirportSavingCode] = useState(null);
+  const [airportDeletingCode, setAirportDeletingCode] = useState(null);
+  const [airportCreating, setAirportCreating] = useState(false);
+  const [airportSearch, setAirportSearch] = useState("");
+  const [newAirport, setNewAirport] = useState({
+    code: "",
+    name: "",
+    latitude: "",
+    longitude: "",
+    country: "IN",
+  });
   const [toast, setToast] = useState(null);
 
   // small helper to show temporary toast
@@ -122,6 +142,161 @@ const Configuration = () => {
     setter((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
+  const loadCfcFactors = async () => {
+    try {
+      setCfcLoading(true);
+      const res = await carbonApiClient.get("/v1/factors");
+      const rows = Array.isArray(res?.data?.data) ? res.data.data : [];
+      setCfcFactors(rows);
+    } catch (error) {
+      console.error("Failed to load CFC factors:", error);
+      showToast("Failed to load CFC factors");
+    } finally {
+      setCfcLoading(false);
+    }
+  };
+
+  const loadAirports = async () => {
+    try {
+      setAirportsLoading(true);
+      const res = await carbonApiClient.get("/v1/airports/admin");
+      const rows = Array.isArray(res?.data?.data) ? res.data.data : [];
+      setAirports(rows);
+    } catch (error) {
+      console.error("Failed to load airports:", error);
+      showToast("Failed to load airports");
+    } finally {
+      setAirportsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab !== "cfc") return;
+    loadCfcFactors();
+    loadAirports();
+  }, [activeTab]);
+
+  const filteredCfcFactors = useMemo(() => {
+    const q = cfcSearch.trim().toLowerCase();
+    if (!q) return cfcFactors;
+
+    return cfcFactors.filter((row) => {
+      return (
+        String(row.category || "").toLowerCase().includes(q) ||
+        String(row.sub_category || "").toLowerCase().includes(q) ||
+        String(row.region || "").toLowerCase().includes(q) ||
+        String(row.source || "").toLowerCase().includes(q) ||
+        String(row.version || "").toLowerCase().includes(q)
+      );
+    });
+  }, [cfcFactors, cfcSearch]);
+
+  const updateCfcDraftField = (id, key, value) => {
+    setCfcFactors((prev) =>
+      prev.map((row) => (row.id === id ? { ...row, [key]: value } : row))
+    );
+  };
+
+  const filteredAirports = useMemo(() => {
+    const q = airportSearch.trim().toLowerCase();
+    if (!q) return airports;
+
+    return airports.filter((row) => (
+      String(row.code || "").toLowerCase().includes(q) ||
+      String(row.name || "").toLowerCase().includes(q) ||
+      String(row.country || "").toLowerCase().includes(q)
+    ));
+  }, [airports, airportSearch]);
+
+  const updateAirportField = (code, key, value) => {
+    setAirports((prev) =>
+      prev.map((row) => (row.code === code ? { ...row, [key]: value } : row))
+    );
+  };
+
+  const saveCfcFactor = async (row) => {
+    try {
+      setCfcSavingId(row.id);
+      await carbonApiClient.put(`/v1/factors/${row.id}`, {
+        category: row.category,
+        sub_category: row.sub_category,
+        unit: row.unit,
+        value: Number(row.value),
+        region: row.region,
+        year: Number(row.year),
+        source: row.source,
+        version: row.version,
+      });
+      showToast("CFC factor updated");
+    } catch (error) {
+      console.error("Failed to update CFC factor:", error);
+      showToast("Failed to update CFC factor");
+    } finally {
+      setCfcSavingId(null);
+    }
+  };
+
+  const saveAirport = async (row) => {
+    try {
+      setAirportSavingCode(row.code);
+      await carbonApiClient.put(`/v1/airports/admin/${encodeURIComponent(row.code)}`, {
+        name: row.name,
+        latitude: Number(row.latitude),
+        longitude: Number(row.longitude),
+        country: String(row.country || "").toUpperCase(),
+      });
+      showToast("Airport updated");
+    } catch (error) {
+      console.error("Failed to update airport:", error);
+      showToast("Failed to update airport");
+    } finally {
+      setAirportSavingCode(null);
+    }
+  };
+
+  const removeAirport = async (code) => {
+    try {
+      setAirportDeletingCode(code);
+      await carbonApiClient.delete(`/v1/airports/admin/${encodeURIComponent(code)}`);
+      setAirports((prev) => prev.filter((row) => row.code !== code));
+      showToast("Airport deleted");
+    } catch (error) {
+      console.error("Failed to delete airport:", error);
+      showToast("Failed to delete airport");
+    } finally {
+      setAirportDeletingCode(null);
+    }
+  };
+
+  const createAirport = async () => {
+    try {
+      setAirportCreating(true);
+      await carbonApiClient.post("/v1/airports/admin", {
+        code: String(newAirport.code || "").toUpperCase().trim(),
+        name: newAirport.name,
+        latitude: Number(newAirport.latitude),
+        longitude: Number(newAirport.longitude),
+        country: String(newAirport.country || "").toUpperCase().trim(),
+      });
+
+      setNewAirport({
+        code: "",
+        name: "",
+        latitude: "",
+        longitude: "",
+        country: "IN",
+      });
+
+      await loadAirports();
+      showToast("Airport created");
+    } catch (error) {
+      console.error("Failed to create airport:", error);
+      showToast("Failed to create airport");
+    } finally {
+      setAirportCreating(false);
+    }
+  };
+
   return (
     <div className="config-page__container">
       {/* Tabs */}
@@ -155,6 +330,12 @@ const Configuration = () => {
           onClick={() => setActiveTab("system")}
         >
           <FaCog /> System
+        </button>
+        <button
+          className={`config-tab ${activeTab === "cfc" ? "active" : ""}`}
+          onClick={() => setActiveTab("cfc")}
+        >
+          <FaLeaf /> CFC
         </button>
       </div>
 
@@ -458,6 +639,280 @@ const Configuration = () => {
                 <input name="enableAuditLogging" type="checkbox" checked={system.enableAuditLogging} onChange={handleInputChange(setSystem)} />
                 <span>Enable Audit Logging</span>
               </label>
+            </div>
+          </section>
+        )}
+
+        {activeTab === "cfc" && (
+          <section className="config-card config-cfc">
+            <div className="config-card__header">
+              <h2><FaLeaf className="config-icon" /> CFC Emission Factors</h2>
+              <div className="config-actions-right">
+                <button className="config-btn config-btn--outline" onClick={loadCfcFactors}>
+                  <FaUndo /> Refresh
+                </button>
+              </div>
+            </div>
+
+            <div className="config-field">
+              <label>Search Factors</label>
+              <input
+                value={cfcSearch}
+                onChange={(e) => setCfcSearch(e.target.value)}
+                placeholder="Search by category, sub category, region, source, version"
+              />
+            </div>
+
+            <div className="config-cfc-table-wrap">
+              <table className="config-cfc-table">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Sub Category</th>
+                    <th>Unit</th>
+                    <th>Value</th>
+                    <th>Region</th>
+                    <th>Year</th>
+                    <th>Source</th>
+                    <th>Version</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cfcLoading ? (
+                    <tr>
+                      <td colSpan={9} className="config-cfc-empty">Loading emission factors...</td>
+                    </tr>
+                  ) : filteredCfcFactors.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="config-cfc-empty">No emission factors found.</td>
+                    </tr>
+                  ) : (
+                    filteredCfcFactors.map((row) => (
+                      <tr key={row.id}>
+                        <td>
+                          <input
+                            value={row.category || ""}
+                            onChange={(e) => updateCfcDraftField(row.id, "category", e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            value={row.sub_category || ""}
+                            onChange={(e) => updateCfcDraftField(row.id, "sub_category", e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            value={row.unit || ""}
+                            onChange={(e) => updateCfcDraftField(row.id, "unit", e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            step="0.00001"
+                            value={row.value ?? ""}
+                            onChange={(e) => updateCfcDraftField(row.id, "value", e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            value={row.region || ""}
+                            onChange={(e) => updateCfcDraftField(row.id, "region", e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            value={row.year ?? ""}
+                            onChange={(e) => updateCfcDraftField(row.id, "year", e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            value={row.source || ""}
+                            onChange={(e) => updateCfcDraftField(row.id, "source", e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            value={row.version || ""}
+                            onChange={(e) => updateCfcDraftField(row.id, "version", e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <button
+                            className="small-btn"
+                            onClick={() => saveCfcFactor(row)}
+                            disabled={cfcSavingId === row.id}
+                          >
+                            {cfcSavingId === row.id ? "Saving..." : "Save"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="config-cfc-divider" />
+
+            <div className="config-card__header">
+              <h2><FaDatabase className="config-icon" /> Airports</h2>
+              <div className="config-actions-right">
+                <button className="config-btn config-btn--outline" onClick={loadAirports}>
+                  <FaUndo /> Refresh Airports
+                </button>
+              </div>
+            </div>
+
+            <div className="config-grid two-col">
+              <div className="config-field">
+                <label>Airport Code</label>
+                <input
+                  value={newAirport.code}
+                  onChange={(e) => setNewAirport((p) => ({ ...p, code: e.target.value.toUpperCase() }))}
+                  placeholder="DEL"
+                  maxLength={3}
+                />
+              </div>
+              <div className="config-field">
+                <label>Airport Name</label>
+                <input
+                  value={newAirport.name}
+                  onChange={(e) => setNewAirport((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="Indira Gandhi International Airport"
+                />
+              </div>
+              <div className="config-field">
+                <label>Latitude</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  value={newAirport.latitude}
+                  onChange={(e) => setNewAirport((p) => ({ ...p, latitude: e.target.value }))}
+                />
+              </div>
+              <div className="config-field">
+                <label>Longitude</label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  value={newAirport.longitude}
+                  onChange={(e) => setNewAirport((p) => ({ ...p, longitude: e.target.value }))}
+                />
+              </div>
+              <div className="config-field">
+                <label>Country</label>
+                <input
+                  value={newAirport.country}
+                  onChange={(e) => setNewAirport((p) => ({ ...p, country: e.target.value.toUpperCase() }))}
+                  placeholder="IN"
+                  maxLength={2}
+                />
+              </div>
+            </div>
+
+            <div className="config-actions-right" style={{ marginTop: "10px" }}>
+              <button
+                className="config-btn config-btn--primary"
+                onClick={createAirport}
+                disabled={airportCreating}
+              >
+                <FaSave /> {airportCreating ? "Creating..." : "Create Airport"}
+              </button>
+            </div>
+
+            <div className="config-field" style={{ marginTop: "14px" }}>
+              <label>Search Airports</label>
+              <input
+                value={airportSearch}
+                onChange={(e) => setAirportSearch(e.target.value)}
+                placeholder="Search by code, name, country"
+              />
+            </div>
+
+            <div className="config-cfc-table-wrap">
+              <table className="config-cfc-table">
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>Country</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {airportsLoading ? (
+                    <tr>
+                      <td colSpan={6} className="config-cfc-empty">Loading airports...</td>
+                    </tr>
+                  ) : filteredAirports.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="config-cfc-empty">No airports found.</td>
+                    </tr>
+                  ) : (
+                    filteredAirports.map((row) => (
+                      <tr key={row.code}>
+                        <td>
+                          <input value={row.code || ""} disabled />
+                        </td>
+                        <td>
+                          <input
+                            value={row.name || ""}
+                            onChange={(e) => updateAirportField(row.code, "name", e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            step="0.000001"
+                            value={row.latitude ?? ""}
+                            onChange={(e) => updateAirportField(row.code, "latitude", e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            step="0.000001"
+                            value={row.longitude ?? ""}
+                            onChange={(e) => updateAirportField(row.code, "longitude", e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            value={row.country || ""}
+                            onChange={(e) => updateAirportField(row.code, "country", e.target.value.toUpperCase())}
+                            maxLength={2}
+                          />
+                        </td>
+                        <td>
+                          <div className="config-inline-actions">
+                            <button
+                              className="small-btn"
+                              onClick={() => saveAirport(row)}
+                              disabled={airportSavingCode === row.code}
+                            >
+                              {airportSavingCode === row.code ? "Saving..." : "Save"}
+                            </button>
+                            <button
+                              className="small-btn outline"
+                              onClick={() => removeAirport(row.code)}
+                              disabled={airportDeletingCode === row.code}
+                            >
+                              {airportDeletingCode === row.code ? "Deleting..." : "Delete"}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </section>
         )}
