@@ -2,6 +2,37 @@ import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 
+const storageState = new Map();
+
+const localStorageMock = {
+  getItem: vi.fn((key) => {
+    return storageState.has(key) ? storageState.get(key) : null;
+  }),
+  setItem: vi.fn((key, value) => {
+    storageState.set(key, String(value));
+  }),
+  removeItem: vi.fn((key) => {
+    storageState.delete(key);
+  }),
+  clear: vi.fn(() => {
+    storageState.clear();
+  }),
+  key: vi.fn((index) => Array.from(storageState.keys())[index] ?? null),
+  get length() {
+    return storageState.size;
+  },
+};
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+  configurable: true,
+});
+
+Object.defineProperty(globalThis, 'localStorage', {
+  value: localStorageMock,
+  configurable: true,
+});
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();
@@ -14,22 +45,6 @@ vi.stubEnv('VITE_API_URL', 'http://localhost:5002');
 vi.stubEnv('VITE_ASSET_SERVICE_URL', 'http://localhost:5000');
 vi.stubEnv('VITE_AUTH_SERVICE_URL', 'http://localhost:5002');
 vi.stubEnv('VITE_NOTIFICATION_SERVICE_URL', 'http://localhost:5001');
-
-// Mock localStorage
-const localStorageMock = {
-  getItem: vi.fn((key) => localStorage[key] || null),
-  setItem: vi.fn((key, value) => {
-    localStorage[key] = value.toString();
-  }),
-  removeItem: vi.fn((key) => {
-    delete localStorage[key];
-  }),
-  clear: vi.fn(() => {
-    Object.keys(localStorage).forEach((key) => delete localStorage[key]);
-  }),
-};
-
-global.localStorage = localStorageMock;
 
 // Mock console methods to reduce noise in tests
 global.console = {
