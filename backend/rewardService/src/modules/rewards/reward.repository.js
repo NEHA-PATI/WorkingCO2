@@ -17,13 +17,28 @@ const getMonthlyPoints = async (u_id) => {
 };
 
 const getTotalPoints = async (u_id) => {
-  const { rows } = await pool.query(`
-    SELECT COALESCE(SUM(points), 0) AS total
-    FROM user_reward_events
-    WHERE u_id = $1
-  `, [u_id]);
+  try {
+    const { rows } = await pool.query(`
+      SELECT COALESCE(total_points, 0) AS total
+      FROM user_points_balance
+      WHERE u_id = $1
+      LIMIT 1
+    `, [u_id]);
 
-  return Number(rows[0].total);
+    return Number(rows[0]?.total || 0);
+  } catch (error) {
+    if (error?.code !== '42P01') {
+      throw error;
+    }
+
+    const { rows } = await pool.query(`
+      SELECT COALESCE(SUM(points), 0) AS total
+      FROM user_reward_events
+      WHERE u_id = $1
+    `, [u_id]);
+
+    return Number(rows[0].total);
+  }
 };
 
 /* ===============================
@@ -511,6 +526,341 @@ const getRewardById = async (reward_id) => {
 
   return rows[0] || null;
 };
+
+const getRewardCatalogAdminItems = async (limit = 100, offset = 0, search = '') => {
+  const normalizedSearch = String(search || '').trim();
+  const hasSearch = normalizedSearch.length > 0;
+
+  const { rows } = await pool.query(`
+    SELECT
+      reward_id,
+      name,
+      description,
+      points,
+      image_url,
+      is_active,
+      created_at,
+      updated_at
+    FROM reward_catalog
+    WHERE ($3::boolean = FALSE OR name ILIKE $4 OR description ILIKE $4 OR reward_id ILIKE $4)
+    ORDER BY updated_at DESC, reward_id ASC
+    LIMIT $1 OFFSET $2
+  `, [limit, offset, hasSearch, `%${normalizedSearch}%`]);
+
+  return rows;
+};
+
+const getRewardCatalogAdminCount = async (search = '') => {
+  const normalizedSearch = String(search || '').trim();
+  const hasSearch = normalizedSearch.length > 0;
+
+  const { rows } = await pool.query(`
+    SELECT COUNT(*) AS total
+    FROM reward_catalog
+    WHERE ($1::boolean = FALSE OR name ILIKE $2 OR description ILIKE $2 OR reward_id ILIKE $2)
+  `, [hasSearch, `%${normalizedSearch}%`]);
+
+  return Number(rows[0].total);
+};
+
+const getRewardRedeemAdminItems = async (limit = 100, offset = 0) => {
+  const { rows } = await pool.query(`
+    SELECT
+      rr.id,
+      rr.u_id,
+      rr.reward_id,
+      rr.points_used,
+      rr.redeemed_at,
+      rr.status,
+      rr.is_completed,
+      rr.completed_at,
+      rr.metadata,
+      rc.name AS reward_name
+    FROM reward_redeem rr
+    LEFT JOIN reward_catalog rc ON rc.reward_id = rr.reward_id
+    ORDER BY rr.redeemed_at DESC, rr.id DESC
+    LIMIT $1 OFFSET $2
+  `, [limit, offset]);
+
+  return rows;
+};
+
+const updateRewardRedeemCompletion = async (id, is_completed = true) => {
+  const { rows } = await pool.query(`
+    UPDATE reward_redeem
+    SET
+      is_completed = $1::boolean,
+      completed_at = CASE WHEN $1::boolean = TRUE THEN NOW() ELSE NULL END
+    WHERE id = $2
+    RETURNING
+      id,
+      u_id,
+      reward_id,
+      points_used,
+      redeemed_at,
+      status,
+      is_completed,
+      completed_at,
+      metadata
+  `, [Boolean(is_completed), id]);
+
+  return rows[0] || null;
+};
+
+const getRewardRedeemAdminCount = async () => {
+  const { rows } = await pool.query(`
+    SELECT COUNT(*) AS total
+    FROM reward_redeem
+  `);
+
+  return Number(rows[0].total);
+};
+
+const createRewardCatalogItem = async ({
+  reward_id,
+  name,
+  description,
+  points,
+  image_url,
+  is_active = true
+}) => {
+  const { rows } = await pool.query(`
+    INSERT INTO reward_catalog (
+      reward_id,
+      name,
+      description,
+      points,
+      image_url,
+      is_active
+    )
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING
+      reward_id,
+      name,
+      description,
+      points,
+      image_url,
+      is_active,
+      created_at,
+      updated_at
+  `, [reward_id, name, description, points, image_url, is_active]);
+
+  return rows[0];
+};
+
+const updateRewardCatalogItem = async (
+  reward_id,
+  {
+    name,
+    description,
+    points,
+    image_url,
+    is_active
+  }
+) => {
+  const { rows } = await pool.query(`
+    UPDATE reward_catalog
+    SET
+      name = COALESCE($1, name),
+      description = COALESCE($2, description),
+      points = COALESCE($3, points),
+      image_url = COALESCE($4, image_url),
+      is_active = CASE WHEN $5::boolean IS NULL THEN is_active ELSE $5::boolean END,
+      updated_at = NOW()
+    WHERE reward_id = $6
+    RETURNING
+      reward_id,
+      name,
+      description,
+      points,
+      image_url,
+      is_active,
+      created_at,
+      updated_at
+  `, [name, description, points, image_url, is_active, reward_id]);
+
+  return rows[0] || null;
+};
+
+const deleteRewardCatalogItem = async (reward_id) => {
+  const { rows } = await pool.query(`
+    DELETE FROM reward_catalog
+    WHERE reward_id = $1
+    RETURNING reward_id
+  `, [reward_id]);
+
+  return rows[0] || null;
+};
+
+const getUserRedeemDetails = async (u_id) => {
+  const base = {
+    u_id,
+    name: u_id,
+    email: null,
+    contact_number: null,
+    address_line: null,
+    city: null,
+    state: null,
+    country: null,
+    pincode: null
+  };
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        u_id,
+        COALESCE(NULLIF(TRIM(username), ''), u_id) AS name,
+        email
+      FROM users
+      WHERE u_id = $1
+      LIMIT 1
+    `, [u_id]);
+
+    if (rows[0]) {
+      base.name = rows[0].name || base.name;
+      base.email = rows[0].email || null;
+    }
+  } catch (error) {
+    if (!(error?.code === '42P01' || error?.code === '42703')) {
+      throw error;
+    }
+  }
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        first_name,
+        middle_name,
+        last_name,
+        mobile_number
+      FROM user_profile
+      WHERE u_id = $1
+      LIMIT 1
+    `, [u_id]);
+
+    if (rows[0]) {
+      const fullName = [rows[0].first_name, rows[0].middle_name, rows[0].last_name]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+
+      if (fullName) {
+        base.name = fullName;
+      }
+      base.contact_number = rows[0].mobile_number || null;
+    }
+  } catch (error) {
+    if (!(error?.code === '42P01' || error?.code === '42703')) {
+      throw error;
+    }
+  }
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT address_line, city, state, country, pincode
+      FROM user_address
+      WHERE u_id = $1
+      ORDER BY is_default DESC, address_id ASC
+      LIMIT 1
+    `, [u_id]);
+
+    if (rows[0]) {
+      base.address_line = rows[0].address_line || null;
+      base.city = rows[0].city || null;
+      base.state = rows[0].state || null;
+      base.country = rows[0].country || null;
+      base.pincode = rows[0].pincode || null;
+    }
+  } catch (error) {
+    if (!(error?.code === '42P01' || error?.code === '42703')) {
+      throw error;
+    }
+  }
+
+  return base;
+};
+
+const redeemReward = async ({
+  u_id,
+  reward_id,
+  points_used,
+  metadata = null
+}) => {
+  const safePoints = Math.abs(Number(points_used) || 0);
+  if (safePoints <= 0) {
+    throw new Error('points_used must be greater than 0');
+  }
+
+  return pool.transaction(async (client) => {
+    let balanceRows = await client.query(`
+      SELECT total_points
+      FROM user_points_balance
+      WHERE u_id = $1
+      FOR UPDATE
+    `, [u_id]);
+
+    if (balanceRows.rows.length === 0) {
+      const earnedRows = await client.query(`
+        SELECT COALESCE(SUM(points), 0) AS total
+        FROM user_reward_events
+        WHERE u_id = $1
+      `, [u_id]);
+
+      const seededTotal = Number(earnedRows.rows[0]?.total || 0);
+
+      await client.query(`
+        INSERT INTO user_points_balance (u_id, total_points, updated_at)
+        VALUES ($1, $2, NOW())
+        ON CONFLICT (u_id) DO NOTHING
+      `, [u_id, seededTotal]);
+
+      balanceRows = await client.query(`
+        SELECT total_points
+        FROM user_points_balance
+        WHERE u_id = $1
+        FOR UPDATE
+      `, [u_id]);
+    }
+
+    const availablePoints = Number(balanceRows.rows[0]?.total_points || 0);
+
+    if (availablePoints < safePoints) {
+      return {
+        redeemed: false,
+        availablePoints
+      };
+    }
+
+    const updateResult = await client.query(`
+      UPDATE user_points_balance
+      SET
+        total_points = total_points - $2,
+        updated_at = NOW()
+      WHERE u_id = $1
+      RETURNING total_points
+    `, [u_id, safePoints]);
+
+    const redeemInsert = await client.query(`
+      INSERT INTO reward_redeem (
+        u_id,
+        reward_id,
+        points_used,
+        redeemed_at,
+        status,
+        metadata
+      )
+      VALUES ($1, $2, $3, NOW(), 'SUCCESS', $4::jsonb)
+      RETURNING id, redeemed_at
+    `, [u_id, reward_id, safePoints, metadata ? JSON.stringify(metadata) : null]);
+
+    return {
+      redeemed: true,
+      current_points: Number(updateResult.rows[0]?.total_points || 0),
+      redeem_id: redeemInsert.rows[0]?.id || null,
+      redeemed_at: redeemInsert.rows[0]?.redeemed_at || null
+    };
+  });
+};
 /* ===============================
    CREATE RULE
 ================================ */
@@ -539,7 +889,6 @@ const createRule = async ({
 
   return rows[0];
 };
-
 
 
 /* ===============================
@@ -572,7 +921,6 @@ const updateRule = async (rule_id, {
   return rows[0];
 };
 
-
 module.exports = {
   getMonthlyPoints,
   getTotalPoints,
@@ -599,6 +947,16 @@ module.exports = {
   getRewardCatalogItems,
   getRewardCatalogCount,
   getRewardById,
+  getRewardCatalogAdminItems,
+  getRewardCatalogAdminCount,
+  getRewardRedeemAdminItems,
+  getRewardRedeemAdminCount,
+  updateRewardRedeemCompletion,
+  createRewardCatalogItem,
+  updateRewardCatalogItem,
+  deleteRewardCatalogItem,
+  getUserRedeemDetails,
+  redeemReward,
   getContestStats,
   createRule,
   updateRule

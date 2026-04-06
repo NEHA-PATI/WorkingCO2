@@ -13,7 +13,9 @@ import { useModal } from "@contexts/ModalContext";
  */
 const FOOTER_HIDDEN_PATHS = ["/settings", "/my-carbon-footprint"];
 
-const FOOTER_HIDDEN_PREFIXES = ["/admin"];
+const FOOTER_HIDDEN_PREFIXES = ["/admin",
+  // "/marketplace"
+];
 
 export default function BaseLayout() {
   const location = useLocation();
@@ -30,14 +32,18 @@ export default function BaseLayout() {
     FOOTER_HIDDEN_PREFIXES.some((prefix) =>
       location.pathname.startsWith(prefix)
     );
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  // const hideNavbar = location.pathname.startsWith("/marketplace");
 
   return (
     <div className="app-container">
       {/* Global Navbar */}
-      <Navbar />
-
+      {
+        // !hideNavbar &&
+        <Navbar />
+      }
       {/* Page Content */}
-      <main className="main-content">
+      <main className={`main-content ${isAdminRoute ? "admin-main-content" : ""}`}>
         <Outlet />
       </main>
 

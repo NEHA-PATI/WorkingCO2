@@ -1,5 +1,6 @@
 const repo = require('./reward.repository');
 const { MONTHLY_CAP } = require('../../config/constants');
+const { sendRedeemSuccessEmail } = require('./reward.mail');
 
 const HOURS_24_MS = 24 * 60 * 60 * 1000;
 const DAILY_CHECKIN_KEY = 'daily_checkin';
@@ -636,6 +637,161 @@ const getRewardCatalog = async (page = 1, limit = 12) => {
   }
 };
 
+const getRewardCatalogAdmin = async (page = 1, limit = 100, search = '') => {
+  const safePage = Math.max(Number(page) || 1, 1);
+  const safeLimit = Math.min(Math.max(Number(limit) || 100, 1), 500);
+  const offset = (safePage - 1) * safeLimit;
+
+  try {
+    const [items, total] = await Promise.all([
+      repo.getRewardCatalogAdminItems(safeLimit, offset, search),
+      repo.getRewardCatalogAdminCount(search)
+    ]);
+
+    return {
+      items,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: Math.max(Math.ceil(total / safeLimit), 1)
+    };
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+
+    return {
+      items: [],
+      total: 0,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: 1
+    };
+  }
+};
+
+const getRewardRedeemsAdmin = async (page = 1, limit = 100) => {
+  const safePage = Math.max(Number(page) || 1, 1);
+  const safeLimit = Math.min(Math.max(Number(limit) || 100, 1), 500);
+  const offset = (safePage - 1) * safeLimit;
+
+  try {
+    const [items, total] = await Promise.all([
+      repo.getRewardRedeemAdminItems(safeLimit, offset),
+      repo.getRewardRedeemAdminCount()
+    ]);
+
+    return {
+      items,
+      total,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: Math.max(Math.ceil(total / safeLimit), 1)
+    };
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+
+    return {
+      items: [],
+      total: 0,
+      page: safePage,
+      limit: safeLimit,
+      totalPages: 1
+    };
+  }
+};
+
+const updateRewardRedeemCompletion = async (id, is_completed = true) => {
+  const redeemId = Number(id);
+  if (!Number.isInteger(redeemId) || redeemId <= 0) {
+    throw new Error('valid redeem id is required');
+  }
+
+  try {
+    const updated = await repo.updateRewardRedeemCompletion(redeemId, Boolean(is_completed));
+    if (!updated) {
+      throw new Error('redeem not found');
+    }
+    return updated;
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+    throw new Error('REDEEM_NOT_CONFIGURED');
+  }
+};
+
+const createRewardCatalogItem = async ({
+  reward_id,
+  name,
+  description,
+  points,
+  image_url,
+  is_active
+}) => {
+  const normalizedName = String(name || '').trim();
+  if (!normalizedName) {
+    throw new Error('name is required');
+  }
+
+  const safePoints = toSafeNumber(points, 0);
+  if (safePoints <= 0) {
+    throw new Error('points must be greater than 0');
+  }
+
+  const normalizedId = String(reward_id || '').trim() || `rw_${Date.now()}`;
+
+  return repo.createRewardCatalogItem({
+    reward_id: normalizedId,
+    name: normalizedName,
+    description: description ? String(description).trim() : null,
+    points: safePoints,
+    image_url: image_url ? String(image_url).trim() : null,
+    is_active: typeof is_active === 'boolean' ? is_active : true
+  });
+};
+
+const updateRewardCatalogItem = async (reward_id, payload = {}) => {
+  const normalizedId = String(reward_id || '').trim();
+  if (!normalizedId) {
+    throw new Error('reward_id is required');
+  }
+
+  const updates = {};
+  if (payload.name !== undefined) updates.name = String(payload.name || '').trim();
+  if (payload.description !== undefined) updates.description = payload.description ? String(payload.description).trim() : null;
+  if (payload.points !== undefined) {
+    const safePoints = toSafeNumber(payload.points, 0);
+    if (safePoints <= 0) throw new Error('points must be greater than 0');
+    updates.points = safePoints;
+  }
+  if (payload.image_url !== undefined) updates.image_url = payload.image_url ? String(payload.image_url).trim() : null;
+  if (payload.is_active !== undefined) updates.is_active = Boolean(payload.is_active);
+
+  const updated = await repo.updateRewardCatalogItem(normalizedId, updates);
+  if (!updated) {
+    throw new Error('reward not found');
+  }
+
+  return updated;
+};
+
+const deleteRewardCatalogItem = async (reward_id) => {
+  const normalizedId = String(reward_id || '').trim();
+  if (!normalizedId) {
+    throw new Error('reward_id is required');
+  }
+
+  const deleted = await repo.deleteRewardCatalogItem(normalizedId);
+  if (!deleted) {
+    throw new Error('reward not found');
+  }
+
+  return deleted;
+};
+
 const redeemReward = async (u_id, reward_id) => {
   let reward;
   try {
@@ -658,28 +814,72 @@ const redeemReward = async (u_id, reward_id) => {
     };
   }
 
-  const availablePoints = await repo.getTotalPoints(u_id);
-  if (availablePoints < reward.points) {
+  const userDetails = await repo.getUserRedeemDetails(u_id);
+  const formattedAddress = userDetails
+    ? [
+      userDetails.address_line,
+      userDetails.city,
+      userDetails.state,
+      userDetails.country,
+      userDetails.pincode
+    ].filter(Boolean).join(', ')
+    : null;
+
+  let redeemResult;
+  try {
+    redeemResult = await repo.redeemReward({
+      u_id,
+      reward_id: reward.reward_id,
+      points_used: toSafeNumber(reward.points, 0),
+      metadata: {
+        reward_name: reward.name,
+        points: toSafeNumber(reward.points, 0),
+        name: userDetails?.name || u_id,
+        email: userDetails?.email || null,
+        contact_number: userDetails?.contact_number || null,
+        address: formattedAddress || null
+      }
+    });
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+
+    return {
+      redeemed: false,
+      reason: 'REDEEM_NOT_CONFIGURED'
+    };
+  }
+
+  if (!redeemResult?.redeemed) {
     return {
       redeemed: false,
       reason: 'INSUFFICIENT_POINTS',
       required_points: reward.points,
-      current_points: availablePoints
+      current_points: toSafeNumber(redeemResult?.availablePoints, 0)
     };
   }
 
-  await repo.insertRewardEvent({
-    u_id,
-    action_key: `redeem_${reward.reward_id}`,
-    action_type: 'one_time',
-    points: -Math.abs(toSafeNumber(reward.points, 0)),
-    activity_date: new Date()
-  });
+  if (userDetails?.email) {
+    sendRedeemSuccessEmail({
+      to: userDetails.email,
+      userName: userDetails.name || u_id,
+      rewardName: reward.name,
+      pointsUsed: toSafeNumber(reward.points, 0),
+      remainingPoints: redeemResult.current_points,
+      redeemId: redeemResult.redeem_id,
+      redeemedAt: redeemResult.redeemed_at
+    }).catch((error) => {
+      console.warn('[reward-service] redeem success email failed:', error?.message || error);
+    });
+  }
 
   return {
     redeemed: true,
     reward,
-    current_points: availablePoints - reward.points
+    current_points: redeemResult.current_points,
+    redeem_id: redeemResult.redeem_id,
+    redeemed_at: redeemResult.redeemed_at
   };
 };
 const createRule = async (data) => {
@@ -709,6 +909,12 @@ module.exports = {
   getTodayTaskStatus,
   getRewardHistory,
   getRewardCatalog,
+  getRewardCatalogAdmin,
+  getRewardRedeemsAdmin,
+  updateRewardRedeemCompletion,
+  createRewardCatalogItem,
+  updateRewardCatalogItem,
+  deleteRewardCatalogItem,
   redeemReward,
   getContestStats,
   createRule,
