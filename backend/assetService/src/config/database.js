@@ -11,6 +11,10 @@ if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
+const shouldUseSsl =
+  process.env.DB_SSL === "true" ||
+  process.env.NODE_ENV === "production";
+
 // Create connection pool
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -18,9 +22,7 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
   password: String(process.env.DB_PASSWORD),
-  ssl: process.env.DB_SSL === "true"
-    ? { rejectUnauthorized: false }
-    : false,
+  ssl: shouldUseSsl ? { rejectUnauthorized: false } : false,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,

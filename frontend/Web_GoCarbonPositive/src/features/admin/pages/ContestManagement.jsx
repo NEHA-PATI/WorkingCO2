@@ -18,6 +18,7 @@ import {
   updateRule,
   getRewardsCatalogAdmin,
   getRedeemsAdmin,
+  updateRedeemCompletionStatus,
   createRewardCatalogItem,
   updateRewardCatalogItem,
   deleteRewardCatalogItem,
@@ -243,6 +244,22 @@ const loadRedeems = async () => {
     alert("Failed to load redeems");
   } finally {
     setRedeemsLoading(false);
+  }
+};
+
+const markRedeemCompleted = async (redeemId) => {
+  try {
+    await updateRedeemCompletionStatus(redeemId, true);
+    setRedeems((prev) =>
+      prev.map((row) =>
+        Number(row.id) === Number(redeemId)
+          ? { ...row, is_completed: true, completed_at: new Date().toISOString() }
+          : row
+      )
+    );
+  } catch (err) {
+    console.error("Failed to mark redeem as completed:", err);
+    alert(err?.message || "Failed to update completed status");
   }
 };
 
@@ -697,6 +714,7 @@ const setStatus = async (id, status) => {
             <RedeemsPanel
               rows={redeems}
               loading={redeemsLoading}
+              onMarkCompleted={markRedeemCompleted}
             />
           )}
         </div>
@@ -1348,7 +1366,36 @@ function RewardsCatalogPanel({
   );
 }
 
-function RedeemsPanel({ rows, loading }) {
+function RedeemsPanel({ rows, loading, onMarkCompleted }) {
+  const [selectedRedeem, setSelectedRedeem] = useState(null);
+  const [confirmRow, setConfirmRow] = useState(null);
+  const [isCompleting, setIsCompleting] = useState(false);
+
+  const openDetails = (row) => {
+    const metadata = parseRedeemMetadata(row?.metadata);
+    setSelectedRedeem({ ...row, metadata });
+  };
+
+  const openConfirmCompleted = (row) => setConfirmRow(row);
+
+  const closeConfirmCompleted = () => {
+    if (isCompleting) return;
+    setConfirmRow(null);
+  };
+
+  const confirmCompleted = async () => {
+    if (!confirmRow || !onMarkCompleted) return;
+    try {
+      setIsCompleting(true);
+      await onMarkCompleted(confirmRow.id);
+      setConfirmRow(null);
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
+  const closeDetails = () => setSelectedRedeem(null);
+
   return (
     <div className="space-y-4">
       <div className="overflow-x-auto border border-slate-200 rounded-lg">
@@ -1361,7 +1408,7 @@ function RedeemsPanel({ rows, loading }) {
               <th className="px-4 py-3">Points Used</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Redeemed At</th>
-              <th className="px-4 py-3">Metadata</th>
+              <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
@@ -1379,12 +1426,6 @@ function RedeemsPanel({ rows, loading }) {
               </tr>
             ) : (
               rows.map((row) => {
-                const metadataText = row.metadata
-                  ? (typeof row.metadata === "string"
-                      ? row.metadata
-                      : JSON.stringify(row.metadata))
-                  : "-";
-
                 return (
                   <tr key={row.id} className="hover:bg-slate-50/60">
                     <td className="px-4 py-3 font-medium text-slate-900">{row.id}</td>
@@ -1400,8 +1441,29 @@ function RedeemsPanel({ rows, loading }) {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-slate-500">{formatDateTime(row.redeemed_at)}</td>
-                    <td className="px-4 py-3 text-slate-500 max-w-[320px]">
-                      <div className="truncate" title={metadataText}>{metadataText}</div>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openDetails(row)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50"
+                        >
+                          <Eye className="w-4 h-4" />
+                          View Details
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openConfirmCompleted(row)}
+                          disabled={Boolean(row.is_completed)}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm ${
+                            row.is_completed
+                              ? "border-emerald-300 bg-emerald-100 text-emerald-800"
+                              : "border-slate-300 bg-slate-100 text-slate-600 hover:bg-slate-200"
+                          }`}
+                        >
+                          Completed
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -1410,8 +1472,126 @@ function RedeemsPanel({ rows, loading }) {
           </tbody>
         </table>
       </div>
+      <RedeemDetailsModal row={selectedRedeem} onClose={closeDetails} />
+      <ConfirmCompletionModal
+        row={confirmRow}
+        isSubmitting={isCompleting}
+        onCancel={closeConfirmCompleted}
+        onConfirm={confirmCompleted}
+      />
     </div>
   );
+}
+
+function ConfirmCompletionModal({ row, isSubmitting, onCancel, onConfirm }) {
+  if (!row) return null;
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-black/40" onClick={onCancel} />
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-xl">
+          <div className="px-5 py-4 border-b border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-900">Confirm Completion</h3>
+          </div>
+          <div className="px-5 py-4 text-sm text-slate-700">
+            Are you sure you want to confirm this redeem as completed?
+          </div>
+          <div className="px-5 py-4 border-t border-slate-200 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={isSubmitting}
+              className="px-4 py-2 text-sm rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              disabled={isSubmitting}
+              className="px-4 py-2 text-sm rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
+            >
+              {isSubmitting ? "Updating..." : "OK"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RedeemDetailsModal({ row, onClose }) {
+  if (!row) return null;
+
+  const metadata = row.metadata || {};
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl rounded-xl border border-slate-200 bg-white shadow-xl">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-900">Redeem Details</h3>
+            <button type="button" onClick={onClose} className="p-2 rounded-md hover:bg-slate-100">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="px-5 py-4 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <DetailItem label="Redeem ID" value={row.id} />
+              <DetailItem label="User ID" value={row.u_id} />
+              <DetailItem label="Reward" value={metadata.reward_name || row.reward_name || row.reward_id} />
+              <DetailItem label="Reward ID" value={row.reward_id} />
+              <DetailItem label="Points Used" value={metadata.points ?? row.points_used} />
+              <DetailItem label="Status" value={row.status || "SUCCESS"} />
+              <DetailItem label="Redeemed At" value={formatDateTime(row.redeemed_at)} />
+            </div>
+
+            <div className="border border-slate-200 rounded-lg p-4 bg-slate-50/60">
+              <h4 className="text-sm font-semibold text-slate-800 mb-3">User Details</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <DetailItem label="Name" value={metadata.name} />
+                <DetailItem label="Email" value={metadata.email} />
+                <DetailItem label="Contact Number" value={metadata.contact_number} />
+                <DetailItem label="Address" value={metadata.address} fullWidth />
+              </div>
+            </div>
+          </div>
+          <div className="px-5 py-4 border-t border-slate-200 flex justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DetailItem({ label, value, fullWidth = false }) {
+  return (
+    <div className={fullWidth ? "md:col-span-2" : ""}>
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-1 text-sm text-slate-800 break-words">{value || "-"}</p>
+    </div>
+  );
+}
+
+function parseRedeemMetadata(metadata) {
+  if (!metadata) return {};
+  if (typeof metadata === "object") return metadata;
+
+  try {
+    const parsed = JSON.parse(metadata);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch (_err) {
+    return {};
+  }
 }
 
 function RewardFormDrawer({
