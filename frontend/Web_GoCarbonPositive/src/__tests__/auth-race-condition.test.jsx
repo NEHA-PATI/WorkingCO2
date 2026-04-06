@@ -39,7 +39,7 @@ describe('Auth Race Condition Fix', () => {
   describe('Login Flow', () => {
     it('should use authToken and authUser keys after login', async () => {
       // Mock successful login API response
-      global.fetch = vi.fn(() =>
+      globalThis.fetch = vi.fn(() =>
         Promise.resolve({
           ok: true,
           json: () =>

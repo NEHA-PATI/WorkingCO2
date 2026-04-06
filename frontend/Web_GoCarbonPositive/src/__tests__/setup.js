@@ -47,7 +47,7 @@ vi.stubEnv('VITE_AUTH_SERVICE_URL', 'http://localhost:5002');
 vi.stubEnv('VITE_NOTIFICATION_SERVICE_URL', 'http://localhost:5001');
 
 // Mock console methods to reduce noise in tests
-global.console = {
+globalThis.console = {
   ...console,
   log: vi.fn(),
   error: vi.fn(),
