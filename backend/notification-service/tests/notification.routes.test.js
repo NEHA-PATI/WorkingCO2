@@ -37,6 +37,16 @@ const Notification = require("../src/models/Notification");
 const EventService = require("../src/services/eventService");
 const { MESSAGES, ROLES } = require("../src/config/constants");
 
+const INTERNAL_SECRET = "test-internal-secret";
+
+beforeEach(() => {
+  process.env.INTERNAL_SECRET = INTERNAL_SECRET;
+});
+
+afterEach(() => {
+  delete process.env.INTERNAL_SECRET;
+});
+
 const app = express();
 app.use(express.json());
 app.use("/api/notifications", router);
@@ -52,6 +62,7 @@ describe("Notification Routes", () => {
 
       const res = await request(app)
         .post("/api/notifications/event")
+        .set("x-internal-secret", INTERNAL_SECRET)
         .send({ event_type: "user.signup" });
 
       expect(res.status).toBe(200);
@@ -66,6 +77,7 @@ describe("Notification Routes", () => {
 
       const res = await request(app)
         .post("/api/notifications/event")
+        .set("x-internal-secret", INTERNAL_SECRET)
         .send({ event_type: "user.signup" });
 
       expect(res.status).toBe(500);

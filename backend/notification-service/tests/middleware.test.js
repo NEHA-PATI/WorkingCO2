@@ -55,7 +55,7 @@ describe("Notification Service - Auth Middleware", () => {
 
     auth(req, res, next);
 
-    expect(jwt.verify).toHaveBeenCalledWith(["Bearer", "bad"], "test-secret");
+    expect(jwt.verify).toHaveBeenCalledWith("bad", "test-secret");
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -79,7 +79,7 @@ describe("Notification Service - Auth Middleware", () => {
 
     auth(req, res, next);
 
-    expect(jwt.verify).toHaveBeenCalledWith(["Bearer", "good"], "test-secret");
+    expect(jwt.verify).toHaveBeenCalledWith("good", "test-secret");
     expect(req.user).toEqual({
       id: 1,
       role: "ADMIN",
