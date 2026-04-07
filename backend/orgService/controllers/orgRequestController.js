@@ -183,14 +183,15 @@ exports.approveOrgRequest = async (req, res) => {
 
     if (!password) {
         return res.status(400).json({
-            message: "Password is required to approve organization"
+            success: false,
+            message: "Password is required to approve organization",
+            data: null
         });
     }
 
     let client;
     try {
-        const { id } = req.params; // org_request_id
-        const { password } = req.body;
+        client = await pool.connect();
 
         if (!password) {
             return res.status(400).json({
