@@ -14,6 +14,17 @@ const createRes = () => {
   return res;
 };
 
+const expectErrorResponse = (res, status, message) => {
+  expect(res.status).toHaveBeenCalledWith(status);
+  expect(res.json).toHaveBeenCalledWith(
+    expect.objectContaining({
+      success: false,
+      message,
+      data: null,
+    })
+  );
+};
+
 describe("Career Service - Applications Controller Unit Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,11 +42,13 @@ describe("Career Service - Applications Controller Unit Tests", () => {
       await applicationController.getAllApplications(req, res, next);
 
       expect(Application.findAll).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith({
-        status: "success",
-        count: 2,
-        data: rows,
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Applications fetched successfully",
+          data: rows,
+        })
+      );
       expect(next).not.toHaveBeenCalled();
     });
 
@@ -74,10 +87,13 @@ describe("Career Service - Applications Controller Unit Tests", () => {
 
       expect(Application.create).toHaveBeenCalledWith(req.body);
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({
-        status: "success",
-        data: created,
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Application submitted successfully",
+          data: created,
+        })
+      );
     });
 
     test("Database error -> next(err)", async () => {
@@ -102,11 +118,7 @@ describe("Career Service - Applications Controller Unit Tests", () => {
 
       await applicationController.updateApplicationStatus(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        status: "fail",
-        message: "Status is required",
-      });
+      expectErrorResponse(res, 400, "Status is required");
     });
 
     test("Application not found -> 404", async () => {
@@ -118,11 +130,7 @@ describe("Career Service - Applications Controller Unit Tests", () => {
 
       await applicationController.updateApplicationStatus(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        status: "fail",
-        message: "Application not found",
-      });
+      expectErrorResponse(res, 404, "Application not found");
     });
 
     test("Success -> 200", async () => {
@@ -136,10 +144,13 @@ describe("Career Service - Applications Controller Unit Tests", () => {
       await applicationController.updateApplicationStatus(req, res, next);
 
       expect(Application.updateStatus).toHaveBeenCalledWith("1", "Reviewed");
-      expect(res.json).toHaveBeenCalledWith({
-        status: "success",
-        data: updated,
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Application updated successfully",
+          data: updated,
+        })
+      );
     });
 
     test("Database error -> next(err)", async () => {

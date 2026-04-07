@@ -23,6 +23,17 @@ const createRes = () => {
   return res;
 };
 
+const expectErrorResponse = (res, status, message) => {
+  expect(res.status).toHaveBeenCalledWith(status);
+  expect(res.json).toHaveBeenCalledWith(
+    expect.objectContaining({
+      success: false,
+      message,
+      data: null,
+    })
+  );
+};
+
 describe("orgRequestController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -75,10 +86,13 @@ describe("orgRequestController", () => {
 
       expect(pool.query).toHaveBeenCalledTimes(2);
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Organization request submitted successfully",
-        org_request_id: "OREQ000010",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Organization request submitted successfully",
+          data: { org_request_id: "OREQ000010" },
+        })
+      );
     });
 
     test("DB failure -> 500", async () => {
@@ -101,8 +115,7 @@ describe("orgRequestController", () => {
 
       await createOrgRequest(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ message: "Internal server error" });
+      expectErrorResponse(res, 500, "Internal server error");
     });
   });
 
@@ -115,7 +128,13 @@ describe("orgRequestController", () => {
 
       await getAllOrgRequests(req, res);
 
-      expect(res.json).toHaveBeenCalledWith([{ id: 1 }]);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Organization requests fetched successfully",
+          data: [{ id: 1 }],
+        })
+      );
     });
 
     test("DB error -> 500", async () => {
@@ -126,8 +145,7 @@ describe("orgRequestController", () => {
 
       await getAllOrgRequests(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ message: "Internal server error" });
+      expectErrorResponse(res, 500, "Internal server error");
     });
   });
 
@@ -138,10 +156,11 @@ describe("orgRequestController", () => {
 
       await approveOrgRequest(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Password is required to approve organization",
-      });
+      expectErrorResponse(
+        res,
+        400,
+        "Password is required to approve organization"
+      );
     });
 
     test("Request not found -> 404", async () => {
@@ -161,7 +180,13 @@ describe("orgRequestController", () => {
 
       expect(client.query).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: "Request not found" });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Request not found",
+          data: null,
+        })
+      );
       expect(client.release).toHaveBeenCalled();
     });
 
@@ -181,9 +206,13 @@ describe("orgRequestController", () => {
       await approveOrgRequest(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Request already processed",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: "Request already processed",
+          data: null,
+        })
+      );
       expect(client.release).toHaveBeenCalled();
     });
 
@@ -207,10 +236,13 @@ describe("orgRequestController", () => {
       await approveOrgRequest(req, res);
 
       expect(bcrypt.hash).toHaveBeenCalledWith("pass", 10);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Organization approved and created successfully",
-        org_id: "ORG0004",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Organization approved and created successfully",
+          data: { org_id: "ORG0004" },
+        })
+      );
     });
 
     test("Transaction failure -> 500", async () => {
@@ -228,8 +260,7 @@ describe("orgRequestController", () => {
 
       await approveOrgRequest(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ message: "Internal server error" });
+      expectErrorResponse(res, 500, "Internal server error");
       expect(client.release).toHaveBeenCalled();
     });
   });
@@ -243,9 +274,13 @@ describe("orgRequestController", () => {
 
       await rejectOrgRequest(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Organization request rejected",
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Organization request rejected",
+          data: null,
+        })
+      );
     });
 
     test("Invalid state -> 400", async () => {
@@ -256,10 +291,11 @@ describe("orgRequestController", () => {
 
       await rejectOrgRequest(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Request not found or already processed",
-      });
+      expectErrorResponse(
+        res,
+        400,
+        "Request not found or already processed"
+      );
     });
 
     test("DB error -> 500", async () => {
@@ -270,8 +306,7 @@ describe("orgRequestController", () => {
 
       await rejectOrgRequest(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ message: "Internal server error" });
+      expectErrorResponse(res, 500, "Internal server error");
     });
   });
 });

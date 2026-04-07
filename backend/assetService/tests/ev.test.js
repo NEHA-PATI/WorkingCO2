@@ -22,6 +22,16 @@ const createRes = () => {
   return res;
 };
 
+const expectErrorResponse = (res, status, message) => {
+  expect(res.status).toHaveBeenCalledWith(status);
+  expect(res.json).toHaveBeenCalledWith(
+    expect.objectContaining({
+      success: false,
+      message,
+    })
+  );
+};
+
 describe("Asset Service - EV Asset Unit Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,13 +44,7 @@ describe("Asset Service - EV Asset Unit Tests", () => {
 
       await EVController.createEV(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Missing required field: u_id",
-        })
-      );
+      expectErrorResponse(res, 400, "Missing required field: u_id");
       expect(EVModel.create).not.toHaveBeenCalled();
     });
 
@@ -114,10 +118,12 @@ describe("Asset Service - EV Asset Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "EV created successfully",
-          data: newEV,
-          evCount: 2,
+          data: {
+            ev: newEV,
+            evCount: 2,
+          },
         })
       );
     });
@@ -130,13 +136,7 @@ describe("Asset Service - EV Asset Unit Tests", () => {
 
       await EVController.createEV(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "db failure",
-        })
-      );
+      expectErrorResponse(res, 500, "db failure");
     });
   });
 
@@ -154,9 +154,8 @@ describe("Asset Service - EV Asset Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "EVs retrieved successfully",
-          count: 2,
           data: rows,
         })
       );
@@ -173,9 +172,8 @@ describe("Asset Service - EV Asset Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "EVs retrieved successfully",
-          count: 0,
           data: [],
         })
       );
@@ -189,13 +187,7 @@ describe("Asset Service - EV Asset Unit Tests", () => {
 
       await EVController.getEVsByUser(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Failed to fetch EVs",
-        })
-      );
+      expectErrorResponse(res, 500, "Failed to fetch EVs");
     });
   });
 
@@ -206,13 +198,7 @@ describe("Asset Service - EV Asset Unit Tests", () => {
 
       await EVController.updateEVStatus(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Status is required",
-        })
-      );
+      expectErrorResponse(res, 400, "Status is required");
       expect(EVModel.updateStatus).not.toHaveBeenCalled();
     });
 
@@ -225,13 +211,10 @@ describe("Asset Service - EV Asset Unit Tests", () => {
 
       await EVController.updateEVStatus(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message:
-            "Invalid status. Must be one of: pending, approved, rejected",
-        })
+      expectErrorResponse(
+        res,
+        400,
+        "Invalid status. Must be one of: pending, approved, rejected"
       );
       expect(EVModel.updateStatus).not.toHaveBeenCalled();
     });
@@ -257,7 +240,7 @@ describe("Asset Service - EV Asset Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "EV status updated successfully",
           data: updatedEV,
         })
@@ -275,13 +258,7 @@ describe("Asset Service - EV Asset Unit Tests", () => {
 
       await EVController.updateEVStatus(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "EV not found",
-        })
-      );
+      expectErrorResponse(res, 404, "EV not found");
     });
 
     test("DB error -> 500", async () => {
@@ -295,13 +272,7 @@ describe("Asset Service - EV Asset Unit Tests", () => {
 
       await EVController.updateEVStatus(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Failed to update EV status",
-        })
-      );
+      expectErrorResponse(res, 500, "Failed to update EV status");
     });
   });
 
@@ -319,7 +290,7 @@ describe("Asset Service - EV Asset Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "EV deleted successfully",
           data: deletedEV,
         })
@@ -334,13 +305,7 @@ describe("Asset Service - EV Asset Unit Tests", () => {
 
       await EVController.deleteEV(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "EV not found",
-        })
-      );
+      expectErrorResponse(res, 404, "EV not found");
     });
 
     test("Database error -> 500", async () => {
@@ -351,13 +316,7 @@ describe("Asset Service - EV Asset Unit Tests", () => {
 
       await EVController.deleteEV(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Failed to delete EV",
-        })
-      );
+      expectErrorResponse(res, 500, "Failed to delete EV");
     });
   });
 });

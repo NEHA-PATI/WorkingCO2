@@ -24,6 +24,16 @@ const createRes = () => {
   return res;
 };
 
+const expectErrorResponse = (res, status, message) => {
+  expect(res.status).toHaveBeenCalledWith(status);
+  expect(res.json).toHaveBeenCalledWith(
+    expect.objectContaining({
+      success: false,
+      message,
+    })
+  );
+};
+
 describe("Asset Service - Tree Asset Unit Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,12 +53,10 @@ describe("Asset Service - Tree Asset Unit Tests", () => {
 
       await TreeController.createTree(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Missing required fields: UID, TreeName, PlantingDate, Height",
-        })
+      expectErrorResponse(
+        res,
+        400,
+        "Missing required fields: UID, TreeName, PlantingDate, Height"
       );
       expect(TreeModel.create).not.toHaveBeenCalled();
     });
@@ -105,10 +113,12 @@ describe("Asset Service - Tree Asset Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "Tree created successfully",
-          data: newTree,
-          treeCount: 4,
+          data: {
+            tree: newTree,
+            treeCount: 4,
+          },
         })
       );
     });
@@ -128,13 +138,7 @@ describe("Asset Service - Tree Asset Unit Tests", () => {
 
       await TreeController.createTree(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Failed to create Tree",
-        })
-      );
+      expectErrorResponse(res, 500, "Failed to create Tree");
     });
   });
 
@@ -152,9 +156,8 @@ describe("Asset Service - Tree Asset Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "Trees retrieved successfully",
-          count: 2,
           data: rows,
         })
       );
@@ -171,9 +174,8 @@ describe("Asset Service - Tree Asset Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "Trees retrieved successfully",
-          count: 0,
           data: [],
         })
       );
@@ -187,13 +189,7 @@ describe("Asset Service - Tree Asset Unit Tests", () => {
 
       await TreeController.getTreesByUser(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Failed to fetch Trees",
-        })
-      );
+      expectErrorResponse(res, 500, "Failed to fetch Trees");
     });
   });
 
@@ -204,13 +200,7 @@ describe("Asset Service - Tree Asset Unit Tests", () => {
 
       await TreeController.updateTreeStatus(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Status is required",
-        })
-      );
+      expectErrorResponse(res, 400, "Status is required");
       expect(TreeModel.updateStatus).not.toHaveBeenCalled();
     });
 
@@ -223,13 +213,10 @@ describe("Asset Service - Tree Asset Unit Tests", () => {
 
       await TreeController.updateTreeStatus(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message:
-            "Invalid status. Must be one of: pending, approved, rejected",
-        })
+      expectErrorResponse(
+        res,
+        400,
+        "Invalid status. Must be one of: pending, approved, rejected"
       );
       expect(TreeModel.updateStatus).not.toHaveBeenCalled();
     });
@@ -255,7 +242,7 @@ describe("Asset Service - Tree Asset Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "Tree status updated successfully",
           data: updatedTree,
         })
@@ -273,13 +260,7 @@ describe("Asset Service - Tree Asset Unit Tests", () => {
 
       await TreeController.updateTreeStatus(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Tree not found",
-        })
-      );
+      expectErrorResponse(res, 404, "Tree not found");
     });
 
     test("DB error -> 500", async () => {
@@ -293,13 +274,7 @@ describe("Asset Service - Tree Asset Unit Tests", () => {
 
       await TreeController.updateTreeStatus(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Failed to update Tree status",
-        })
-      );
+      expectErrorResponse(res, 500, "Failed to update Tree status");
     });
   });
 });
