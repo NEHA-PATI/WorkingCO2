@@ -140,12 +140,12 @@ export default function MarketplaceAuthModal({
     registrationNumber: "",
   });
 
-  const [otp, setOtp] = useState(["4", "8", "", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const otpRefs = useRef([]);
 
   const stepMeta = useMemo(() => getStepMeta(view), [view]);
   const otpValue = otp.join("");
-  const canVerify = otpValue.length === 6 && !otpValue.includes("");
+  const canVerify = otp.some((digit) => digit !== "");
   const canContinuePlatform = platformConsent.termsAccepted;
   const canContinueAccount =
     signupAccount.fullName.trim().length >= 2 &&
@@ -216,8 +216,11 @@ export default function MarketplaceAuthModal({
       next[index] = digit;
       return next;
     });
-    if (digit && index < 5) {
-      otpRefs.current[index + 1]?.focus();
+    if (digit) {
+      if (index < 5) {
+        otpRefs.current[index + 1]?.focus();
+      }
+      goToSignupStep("success");
     }
   };
 
@@ -549,8 +552,8 @@ export default function MarketplaceAuthModal({
     </div>
   );
   const renderAccountSetup = () => (
-    <div className="marketplace1-auth-dialog mx-auto w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-      <div className="flex items-center justify-between border-b border-[#e2e6e2] px-5 py-4 sm:px-6">
+    <div className="marketplace1-auth-dialog mx-auto flex max-h-[calc(100dvh-1rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)]">
+      <div className="flex items-center justify-between border-b border-[#e2e6e2] px-4 py-3 sm:px-6 sm:py-4">
         <div>
           <h3 className="marketplace1-auth-headline text-xl font-extrabold text-[#005129]">
             Account Setup
@@ -568,15 +571,15 @@ export default function MarketplaceAuthModal({
         </button>
       </div>
 
-      <div className="px-5 pb-6 pt-5 sm:px-6">
-        <div className="mb-6 h-2 overflow-hidden rounded-full bg-[#e6e9e7]">
+      <div className="marketplace1-no-scrollbar overflow-y-auto px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-4">
+        <div className="mb-4 h-2 overflow-hidden rounded-full bg-[#e6e9e7]">
           <div
             className="h-full rounded-full bg-gradient-to-r from-[#005129] to-[#1a6b3c]"
             style={{ width: stepMeta.percentage }}
           />
         </div>
 
-        <div className="mb-5">
+        <div className="mb-4">
           <h4 className="marketplace1-auth-headline text-xl font-bold text-slate-900">
             Create your account
           </h4>
@@ -585,11 +588,11 @@ export default function MarketplaceAuthModal({
           </p>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-4">
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
             Select your role
           </p>
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-2.5 md:grid-cols-3">
             {ROLE_OPTIONS.map((role) => (
               <button
                 key={role.id}
@@ -622,7 +625,7 @@ export default function MarketplaceAuthModal({
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2">
           <label className="block">
             <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
               Full Name
@@ -700,7 +703,7 @@ export default function MarketplaceAuthModal({
           </label>
         </div>
 
-        <div className="my-5 border-t border-[#dbe1db]" />
+        <div className="my-4 border-t border-[#dbe1db]" />
 
         <button
           type="button"
@@ -710,7 +713,7 @@ export default function MarketplaceAuthModal({
           Sign up with Google
         </button>
 
-        <div className="mt-5 flex flex-col gap-2.5">
+        <div className="mt-4 flex flex-col gap-2">
           <button
             type="button"
             onClick={handleAccountContinue}
@@ -735,7 +738,7 @@ export default function MarketplaceAuthModal({
     </div>
   );
   const renderOrganizationProfile = () => (
-    <div className="marketplace1-auth-dialog mx-auto w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+    <div className="marketplace1-auth-dialog relative mx-auto flex max-h-[calc(100dvh-1rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-2rem)]">
       <button
         type="button"
         onClick={onClose}
@@ -744,7 +747,7 @@ export default function MarketplaceAuthModal({
         <X className="h-5 w-5" />
       </button>
 
-      <div className="px-5 pb-6 pt-6 sm:px-6 sm:pt-7">
+      <div className="marketplace1-no-scrollbar overflow-y-auto px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-6">
         <h3 className="marketplace1-auth-headline text-xl font-extrabold text-[#005129]">
           Organization Profile
         </h3>
@@ -752,61 +755,63 @@ export default function MarketplaceAuthModal({
           Step {stepMeta.current} of {stepMeta.total}
         </p>
 
-        <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#e6e9e7]">
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#e6e9e7]">
           <div
             className="h-full rounded-full bg-gradient-to-r from-[#005129] to-[#1a6b3c]"
             style={{ width: stepMeta.percentage }}
           />
         </div>
 
-        <form className="mt-5 space-y-4" onSubmit={(event) => event.preventDefault()}>
-          <label className="block">
-            <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-              Country of Registry
-            </span>
-            <span className="relative block">
-              <Globe2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <select
-                value={organizationProfile.country}
-                onChange={(event) =>
-                  setOrganizationProfile((prev) => ({
-                    ...prev,
-                    country: event.target.value,
-                  }))
-                }
-                className="w-full appearance-none rounded-xl border border-transparent bg-[#e6e9e7] py-3 pl-11 pr-10 text-sm outline-none transition-all focus:border-[#005129]/30 focus:bg-white focus:shadow-[0_0_0_1px_#005129]"
-              >
-                {COUNTRY_OPTIONS.map((country) => (
-                  <option key={country} value={country}>
-                    {country}
-                  </option>
-                ))}
-              </select>
-            </span>
-          </label>
+        <form className="mt-4 space-y-3" onSubmit={(event) => event.preventDefault()}>
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="block">
+              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                Country of Registry
+              </span>
+              <span className="relative block">
+                <Globe2 className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <select
+                  value={organizationProfile.country}
+                  onChange={(event) =>
+                    setOrganizationProfile((prev) => ({
+                      ...prev,
+                      country: event.target.value,
+                    }))
+                  }
+                  className="w-full appearance-none rounded-xl border border-transparent bg-[#e6e9e7] py-3 pl-11 pr-10 text-sm outline-none transition-all focus:border-[#005129]/30 focus:bg-white focus:shadow-[0_0_0_1px_#005129]"
+                >
+                  {COUNTRY_OPTIONS.map((country) => (
+                    <option key={country} value={country}>
+                      {country}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </label>
 
-          <label className="block">
-            <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-              Phone Number
-            </span>
-            <span className="relative block">
-              <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                type="tel"
-                value={organizationProfile.phone}
-                onChange={(event) =>
-                  setOrganizationProfile((prev) => ({
-                    ...prev,
-                    phone: event.target.value,
-                  }))
-                }
-                placeholder="+1 (555) 000-0000"
-                className="w-full rounded-xl border border-transparent bg-[#e6e9e7] py-3 pl-11 pr-4 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-[#005129]/30 focus:bg-white focus:shadow-[0_0_0_1px_#005129]"
-              />
-            </span>
-          </label>
+            <label className="block">
+              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                Phone Number
+              </span>
+              <span className="relative block">
+                <Phone className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="tel"
+                  value={organizationProfile.phone}
+                  onChange={(event) =>
+                    setOrganizationProfile((prev) => ({
+                      ...prev,
+                      phone: event.target.value,
+                    }))
+                  }
+                  placeholder="+1 (555) 000-0000"
+                  className="w-full rounded-xl border border-transparent bg-[#e6e9e7] py-3 pl-11 pr-4 text-sm outline-none transition-all placeholder:text-slate-400 focus:border-[#005129]/30 focus:bg-white focus:shadow-[0_0_0_1px_#005129]"
+                />
+              </span>
+            </label>
+          </div>
 
-          <div className="rounded-xl bg-[#c7ebd2]/35 p-4 text-xs text-[#2e4d3b]">
+          <div className="rounded-xl bg-[#c7ebd2]/35 p-3 text-xs text-[#2e4d3b]">
             <p className="flex items-start gap-2">
               <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#005129]" />
               You are registering as a seller or company profile. Additional
@@ -835,7 +840,7 @@ export default function MarketplaceAuthModal({
             </span>
           </label>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-2">
             <label className="block">
               <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                 Business Type
@@ -876,7 +881,7 @@ export default function MarketplaceAuthModal({
             </label>
           </div>
 
-          <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+          <div className="flex flex-col gap-2 pt-1.5 sm:flex-row">
             <button
               type="button"
               onClick={() => goToSignupStep("account")}
@@ -1075,15 +1080,17 @@ export default function MarketplaceAuthModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-[80] px-3 py-2 sm:px-4 sm:py-4">
       <button
         type="button"
         className="marketplace1-auth-backdrop absolute inset-0"
         onClick={onClose}
         aria-label="Close modal"
       />
-      <div className="marketplace1-no-scrollbar relative z-[1] flex max-h-[94vh] w-full items-center justify-center overflow-y-auto py-2 sm:py-4">
-        {renderContent()}
+      <div className="marketplace1-no-scrollbar relative z-[1] h-full w-full overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center py-1 sm:py-2">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );
