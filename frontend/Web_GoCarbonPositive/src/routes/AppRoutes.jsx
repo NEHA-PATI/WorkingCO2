@@ -38,6 +38,12 @@ import Careers from "@features/careers/pages/Careers";
 import MyCarbonFootprint from "@features/calculator/pages/MyCarbonFootprint";
 import MarketplacePage from "@features/marketplace1/pages/MarketplacePage";
 import ListingDetailPage from "@features/marketplace1/pages/ListingDetailPage";
+import MarketplaceBrowsePage from "@features/marketplace1/pages/MarketplaceBrowsePage";
+import MarketplaceCheckoutPage from "@features/marketplace1/pages/MarketplaceCheckoutPage";
+import MarketplaceSellPage from "@features/marketplace1/pages/MarketplaceSellPage";
+import MarketplaceCreateListingPage from "@features/marketplace1/pages/MarketplaceCreateListingPage";
+import MarketplacePortfolioPage from "@features/marketplace1/pages/MarketplacePortfolioPage";
+import MarketplaceMethodologyPage from "@features/marketplace1/pages/MarketplaceMethodologyPage";
 
 import ViewAssets from "@shared/pages/ViewAssets";
 import WalletPage from "@shared/pages/wallet";
@@ -172,12 +178,100 @@ const AppRoutes = () => {
         element={<MarketplacePage />}
       />
       <Route
+        path="/marketplace/browse"
+        element={<MarketplaceBrowsePage />}
+      />
+      <Route
+        path="/marketplace1/browse"
+        element={<MarketplaceBrowsePage />}
+      />
+      <Route
         path="/marketplace/listing/:listingId"
         element={<ListingDetailPage />}
       />
       <Route
         path="/marketplace1/listing/:listingId"
         element={<ListingDetailPage />}
+      />
+      <Route
+        path="/marketplace/checkout/:stepId"
+        element={<MarketplaceCheckoutPage />}
+      />
+      <Route
+        path="/marketplace1/checkout/:stepId"
+        element={<MarketplaceCheckoutPage />}
+      />
+      <Route
+        path="/marketplace/sell"
+        element={<MarketplaceSellPage />}
+      />
+      <Route
+        path="/marketplace1/sell"
+        element={<MarketplaceSellPage />}
+      />
+      <Route
+        path="/sell"
+        element={<MarketplaceSellPage />}
+      />
+      <Route
+        path="/marketplace/create-listing"
+        element={<MarketplaceCreateListingPage />}
+      />
+      <Route
+        path="/marketplace/create-listing/:stepId"
+        element={<MarketplaceCreateListingPage />}
+      />
+      <Route
+        path="/marketplace1/create-listing"
+        element={<MarketplaceCreateListingPage />}
+      />
+      <Route
+        path="/marketplace1/create-listing/:stepId"
+        element={<MarketplaceCreateListingPage />}
+      />
+      <Route
+        path="/create-listing"
+        element={<MarketplaceCreateListingPage />}
+      />
+      <Route
+        path="/create-listing/:stepId"
+        element={<MarketplaceCreateListingPage />}
+      />
+      <Route
+        path="/marketplace/portfolio"
+        element={<MarketplacePortfolioPage />}
+      />
+      <Route
+        path="/marketplace1/portfolio"
+        element={<MarketplacePortfolioPage />}
+      />
+      <Route
+        path="/portfolio"
+        element={<MarketplacePortfolioPage />}
+      />
+      <Route
+        path="/marketplace/methodology"
+        element={<MarketplaceMethodologyPage />}
+      />
+      <Route
+        path="/marketplace1/methodology"
+        element={<MarketplaceMethodologyPage />}
+      />
+      <Route
+        path="/marketplace/methodologies"
+        element={<MarketplaceMethodologyPage />}
+      />
+      <Route
+        path="/marketplace1/methodologies"
+        element={<MarketplaceMethodologyPage />}
+      />
+      <Route
+        path="/methodology"
+        element={<MarketplaceMethodologyPage />}
+      />
+      <Route
+        path="/methodologies"
+        element={<MarketplaceMethodologyPage />}
       />
 
       <Route element={<BaseLayout />}>
