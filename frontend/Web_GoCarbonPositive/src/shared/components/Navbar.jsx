@@ -404,7 +404,7 @@ export default function Navbar() {
               alt="CarbonCredit Logo"
               className="user-logo-icon"
             />
-            <span className="user-logo-text">Carbon Positive</span>
+            <span className="user-logo-text">CarbonPositive</span>
           </div>
         </div>
 
