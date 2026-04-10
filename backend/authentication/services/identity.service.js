@@ -29,7 +29,7 @@ exports.resolveOAuthUser = async (provider, profile) => {
   } else {
     // 3. create new user
     const newUser = await pool.query(
-      `INSERT INTO users (username,email,verified,status)
+      `INSERT INTO users (username,email,is_email_verified,status)
        VALUES ($1,$2,true,'active')
        RETURNING *`,
       [name, email.toLowerCase()]

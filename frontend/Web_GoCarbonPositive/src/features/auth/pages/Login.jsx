@@ -11,6 +11,42 @@ import { ENV } from "@config/env";
 const Login = ({ onClose, onSwitchToSignup }) => {
   const API_URL = import.meta.env.VITE_AUTH_API || "http://localhost:5002";
 
+  const normalizeAppRole = (user) => {
+    const rawRole =
+      user?.context ??
+      user?.app_role ??
+      user?.global_role ??
+      user?.org_role ??
+      user?.role ??
+      user?.role_name ??
+      user?.account_role_name ??
+      "";
+    const role = String(rawRole || "").trim().toLowerCase();
+
+    if (role) {
+      if (["admin", "platform_admin", "super_admin", "superadmin"].includes(role)) {
+        return "admin";
+      }
+
+      if (
+        role === "organization" ||
+        role === "organisation" ||
+        role === "org" ||
+        role === "org_admin" ||
+        role === "org_member" ||
+        role.startsWith("org_")
+      ) {
+        return "organization";
+      }
+
+      if (role === "marketplace_only" || role === "user") {
+        return "user";
+      }
+    }
+
+    return null;
+  };
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -368,14 +404,12 @@ const Login = ({ onClose, onSwitchToSignup }) => {
       });
       fireToast("AUTH.LOGIN_SUCCESS");
 
-      const role =
-        data.data.user.role?.toLowerCase() ||
-        data.data.user.role_name?.toLowerCase();
+      const role = normalizeAppRole(data.data.user);
 
       if (role === "admin") {
         navigate("/admin/dashboard", { replace: true });
       } else if (role === "organization") {
-        navigate("/organization/dashboard", { replace: true });
+        navigate("/org/dashboard", { replace: true });
       } else {
         navigate("/user/dashboard", { replace: true });
       }

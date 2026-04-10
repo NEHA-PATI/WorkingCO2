@@ -6,6 +6,19 @@ const auth = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { MESSAGES, ROLES } = require('../config/constants');
 
+const isAdminUser = (user = {}) => {
+  const role = String(user.role || '').toLowerCase();
+  const context = String(user.context || '').toLowerCase();
+
+  return (
+    context === 'admin' ||
+    role === ROLES.ADMIN ||
+    role === 'platform_admin' ||
+    role === 'super_admin' ||
+    role === 'superadmin'
+  );
+};
+
 /**
  * Receive events from auth service
  * POST /api/notifications/event
@@ -49,7 +62,7 @@ router.post('/event', async (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     // ✅ FIXED: Re-enabled admin check
-    if (req.user.role !== ROLES.ADMIN) {
+    if (!isAdminUser(req.user)) {
       return res.status(403).json({
         status: 'error',
         message: MESSAGES.UNAUTHORIZED
@@ -126,7 +139,7 @@ router.get('/user/:userId', auth, async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     
     // User can only view their own notifications, admins can view all
-    if (req.user.id !== userId && req.user.role !== ROLES.ADMIN) {
+    if (req.user.id !== userId && !isAdminUser(req.user)) {
       return res.status(403).json({
         status: 'error',
         message: MESSAGES.UNAUTHORIZED
@@ -163,7 +176,7 @@ router.get('/user/:userId', auth, async (req, res) => {
 router.get('/stats', auth, async (req, res) => {
   try {
     // ✅ FIXED: Re-enabled admin check
-    if (req.user.role !== ROLES.ADMIN) {
+    if (!isAdminUser(req.user)) {
       return res.status(403).json({
         status: 'error',
         message: MESSAGES.UNAUTHORIZED
@@ -248,7 +261,7 @@ router.patch('/read/all', auth, async (req, res) => {
  */
 router.delete('/:id', auth, async (req, res) => {
   try {
-    if (req.user.role !== ROLES.ADMIN) {
+    if (!isAdminUser(req.user)) {
       return res.status(403).json({
         status: 'error',
         message: MESSAGES.UNAUTHORIZED

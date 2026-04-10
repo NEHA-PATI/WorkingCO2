@@ -2,6 +2,42 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext(null);
 
+const normalizeAppRole = (user) => {
+  const rawRole =
+    user?.context ??
+    user?.app_role ??
+    user?.global_role ??
+    user?.org_role ??
+    user?.role ??
+    user?.role_name ??
+    user?.account_role_name ??
+    "";
+  const role = String(rawRole || "").trim().toLowerCase();
+
+  if (role) {
+    if (["admin", "platform_admin", "super_admin", "superadmin"].includes(role)) {
+      return "admin";
+    }
+
+    if (
+      role === "organization" ||
+      role === "organisation" ||
+      role === "org" ||
+      role === "org_admin" ||
+      role === "org_member" ||
+      role.startsWith("org_")
+    ) {
+      return "organization";
+    }
+
+    if (role === "marketplace_only" || role === "user") {
+      return "user";
+    }
+  }
+
+  return null;
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
@@ -16,11 +52,7 @@ export const AuthProvider = ({ children }) => {
 
       if (token && storedUser) {
         const parsedUser = JSON.parse(storedUser);
-
-        const normalizedRole =
-          parsedUser.role?.toLowerCase() ||
-          parsedUser.role_name?.toLowerCase() ||
-          null;
+        const normalizedRole = normalizeAppRole(parsedUser);
 
         setUser(parsedUser);
         setRole(normalizedRole);
@@ -50,11 +82,7 @@ export const AuthProvider = ({ children }) => {
 
     localStorage.setItem("authToken", token);
     localStorage.setItem("authUser", JSON.stringify(user));
-
-    const normalizedRole =
-      user.role?.toLowerCase() ||
-      user.role_name?.toLowerCase() ||
-      null;
+    const normalizedRole = normalizeAppRole(user);
 
     setUser(user);
     setRole(normalizedRole);

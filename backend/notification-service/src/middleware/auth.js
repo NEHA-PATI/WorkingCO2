@@ -20,7 +20,11 @@ const auth = (req, res, next) => {
     req.user = {
       id: decoded.id,
       role: decoded.role,
-      email: decoded.email
+      email: decoded.email,
+      context: decoded.context,
+      app_role: decoded.app_role,
+      global_role: decoded.global_role,
+      org_role: decoded.org_role
     };
 
     logger.info(`Authenticated user: ${decoded.id}`);

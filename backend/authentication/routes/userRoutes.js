@@ -1,198 +1,175 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const pool = require('../config/db');
-const verifyToken = require('../middlewares/verifyToken');
-const allowRoles = require('../middlewares/allowRoles');
+const pool = require("../config/db");
 
-// Apply auth middleware to all routes in this router
+const verifyToken = require("../middlewares/verifyToken");
+const allowRoles = require("../middlewares/allowRoles");
+
+// Apply auth middleware globally
 router.use(verifyToken);
 
 /**
- * Approve user - Set status to 'active'
+ * 🛠️ ADMIN ONLY middleware (clean)
+ */
+const requireAdmin = (req, res, next) => {
+  const role = String(req.user?.role || "").toLowerCase();
+  const context = String(req.user?.context || "").toLowerCase();
+  const isAdmin =
+    context === "admin" ||
+    ["admin", "platform_admin", "super_admin", "superadmin"].includes(role);
+
+  if (!isAdmin) {
+    return res.status(403).json({ message: "Admin access required" });
+  }
+  next();
+};
+
+/**
+ * ✅ Approve User
  * PATCH /api/users/:userId/approve
  */
-router.patch('/:userId/approve', allowRoles('admin'), async (req, res) => {
+router.patch("/:userId/approve", requireAdmin, async (req, res) => {
   const { userId } = req.params;
 
   try {
     const result = await pool.query(
       `UPDATE users 
-       SET status = 'active', 
-           updated_at = NOW() 
-       WHERE id = $1 
+       SET status = 'active', updated_at = NOW()
+       WHERE id = $1
        RETURNING id, username, email, status`,
       [userId]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'User not found'
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({
-      status: 'success',
-      message: 'User approved successfully',
-      data: result.rows[0]
+    res.json({
+      message: "User approved successfully",
+      data: result.rows[0],
     });
   } catch (error) {
-    console.error('Error approving user:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to approve user',
-      error: error.message
-    });
+    console.error(error);
+    res.status(500).json({ message: "Failed to approve user" });
   }
 });
 
 /**
- * Reject user - Set status to 'rejected'
- * PATCH /api/users/:userId/reject
+ * ❌ Reject User
  */
-router.patch('/:userId/reject', allowRoles('admin'), async (req, res) => {
+router.patch("/:userId/reject", requireAdmin, async (req, res) => {
   const { userId } = req.params;
   const { reason } = req.body;
 
   try {
     const result = await pool.query(
       `UPDATE users 
-       SET status = 'rejected', 
-           updated_at = NOW() 
-       WHERE id = $1 
+       SET status = 'rejected', updated_at = NOW()
+       WHERE id = $1
        RETURNING id, username, email, status`,
       [userId]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'User not found'
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // Optional: Log rejection reason
     console.log(`User ${userId} rejected. Reason: ${reason}`);
 
-    res.status(200).json({
-      status: 'success',
-      message: 'User rejected successfully',
-      data: result.rows[0]
+    res.json({
+      message: "User rejected successfully",
+      data: result.rows[0],
     });
   } catch (error) {
-    console.error('Error rejecting user:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to reject user',
-      error: error.message
-    });
+    console.error(error);
+    res.status(500).json({ message: "Failed to reject user" });
   }
 });
 
 /**
- * Get user by email
- * GET /api/users/email/:email
+ * 👤 Get User by Email
  */
-router.get('/email/:email', async (req, res) => {
+router.get("/email/:email", requireAdmin, async (req, res) => {
   const { email } = req.params;
 
   try {
     const result = await pool.query(
-      'SELECT id, username, email, status, role_id, created_at FROM users WHERE email = $1',
-      [email]
+      `SELECT id, username, email, status, created_at 
+       FROM users 
+       WHERE email = $1`,
+      [email.toLowerCase()]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'User not found'
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({
-      status: 'success',
-      data: result.rows[0]
-    });
+    res.json({ data: result.rows[0] });
   } catch (error) {
-    console.error('Error fetching user:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to fetch user',
-      error: error.message
-    });
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch user" });
   }
 });
 
 /**
- * Get all users (Admin only)
- * GET /api/users
+ * 📋 Get All Users (Admin)
  */
-router.get('/', allowRoles('admin'), async (req, res) => {
+router.get("/", requireAdmin, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, username, email, status, role_id, created_at FROM users ORDER BY created_at DESC'
+      `SELECT id, username, email, status, created_at 
+       FROM users 
+       ORDER BY created_at DESC`
     );
 
-    res.status(200).json({
-      status: 'success',
-      data: result.rows
-    });
+    res.json({ data: result.rows });
   } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to fetch users',
-      error: error.message
-    });
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch users" });
   }
 });
 
 /**
- * Update user status
- * PATCH /api/users/:userId/status
+ * 🔄 Update User Status
  */
-router.patch('/:userId/status', allowRoles('admin'), async (req, res) => {
+router.patch("/:userId/status", requireAdmin, async (req, res) => {
   const { userId } = req.params;
   const { status } = req.body;
 
-  // Validate status
-  const validStatuses = ['pending', 'active', 'inactive', 'rejected', 'suspended'];
+  const validStatuses = [
+    "pending",
+    "active",
+    "inactive",
+    "rejected",
+    "suspended",
+  ];
+
   if (!validStatuses.includes(status)) {
     return res.status(400).json({
-      status: 'error',
-      message: 'Invalid status. Valid values: ' + validStatuses.join(', ')
+      message: "Invalid status",
     });
   }
 
   try {
     const result = await pool.query(
       `UPDATE users 
-       SET status = $1, 
-           updated_at = NOW() 
-       WHERE id = $2 
+       SET status = $1, updated_at = NOW()
+       WHERE id = $2
        RETURNING id, username, email, status`,
       [status, userId]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'User not found'
-      });
+      return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json({
-      status: 'success',
-      message: 'User status updated successfully',
-      data: result.rows[0]
+    res.json({
+      message: "User status updated",
+      data: result.rows[0],
     });
   } catch (error) {
-    console.error('Error updating user status:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Failed to update user status',
-      error: error.message
-    });
+    console.error(error);
+    res.status(500).json({ message: "Failed to update user" });
   }
 });
 

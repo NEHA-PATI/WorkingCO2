@@ -13,6 +13,7 @@ import {
   ChevronsRight,
 } from "lucide-react"
 import "@features/admin/styles/User Management.css"
+import { fetchAllUsers } from "@features/admin/services/userManagementApi"
 
 // Helper functions outside component (Allowed)
 function getInitials(name) {
@@ -35,14 +36,13 @@ export default function UserManagementPage() {
 
   useEffect(() => {
     const fetchUsers = async () => {
+      setLoading(true)
+      setError(null)
       try {
-        const res = await fetch("http://localhost:8080/api/v1/users")
-        const result = await res.json()
-
-        if (result.success) {
-          setUsers(result.data)
-        }
+        const result = await fetchAllUsers()
+        setUsers(result)
       } catch (err) {
+        console.error("Error loading users:", err)
         setError("Server error")
       } finally {
         setLoading(false)
@@ -143,10 +143,14 @@ export default function UserManagementPage() {
       .toISOString()
       .slice(0, 10)}.csv`
 
-    const toRoleLabel = (roleId) => {
-      if (roleId === 1) return "User"
-      if (roleId === 2) return "Admin"
-      if (roleId === 3) return "Super Admin"
+    const toRoleLabel = (roleName, roleId) => {
+      const normalized = String(roleName || "").toLowerCase()
+      if (normalized === "user") return "User"
+      if (normalized === "platform_admin") return "Super Admin"
+      if (normalized === "org_admin") return "Org Admin"
+      if (normalized === "org_member") return "Org Member"
+      if (normalized === "marketplace_only") return "Marketplace Only"
+      if (normalized === "super_admin") return "Super Admin"
       return "No Role"
     }
 
@@ -155,13 +159,25 @@ export default function UserManagementPage() {
       return `"${text.replace(/"/g, '""')}"`
     }
 
-    const headers = ["Full Name", "Email", "User Id", "Status", "Role", "Joined Date"]
+    const headers = [
+      "Full Name",
+      "Email",
+      "User Id",
+      "Status",
+      "Access",
+      "Joined Date",
+    ]
     const rows = reportUsers.map((user) => [
       user.username || "-",
       user.email || "-",
       user.u_id || "-",
       user.status || "-",
-      toRoleLabel(user.role_id),
+      [
+        toRoleLabel(user.role_name, user.role_id),
+        user.organization_name,
+      ]
+        .filter(Boolean)
+        .join(" | ") || "-",
       user.created_at ? new Date(user.created_at).toLocaleDateString() : "-",
     ])
 
@@ -284,71 +300,94 @@ export default function UserManagementPage() {
                   <th>Email</th>
                   <th>User Id</th>
                   <th>Status</th>
-                  <th>Role</th>
+                  <th>Access</th>
                   <th>Joined Date</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-  {paginatedUsers.map((user) => (
-    <tr key={user.id}>
-      <td>
-        <input
-          type="checkbox"
-          className="um-checkbox"
-          checked={selectedUserIds.includes(user.id)}
-          onChange={() => toggleSelectUser(user.id)}
-          aria-label={`Select user ${user.username}`}
-        />
-      </td>
+                {paginatedUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan="8" style={{ textAlign: "center", padding: "1.5rem" }}>
+                      No users found.
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedUsers.map((user) => (
+                    <tr key={user.id}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          className="um-checkbox"
+                          checked={selectedUserIds.includes(user.id)}
+                          onChange={() => toggleSelectUser(user.id)}
+                          aria-label={`Select user ${user.username}`}
+                        />
+                      </td>
 
-      <td>
-        <div className="um-user-cell">
-          <div className="um-avatar">
-            {user.username?.charAt(0)?.toUpperCase()}
-          </div>
-          <span className="um-user-name">{user.username}</span>
-        </div>
-      </td>
+                      <td>
+                        <div className="um-user-cell">
+                          <div className="um-avatar">
+                            {user.username?.charAt(0)?.toUpperCase()}
+                          </div>
+                          <span className="um-user-name">{user.username}</span>
+                        </div>
+                      </td>
 
-      <td>{user.email}</td>
-      <td>{user.u_id}</td>
+                      <td>{user.email}</td>
+                      <td>{user.u_id || user.id}</td>
 
-      <td>
-        <span className={`um-badge um-badge--${user.status}`}>
-          {user.status}
-        </span>
-      </td>
+                      <td>
+                        <span className={`um-badge um-badge--${user.status}`}>
+                          {user.status}
+                        </span>
+                      </td>
 
-      <td>
-        {user.role_id === 1
-          ? "User"
-          : user.role_id === 2
-          ? "Admin"
-          : user.role_id === 3
-          ? "Super Admin"
-          : "No Role"}
-      </td>
+                      <td>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                          <span style={{ fontWeight: 600 }}>
+                            {user.role_name === "user"
+                              ? "User"
+                              : user.role_name === "platform_admin"
+                              ? "Super Admin"
+                              : user.role_name === "org_admin"
+                              ? "Org Admin"
+                              : user.role_name === "org_member"
+                              ? "Org Member"
+                              : user.role_name === "marketplace_only"
+                              ? "Marketplace Only"
+                              : user.role_name === "super_admin"
+                              ? "Super Admin"
+                              : "No Role"}
+                          </span>
+                          <span style={{ color: "#64748b", fontSize: "0.85rem" }}>
+                            {user.organization_name || "No organization"}
+                          </span>
+                        </div>
+                      </td>
 
-      <td>
-        {new Date(user.created_at).toLocaleDateString()}
-      </td>
+                      <td>
+                        {user.created_at
+                          ? new Date(user.created_at).toLocaleDateString()
+                          : "-"}
+                      </td>
 
-      <td>
-        <div className="um-actions">
-          <button
-            className={`um-suspend-btn ${(user.status || "").toLowerCase() === "suspended" ? "um-suspend-btn--disabled" : ""}`}
-            type="button"
-            onClick={() => setConfirmSuspendUser(user)}
-            disabled={(user.status || "").toLowerCase() === "suspended"}
-          >
-            {(user.status || "").toLowerCase() === "suspended" ? "Suspended" : "Suspend User"}
-          </button>
-        </div>
-      </td>
-    </tr>
-  ))}
-</tbody>
+                      <td>
+                        <div className="um-actions">
+                          <button
+                            className={`um-suspend-btn ${(user.status || "").toLowerCase() === "suspended" ? "um-suspend-btn--disabled" : ""}`}
+                            type="button"
+                            onClick={() => setConfirmSuspendUser(user)}
+                            disabled={(user.status || "").toLowerCase() === "suspended"}
+                          >
+                            {(user.status || "").toLowerCase() === "suspended" ? "Suspended" : "Suspend User"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
 
             </table>
           </div>
