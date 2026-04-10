@@ -119,9 +119,9 @@ Requests can be sent to: privacy@yourdomain.com`
   {
     id: 12,
     title: "Contact Us",
-    content: `Email: privacy@yourdomain.com
-Company Name: Carbon Positive Inc.
-Website: www.yoururl.com`
+    content: `Email: support@gocarbonpositive.com
+Company Name: CarbonPositive
+Website: www.gocarbonpositive.com`
   },
 ];
 

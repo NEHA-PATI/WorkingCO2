@@ -14,7 +14,6 @@ import {
 import { fireToast } from "@shared/utils/toastService";
 import { USER_ORG_MENU } from "@config/menuConfig";
 import HamburgerMenu from "./HamburgerMenu";
-import CurrencyToggle from "@features/marketplace/components/CurrencyToggle";
 
 import useAuth from "@contexts/AuthContext";
 
@@ -174,7 +173,7 @@ export default function Navbar() {
     canUseMarketplace
       ? {
           label: "Methodologies",
-          path: "/marketplace",
+          path: "/marketplace/methodology",
           action: null,
         }
       : null,
@@ -405,7 +404,7 @@ export default function Navbar() {
               alt="CarbonCredit Logo"
               className="user-logo-icon"
             />
-            <span className="user-logo-text">Carbon Positive</span>
+            <span className="user-logo-text">CarbonPositive</span>
           </div>
         </div>
 
@@ -479,7 +478,6 @@ export default function Navbar() {
         {/* ================= RIGHT ================= */}
 
         <div className="user-right-section">
-          <CurrencyToggle />
           {/* <ArenaButton /> */}
           {(!isAuthenticated || normalizedRole === "user") && (
             <button
