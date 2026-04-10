@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
         setRole(null);
         setIsAuthenticated(false);
       }
-    } catch (err) {
+    } catch {
       localStorage.removeItem("authToken");
       localStorage.removeItem("authUser");
       setUser(null);
