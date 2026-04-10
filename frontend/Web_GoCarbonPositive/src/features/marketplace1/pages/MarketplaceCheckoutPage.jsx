@@ -360,7 +360,7 @@ function SuccessStep({ rootPath }) {
             View on Registry
           </button>
           <Link
-            to="/user/dashboard"
+            to={`${rootPath}/portfolio`}
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#dbe4db] bg-white px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-[#f6faf7]"
           >
             Go to Portfolio
