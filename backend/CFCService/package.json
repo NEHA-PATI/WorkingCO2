@@ -5,7 +5,8 @@
   "scripts": {
     "test": "jest --coverage --detectOpenHandles",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build": "node -e \"console.log('No build step for CFCService')\""
   },
   "keywords": [],
   "author": "",

@@ -22,6 +22,16 @@ const createRes = () => {
   return res;
 };
 
+const expectErrorResponse = (res, status, message) => {
+  expect(res.status).toHaveBeenCalledWith(status);
+  expect(res.json).toHaveBeenCalledWith(
+    expect.objectContaining({
+      success: false,
+      message,
+    })
+  );
+};
+
 describe("Asset Service - Solar Panel Unit Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,13 +50,10 @@ describe("Asset Service - Solar Panel Unit Tests", () => {
 
       await SolarController.createSolar(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message:
-            "Missing required fields: U_ID, Installed_Capacity, Installation_Date",
-        })
+      expectErrorResponse(
+        res,
+        400,
+        "Missing required fields: U_ID, Installed_Capacity, Installation_Date"
       );
       expect(SolarModel.create).not.toHaveBeenCalled();
     });
@@ -62,13 +69,10 @@ describe("Asset Service - Solar Panel Unit Tests", () => {
 
       await SolarController.createSolar(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message:
-            "Missing required fields: U_ID, Installed_Capacity, Installation_Date",
-        })
+      expectErrorResponse(
+        res,
+        400,
+        "Missing required fields: U_ID, Installed_Capacity, Installation_Date"
       );
       expect(SolarModel.create).not.toHaveBeenCalled();
     });
@@ -120,10 +124,12 @@ describe("Asset Service - Solar Panel Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "Solar Panel created successfully",
-          data: newSolar,
-          solarCount: 3,
+          data: {
+            solar: newSolar,
+            solarCount: 3,
+          },
         })
       );
     });
@@ -142,13 +148,7 @@ describe("Asset Service - Solar Panel Unit Tests", () => {
 
       await SolarController.createSolar(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Failed to create Solar Panel",
-        })
-      );
+      expectErrorResponse(res, 500, "Failed to create Solar Panel");
     });
   });
 
@@ -166,9 +166,8 @@ describe("Asset Service - Solar Panel Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "Solar Panels retrieved successfully",
-          count: 2,
           data: rows,
         })
       );
@@ -185,9 +184,8 @@ describe("Asset Service - Solar Panel Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "Solar Panels retrieved successfully",
-          count: 0,
           data: [],
         })
       );
@@ -201,13 +199,7 @@ describe("Asset Service - Solar Panel Unit Tests", () => {
 
       await SolarController.getSolarByUser(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Failed to fetch Solar Panels",
-        })
-      );
+      expectErrorResponse(res, 500, "Failed to fetch Solar Panels");
     });
   });
 
@@ -218,13 +210,7 @@ describe("Asset Service - Solar Panel Unit Tests", () => {
 
       await SolarController.updateSolarStatus(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Status is required",
-        })
-      );
+      expectErrorResponse(res, 400, "Status is required");
       expect(SolarModel.updateStatus).not.toHaveBeenCalled();
     });
 
@@ -237,13 +223,10 @@ describe("Asset Service - Solar Panel Unit Tests", () => {
 
       await SolarController.updateSolarStatus(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message:
-            "Invalid status. Must be one of: pending, approved, rejected",
-        })
+      expectErrorResponse(
+        res,
+        400,
+        "Invalid status. Must be one of: pending, approved, rejected"
       );
       expect(SolarModel.updateStatus).not.toHaveBeenCalled();
     });
@@ -269,7 +252,7 @@ describe("Asset Service - Solar Panel Unit Tests", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          status: "success",
+          success: true,
           message: "Solar Panel status updated successfully",
           data: updatedSolar,
         })
@@ -287,13 +270,7 @@ describe("Asset Service - Solar Panel Unit Tests", () => {
 
       await SolarController.updateSolarStatus(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Solar Panel not found",
-        })
-      );
+      expectErrorResponse(res, 404, "Solar Panel not found");
     });
 
     test("Database error -> 500", async () => {
@@ -307,13 +284,7 @@ describe("Asset Service - Solar Panel Unit Tests", () => {
 
       await SolarController.updateSolarStatus(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: "error",
-          message: "Failed to update Solar Panel status",
-        })
-      );
+      expectErrorResponse(res, 500, "Failed to update Solar Panel status");
     });
   });
 });
