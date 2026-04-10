@@ -216,6 +216,7 @@ describe("Auth Controller - verifyOTP", () => {
           u_id: "USR000001",
           email: "test@example.com",
           verified: true,
+          is_email_verified: true,
           status: "pending"
         }
       }
@@ -252,9 +253,7 @@ describe("Auth Controller - login", () => {
   });
 
   test("returns 400 when user is not found", async () => {
-    pool.query
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] });
+    pool.query.mockResolvedValueOnce({ rows: [] });
     const req = makeReq({ email: "test@example.com", password: "Valid1@Pass" });
     const res = makeRes();
 
@@ -267,17 +266,16 @@ describe("Auth Controller - login", () => {
     pool.query.mockResolvedValueOnce({
       rows: [{
         id: 1,
+        u_id: "USR000001",
+        username: "Test User",
         email: "test@example.com",
-        password: "hashed_pw",
-        verified: true,
+        password_hash: "hashed_pw",
+        is_email_verified: true,
         status: "active",
-        role_name: "user",
         login_attempts: 0
       }]
     });
     bcrypt.compare.mockResolvedValueOnce(false);
-    pool.query.mockResolvedValueOnce({});
-    axios.post.mockResolvedValue({});
 
     const req = makeReq({ email: "test@example.com", password: "WrongPass1@" });
     const res = makeRes();
@@ -296,19 +294,17 @@ describe("Auth Controller - login", () => {
           u_id: "USR000001",
           username: "Test User",
           email: "test@example.com",
-          password: "hashed_pw",
-          verified: true,
+          password_hash: "hashed_pw",
+          is_email_verified: true,
           status: "active",
-          role_name: "user",
           login_attempts: 0
         }]
       })
-      .mockResolvedValueOnce({})
-      .mockResolvedValueOnce({});
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
 
     bcrypt.compare.mockResolvedValueOnce(true);
     jwt.sign.mockReturnValueOnce("access_token");
-    axios.post.mockResolvedValue({});
 
     const req = makeReq(
       { email: "test@example.com", password: "Valid1@Pass" },
@@ -318,10 +314,25 @@ describe("Auth Controller - login", () => {
 
     await authController.login(req, res);
 
-    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
-      message: "Welcome back!",
+      token: "access_token",
+      user: {
+        id: 1,
+        u_id: "USR000001",
+        username: "Test User",
+        email: "test@example.com",
+        role: "user",
+        role_name: "user",
+        app_role: "user",
+        global_role: null,
+        org_role: null,
+        context: "user",
+        org_id: null,
+        verified: true,
+        is_email_verified: true,
+        status: "active"
+      },
       data: {
         token: "access_token",
         user: {
@@ -329,8 +340,15 @@ describe("Auth Controller - login", () => {
           u_id: "USR000001",
           username: "Test User",
           email: "test@example.com",
+          role: "user",
           role_name: "user",
+          app_role: "user",
+          global_role: null,
+          org_role: null,
+          context: "user",
+          org_id: null,
           verified: true,
+          is_email_verified: true,
           status: "active"
         }
       }

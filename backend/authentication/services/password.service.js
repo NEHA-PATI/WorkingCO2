@@ -50,7 +50,7 @@ exports.resetPassword = async (token, newPassword) => {
   const hashedPassword = await bcrypt.hash(newPassword, 12);
 
   await pool.query(
-    "UPDATE users SET password=$1, updated_at=NOW() WHERE id=$2",
+    "UPDATE users SET password_hash=$1, updated_at=NOW() WHERE id=$2",
     [hashedPassword, record.user_id]
   );
 

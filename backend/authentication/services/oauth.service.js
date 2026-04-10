@@ -10,6 +10,8 @@ exports.handleOAuthLogin = async (provider, profile) => {
       u_id: user.u_id,
       email: user.email,
       status: user.status,
+      context: "user",
+      role: "user",
     },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }

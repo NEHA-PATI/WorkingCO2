@@ -81,11 +81,13 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const passwordRoutes = require("./routes/passwordRoutes");
 const oauthRoutes = require("./routes/oauthRoutes");
+const orgRoutes = require("./routes/orgRoutes");
 
 app.use("/api/v1/auth", authLimiter, authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth/password", passwordRoutes);
 app.use("/api/v1/auth/oauth", oauthRoutes);
+app.use("/api/v1/org", orgRoutes);
 
 
 app.use("/api/v1/mail", mailRoutes);
