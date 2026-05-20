@@ -5,7 +5,7 @@ const routes = require("./routes");
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ["http://localhost:5173", "http://15.207.54.164:5173"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: [
     "Content-Type",
@@ -15,6 +15,12 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use("/api", routes);
+app.get("/health", (req, res) => {
+  res.json({
+    status: "success",
+    service: "profile-service"
+  });
+});
+app.use("/api/v1", routes);
 
 module.exports = app;

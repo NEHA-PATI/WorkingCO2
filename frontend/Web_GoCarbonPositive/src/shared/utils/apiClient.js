@@ -3,26 +3,72 @@ import { fireToast } from "./toastService";
 import { ENV } from "@config/env";
 
 // Get base URLs from environment or use defaults
+const stripTrailingSlashes = (url) => (url ? url.replace(/\/+$/, "") : url);
+
 const API_CONFIG = {
   // Asset Service (port 5000)
   ASSET_API:
-    (import.meta.env.VITE_ASSET_SERVICE_URL || "http://localhost:5000") +
-    "/api/v1",
+    stripTrailingSlashes(
+      import.meta.env.VITE_ASSET_SERVICE_URL ||
+        import.meta.env.VITE_ASSET_API ||
+        "http://localhost:5000",
+    ) + "/api/v1",
 
   // Auth Service (port 5002)
   AUTH_API: import.meta.env.VITE_AUTH_API || "http://localhost:5002",
 
   // Notification Service (port 5001)
-  NOTIFICATION_API:
-    import.meta.env.VITE_NOTIFICATION_SERVICE_URL || "http://localhost:5001",
+ NOTIFICATION_API:
+  import.meta.env.VITE_NOTIFICATION_API ||
+  import.meta.env.VITE_NOTIFICATION_SERVICE_URL ||
+  "http://localhost:5001",
+
+   ADMIN_API: import.meta.env.VITE_ADMIN_API || "http://localhost:8080",  
 
 
   // Contact Service (port 5005)
   CONTACT_API: import.meta.env.VITE_CONTACT_API || "http://localhost:5005",
 
+  DEMO_API: import.meta.env.VITE_DEMO_API || "http://localhost:5007",
+
+  TICKET_API:
+    (() => {
+      const raw =
+        import.meta.env.VITE_TICKET_API ||
+        "http://15.207.54.164:5004";
+      const base = stripTrailingSlashes(raw);
+      return base.endsWith("/api/v1") ? base : base + "/api/v1";
+    })(),
+
   // Carbon Footprint Service (port 5003 for example)
-CFC_API:
-  import.meta.env.VITE_CFC_SERVICE_URL || "http://localhost:8004/api",
+  CFC_API: (() => {
+    const raw =
+      import.meta.env.VITE_CFC_SERVICE_URL ||
+      import.meta.env.VITE_CFC_API ||
+      "http://localhost:8004";
+    const base = stripTrailingSlashes(raw);
+    return base.endsWith("/api") ? base : base + "/api";
+  })(),
+
+  PROFILE_API: (() => {
+  const raw =
+    import.meta.env.VITE_PROFILE_API ||
+    "http://15.207.54.164:5006";
+
+  const base = raw.replace(/\/+$/, "");
+
+  return base.endsWith("/api/v1") ? base : base + "/api/v1";
+})(),
+
+REWARD_API: (() => {
+  const raw =
+    import.meta.env.VITE_REWARD_API ||
+    "http://15.207.54.164:5008";
+
+  const base = stripTrailingSlashes(raw);
+
+  return base.endsWith("/api/v1") ? base : base + "/api/v1";
+})(),
 
   ORG_API:
     import.meta.env.VITE_ORG_SERVICE_URL || ENV.ORG_SERVICE_URL || "http://localhost:5003",
@@ -141,6 +187,15 @@ export const notificationApiClient = createApiClient(
   API_CONFIG.NOTIFICATION_API,
   "Notification Service",
 );
+export const adminApiClient = createApiClient(
+  API_CONFIG.ADMIN_API,
+  "Admin Service"
+);
+
+export const profileApiClient = createApiClient(
+  API_CONFIG.PROFILE_API,
+  "Profile Service"
+);
 
 // Career Service (port 5006)
 export const careerApiClient = createApiClient(
@@ -150,7 +205,9 @@ export const careerApiClient = createApiClient(
 
 // Blog Service (port 4000)
 export const blogApiClient = createApiClient(
-  import.meta.env.VITE_BLOG_API_URL || "http://localhost:4000/api/blog",
+  stripTrailingSlashes(import.meta.env.VITE_BLOG_API_URL) ||
+    stripTrailingSlashes(import.meta.env.VITE_BLOG_API || "http://localhost:4000") +
+      "/api/v1/blog",
   "Blog Service",
 );
 
@@ -164,9 +221,18 @@ export const contactApiClient = createApiClient(
 );
 
 export const ticketApiClient = createApiClient(
-  (import.meta.env.VITE_TICKET_API || "http://localhost:5004") + "/api",
+  API_CONFIG.TICKET_API,
   "Ticket Service",
 );
+
+export const rewardApiClient = createApiClient(
+  API_CONFIG.REWARD_API,
+  "Reward Service",
+);
+export const demoApiClient = createApiClient(
+  API_CONFIG.DEMO_API + "/api/v1/demo",
+  "Demo Service",
+); 
 
 export const orgApiClient = createApiClient(
   API_CONFIG.ORG_API,

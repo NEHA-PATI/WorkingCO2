@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import "../styles/quiz.css";
 import arenaApi, { getArenaUserId } from '@features/arena/services/arenaApi';
 import { useCountdown } from '@features/arena/hooks/useCountdown';
+const BASE_URL = `${import.meta.env.VITE_REWARD_API}/api/v1`;
 import { 
   FaBook, 
   FaTrophy, 
@@ -128,7 +129,7 @@ useEffect(() => {
 useEffect(() => {
   const fetchQuestions = async () => {
     try {
-      const res = await fetch("http://localhost:5008/api/v1/quiz/questions", {
+      const res = await fetch(`${BASE_URL}/quiz/questions`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`
         }
@@ -215,7 +216,7 @@ useEffect(() => {
       })
     );
 
-    const res = await fetch("http://localhost:5008/api/v1/quiz/submit", {
+    const res = await fetch(`${BASE_URL}/quiz/submit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

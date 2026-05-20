@@ -1,4 +1,4 @@
-const pool = require("../config/db");
+const { pool } = require("../config/db");
 
 /**
  * Generate ticket_id like TCKT000001

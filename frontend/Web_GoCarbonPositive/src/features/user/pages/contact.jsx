@@ -41,7 +41,8 @@ export default function Contact() {
       message: formData.message,
     };
     try {
-      const res = await contactApiClient.post("/api/contact", payload);
+      // Contact Service routes are mounted at `/api/v1/contact`
+      const res = await contactApiClient.post("/api/v1/contact", payload);
       const data = res.data;
       fireToast("CONTACT.MESSAGE_SENT", "success", { id: data.contact_id });
       setFormData({ name: "", email: "", phone: "", subject: "", message: "" });    } catch (error) {
@@ -80,7 +81,7 @@ export default function Contact() {
         category: queryData.category,
         priority: queryData.priority,
       };
-      const res = await ticketApiClient.post("/api/tickets", payload, {
+      const res = await ticketApiClient.post("/tickets", payload, {
         headers: { "x-user-id": u_id },
       });
       const data = res.data;

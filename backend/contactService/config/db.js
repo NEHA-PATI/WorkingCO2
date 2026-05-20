@@ -1,59 +1,117 @@
 const { Pool } = require("pg");
+
+/* ==================== ENV LOAD ==================== */
+// Docker already injects env, dotenv fallback for local
 require("dotenv").config();
 
-const isProduction = process.env.NODE_ENV === "production";
+/* ==================== SSL CONFIG ==================== */
+const useSSL =
+  String(process.env.DB_SSL).toLowerCase() === "true" ||
+  process.env.NODE_ENV === "production";
 
-const connectionConfig = process.env.DATABASE_URL
-  ? {
-      connectionString: process.env.DATABASE_URL,
-      ssl: isProduction ? { rejectUnauthorized: false } : false,
-    }
-  : {
-      user: process.env.DB_USER,
-      host: process.env.DB_HOST,
-      database: process.env.DB_NAME,
-      password: process.env.DB_PASSWORD,
-      port: process.env.DB_PORT || 5432,
-      ssl: isProduction ? { rejectUnauthorized: false } : false,
-    };
+/* ==================== CONNECTION CONFIG ==================== */
+let connectionConfig = {};
 
+/* 🔥 PRIORITY: DATABASE_URL (if provided) */
+if (process.env.DATABASE_URL) {
+  connectionConfig = {
+    connectionString: process.env.DATABASE_URL,
+    ssl: useSSL ? { rejectUnauthorized: false } : false,
+  };
+} else {
+  connectionConfig = {
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: String(process.env.DB_PASSWORD),
+    port: Number(process.env.DB_PORT) || 5432,
+    ssl: useSSL ? { rejectUnauthorized: false } : false,
+  };
+}
+
+/* ==================== POOL ==================== */
 const pool = new Pool({
   ...connectionConfig,
-  max: 20, // max clients in pool
-  idleTimeoutMillis: 30000, // close idle clients after 30s
-  connectionTimeoutMillis: 5000, // wait 5s before timeout
+
+  // 🔥 Production tuning
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
 });
 
+/* ==================== EVENTS ==================== */
 pool.on("connect", () => {
-  console.log("✅ Connected to PostgreSQL");
+  console.log("✅ PostgreSQL connected");
 });
 
 pool.on("error", (err) => {
-  console.error("❌ Unexpected database error:", err.message);
+  console.error("❌ Unexpected DB error:", err.message);
+  process.exit(1); // restart container (Docker)
 });
 
-
+/* ==================== TEST CONNECTION ==================== */
 const testConnection = async () => {
+  let client;
   try {
-    const res = await pool.query("SELECT NOW()");
-    console.log("🕐 DB time:", res.rows[0].now);
+    client = await pool.connect();
+    const res = await client.query("SELECT NOW()");
+    console.log("🕒 DB time:", res.rows[0].now);
     console.log("🚀 Database ready");
     return true;
   } catch (err) {
     console.error("❌ PostgreSQL connection error:", err.message);
     return false;
+  } finally {
+    if (client) client.release();
   }
 };
 
-testConnection();
+/* ==================== QUERY HELPER ==================== */
+const query = async (text, params) => {
+  try {
+    return await pool.query(text, params);
+  } catch (err) {
+    console.error("❌ Query error:", err.message);
+    throw err;
+  }
+};
 
+/* ==================== TRANSACTION ==================== */
+const transaction = async (callback) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await callback(client);
+    await client.query("COMMIT");
+    return result;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("❌ Transaction error:", err.message);
+    throw err;
+  } finally {
+    client.release();
+  }
+};
+
+/* ==================== GRACEFUL SHUTDOWN ==================== */
 const shutdown = async () => {
   console.log("🔌 Closing database pool...");
-  await pool.end();
+  try {
+    await pool.end();
+    console.log("✅ DB pool closed");
+  } catch (err) {
+    console.error("❌ Error closing pool:", err.message);
+  }
   process.exit(0);
 };
 
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
-module.exports = pool;
+/* ==================== EXPORTS ==================== */
+module.exports = {
+  pool,
+  query,
+  transaction,
+  testConnection,
+};

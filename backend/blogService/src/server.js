@@ -1,75 +1,116 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
-import rateLimit from 'express-rate-limit';
-import { config } from './config/env.config.js';
-import { testSanityConnection } from './config/sanity.config.js';
-import { initRedis } from './config/redis.config.js';
-import blogRoutes from './routes/blog.routes.js';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import compression from "compression";
+import rateLimit from "express-rate-limit";
+import { config } from "./config/env.config.js";
+import { testSanityConnection } from "./config/sanity.config.js";
+import { initRedis } from "./config/redis.config.js";
+import blogRoutes from "./routes/blog.routes.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
-// Security middleware
+/* ==================== TRUST PROXY (IMPORTANT FOR AWS) ==================== */
+app.set("trust proxy", 1);
+
+/* ==================== SECURITY ==================== */
 app.use(helmet());
 app.use(compression());
 
-// CORS configuration
+/* ==================== CORS ==================== */
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+
+  // 🔥 ADD THIS (MOST IMPORTANT)
+  "http://15.207.54.164:3000",
+];
+
 app.use(
   cors({
-    origin: config.cors.allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log(`❌ CORS blocked: ${origin}`);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
 
-// Body parsing middleware
+/* ==================== BODY ==================== */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rate limiting
+/* ==================== RATE LIMIT ==================== */
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: "error",
+    message: "Too many requests, please try again later.",
+  },
 });
-app.use('/api/', limiter);
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
+app.use("/api/", limiter);
+
+/* ==================== ROOT ROUTE ==================== */
+app.get("/", (req, res) => {
+  res.send("🚀 Blog Service Running");
+});
+
+/* ==================== HEALTH ROUTE (PRODUCTION STANDARD) ==================== */
+app.get("/api/v1/health", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    service: "blog-service",
     timestamp: new Date().toISOString(),
-    service: 'BlogService',
   });
 });
 
-// API routes
-app.use('/api/blog', blogRoutes);
+/* ==================== API ROUTES ==================== */
+app.use("/api/v1/blog", blogRoutes);
 
-// Error handling
+/* ==================== 404 ==================== */
 app.use(notFoundHandler);
+
+/* ==================== ERROR HANDLER ==================== */
 app.use(errorHandler);
 
-// Initialize connections and start server
+/* ==================== START SERVER ==================== */
 const startServer = async () => {
   try {
-    // Test Sanity connection
+    console.log("🔄 Starting Blog Service...");
+
+    // 🔥 Sanity connection check
     await testSanityConnection();
+    console.log("✅ Sanity connected");
 
-    // Initialize Redis (optional)
+    // 🔥 Redis init (optional)
     await initRedis();
+    console.log("✅ Redis initialized (if enabled)");
 
-    // Start server
-    const PORT = config.port;
-    app.listen(PORT, () => {
-      console.log(`\n🚀 BlogService running on port ${PORT}`);
-      console.log(`📝 Environment: ${config.nodeEnv}`);
-      console.log(`🌐 API: http://localhost:${PORT}/api/blog`);
-      console.log(`❤️  Health: http://localhost:${PORT}/health\n`);
+    const PORT = process.env.PORT || config.port || 4000;
+
+    // 🔥 IMPORTANT: bind to 0.0.0.0
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log("\n========================================");
+      console.log("🚀 Blog Service Started");
+      console.log(`📡 Environment: ${process.env.NODE_ENV}`);
+      console.log(`🌐 Server: http://0.0.0.0:${PORT}`);
+      console.log(`📊 API: http://0.0.0.0:${PORT}/api/v1/blog`);
+      console.log(`❤️ Health: http://0.0.0.0:${PORT}/api/v1/health`);
+      console.log("========================================\n");
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error("❌ Failed to start server:", error.message);
     process.exit(1);
   }
 };

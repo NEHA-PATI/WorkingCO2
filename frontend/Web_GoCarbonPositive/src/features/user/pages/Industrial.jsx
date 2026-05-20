@@ -181,13 +181,13 @@ const IndustrialSolutions = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5007/api/demo/book-demo", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch("http://15.207.54.164:5007/api/v1/demo/book-demo", {
+  method: "POST", // ✅ ADD THIS
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(formData),
+});
 
       const data = await response.json();
 

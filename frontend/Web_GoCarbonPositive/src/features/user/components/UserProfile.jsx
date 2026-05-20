@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Country, State } from "country-state-city";
 import "@features/user/styles/UserProfile.css";
 import { fireToast } from "@shared/utils/toastService";
+const BASE_URL = `${import.meta.env.VITE_PROFILE_API}/api/v1`;
 
 const UserProfile = () => {
   const navigate = useNavigate();
@@ -224,7 +225,7 @@ const UserProfile = () => {
 
     try {
       const res = await fetch(
-        "http://localhost:5009/api/profiles/complete",
+        `${BASE_URL}/profiles/complete`,
         {
           method: "POST",
           headers: {
@@ -271,7 +272,7 @@ const UserProfile = () => {
 
       try {
         const res = await fetch(
-          "http://localhost:5009/api/profiles/complete",
+          `${BASE_URL}/profiles/complete`,
           {
             headers: { "x-user-id": u_id },
           }

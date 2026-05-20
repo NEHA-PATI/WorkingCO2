@@ -2,7 +2,11 @@ import axios from 'axios';
 import { ENV } from '@config/env';
 
 const resolveRewardsBaseUrl = () => {
-  const raw = (ENV.REWARD_SERVICE_URL || '').replace(/\/+$/, '');
+ const raw = (
+  import.meta.env.VITE_REWARD_API ||
+  ENV.REWARD_SERVICE_URL ||
+  "http://15.207.54.164:5008"
+).replace(/\/+$/, '');
 
   if (!raw) {
     return '/api/v1/rewards';
@@ -83,6 +87,7 @@ export const getArenaUserId = () => {
     }
 
     const token = localStorage.getItem('authToken');
+    console.log("🔥 TOKEN:", token);
     const tokenPayload = decodeJwtPayload(token);
 
     const userIdFromToken =
@@ -108,9 +113,11 @@ const getAuthHeaders = () => {
   }
 
   const token = localStorage.getItem('authToken');
+  console.log("🔥 TOKEN:", token);
   const headers = {
     'x-user-id': uId
   };
+  console.log("🔥 USER ID:", uId);
 
   if (token) {
     headers.Authorization = `Bearer ${token}`;

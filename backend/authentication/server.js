@@ -4,29 +4,35 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
+
 const mailRoutes = require("./routes/mailRoutes");
 
 const app = express();
 
-/* ==================== IMPORTANT FOR AWS + DOCKER ==================== */
-app.set("trust proxy", 1); // 🔥 REQUIRED for rate-limit behind proxy
+/* ==================== TRUST PROXY (VERY IMPORTANT FOR AWS) ==================== */
+app.set("trust proxy", 1); // Required behind Nginx / AWS / Load Balancer
 
-// ==================== SECURITY ====================
-app.use(helmet());
+/* ==================== SECURITY ==================== */
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false, // prevent blocking frontend assets
+  })
+);
 
-// ==================== LOGGING ====================
+/* ==================== LOGGING ==================== */
 app.use(
   morgan(process.env.NODE_ENV === "production" ? "combined" : "dev")
 );
 
-// ==================== CORS CONFIGURATION ====================
+/* ==================== CORS CONFIGURATION ==================== */
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
   "http://localhost",
+  "http://15.207.54.164:3000",
   "https://www.gocarbonpositive.com",
-  process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL, // 🔥 dynamic (EC2 / domain)
 ].filter(Boolean);
 
 app.use(
@@ -35,10 +41,10 @@ app.use(
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
-        callback(null, true);
+        return callback(null, true);
       } else {
-        console.log(`❌ CORS blocked: ${origin}`);
-        callback(new Error("Not allowed by CORS"));
+        console.warn(`❌ CORS blocked: ${origin}`);
+        return callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
@@ -47,11 +53,11 @@ app.use(
   })
 );
 
-// ==================== BODY ====================
-app.use(express.json());
+/* ==================== BODY ==================== */
+app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// ==================== RATE LIMITING ====================
+/* ==================== RATE LIMITING ==================== */
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -76,7 +82,7 @@ const authLimiter = rateLimit({
 
 app.use(globalLimiter);
 
-// ==================== ROUTES ====================
+/* ==================== ROUTES ==================== */
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const passwordRoutes = require("./routes/passwordRoutes");
@@ -86,21 +92,24 @@ app.use("/api/v1/auth", authLimiter, authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth/password", passwordRoutes);
 app.use("/api/v1/auth/oauth", oauthRoutes);
-
-
 app.use("/api/v1/mail", mailRoutes);
 
-
-// Health Check
+/* ==================== HEALTH CHECK (VERY IMPORTANT FOR AWS) ==================== */
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "success",
     service: "authentication-service",
+    uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
 });
 
-// ==================== 404 ====================
+/* ==================== ROOT CHECK ==================== */
+app.get("/", (req, res) => {
+  res.send("🚀 Auth Service is running");
+});
+
+/* ==================== 404 HANDLER ==================== */
 app.use((req, res) => {
   res.status(404).json({
     status: "error",
@@ -108,7 +117,7 @@ app.use((req, res) => {
   });
 });
 
-// ==================== ERROR HANDLER ====================
+/* ==================== GLOBAL ERROR HANDLER ==================== */
 app.use((err, req, res, next) => {
   console.error("❌ Error:", err);
 
@@ -126,19 +135,27 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ==================== START SERVER ====================
-const PORT = process.env.PORT || 5002; // ✅ FALLBACK ADDED
+/* ==================== SERVER START ==================== */
+const PORT = process.env.PORT || 5002;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`
-    ================================
-    🚀 Auth Service Started
-    ================================
-    Port: ${PORT}
-    Environment: ${process.env.NODE_ENV || "development"}
-    CORS: ${allowedOrigins.length} origins enabled
-    ================================
-  `);
+================================
+🚀 Auth Service Started
+================================
+Port: ${PORT}
+Environment: ${process.env.NODE_ENV || "development"}
+CORS Origins: ${allowedOrigins.join(", ")}
+================================
+`);
+});
+
+/* ==================== GRACEFUL SHUTDOWN (DOCKER/AWS) ==================== */
+process.on("SIGTERM", () => {
+  console.log("🛑 SIGTERM received. Shutting down...");
+  server.close(() => {
+    console.log("💤 Process terminated");
+  });
 });
 
 module.exports = app;

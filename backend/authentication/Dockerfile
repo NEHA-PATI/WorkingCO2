@@ -1,20 +1,11 @@
-# 1️⃣ Base image
 FROM node:20-alpine
-
-# 2️⃣ App directory
 WORKDIR /app
-
-# 3️⃣ Copy package files first (cache benefit)
 COPY package*.json ./
-
-# 4️⃣ Install dependencies
-RUN npm install --production
-
-# 5️⃣ Copy rest of code
+RUN npm ci --only=production
 COPY . .
-
-# 6️⃣ Expose port
+ENV NODE_ENV=production
+ENV PORT=5002
 EXPOSE 5002
-
-# 7️⃣ Start app
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:5002/health || exit 1
 CMD ["node", "server.js"]

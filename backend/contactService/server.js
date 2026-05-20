@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
 const contactRoutes = require("./routes/contactRoutes");
@@ -9,43 +10,85 @@ const contactRoutes = require("./routes/contactRoutes");
 const app = express();
 
 /* =======================================
-   TRUST PROXY (IMPORTANT FOR EC2)
+   TRUST PROXY (IMPORTANT FOR AWS / NGINX)
 ======================================= */
 app.set("trust proxy", 1);
 
 /* =======================================
-   SECURITY
+   SECURITY (HELMET)
 ======================================= */
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
 
 /* =======================================
    CORS CONFIG (PRODUCTION SAFE)
 ======================================= */
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",")
-  : [];
+const splitCsv = (value) =>
+  value
+    ? value
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean)
+    : [];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
+// Prefer explicit allow-list via `ALLOWED_ORIGINS`, but fall back to `FRONTEND_URL`
+// and common local dev origins so a missing env var doesn't break preflight.
+const allowedOrigins = new Set([
+  ...splitCsv(process.env.ALLOWED_ORIGINS),
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+]);
 
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.log(`❌ CORS Blocked: ${origin}`);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Postman / curl
+
+    if (allowedOrigins.has(origin)) {
+      return callback(null, true);
+    }
+
+    // In non-production, be permissive to reduce local dev friction.
+    if (process.env.NODE_ENV !== "production") {
+      return callback(null, true);
+    }
+
+    console.log(`CORS Blocked: ${origin}`);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 /* =======================================
    BODY PARSER
 ======================================= */
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
+
+/* =======================================
+   RATE LIMITING (ANTI-SPAM 🔥)
+======================================= */
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 min
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: "error",
+    message: "Too many requests, please try again later.",
+  },
+});
+
+app.use("/api/", limiter);
 
 /* =======================================
    LOGGING
@@ -55,24 +98,31 @@ app.use(
 );
 
 /* =======================================
-   ROUTES
+   ROOT ROUTE (DEBUG FRIENDLY)
 ======================================= */
-app.use("/api/contact", contactRoutes);
+app.get("/", (req, res) => {
+  res.send("📨 Contact Service Running 🚀");
+});
 
 /* =======================================
-   HEALTH CHECK
+   HEALTH CHECK (STANDARDIZED)
 ======================================= */
-app.get("/health", (req, res) => {
+app.get("/api/v1/health", (req, res) => {
   res.status(200).json({
+    status: "success",
     service: "contact-service",
-    status: "ok",
     environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString(),
   });
 });
 
 /* =======================================
-   404
+   ROUTES
+======================================= */
+app.use("/api/v1/contact", contactRoutes);
+
+/* =======================================
+   404 HANDLER
 ======================================= */
 app.use((req, res) => {
   res.status(404).json({
@@ -94,21 +144,27 @@ app.use((err, req, res, next) => {
     });
   }
 
-  res.status(500).json({
+  res.status(err.status || 500).json({
     status: "error",
-    message: "Internal server error",
+    message: err.message || "Internal server error",
   });
 });
 
+/* =======================================
+   START SERVER (IMPORTANT FIX)
+======================================= */
 const PORT = process.env.PORT || 5005;
 
-app.listen(PORT, () => {
+// 🔥 IMPORTANT: bind 0.0.0.0 for EC2 access
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`
 ================================
 📨 Contact Service Started
 ================================
 Port: ${PORT}
 Environment: ${process.env.NODE_ENV}
+API: http://0.0.0.0:${PORT}/api/v1/contact
+Health: http://0.0.0.0:${PORT}/api/v1/health
 ================================
 `);
 });

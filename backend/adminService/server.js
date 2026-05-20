@@ -3,25 +3,41 @@ const config = require("./src/config/env");
 const logger = require("./src/utils/logger");
 const { pool } = require("./src/config/database");
 
-const PORT = config.port || 5000;
+const PORT = process.env.PORT || config.port || 5000;
 
+/* ==================== SERVER START ==================== */
 const startServer = async () => {
   try {
-    const server = app.listen(PORT, () => {
+    // 🔥 IMPORTANT: bind to 0.0.0.0 for EC2 access
+    const server = app.listen(PORT, "0.0.0.0", () => {
       logger.info("========================================");
       logger.info("🚀 Admin Service Started");
-      logger.info(`📡 Environment: ${config.nodeEnv}`);
-      logger.info(`🌐 Server: http://localhost:${PORT}`);
-      logger.info(`📊 API Base: http://localhost:${PORT}/api/v1`);
-      logger.info(`🏥 Health: http://localhost:${PORT}/api/v1/health`);
+      logger.info(`📡 Environment: ${process.env.NODE_ENV || "development"}`);
+      logger.info(`🌐 Server: http://0.0.0.0:${PORT}`);
+      logger.info(`📊 API Base: http://0.0.0.0:${PORT}/api/v1`);
+      logger.info(`🏥 Health: http://0.0.0.0:${PORT}/api/v1/health`);
       logger.info("========================================");
     });
 
-    /**
-     * Graceful Shutdown
-     */
+    /* ==================== DB CONNECTION TEST ==================== */
+    try {
+      const res = await pool.query("SELECT NOW()");
+      logger.info(`🕒 DB Connected. Time: ${res.rows[0].now}`);
+    } catch (err) {
+      logger.error("❌ Database connection failed:", err.message);
+    }
+
+    /* ==================== DB ERROR HANDLER ==================== */
+    if (pool) {
+      pool.on("error", (err) => {
+        logger.error("❌ Unexpected DB error:", err);
+        process.exit(1); // restart container
+      });
+    }
+
+    /* ==================== GRACEFUL SHUTDOWN ==================== */
     const shutdown = async (signal) => {
-      logger.warn(`⚠️  ${signal} received. Shutting down gracefully...`);
+      logger.warn(`⚠️ ${signal} received. Shutting down gracefully...`);
 
       server.close(async () => {
         logger.info("✅ HTTP server closed");
@@ -38,6 +54,7 @@ const startServer = async () => {
         process.exit(0);
       });
 
+      // 🔥 Force shutdown fallback
       setTimeout(() => {
         logger.error("⏱ Force shutdown after timeout");
         process.exit(1);

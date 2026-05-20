@@ -1,4 +1,4 @@
-const pool = require("../config/db");
+const { pool } = require("../config/db");
 const bcrypt = require("bcryptjs");
 
 const PURPOSE = "ORG_EMAIL_VERIFY";
