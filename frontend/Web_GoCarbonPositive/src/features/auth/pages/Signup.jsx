@@ -9,7 +9,7 @@ import { ENV } from "@config/env";
 
 
 const Signup = ({ onClose, onSwitchToLogin }) => {
-  const API_URL = import.meta.env.VITE_AUTH_API || "http://localhost:5002";
+  const API_URL = ENV.AUTH_SERVICE_URL;
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -396,7 +396,7 @@ const { login } = useAuth();
   setError({});
 
   try {
-    const response = await fetch(`${API_URL}/api/v1/auth/register`, {
+    const response = await fetch(`${API_URL}/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -445,7 +445,7 @@ const { login } = useAuth();
     setError({});
 
     try {
-      const response = await fetch(`${API_URL}/api/v1/auth/verify`, {
+      const response = await fetch(`${API_URL}/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -502,7 +502,7 @@ const { login } = useAuth();
     setError({});
 
     try {
-      const response = await fetch(`${API_URL}/api/v1/auth/resend-otp`, {
+      const response = await fetch(`${API_URL}/resend-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -533,7 +533,7 @@ const { login } = useAuth();
   };
 
   const handleSocialLogin = (provider) => {
-    window.location.href = `${API_URL}/api/v1/auth/oauth/google/login`;
+    window.location.href = `${API_URL}/oauth/google/login`;
   };
 
   return (

@@ -36,11 +36,11 @@ const evService = {
 
   // ==============================
   // Create EV
-  // POST /api/v1/evmasterdata
+  // POST /api/v1/evmasterdata/
   // ==============================
   createEV: async (evData) => {
     try {
-      const res = await apiClient.post("/evmasterdata", evData);
+      const res = await apiClient.post("/evmasterdata/", evData);
       return res.data;
     } catch (error) {
       throw error.response?.data || {

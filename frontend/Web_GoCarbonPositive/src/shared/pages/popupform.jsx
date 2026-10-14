@@ -59,12 +59,26 @@ const PopupForms = ({
     }, 3000);
   };
 
+  const getStoredUserId = () => {
+    let storedUser = null;
+    try {
+      storedUser = JSON.parse(localStorage.getItem("authUser") || "null");
+    } catch {
+      storedUser = null;
+    }
+
+    return (
+      storedUser?.u_id ||
+      storedUser?.user?.u_id ||
+      localStorage.getItem("userId")
+    );
+  };
+
   // ===== EV SUBMIT =====
   const handleEVSubmit = async (e) => {
     e.preventDefault();
 
-    const storedUser = JSON.parse(localStorage.getItem("authUser"));
-    const U_ID = storedUser?.u_id || "USR_SAMPLE_001";
+    const U_ID = getStoredUserId();
 
     if (!U_ID) {
       showToast("User not logged in or invalid session", "error");
@@ -134,8 +148,7 @@ const PopupForms = ({
   const handleSolarSubmit = async (e) => {
     e.preventDefault();
 
-    const storedUser = JSON.parse(localStorage.getItem("authUser"));
-    const U_ID = storedUser?.u_id || "USR_SAMPLE_001";
+    const U_ID = getStoredUserId();
 
     if (!U_ID) {
       showToast("User not logged in", "error");
@@ -212,8 +225,7 @@ const PopupForms = ({
   const handleTreeSubmit = async (e) => {
     e.preventDefault();
 
-    const storedUser = JSON.parse(localStorage.getItem("authUser"));
-    const U_ID = storedUser?.u_id || "USR_SAMPLE_001";
+    const U_ID = getStoredUserId();
 
     if (!U_ID) {
       showToast("User ID not found. Please login again.", "error");

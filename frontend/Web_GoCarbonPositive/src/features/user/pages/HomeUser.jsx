@@ -4,19 +4,19 @@ import useAuth from "@contexts/AuthContext";
 import {
   FaArrowRight,
   FaAward,
+  FaClipboardCheck,
   FaBookOpen,
+  FaFireFlameCurved,
   FaChevronDown,
   FaChevronUp,
   FaClock,
-  FaCoins,
   FaGift,
   FaBullhorn,
   FaGlobe,
   FaLeaf,
-  FaShieldHeart,
   FaUserGroup,
 } from "react-icons/fa6";
-import { GiChemicalDrop, GiRecycle } from "react-icons/gi";
+import { GiChemicalDrop } from "react-icons/gi";
 import { HiMiniChartBar } from "react-icons/hi2";
 import { toSectionId } from "@features/user/config/learnMoreContent";
 import "@features/user/styles/HomeUser.css";
@@ -28,12 +28,12 @@ const HomeUser = () => {
 
   const rewards = [
     {
-      icon: <FaLeaf style={{ color: "#16a34a" }} />,
+      icon: <FaClipboardCheck style={{ color: "#16a34a" }} />,
       title: "Complete tasks",
       desc: "Do various tasks to earn points",
     },
     {
-      icon: <FaShieldHeart style={{ color: "#ec4899" }} />,
+      icon: <FaAward style={{ color: "#ec4899" }} />,
       title: "Eco Badge",
       desc: "Get badges for your consistency",
     },
@@ -43,7 +43,7 @@ const HomeUser = () => {
       desc: "Get internship, expert consulting , and goodies ",
     },
     {
-      icon: <GiRecycle style={{ color: "#14b8a6" }} />,
+      icon: <FaFireFlameCurved style={{ color: "#14b8a6" }} />,
       title: "Streak Points",
       desc: "Stay consistent and Earn more points ",
     },
@@ -212,7 +212,7 @@ const HomeUser = () => {
               Join Contest,Earn Rewards
             </h2>
             <p className="hp-section-sub">
-              Redeem your hard-earned coins for real-world impact
+              Redeem your hard-earned rewards for real-world impact
             </p>
           </div>
         </div>
@@ -224,10 +224,6 @@ const HomeUser = () => {
               </div>
               <h3 className="hp-reward-title">{r.title}</h3>
               <p className="hp-reward-desc">{r.desc}</p>
-              <span className="hp-coins-badge">
-                <FaCoins style={{ color: "#eab308" }} />
-                {r.coins}
-              </span>
             </div>
           ))}
         </div>

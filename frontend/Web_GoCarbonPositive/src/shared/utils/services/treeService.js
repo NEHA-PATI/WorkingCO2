@@ -12,7 +12,7 @@ export const treeService = {
   },
 
   createTree: async (treeData) => {
-    const response = await apiClient.post('/tree', treeData);
+    const response = await apiClient.post('/tree/', treeData);
     return response.data;
   },
 
@@ -41,7 +41,7 @@ export const treeService = {
       throw new Error("Image upload succeeded but image URL was not returned");
     }
 
-    const linkResponse = await apiClient.post(`/tree/${treeId}/image`, {
+    const linkResponse = await apiClient.post(`/tree/${treeId}/image/`, {
       UID: userId,
       image_url: firstImage.url,
       cloudinary_public_id: firstImage.public_id || null,

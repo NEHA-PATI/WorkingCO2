@@ -17,7 +17,7 @@ import {
 import { ENV } from "@config/env";
 import "@features/admin/styles/User Management.css";
 
-const ORGANIZATION_API_URL = `${ENV.ORG_SERVICE_URL}/api/organizations`;
+const ORGANIZATION_API_URL = `${ENV.ORG_SERVICE_URL}/organizations`;
 
 const normalizeOrganization = (row) => ({
   org_id: row.org_id,

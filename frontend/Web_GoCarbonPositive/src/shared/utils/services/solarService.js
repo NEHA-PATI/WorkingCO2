@@ -13,7 +13,7 @@ export const solarService = {
   },
 
   createSolarPanel: async (panelData) => {
-    const response = await apiClient.post('/solarpanel', panelData);
+    const response = await apiClient.post('/solarpanel/', panelData);
     return response.data;
   },
 

@@ -7,7 +7,7 @@ import { ENV } from "@config/env";
 
 const ResetPassword = () => {
   const { token } = useParams();   // 👈 ye missing tha!
-  const API_URL = ENV.API_URL;
+  const API_URL = ENV.AUTH_SERVICE_URL;
   const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
@@ -27,7 +27,7 @@ const ResetPassword = () => {
 
     try {   // ✅ TRY START
 
-      const res = await fetch(`${API_URL}/api/v1/auth/password/reset/${token}`, {
+      const res = await fetch(`${API_URL}/password/reset/${token}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ newPassword: password }),

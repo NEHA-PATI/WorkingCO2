@@ -18,6 +18,7 @@ import About from "@features/user/pages/about";
 import Community from "@features/user/pages/community";
 import Contact from "@features/user/pages/contact";
 import CaseStudy from "@features/user/pages/CaseStudy";
+import Internship from "@features/user/pages/Internship";
 import IndustrialSolutions from "@features/user/pages/Industrial";
 import Faq from "@features/user/pages/FAQ";
 import NotFoundAnimation from "@features/user/pages/NotFoundAnimation";
@@ -35,8 +36,15 @@ import Blog from "@features/blog/pages/blog";
 import BlogDetailPage from "@features/blog/pages/blog-detail";
 import Careers from "@features/careers/pages/Careers";
 import MyCarbonFootprint from "@features/calculator/pages/MyCarbonFootprint";
+import MarketplacePage from "@features/marketplace1/pages/MarketplacePage";
+import ListingDetailPage from "@features/marketplace1/pages/ListingDetailPage";
+import MarketplaceBrowsePage from "@features/marketplace1/pages/MarketplaceBrowsePage";
+import MarketplaceCheckoutPage from "@features/marketplace1/pages/MarketplaceCheckoutPage";
+import MarketplaceSellPage from "@features/marketplace1/pages/MarketplaceSellPage";
+import MarketplaceCreateListingPage from "@features/marketplace1/pages/MarketplaceCreateListingPage";
+import MarketplacePortfolioPage from "@features/marketplace1/pages/MarketplacePortfolioPage";
+import MarketplaceMethodologyPage from "@features/marketplace1/pages/MarketplaceMethodologyPage";
 
-// import MarketplacePage from "@features/marketplace/pages/MarketplacePage";
 import ViewAssets from "@shared/pages/ViewAssets";
 import WalletPage from "@shared/pages/wallet";
 import Upload from "@shared/pages/upload";
@@ -137,6 +145,134 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/marketplace"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace/login"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace/logout"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace/signup/*"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace1"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace1/login"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace1/logout"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace1/signup/*"
+        element={<MarketplacePage />}
+      />
+      <Route
+        path="/marketplace/browse"
+        element={<MarketplaceBrowsePage />}
+      />
+      <Route
+        path="/marketplace1/browse"
+        element={<MarketplaceBrowsePage />}
+      />
+      <Route
+        path="/marketplace/listing/:listingId"
+        element={<ListingDetailPage />}
+      />
+      <Route
+        path="/marketplace1/listing/:listingId"
+        element={<ListingDetailPage />}
+      />
+      <Route
+        path="/marketplace/checkout/:stepId"
+        element={<MarketplaceCheckoutPage />}
+      />
+      <Route
+        path="/marketplace1/checkout/:stepId"
+        element={<MarketplaceCheckoutPage />}
+      />
+      <Route
+        path="/marketplace/sell"
+        element={<MarketplaceSellPage />}
+      />
+      <Route
+        path="/marketplace1/sell"
+        element={<MarketplaceSellPage />}
+      />
+      <Route
+        path="/sell"
+        element={<MarketplaceSellPage />}
+      />
+      <Route
+        path="/marketplace/create-listing"
+        element={<MarketplaceCreateListingPage />}
+      />
+      <Route
+        path="/marketplace/create-listing/:stepId"
+        element={<MarketplaceCreateListingPage />}
+      />
+      <Route
+        path="/marketplace1/create-listing"
+        element={<MarketplaceCreateListingPage />}
+      />
+      <Route
+        path="/marketplace1/create-listing/:stepId"
+        element={<MarketplaceCreateListingPage />}
+      />
+      <Route
+        path="/create-listing"
+        element={<MarketplaceCreateListingPage />}
+      />
+      <Route
+        path="/create-listing/:stepId"
+        element={<MarketplaceCreateListingPage />}
+      />
+      <Route
+        path="/marketplace/portfolio"
+        element={<MarketplacePortfolioPage />}
+      />
+      <Route
+        path="/marketplace1/portfolio"
+        element={<MarketplacePortfolioPage />}
+      />
+      <Route
+        path="/portfolio"
+        element={<MarketplacePortfolioPage />}
+      />
+      <Route
+        path="/marketplace/methodology"
+        element={<MarketplaceMethodologyPage />}
+      />
+      <Route
+        path="/marketplace1/methodology"
+        element={<MarketplaceMethodologyPage />}
+      />
+      <Route
+        path="/marketplace/methodologies"
+        element={<MarketplaceMethodologyPage />}
+      />
+      <Route
+        path="/marketplace1/methodologies"
+        element={<MarketplaceMethodologyPage />}
+      />
+      <Route
+        path="/methodology"
+        element={<MarketplaceMethodologyPage />}
+      />
+      <Route
+        path="/methodologies"
+        element={<MarketplaceMethodologyPage />}
+      />
 
       <Route element={<BaseLayout />}>
         <Route path="/" element={<Home />} />
@@ -154,6 +290,7 @@ const AppRoutes = () => {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:id" element={<BlogDetailPage />} />
         <Route path="/careers" element={<Careers />} />
+        <Route path="/careers/internship" element={<Internship />} />
         <Route path="/community" element={<Community />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/case-studies" element={<CaseStudy />} />
@@ -163,14 +300,6 @@ const AppRoutes = () => {
         <Route path="/industrial" element={<IndustrialSolutions />} />
         <Route path="/faq" element={<Faq />} />
 
-        {/* <Route
-          path="/marketplace"
-          element={
-            <ProtectedRoute allowedRoles={["user", "organization", "admin"]}>
-              <MarketplacePage />
-            </ProtectedRoute>
-          }
-        /> */}
         <Route
           path="/upload"
           element={

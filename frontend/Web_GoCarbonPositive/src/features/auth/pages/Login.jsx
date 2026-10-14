@@ -9,7 +9,7 @@ import { fireToast } from "@shared/utils/toastService";
 import { ENV } from "@config/env";
 
 const Login = ({ onClose, onSwitchToSignup }) => {
-  const API_URL = import.meta.env.VITE_AUTH_API || "http://localhost:5002";
+  const API_URL = ENV.AUTH_SERVICE_URL;
 
   const [formData, setFormData] = useState({
     email: "",
@@ -329,7 +329,7 @@ const Login = ({ onClose, onSwitchToSignup }) => {
     setErrors({});
 
     try {
-      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+      const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -368,11 +368,16 @@ const Login = ({ onClose, onSwitchToSignup }) => {
       });
       fireToast("AUTH.LOGIN_SUCCESS");
 
-      const role =
-        data.data.user.role?.toLowerCase() ||
-        data.data.user.role_name?.toLowerCase();
+      const roleText = data.data.user.role || data.data.user.role_name;
+      const role = roleText
+        ? String(roleText).trim().toLowerCase().replace(/\s+/g, "_")
+        : Number(data.data.user.role_id) === 2 || Number(data.data.user.role_id) === 3
+          ? "admin"
+          : Number(data.data.user.role_id) === 4
+            ? "organization"
+            : "user";
 
-      if (role === "admin") {
+      if (role === "admin" || role === "super_admin") {
         navigate("/admin/dashboard", { replace: true });
       } else if (role === "organization") {
         navigate("/organization/dashboard", { replace: true });
@@ -395,7 +400,7 @@ const Login = ({ onClose, onSwitchToSignup }) => {
 
   const handleSocialLogin = (provider) => {
     if (provider === "Google") {
-      window.location.href = `${API_URL}/api/v1/auth/oauth/google/login`;
+      window.location.href = `${API_URL}/oauth/google/login`;
     }
   };
 

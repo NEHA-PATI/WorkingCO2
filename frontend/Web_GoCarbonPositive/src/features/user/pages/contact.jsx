@@ -41,8 +41,7 @@ export default function Contact() {
       message: formData.message,
     };
     try {
-      // Contact Service routes are mounted at `/api/v1/contact`
-      const res = await contactApiClient.post("/api/v1/contact", payload);
+      const res = await contactApiClient.post("/", payload);
       const data = res.data;
       fireToast("CONTACT.MESSAGE_SENT", "success", { id: data.contact_id });
       setFormData({ name: "", email: "", phone: "", subject: "", message: "" });    } catch (error) {
@@ -69,7 +68,11 @@ export default function Contact() {
     setIsSubmitting(true);
     try {
       const storedUser = getAuthUser();
-      const u_id = storedUser?.u_id ?? null;
+      const u_id =
+        storedUser?.u_id ||
+        storedUser?.user?.u_id ||
+        localStorage.getItem("userId") ||
+        null;
       if (!u_id) {
         fireToast("CONTACT.LOGIN_REQUIRED", "warning");
         setIsSubmitting(false);
@@ -81,7 +84,7 @@ export default function Contact() {
         category: queryData.category,
         priority: queryData.priority,
       };
-      const res = await ticketApiClient.post("/tickets", payload, {
+      const res = await ticketApiClient.post("/", payload, {
         headers: { "x-user-id": u_id },
       });
       const data = res.data;
@@ -104,7 +107,7 @@ export default function Contact() {
         <div className="cp-left-inner">
           <div className="cp-left-top">
             <h1 className="cp-headline">We're here</h1>
-            <p className="cp-subtext">Our door is always open for a good cup of coffee.</p>
+            <p className="cp-subtext">Let’s connect and create impact together</p>
           </div>
 
           <div className="cp-office-block">

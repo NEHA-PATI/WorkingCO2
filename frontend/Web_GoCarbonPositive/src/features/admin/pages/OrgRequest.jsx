@@ -19,9 +19,10 @@ import {
   FaBuilding,
   FaUserTie,
 } from "react-icons/fa";
+import { ENV } from "@config/env";
 import "@features/admin/styles/orgrequest.css";
 
-const ORGRQ_API_BASE_URL = "http://localhost:8080/api/v1";
+const ORGRQ_API_BASE_URL = ENV.ADMIN_API_URL;
 
 const normalizeStatus = (rawStatus = "") => {
   const value = String(rawStatus).trim().toLowerCase();

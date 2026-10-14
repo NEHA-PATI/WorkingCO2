@@ -4,13 +4,40 @@ import { useNavigate } from "react-router-dom";
 import { Country, State } from "country-state-city";
 import "@features/user/styles/UserProfile.css";
 import { fireToast } from "@shared/utils/toastService";
-const BASE_URL = `${import.meta.env.VITE_PROFILE_API}/api/v1`;
+import { ENV } from "@config/env";
+
+const BASE_URL = ENV.PROFILE_API_URL;
+
+const readJsonResponse = async (response) => {
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) {
+    const text = await response.text();
+    throw new Error(
+      `Expected JSON but received ${contentType || "unknown content type"}: ${text.slice(0, 120)}`
+    );
+  }
+
+  return response.json();
+};
+
+const getStoredUser = () => {
+  const storedUserRaw = localStorage.getItem("authUser");
+  if (!storedUserRaw) return null;
+
+  try {
+    return JSON.parse(storedUserRaw);
+  } catch (error) {
+    console.error("Invalid authUser in localStorage", error);
+    return null;
+  }
+};
 
 const UserProfile = () => {
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -192,8 +219,9 @@ const UserProfile = () => {
 
 
   const handleSubmit = async () => {
-    const storedUserRaw = localStorage.getItem("authUser");
-    const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
+    if (saving) return;
+
+    const storedUser = getStoredUser();
     const u_id = storedUser?.u_id ?? null;
 
     if (!u_id) {
@@ -223,6 +251,8 @@ const UserProfile = () => {
       ,
     };
 
+    setSaving(true);
+
     try {
       const res = await fetch(
         `${BASE_URL}/profiles/complete`,
@@ -236,9 +266,12 @@ const UserProfile = () => {
         }
       );
 
-      const data = await res.json();
-
       if (!res.ok) {
+        const data = await readJsonResponse(res).catch(() => null);
+        console.error("Profile save failed", {
+          status: res.status,
+          data,
+        });
         fireToast("PROFILE.SAVE_FAILED", "error");
         return;
       }
@@ -247,15 +280,17 @@ const UserProfile = () => {
       setIsEditing(false);
 
     } catch (err) {
+      console.error("Profile save request failed", err);
       fireToast("API.NETWORK", "error");
+    } finally {
+      setSaving(false);
     }
   };
 
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const storedUserRaw = localStorage.getItem("authUser");
-      const storedUser = storedUserRaw ? JSON.parse(storedUserRaw) : null;
+      const storedUser = getStoredUser();
       const u_id = storedUser?.u_id ?? null;
 
       console.log("🔍 UserProfile localStorage snapshot:", {
@@ -275,8 +310,14 @@ const UserProfile = () => {
           `${BASE_URL}/profiles/complete`,
           {
             headers: { "x-user-id": u_id },
+            cache: "no-store",
           }
         );
+
+        if (res.status === 304) {
+          setIsEditing(false);
+          return;
+        }
 
         if (!res.ok) {
           // ❗ profile nahi mila → form
@@ -284,7 +325,7 @@ const UserProfile = () => {
           return;
         }
 
-        const data = await res.json();
+        const data = await readJsonResponse(res);
 
         if (data?.profile) {
           setFormData({
@@ -562,8 +603,12 @@ const UserProfile = () => {
 
               {/* Submit Button */}
               <div className="pf-button-group">
-                <button className="pf-save-btn" onClick={handleSubmit}>
-                  Save Changes
+                <button
+                  className="pf-save-btn"
+                  onClick={handleSubmit}
+                  disabled={saving}
+                >
+                  {saving ? "Saving..." : "Save Changes"}
                 </button>
                 <button
                   type="button"

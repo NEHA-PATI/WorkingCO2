@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import "../styles/quiz.css";
 import arenaApi, { getArenaUserId } from '@features/arena/services/arenaApi';
 import { useCountdown } from '@features/arena/hooks/useCountdown';
-const BASE_URL = `${import.meta.env.VITE_REWARD_API}/api/v1`;
+import { ENV } from '@config/env';
 import { 
   FaBook, 
   FaTrophy, 
@@ -18,6 +18,8 @@ import {
   FaCalendarAlt
 } from 'react-icons/fa';
 import { GiPartyPopper } from 'react-icons/gi';
+
+const BASE_URL = ENV.QUIZ_API_URL;
 
 const QUIZ_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const QUIZ_COOLDOWN_GLOBAL_KEY = 'arena_daily_quiz_cooldown_until';

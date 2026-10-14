@@ -17,6 +17,17 @@ const createRes = () => {
   return res;
 };
 
+const expectErrorResponse = (res, status, message) => {
+  expect(res.status).toHaveBeenCalledWith(status);
+  expect(res.json).toHaveBeenCalledWith(
+    expect.objectContaining({
+      success: false,
+      message,
+      data: null,
+    })
+  );
+};
+
 describe("Career Service - Jobs Controller Unit Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,11 +51,13 @@ describe("Career Service - Jobs Controller Unit Tests", () => {
         status: "Open",
         department: "Engineering",
       });
-      expect(res.json).toHaveBeenCalledWith({
-        status: "success",
-        count: 2,
-        data: rows,
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Jobs fetched successfully",
+          data: rows,
+        })
+      );
       expect(next).not.toHaveBeenCalled();
     });
 
@@ -61,11 +74,13 @@ describe("Career Service - Jobs Controller Unit Tests", () => {
 
       await jobController.getAllJobs(req, res, next);
 
-      expect(res.json).toHaveBeenCalledWith({
-        status: "success",
-        count: 1,
-        data: [{ id: 1, type: "Full-time" }],
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Jobs fetched successfully",
+          data: [{ id: 1, type: "Full-time" }],
+        })
+      );
     });
 
     test("Database error -> next(err)", async () => {
@@ -92,11 +107,7 @@ describe("Career Service - Jobs Controller Unit Tests", () => {
 
       await jobController.getJobById(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        status: "fail",
-        message: "Job not found",
-      });
+      expectErrorResponse(res, 404, "Job not found");
     });
 
     test("Success -> 200", async () => {
@@ -109,10 +120,13 @@ describe("Career Service - Jobs Controller Unit Tests", () => {
 
       await jobController.getJobById(req, res, next);
 
-      expect(res.json).toHaveBeenCalledWith({
-        status: "success",
-        data: job,
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Job fetched successfully",
+          data: job,
+        })
+      );
     });
 
     test("Database error -> next(err)", async () => {
@@ -144,10 +158,13 @@ describe("Career Service - Jobs Controller Unit Tests", () => {
 
       expect(Job.create).toHaveBeenCalledWith(req.body);
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({
-        status: "success",
-        data: created,
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Job created successfully",
+          data: created,
+        })
+      );
     });
 
     test("Database error -> next(err)", async () => {
@@ -174,11 +191,7 @@ describe("Career Service - Jobs Controller Unit Tests", () => {
 
       await jobController.updateJob(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        status: "fail",
-        message: "Job not found",
-      });
+      expectErrorResponse(res, 404, "Job not found");
     });
 
     test("Success -> 200", async () => {
@@ -192,10 +205,13 @@ describe("Career Service - Jobs Controller Unit Tests", () => {
       await jobController.updateJob(req, res, next);
 
       expect(Job.update).toHaveBeenCalledWith("123", req.body);
-      expect(res.json).toHaveBeenCalledWith({
-        status: "success",
-        data: updated,
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Job updated successfully",
+          data: updated,
+        })
+      );
     });
 
     test("Database error -> next(err)", async () => {
@@ -222,11 +238,7 @@ describe("Career Service - Jobs Controller Unit Tests", () => {
 
       await jobController.deleteJob(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        status: "fail",
-        message: "Job not found",
-      });
+      expectErrorResponse(res, 404, "Job not found");
     });
 
     test("Success -> 204", async () => {
@@ -240,7 +252,13 @@ describe("Career Service - Jobs Controller Unit Tests", () => {
 
       expect(Job.delete).toHaveBeenCalledWith("123");
       expect(res.status).toHaveBeenCalledWith(204);
-      expect(res.send).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          message: "Job deleted successfully",
+          data: null,
+        })
+      );
     });
 
     test("Database error -> next(err)", async () => {

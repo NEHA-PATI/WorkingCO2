@@ -7,15 +7,10 @@ const stripTrailingSlashes = (url) => (url ? url.replace(/\/+$/, "") : url);
 
 const API_CONFIG = {
   // Asset Service (port 5000)
-  ASSET_API:
-    stripTrailingSlashes(
-      import.meta.env.VITE_ASSET_SERVICE_URL ||
-        import.meta.env.VITE_ASSET_API ||
-        "http://localhost:5000",
-    ) + "/api/v1",
+  ASSET_API: ENV.ASSET_SERVICE_URL,
 
   // Auth Service (port 5002)
-  AUTH_API: import.meta.env.VITE_AUTH_API || "http://localhost:5002",
+  AUTH_API: ENV.AUTH_SERVICE_URL,
 
   // Notification Service (port 5001)
  NOTIFICATION_API:
@@ -23,55 +18,28 @@ const API_CONFIG = {
   import.meta.env.VITE_NOTIFICATION_SERVICE_URL ||
   "http://localhost:5001",
 
-   ADMIN_API: import.meta.env.VITE_ADMIN_API || "http://localhost:8080",  
+   ADMIN_API: ENV.ADMIN_API_URL,  
 
 
   // Contact Service (port 5005)
-  CONTACT_API: import.meta.env.VITE_CONTACT_API || "http://localhost:5005",
+  CONTACT_API: ENV.CONTACT_API_URL,
 
-  DEMO_API: import.meta.env.VITE_DEMO_API || "http://localhost:5007",
+  DEMO_API: ENV.DEMO_API_URL,
 
   TICKET_API:
-    (() => {
-      const raw =
-        import.meta.env.VITE_TICKET_API ||
-        "http://15.207.54.164:5004";
-      const base = stripTrailingSlashes(raw);
-      return base.endsWith("/api/v1") ? base : base + "/api/v1";
-    })(),
+    ENV.TICKET_API_URL,
 
   // Carbon Footprint Service (port 5003 for example)
-  CFC_API: (() => {
-    const raw =
-      import.meta.env.VITE_CFC_SERVICE_URL ||
-      import.meta.env.VITE_CFC_API ||
-      "http://localhost:8004";
-    const base = stripTrailingSlashes(raw);
-    return base.endsWith("/api") ? base : base + "/api";
-  })(),
+  CFC_API: ENV.CARBON_API_URL,
 
-  PROFILE_API: (() => {
-  const raw =
-    import.meta.env.VITE_PROFILE_API ||
-    "http://15.207.54.164:5006";
-
-  const base = raw.replace(/\/+$/, "");
-
-  return base.endsWith("/api/v1") ? base : base + "/api/v1";
-})(),
+  PROFILE_API: ENV.PROFILE_API_URL,
 
 REWARD_API: (() => {
-  const raw =
-    import.meta.env.VITE_REWARD_API ||
-    "http://15.207.54.164:5008";
-
-  const base = stripTrailingSlashes(raw);
-
-  return base.endsWith("/api/v1") ? base : base + "/api/v1";
+  return ENV.REWARD_SERVICE_URL;
 })(),
 
   ORG_API:
-    import.meta.env.VITE_ORG_SERVICE_URL || ENV.ORG_SERVICE_URL || "http://localhost:5003",
+    ENV.ORG_SERVICE_URL,
 };
 
 /**
@@ -205,9 +173,7 @@ export const careerApiClient = createApiClient(
 
 // Blog Service (port 4000)
 export const blogApiClient = createApiClient(
-  stripTrailingSlashes(import.meta.env.VITE_BLOG_API_URL) ||
-    stripTrailingSlashes(import.meta.env.VITE_BLOG_API || "http://localhost:4000") +
-      "/api/v1/blog",
+  ENV.BLOG_API_URL,
   "Blog Service",
 );
 
@@ -230,7 +196,7 @@ export const rewardApiClient = createApiClient(
   "Reward Service",
 );
 export const demoApiClient = createApiClient(
-  API_CONFIG.DEMO_API + "/api/v1/demo",
+  API_CONFIG.DEMO_API,
   "Demo Service",
 ); 
 
@@ -245,49 +211,49 @@ export default assetApiClient;
 export { API_CONFIG };
 
 export const calculateCarbonFootprint = async (payload) => {
-  const response = await carbonApiClient.post('/v1/calculate', payload);
+  const response = await carbonApiClient.post('/v1/calculate/', payload);
   return response.data;
 };
 
 export const fetchAirportCodes = async (search = "", limit = 300) => {
-  const response = await carbonApiClient.get('/v1/airports', {
+  const response = await carbonApiClient.get('/v1/airports/', {
     params: { q: search, limit },
   });
   return response.data?.data || [];
 };
 
 export const fetchTickets = async () => {
-  const response = await ticketApiClient.get("/tickets");
+  const response = await ticketApiClient.get("/");
   return response.data.data;
 };
 
 export const fetchTicketById = async (ticketId) => {
-  const response = await ticketApiClient.get(`/tickets/${ticketId}`);
+  const response = await ticketApiClient.get(`/${ticketId}`);
   return response.data.data;
 };
 
 export const createTicket = async (payload) => {
-  const response = await ticketApiClient.post("/tickets", payload);
+  const response = await ticketApiClient.post("/", payload);
   return response.data;
 };
 
 export const updateTicket = async (ticketId, payload) => {
   const response = await ticketApiClient.put(
-    `/tickets/${ticketId}`,
+    `/${ticketId}`,
     payload
   );
   return response.data;
 };
 
 export const deleteTicket = async (ticketId) => {
-  const response = await ticketApiClient.delete(`/tickets/${ticketId}`);
+  const response = await ticketApiClient.delete(`/${ticketId}`);
   return response.data;
 };
 
 // Send OTP
 export const sendOrgOtp = async (email) => {
   const response = await orgApiClient.post(
-    "/api/org-email-otp/send",
+    "/org-email-otp/send",
     { email }
   );
   return response.data;
@@ -296,7 +262,7 @@ export const sendOrgOtp = async (email) => {
 // Verify OTP
 export const verifyOrgOtp = async (email, otp) => {
   const response = await orgApiClient.post(
-    "/api/org-email-otp/verify",
+    "/org-email-otp/verify",
     { email, otp }
   );
   return response.data;
@@ -305,7 +271,7 @@ export const verifyOrgOtp = async (email, otp) => {
 // Submit Organization Request
 export const submitOrgRequest = async (payload) => {
   const response = await orgApiClient.post(
-    "/api/org-requests",
+    "/org-requests",
     payload
   );
   return response.data;

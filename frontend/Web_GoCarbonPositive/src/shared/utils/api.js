@@ -6,7 +6,7 @@ import { authApiClient, assetApiClient, notificationApiClient } from './apiClien
 export const authService = {
   login: async (email, password) => {
     try {
-      const response = await authApiClient.post('/api/v1/auth/login', {
+      const response = await authApiClient.post('/login', {
         email,
         password
       });
@@ -20,7 +20,7 @@ export const authService = {
 
   register: async (email, password, name) => {
     try {
-      const response = await authApiClient.post('/api/v1/auth/register', {
+      const response = await authApiClient.post('/register', {
         email,
         password,
         name
@@ -34,7 +34,7 @@ export const authService = {
 
   logout: async () => {
     try {
-      const response = await authApiClient.post('/api/v1/auth/logout');
+      const response = await authApiClient.post('/logout');
       localStorage.removeItem('authToken');
       return response.data;
     } catch (error) {
@@ -47,7 +47,7 @@ export const authService = {
 
   refreshToken: async () => {
     try {
-      const response = await authApiClient.post('/api/v1/auth/refresh');
+      const response = await authApiClient.post('/refresh');
       if (response.data.token) {
         localStorage.setItem('authToken', response.data.token);
       }

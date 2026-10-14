@@ -1,8 +1,7 @@
-import { ENV } from "@config/env";
 import { assetApiClient as apiClient } from "@shared/utils/apiClient";
 
-const PLANTATION_BASE = `${ENV.ASSET_SERVICE_URL}/api/v1/plantation`;
-const CARBON_BASE = `${ENV.ASSET_SERVICE_URL}/api/v1/carbon-capture`;
+const PLANTATION_BASE = "/plantation";
+const CARBON_BASE = "/carbon-capture";
 
 const orgAssetApi = {
   getAll: async () => {
@@ -11,7 +10,7 @@ const orgAssetApi = {
   },
 
   getAllFleet: async () => {
-    const response = await apiClient.get(`${ENV.ASSET_SERVICE_URL}/api/v1/fleet/all`);
+    const response = await apiClient.get("/fleet/all");
     return response.data;
   },
 

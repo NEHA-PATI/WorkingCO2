@@ -1,7 +1,5 @@
 import { assetApiClient as apiClient } from "@shared/utils/apiClient";
-import { ENV } from "@config/env";
 
-const API_BASE_URL = `${ENV.ASSET_SERVICE_URL}/api/v1`;
 const isSuccessResponse = (payload) =>
   payload?.success === true || payload?.status === "success";
 
@@ -11,7 +9,7 @@ export const assetAPI = {
   getEVs: async (userId) => {
     try {
       const response = await apiClient.get(
-        `${API_BASE_URL}/evmasterdata/${userId}`
+        `/evmasterdata/${userId}`
       );
       return response.data;
     } catch (error) {
@@ -23,7 +21,7 @@ export const assetAPI = {
   // Fetch all Solar Panels for a user
   getSolarPanels: async (userId) => {
     try {
-      const response = await apiClient.get(`${API_BASE_URL}/solarpanel/${userId}`);
+      const response = await apiClient.get(`/solarpanel/${userId}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching Solar Panels:", error);
@@ -34,7 +32,7 @@ export const assetAPI = {
   // Fetch all Trees for a user
   getTrees: async (userId) => {
     try {
-      const response = await apiClient.get(`${API_BASE_URL}/tree/${userId}`);
+      const response = await apiClient.get(`/tree/${userId}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching Trees:", error);
@@ -54,12 +52,12 @@ export const assetAPI = {
         fleetResult,
       ] =
         await Promise.allSettled([
-          apiClient.get(`${API_BASE_URL}/evmasterdata/${userId}`),
-          apiClient.get(`${API_BASE_URL}/solarpanel/${userId}`),
-          apiClient.get(`${API_BASE_URL}/tree/${userId}`),
-          apiClient.get(`${API_BASE_URL}/carbon-capture/org/${orgId}`),
-          apiClient.get(`${API_BASE_URL}/plantation/org/${orgId}`),
-          apiClient.get(`${API_BASE_URL}/fleet/org/${orgId}`),
+          apiClient.get(`/evmasterdata/${userId}`),
+          apiClient.get(`/solarpanel/${userId}`),
+          apiClient.get(`/tree/${userId}`),
+          apiClient.get(`/carbon-capture/org/${orgId}`),
+          apiClient.get(`/plantation/org/${orgId}`),
+          apiClient.get(`/fleet/org/${orgId}`),
         ]);
 
       const evsResponse =
@@ -257,7 +255,7 @@ export const assetAPI = {
   deleteEV: async (evId) => {
     try {
       const response = await apiClient.delete(
-        `${API_BASE_URL}/evmasterdata/${evId}`
+        `/evmasterdata/${evId}`
       );
       return response.data;
     } catch (error) {
@@ -270,7 +268,7 @@ export const assetAPI = {
   deleteSolar: async (solarId) => {
     try {
       const response = await apiClient.delete(
-        `${API_BASE_URL}/solarpanel/${solarId}`
+        `/solarpanel/${solarId}`
       );
       return response.data;
     } catch (error) {
@@ -282,7 +280,7 @@ export const assetAPI = {
   // Delete Tree
   deleteTree: async (treeId) => {
     try {
-      const response = await apiClient.delete(`${API_BASE_URL}/tree/${treeId}`);
+      const response = await apiClient.delete(`/tree/${treeId}`);
       return response.data;
     } catch (error) {
       console.error("Error deleting Tree:", error);
@@ -294,7 +292,7 @@ export const assetAPI = {
   updateEV: async (evId, data) => {
     try {
       const response = await apiClient.put(
-        `${API_BASE_URL}/evmasterdata/${evId}`,
+        `/evmasterdata/${evId}`,
         data
       );
       return response.data;
@@ -308,7 +306,7 @@ export const assetAPI = {
   updateSolar: async (solarId, data) => {
     try {
       const response = await apiClient.put(
-        `${API_BASE_URL}/solarpanel/${solarId}`,
+        `/solarpanel/${solarId}`,
         data
       );
       return response.data;
@@ -321,7 +319,7 @@ export const assetAPI = {
   // Update Tree
   updateTree: async (treeId, data) => {
     try {
-      const response = await apiClient.put(`${API_BASE_URL}/tree/${treeId}`, data);
+      const response = await apiClient.put(`/tree/${treeId}`, data);
       return response.data;
     } catch (error) {
       console.error("Error updating Tree:", error);
@@ -331,7 +329,7 @@ export const assetAPI = {
   // Create Plantation asset
   createPlantation: async (data) => {
     try {
-      const response = await apiClient.post(`${API_BASE_URL}/plantation`, data);
+      const response = await apiClient.post(`/plantation`, data);
       return response.data;
     } catch (error) {
       console.error("Error creating Plantation asset:", error);
@@ -343,7 +341,7 @@ export const assetAPI = {
   getPlantationByOrg: async (orgId) => {
     try {
       const response = await apiClient.get(
-        `${API_BASE_URL}/plantation/org/${orgId}`
+        `/plantation/org/${orgId}`
       );
       return response.data;
     } catch (error) {
@@ -354,7 +352,7 @@ export const assetAPI = {
   // Create Fleet entry
   createFleet: async (data) => {
     try {
-      const response = await apiClient.post(`${API_BASE_URL}/fleet`, data);
+      const response = await apiClient.post(`/fleet`, data);
       return response.data;
     } catch (error) {
       console.error("Error creating Fleet entry:", error);
@@ -365,7 +363,7 @@ export const assetAPI = {
   // Get Fleet entries by organization
   getFleetByOrg: async (orgId) => {
     try {
-      const response = await apiClient.get(`${API_BASE_URL}/fleet/org/${orgId}`);
+      const response = await apiClient.get(`/fleet/org/${orgId}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching Fleet entries:", error);
@@ -376,7 +374,7 @@ export const assetAPI = {
   createCarbonCapture: async (data) => {
     try {
       const response = await apiClient.post(
-        `${API_BASE_URL}/carbon-capture`,
+        `/carbon-capture`,
         data
       );
       return response.data;
@@ -390,7 +388,7 @@ export const assetAPI = {
   getCarbonCaptureByOrg: async (orgId) => {
     try {
       const response = await apiClient.get(
-        `${API_BASE_URL}/carbon-capture/org/${orgId}`
+        `/carbon-capture/org/${orgId}`
       );
       return response.data;
     } catch (error) {
@@ -403,7 +401,7 @@ export const assetAPI = {
   updateCarbonCapture: async (captureId, data) => {
     try {
       const response = await apiClient.put(
-        `${API_BASE_URL}/carbon-capture/${captureId}`,
+        `/carbon-capture/${captureId}`,
         data
       );
       return response.data;
@@ -417,7 +415,7 @@ export const assetAPI = {
   deleteCarbonCapture: async (captureId) => {
     try {
       const response = await apiClient.delete(
-        `${API_BASE_URL}/carbon-capture/${captureId}`
+        `/carbon-capture/${captureId}`
       );
       return response.data;
     } catch (error) {

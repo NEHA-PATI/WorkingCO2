@@ -30,7 +30,7 @@ const allowedOrigins = [
   "http://localhost:5174",
   "http://localhost:3000",
   "http://localhost",
-  "http://15.207.54.164:3000",
+  "http://3.7.181.15:3000",
   "https://www.gocarbonpositive.com",
   process.env.FRONTEND_URL, // 🔥 dynamic (EC2 / domain)
 ].filter(Boolean);

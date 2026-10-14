@@ -35,41 +35,8 @@ const Users = () => {
   const [actionLoading, setActionLoading] = useState(null);
 
   useEffect(() => {
-    loadNotifications();
     loadUsers();
-
-    const interval = setInterval(loadNotifications, 30000);
-    return () => clearInterval(interval);
   }, []);
-
-  /* ---------------- OLD: PENDING APPROVALS (NOTIFICATIONS) ---------------- */
-
-  // const loadNotifications = async () => {
-  //   try {
-  //     setLoading(true);
-
-  //     const unreadResponse = await fetchNotifications({
-  //       status: "new",
-  //       limit: 50,
-  //     });
-
-  //     const pending = unreadResponse.data.map((notif) => ({
-  //       id: notif.id,
-  //       name: notif.username || "Unknown User",
-  //       email: notif.email,
-  //       userId: notif.user_id,
-  //       eventType: notif.event_type,
-  //       ipAddress: notif.ip_address,
-  //       createdAt: notif.created_at,
-  //     }));
-
-  //     setPendingApprovals(pending);
-  //   } catch (error) {
-  //     console.error("Error loading notifications:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   /* ---------------- ALL USERS (AUTH SERVICE) ---------------- */
 

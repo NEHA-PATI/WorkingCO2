@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ChevronsRight,
 } from "lucide-react"
+import { ENV } from "@config/env"
 import "@features/admin/styles/User Management.css"
 
 // Helper functions outside component (Allowed)
@@ -36,7 +37,7 @@ export default function UserManagementPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/v1/users")
+        const res = await fetch(`${ENV.ADMIN_API_URL}/users`)
         const result = await res.json()
 
         if (result.success) {

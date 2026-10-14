@@ -3,10 +3,9 @@ import { ENV } from '@config/env';
 
 const resolveRewardsBaseUrl = () => {
  const raw = (
-  import.meta.env.VITE_REWARD_API ||
   ENV.REWARD_SERVICE_URL ||
-  "http://15.207.54.164:5008"
-).replace(/\/+$/, '');
+  import.meta.env.VITE_REWARD_API ||
+  "/api/v1/rewards").replace(/\/+$/, '');
 
   if (!raw) {
     return '/api/v1/rewards';

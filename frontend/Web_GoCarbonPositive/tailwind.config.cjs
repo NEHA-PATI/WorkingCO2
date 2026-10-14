@@ -4,10 +4,12 @@ module.exports = {
   content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
     extend: {
-
-      // ✅ ADD THIS BLOCK
       fontFamily: {
         sans: ["Poppins", "system-ui", "sans-serif"],
+        display: ["Space Grotesk", "Poppins", "system-ui", "sans-serif"],
+        headline: ["Epilogue", "Poppins", "system-ui", "sans-serif"],
+        body: ["Inter", "Poppins", "system-ui", "sans-serif"],
+        label: ["Inter", "Poppins", "system-ui", "sans-serif"],
       },
 
       borderRadius: {
@@ -67,6 +69,46 @@ module.exports = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        brand: {
+          50: "#eefcf6",
+          100: "#d6f5e7",
+          200: "#afead1",
+          300: "#7fdbb4",
+          400: "#4cc893",
+          500: "#22b673",
+          600: "#169662",
+          700: "#11784f",
+          800: "#0f5f42",
+          900: "#0f5039",
+        },
+        marketplace: {
+          primary: "#005129",
+          secondary: "#006d39",
+          tertiary: "#004a75",
+          surface: "#f8fafb",
+          "surface-container-low": "#f2f4f5",
+          "surface-container": "#eceeef",
+          "surface-container-high": "#e6e8e9",
+          "surface-container-highest": "#e1e3e4",
+          "surface-container-lowest": "#ffffff",
+          "on-surface": "#191c1d",
+          "on-surface-variant": "#404940",
+          outline: "#707a70",
+          "outline-variant": "#bfc9be",
+          "primary-container": "#1a6b3c",
+          "secondary-container": "#8ef9ad",
+          "primary-fixed": "#a5f4b8",
+          "primary-fixed-dim": "#89d89e",
+          "secondary-fixed": "#8ef9ad",
+          "secondary-fixed-dim": "#72dc93",
+          "error-container": "#ffdad6",
+          error: "#ba1a1a",
+        },
+      },
+
+      boxShadow: {
+        soft: "0 22px 45px -28px rgba(15, 80, 57, 0.45)",
+        card: "0 14px 36px -24px rgba(15, 80, 57, 0.35)",
       },
 
       keyframes: {
@@ -78,13 +120,17 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "fade-up": {
+          from: { opacity: "0", transform: "translateY(14px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
 
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-up": "fade-up 0.5s ease-out both",
       },
-
     },
   },
   plugins: [require("tailwindcss-animate")],

@@ -5,7 +5,7 @@ const routes = require("./routes");
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:5173", "http://15.207.54.164:5173"],
+  origin: ["http://localhost:5173", "http://3.7.181.15:5173"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: [
     "Content-Type",

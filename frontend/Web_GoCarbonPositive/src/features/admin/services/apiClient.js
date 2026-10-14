@@ -1,4 +1,6 @@
-const BASE_URL = "http://localhost:5008/api/v1";
+import { ENV } from "@config/env";
+
+const BASE_URL = ENV.REWARD_SERVICE_URL;
 
 const apiClient = async ({
   url,

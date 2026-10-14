@@ -5,7 +5,7 @@ import { fireToast } from "@shared/utils/toastService";
 import { ENV } from "@config/env";
 
 const ForgotPassword = () => {
-  const API_URL = ENV.API_URL;
+  const API_URL = ENV.AUTH_SERVICE_URL;
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -25,7 +25,7 @@ const ForgotPassword = () => {
 
     try {
       const res = await fetch(
-        `${API_URL}/api/v1/auth/password/forgot-password`,
+        `${API_URL}/password/forgot-password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
