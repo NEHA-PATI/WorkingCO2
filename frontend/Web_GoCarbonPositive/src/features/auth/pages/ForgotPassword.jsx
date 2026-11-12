@@ -5,7 +5,7 @@ import { fireToast } from "@shared/utils/toastService";
 import { ENV } from "@config/env";
 
 const ForgotPassword = () => {
-  const API_URL = ENV.API_URL;
+  const API_URL = ENV.AUTH_SERVICE_URL;
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");

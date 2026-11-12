@@ -14,6 +14,7 @@ import {
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import arenaApi, { getArenaUserId } from '@features/arena/services/arenaApi';
 import { useCountdown } from '@features/arena/hooks/useCountdown';
+import { ENV } from '@config/env';
 const arenaBannerImages = {
     a4: "/arena/a4.jpg",
     a5: "/arena/a5.jpg",
@@ -1751,7 +1752,7 @@ export default function ArenaStandalone() {
                 return headers;
             })();
 
-            const response = await fetch('http://localhost:5009/api/profiles/complete', {
+            const response = await fetch(`${ENV.PROFILE_API_URL}/profiles/complete`, {
                 headers: authHeaders
             });
 

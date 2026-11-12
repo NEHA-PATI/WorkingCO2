@@ -252,7 +252,7 @@ const Wallet = () => {
 
       // 🔹 STEP 1: Get nonce from backend
       const nonceRes = await fetch(
-        `http://localhost:5050/wallet/nonce?address=${walletAddress}`
+        `${import.meta.env.VITE_WALLET_API || (import.meta.env.PROD ? "/wallet" : "http://localhost:5050/wallet")}/nonce?address=${walletAddress}`
       );
       const { nonce } = await nonceRes.json();
 
@@ -272,7 +272,7 @@ const Wallet = () => {
 
       // 🔹 STEP 4: Register in backend
       const registerRes = await fetch(
-        "http://localhost:5050/wallet/register",
+        `${import.meta.env.VITE_WALLET_API || (import.meta.env.PROD ? "/wallet" : "http://localhost:5050/wallet")}/register`,
         {
           method: "POST",
           headers: {

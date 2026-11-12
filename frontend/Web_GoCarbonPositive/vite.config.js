@@ -8,7 +8,7 @@ const require = createRequire(import.meta.url);
 const processBrowserPath = require.resolve("process/browser");
 const bufferPath = require.resolve("buffer/");
 
-export default defineConfig({
+export default defineConfig(() => ({
   plugins: [react()],
   define: {
     global: "globalThis",
@@ -30,4 +30,18 @@ export default defineConfig({
   optimizeDeps: {
     include: ["buffer", "process"],
   },
-});
+  // These proxies make same-origin route bases usable during local
+  // development when a local .env does not provide an absolute service URL.
+  server: {
+    proxy: {
+      "/api/v1/auth": "http://localhost:5002",
+      "/api/v1/users": "http://localhost:5002",
+      "/api/v1": "http://localhost:5000",
+      "/api/contact": "http://localhost:5005",
+      "/api/blog": "http://localhost:4000",
+      "/api/demo": "http://localhost:5007",
+      "/api/tickets": "http://localhost:5004",
+      "/wallet": "http://localhost:5050",
+    },
+  },
+}));

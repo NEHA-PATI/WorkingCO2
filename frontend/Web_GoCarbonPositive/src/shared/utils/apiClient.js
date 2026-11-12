@@ -6,30 +6,27 @@ import { ENV } from "@config/env";
 const API_CONFIG = {
   // Asset Service (port 5000)
   ASSET_API:
-    (
-      import.meta.env.VITE_ASSET_SERVICE_URL ||
-      (import.meta.env.PROD
-        ? "https://asset-service2026.onrender.com"
-        : "http://localhost:5000")
-    ) + "/api/v1",
+    import.meta.env.VITE_ASSET_API ||
+    `${ENV.ASSET_SERVICE_URL}/api/v1`,
 
   // Auth Service (port 5002)
-  AUTH_API: import.meta.env.VITE_AUTH_API || "http://localhost:5002",
+  AUTH_API: ENV.AUTH_SERVICE_URL,
 
   // Notification Service (port 5001)
   NOTIFICATION_API:
-    import.meta.env.VITE_NOTIFICATION_SERVICE_URL || "http://localhost:5001",
+    ENV.NOTIFICATION_SERVICE_URL,
 
 
   // Contact Service (port 5005)
-  CONTACT_API: import.meta.env.VITE_CONTACT_API || "http://localhost:5005",
+  CONTACT_API: ENV.CONTACT_SERVICE_URL,
 
   // Carbon Footprint Service (port 5003 for example)
-CFC_API:
-  import.meta.env.VITE_CFC_SERVICE_URL || "http://localhost:8004/api",
+  CFC_API:
+    import.meta.env.VITE_CFC_API ||
+    `${import.meta.env.VITE_CFC_SERVICE_URL || (import.meta.env.PROD ? "" : "http://localhost:8004")}/api`,
 
   ORG_API:
-    import.meta.env.VITE_ORG_SERVICE_URL || ENV.ORG_SERVICE_URL || "http://localhost:5003",
+    ENV.ORG_SERVICE_URL,
 };
 
 /**
@@ -168,7 +165,7 @@ export const contactApiClient = createApiClient(
 );
 
 export const ticketApiClient = createApiClient(
-  (import.meta.env.VITE_TICKET_API || "http://localhost:5004") + "/api",
+  ENV.TICKET_SERVICE_URL,
   "Ticket Service",
 );
 
@@ -195,30 +192,30 @@ export const fetchAirportCodes = async (search = "", limit = 300) => {
 };
 
 export const fetchTickets = async () => {
-  const response = await ticketApiClient.get("/tickets");
+  const response = await ticketApiClient.get("/api/tickets");
   return response.data.data;
 };
 
 export const fetchTicketById = async (ticketId) => {
-  const response = await ticketApiClient.get(`/tickets/${ticketId}`);
+  const response = await ticketApiClient.get(`/api/tickets/${ticketId}`);
   return response.data.data;
 };
 
 export const createTicket = async (payload) => {
-  const response = await ticketApiClient.post("/tickets", payload);
+  const response = await ticketApiClient.post("/api/tickets", payload);
   return response.data;
 };
 
 export const updateTicket = async (ticketId, payload) => {
   const response = await ticketApiClient.put(
-    `/tickets/${ticketId}`,
+    `/api/tickets/${ticketId}`,
     payload
   );
   return response.data;
 };
 
 export const deleteTicket = async (ticketId) => {
-  const response = await ticketApiClient.delete(`/tickets/${ticketId}`);
+  const response = await ticketApiClient.delete(`/api/tickets/${ticketId}`);
   return response.data;
 };
 

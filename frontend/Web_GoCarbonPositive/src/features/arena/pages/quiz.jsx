@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import "../styles/quiz.css";
 import arenaApi, { getArenaUserId } from '@features/arena/services/arenaApi';
+import { ENV } from '@config/env';
 import { useCountdown } from '@features/arena/hooks/useCountdown';
 import { 
   FaBook, 
@@ -128,7 +129,7 @@ useEffect(() => {
 useEffect(() => {
   const fetchQuestions = async () => {
     try {
-      const res = await fetch("http://localhost:5008/api/v1/quiz/questions", {
+      const res = await fetch(`${ENV.REWARD_SERVICE_URL}/api/v1/quiz/questions`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`
         }
@@ -215,7 +216,7 @@ useEffect(() => {
       })
     );
 
-    const res = await fetch("http://localhost:5008/api/v1/quiz/submit", {
+    const res = await fetch(`${ENV.REWARD_SERVICE_URL}/api/v1/quiz/submit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
