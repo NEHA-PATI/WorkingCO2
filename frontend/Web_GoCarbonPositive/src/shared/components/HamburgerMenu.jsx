@@ -39,6 +39,20 @@ const MENU_ICONS = {
 export default function HamburgerMenu({ role, close, handleLogout }) {
   const navigate = useNavigate();
   const menu = USER_ORG_MENU[role] || [];
+  const careersIndex = menu.findIndex((item) => item.label === "Careers");
+  const menuItems =
+    careersIndex >= 0
+      ? [
+          ...menu.slice(0, careersIndex + 1),
+          {
+            label: "Internship",
+            path: "/careers/internship",
+            iconKey: "careers",
+            isChild: true,
+          },
+          ...menu.slice(careersIndex + 1),
+        ]
+      : menu;
 
   const handleItemClick = (item) => {
     close();
@@ -53,13 +67,13 @@ export default function HamburgerMenu({ role, close, handleLogout }) {
 
   return (
     <div className="sidebar-dropdown">
-      {menu.map((item) => {
+      {menuItems.map((item) => {
         const Icon = MENU_ICONS[item.iconKey];
 
         return (
           <div
             key={item.label}
-            className="sidebar-item"
+            className={`sidebar-item ${item.isChild ? "sidebar-item-child" : ""}`}
             onClick={() => handleItemClick(item)}
           >
             {Icon && (
@@ -71,7 +85,7 @@ export default function HamburgerMenu({ role, close, handleLogout }) {
                 }}
               />
             )}
-            <span>{item.label}</span>
+            <span className="sidebar-item-label">{item.label}</span>
           </div>
         );
       })}

@@ -26,6 +26,8 @@ import {
   BarChart3,
   Users,
 } from "lucide-react";
+import useCurrency from "../hooks/useCurrency";
+import { convertPrice, formatPriceFromUSD } from "../lib/currencyUtils";
 
 // Mock market data
 const priceData = [
@@ -81,6 +83,17 @@ const featuredListings = [
 ];
 
 const Overview = () => {
+  const { currency, fxRate } = useCurrency();
+  const money = (value, options = {}) =>
+    formatPriceFromUSD(value, currency, fxRate, options);
+  const compactMoney = (valueUSD) =>
+    new Intl.NumberFormat(currency === "INR" ? "en-IN" : "en-US", {
+      style: "currency",
+      currency,
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(convertPrice(valueUSD, currency, fxRate));
+
   return (
     <div className="space-y-6">
       {/* Market Statistics */}
@@ -92,7 +105,9 @@ const Overview = () => {
                 <p className="text-sm font-medium text-gray-600">
                   Market Price
                 </p>
-                <p className="text-2xl font-bold">$23.76</p>
+                <p className="text-2xl font-bold">
+                  {money(23.76, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
                 <p className="text-xs text-green-600 flex items-center">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   +1.4% (24h)
@@ -148,7 +163,7 @@ const Overview = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Market Cap</p>
-                <p className="text-2xl font-bold">$2.4M</p>
+                <p className="text-2xl font-bold">{compactMoney(2400000)}</p>
                 <p className="text-xs text-orange-600 flex items-center">
                   <TrendingUp className="h-3 w-3 mr-1" />
                   ATH this month
@@ -180,7 +195,10 @@ const Overview = () => {
                   <XAxis dataKey="time" />
                   <YAxis />
                   <Tooltip
-                    formatter={(value) => [`$${value}`, "Price"]}
+                    formatter={(value) => [
+                      money(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                      "Price",
+                    ]}
                     labelFormatter={(label) => `Time: ${label}`}
                   />
                   <Area
@@ -275,7 +293,12 @@ const Overview = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Price</span>
                     <div className="flex items-center space-x-2">
-                      <span className="font-semibold">${listing.price}</span>
+                      <span className="font-semibold">
+                        {money(listing.price, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
                       <span
                         className={cn(
                           "text-xs flex items-center",

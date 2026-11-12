@@ -118,6 +118,14 @@ export default function Navbar() {
   const caseStudiesItem = toNavItem(getMenuItem("Case Studies"));
   const careersItem = toNavItem(getMenuItem("Careers"));
   const marketplaceRootItem = toNavItem(getMenuItem("Marketplace"));
+  const internshipItem = careersItem
+    ? {
+        label: "Internship",
+        path: "/careers/internship",
+        action: null,
+        isChild: true,
+      }
+    : null;
 
   const enterpriseItems = [
     addAssetItem,
@@ -147,6 +155,7 @@ export default function Navbar() {
     contactItem,
     caseStudiesItem,
     careersItem,
+    internshipItem,
   ].filter(Boolean);
 
   const canUseMarketplace =
@@ -164,7 +173,7 @@ export default function Navbar() {
     canUseMarketplace
       ? {
           label: "Methodologies",
-          path: "/marketplace",
+          path: "/marketplace/methodology",
           action: null,
         }
       : null,
@@ -395,7 +404,7 @@ export default function Navbar() {
               alt="CarbonCredit Logo"
               className="user-logo-icon"
             />
-            <span className="user-logo-text">Carbon Positive</span>
+            <span className="user-logo-text">CarbonPositive</span>
           </div>
         </div>
 
@@ -448,10 +457,14 @@ export default function Navbar() {
                         <button
                           key={`${section.key}-${item.label}`}
                           type="button"
-                          className={`tf-nav-dropdown-item tf-nav-dropdown-item--${section.key}`}
+                          className={`tf-nav-dropdown-item tf-nav-dropdown-item--${section.key} ${
+                            item.isChild ? "tf-nav-dropdown-item--child" : ""
+                          }`}
                           onClick={() => handleNavItemClick(item)}
                         >
-                          {item.label}
+                          <span className="tf-nav-dropdown-item-label">
+                            {item.label}
+                          </span>
                         </button>
                       ))}
                     </div>

@@ -1,6 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Droplets, Flame, Leaf, Wind, Zap } from "lucide-react";
+import useCurrency from "../../hooks/useCurrency";
+import { formatPriceFromUSD } from "../../lib/currencyUtils";
 
 const typeIcons = {
   nature_based: Leaf,
@@ -19,7 +21,9 @@ const registryLabels = {
 };
 
 export default function FloatingCard({ project, index }) {
+  const { currency, fxRate } = useCurrency();
   const Icon = typeIcons[project.type] || Leaf;
+  const money = (value) => formatPriceFromUSD(value, currency, fxRate);
 
   return (
     <motion.div
@@ -51,7 +55,7 @@ export default function FloatingCard({ project, index }) {
         <div>
           <p className="text-xs text-slate-400">Price Range</p>
           <p className="font-semibold text-slate-800">
-            ${project.priceMin} - ${project.priceMax}
+            {money(project.priceMin)} - {money(project.priceMax)}
           </p>
         </div>
         <motion.div className="text-xs font-medium text-emerald-600 opacity-0 transition-opacity group-hover:opacity-100">

@@ -21,9 +21,11 @@ app.use(helmet());
 /* =======================================
    CORS CONFIG (PRODUCTION SAFE)
 ======================================= */
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",")
-  : [];
+const allowedOrigins = (process.env.ALLOWED_ORIGINS ||
+  "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(
   cors({

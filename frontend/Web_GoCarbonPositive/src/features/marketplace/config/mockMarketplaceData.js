@@ -311,7 +311,18 @@ function getExchangeMetrics(timeframe = "1M") {
   const mostTradedProjectType = Object.entries(typeMap).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
   const volatilityPct = Number((s.reduce((sum, p) => sum + (Math.abs((p.high - p.low) / p.close) * 100), 0) / Math.max(1, s.length)).toFixed(2));
   const liquidityScore = Math.round(credits.reduce((sum, c) => sum + c.liquidityScore, 0) / credits.length);
-  return { lastPrice: last.close, priceChangePct: Number(priceChangePct.toFixed(2)), volume24h, averageMarketPrice: Number(averageMarketPrice.toFixed(2)), highestRegistryPrice: `${topRegistry?.name || "N/A"} $${topRegistry?.averagePrice?.toFixed(2) || "0.00"}`, mostTradedProjectType, volatilityPct, liquidityScore };
+  return {
+    lastPrice: last.close,
+    priceChangePct: Number(priceChangePct.toFixed(2)),
+    volume24h,
+    averageMarketPrice: Number(averageMarketPrice.toFixed(2)),
+    highestRegistryName: topRegistry?.name || "N/A",
+    highestRegistryAveragePrice: Number(topRegistry?.averagePrice?.toFixed(2) || 0),
+    highestRegistryPrice: `${topRegistry?.name || "N/A"} ${topRegistry?.averagePrice?.toFixed(2) || "0.00"}`,
+    mostTradedProjectType,
+    volatilityPct,
+    liquidityScore,
+  };
 }
 
 function getProjectTypes() {
@@ -327,7 +338,12 @@ function getProjectSegmentationData(projectType) {
   const priceDistribution = Array.from({ length: 4 }).map((_, i) => {
     const from = min + i * step;
     const to = from + step;
-    return { bucket: `$${from.toFixed(0)}-$${to.toFixed(0)}`, count: prices.filter((p) => p >= from && p < to).length };
+    return {
+      bucket: `${from.toFixed(0)}-${to.toFixed(0)}`,
+      from: Number(from.toFixed(0)),
+      to: Number(to.toFixed(0)),
+      count: prices.filter((p) => p >= from && p < to).length,
+    };
   });
   const historicalVolatility = xs[0].priceHistory.slice(-30).map((p, i) => {
     const cohort = xs.map((x) => x.priceHistory.slice(-30)[i].close);

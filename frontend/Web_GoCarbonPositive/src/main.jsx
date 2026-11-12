@@ -7,6 +7,7 @@ import "./polyfills";
 import "react-toastify/dist/ReactToastify.css";
 import App from "./App";
 import { AuthProvider } from "@contexts/AuthContext";
+import { CurrencyProvider } from "@contexts/CurrencyContext";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -22,10 +23,12 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <ToastContainer />
-          <App />
-        </AuthProvider>
+        <CurrencyProvider>
+          <AuthProvider>
+            <ToastContainer />
+            <App />
+          </AuthProvider>
+        </CurrencyProvider>
       </QueryClientProvider>
     </BrowserRouter>
   </React.StrictMode>

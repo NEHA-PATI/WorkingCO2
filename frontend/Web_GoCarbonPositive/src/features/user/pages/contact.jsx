@@ -103,7 +103,7 @@ export default function Contact() {
         <div className="cp-left-inner">
           <div className="cp-left-top">
             <h1 className="cp-headline">We're here</h1>
-            <p className="cp-subtext">Our door is always open for a good cup of coffee.</p>
+            <p className="cp-subtext">Let’s connect and create impact together</p>
           </div>
 
           <div className="cp-office-block">

@@ -221,6 +221,24 @@
   background-color: #f3f4f6;
 }
 
+.sidebar-item-label {
+  display: block;
+}
+
+.sidebar-item-child {
+  margin: 0;
+  padding-bottom: 6px;
+  padding-top: 6px;
+  position: static;
+  border-radius: 0;
+  background: transparent;
+  border-left: none;
+}
+
+.sidebar-item-child::before {
+  content: none;
+}
+
 .sidebar-icon {
   font-size: 1.3rem;
   margin-right: 8px;
@@ -923,6 +941,29 @@
   color: #0f172a;
 }
 
+.tf-nav-dropdown-item-label {
+  display: block;
+}
+
+.tf-nav-dropdown-item--child {
+  margin: 0;
+  padding: 0.54rem 0.66rem;
+  position: static;
+  border-radius: 8px;
+  background: transparent;
+  border-left: none;
+}
+
+.tf-nav-dropdown-item--child::before {
+  content: none;
+}
+
+.tf-nav-dropdown-item--child .tf-nav-dropdown-item-label {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+}
+
 @keyframes navDropdownSmoothIn {
   from {
     opacity: 0;
@@ -1033,6 +1074,11 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .mobile-hamburger-wrap .sidebar-item-child {
+    margin: 0;
+    padding-left: 7px;
   }
 
   .tf-nav {

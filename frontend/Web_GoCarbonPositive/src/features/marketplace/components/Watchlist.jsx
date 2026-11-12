@@ -38,8 +38,11 @@ import {
   AlertTriangle,
   CheckCircle,
 } from "lucide-react";
+import useCurrency from "../hooks/useCurrency";
+import { formatPriceFromUSD } from "../lib/currencyUtils";
 
 const Watchlist = () => {
+  const { currency, fxRate } = useCurrency();
   const [activeTab, setActiveTab] = useState("watchlist"); // 'watchlist' or 'alerts'
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newAlert, setNewAlert] = useState({
@@ -49,6 +52,11 @@ const Watchlist = () => {
     emailEnabled: true,
     smsEnabled: false,
   });
+  const money = (value) =>
+    formatPriceFromUSD(value, currency, fxRate, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   // Mock watchlist data
   const watchlistItems = [
@@ -139,7 +147,7 @@ const Watchlist = () => {
       id: 1,
       type: "price_alert",
       title: "Price Target Reached",
-      message: "EV Carbon Credits dropped below $25.00",
+      message: `EV Carbon Credits dropped below ${money(25)}`,
       timestamp: "2 hours ago",
       read: false,
     },
@@ -272,13 +280,13 @@ const Watchlist = () => {
                     </TableCell>
                     <TableCell>
                       <span className="font-semibold">
-                        ${item.currentPrice}
+                        {money(item.currentPrice)}
                       </span>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
                         <Target className="h-3 w-3 text-gray-400" />
-                        <span>${item.targetPrice}</span>
+                        <span>{money(item.targetPrice)}</span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -296,7 +304,7 @@ const Watchlist = () => {
                           <TrendingDown className="h-3 w-3" />
                         )}
                         <span className="font-medium">
-                          ${Math.abs(item.priceChange)} (
+                          {money(Math.abs(item.priceChange))} (
                           {item.priceChangePercent > 0 ? "+" : ""}
                           {item.priceChangePercent}%)
                         </span>
@@ -488,11 +496,11 @@ const Watchlist = () => {
                     <div>
                       <h4 className="font-medium">{alert.asset}</h4>
                       <p className="text-sm text-gray-600">
-                        Alert when price {alert.condition} ${alert.targetPrice}
+                        Alert when price {alert.condition} {money(alert.targetPrice)}
                       </p>
                       <div className="flex items-center space-x-4 mt-2">
                         <span className="text-xs text-gray-500">
-                          Current: ${alert.currentPrice}
+                          Current: {money(alert.currentPrice)}
                         </span>
                         <div className="flex items-center space-x-2 text-xs">
                           {alert.emailEnabled && (

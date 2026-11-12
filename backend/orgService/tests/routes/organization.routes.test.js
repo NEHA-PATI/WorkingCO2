@@ -4,6 +4,9 @@ jest.mock("../../controllers/organizationController", () => ({
   getOrganizationByOrgId: jest.fn((req, res) =>
     res.status(200).json({ ok: true })
   ),
+  updateOrganizationByOrgId: jest.fn((req, res) =>
+    res.status(200).json({ ok: true })
+  ),
 }));
 
 const express = require("express");

@@ -33,6 +33,8 @@ import {
   getProjectTypes,
   registries,
 } from "../config/mockMarketplaceData";
+import useCurrency from "../hooks/useCurrency";
+import { formatPriceFromUSD } from "../lib/currencyUtils";
 
 const ratingOptions = ["AAA", "AA", "A", "BBB", "BB"];
 
@@ -58,11 +60,17 @@ function isRegistryIdFormatValid(id) {
 }
 
 export default function SellCredits() {
+  const { currency, fxRate } = useCurrency();
   const [form, setForm] = useState(initialForm);
   const [adapterStatus, setAdapterStatus] = useState("idle");
   const [formatStatus, setFormatStatus] = useState("idle");
   const [pricing, setPricing] = useState(null);
   const [activeListings, setActiveListings] = useState([]);
+  const money = (value) =>
+    formatPriceFromUSD(value, currency, fxRate, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   const adapterMessage = useMemo(() => {
     if (adapterStatus === "validating") return "Registry adapter validation running...";
@@ -371,18 +379,19 @@ export default function SellCredits() {
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
               <div className="rounded-lg border border-slate-200 p-3">
                 <p className="text-xs text-slate-500">Base Market Price</p>
-                <p className="text-lg font-bold text-slate-900">${pricing.basePrice}</p>
+                <p className="text-lg font-bold text-slate-900">{money(pricing.basePrice)}</p>
               </div>
               <div className="rounded-lg border border-slate-200 p-3">
                 <p className="text-xs text-slate-500">Suggested Listing Price</p>
                 <p className="text-lg font-bold text-emerald-700">
-                  ${pricing.suggestedPrice}
+                  {money(pricing.suggestedPrice)}
                 </p>
               </div>
               <div className="rounded-lg border border-slate-200 p-3">
                 <p className="text-xs text-slate-500">Rating Premium Driver</p>
                 <p className="text-lg font-bold text-slate-900">
-                  +${pricing.ratingAdjustment}
+                  {pricing.ratingAdjustment >= 0 ? "+" : ""}
+                  {money(pricing.ratingAdjustment)}
                 </p>
               </div>
             </div>
@@ -392,10 +401,10 @@ export default function SellCredits() {
                 Price Components (Registry + Type + Historical + Liquidity + Rating + Volatility)
               </p>
               <div className="mt-2 grid grid-cols-1 gap-2 text-sm text-slate-700 md:grid-cols-2">
-                <p>Registry adjustment: ${pricing.registryAdjustment}</p>
-                <p>Rating adjustment: ${pricing.ratingAdjustment}</p>
-                <p>Liquidity adjustment: ${pricing.liquidityAdjustment}</p>
-                <p>Volatility adjustment: ${pricing.volatilityAdjustment}</p>
+                <p>Registry adjustment: {money(pricing.registryAdjustment)}</p>
+                <p>Rating adjustment: {money(pricing.ratingAdjustment)}</p>
+                <p>Liquidity adjustment: {money(pricing.liquidityAdjustment)}</p>
+                <p>Volatility adjustment: {money(pricing.volatilityAdjustment)}</p>
               </div>
             </div>
 
@@ -440,7 +449,7 @@ export default function SellCredits() {
                       <Badge>{listing.score}</Badge>
                     </TableCell>
                     <TableCell>{listing.quantity.toLocaleString()}</TableCell>
-                    <TableCell>${listing.suggestedPrice.toFixed(2)}</TableCell>
+                    <TableCell>{money(listing.suggestedPrice)}</TableCell>
                     <TableCell>{listing.liquidityScore}/100</TableCell>
                   </TableRow>
                 ))}

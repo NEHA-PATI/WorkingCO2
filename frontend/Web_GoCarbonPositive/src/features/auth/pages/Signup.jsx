@@ -9,7 +9,8 @@ import { ENV } from "@config/env";
 
 
 const Signup = ({ onClose, onSwitchToLogin }) => {
-  const API_URL = import.meta.env.VITE_AUTH_API || "http://localhost:5002";
+  // API_URL is the service origin; route prefixes are added below.
+  const API_URL = ENV.AUTH_SERVICE_URL;
 
   const [formData, setFormData] = useState({
     fullName: "",

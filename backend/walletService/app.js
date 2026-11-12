@@ -10,7 +10,11 @@ app.use(express.json());
 // CORS (frontend -> wallet service)
 app.use((req, res, next) => {
   const requestOrigin = req.headers.origin;
-  const allowedOrigins = new Set([FRONTEND_URL, "http://localhost:5173"]);
+  const allowedOrigins = new Set(
+    [FRONTEND_URL, process.env.ALLOWED_ORIGINS, "http://localhost:5173", "http://127.0.0.1:5173"]
+      .filter(Boolean)
+      .flatMap((value) => value.split(",").map((origin) => origin.trim()))
+  );
 
   if (requestOrigin && allowedOrigins.has(requestOrigin)) {
     res.setHeader("Access-Control-Allow-Origin", requestOrigin);

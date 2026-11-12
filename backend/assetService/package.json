@@ -10,6 +10,7 @@
     "seed": "node src/database/seed.js",
     "seed:blue-carbon": "node src/database/blueCarbonSeed.js",
     "test": "jest --coverage --detectOpenHandles",
+    "build": "node -e \"console.log('No build step for assetService')\"",
     "logs": "type logs\\combined.log",
     "logs:error": "type logs\\error.log"
   },
