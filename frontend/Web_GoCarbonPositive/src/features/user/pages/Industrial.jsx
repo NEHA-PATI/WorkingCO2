@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import "@features/user/styles/Industrial.css";
 import { useNavigate } from "react-router-dom";
+import { ENV } from "@config/env";
 import aluminiumModalImage from "../assets/aluminium-industry-photo.jpeg";
 import aluminiumScopeImage from "../assets/aluminium-industry-scope .png";
 import steelModalImage from "../assets/steel-industry-photo.jpeg";
@@ -226,7 +227,7 @@ const IndustrialSolutions = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5007/api/demo/book-demo", {
+      const response = await fetch(`${ENV.DEMO_API_URL}/book-demo`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

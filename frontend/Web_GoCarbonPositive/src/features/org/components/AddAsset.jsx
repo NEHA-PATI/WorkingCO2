@@ -8,6 +8,7 @@ import { FaFire, FaPagelines } from "react-icons/fa";
 
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { ENV } from "@config/env";
 
 const AddAsset = () => {
 
@@ -35,7 +36,7 @@ const AddAsset = () => {
     }
 
     try {
-      const res = await axios.post("http://localhost:8080/api/evmasterdata", formData);
+      const res = await axios.post(`${ENV.ASSET_SERVICE_URL}/api/v1/evmasterdata`, formData);
       setEvCount(res.data.evCount);
       setActiveEVPopup(false);
     } catch (error) {

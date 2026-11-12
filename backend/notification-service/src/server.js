@@ -16,8 +16,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ CORS configuration - HARDCODED FOR TESTING
+const allowedOrigins = (process.env.ALLOWED_ORIGINS ||
+  'http://localhost:5174,http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://localhost:3001')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 app.use(cors({
-  origin: ['http://localhost:5174', 'http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001'],
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

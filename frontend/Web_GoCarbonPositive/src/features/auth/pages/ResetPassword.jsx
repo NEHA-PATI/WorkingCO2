@@ -7,7 +7,7 @@ import { ENV } from "@config/env";
 
 const ResetPassword = () => {
   const { token } = useParams();   // 👈 ye missing tha!
-  const API_URL = ENV.API_URL;
+  const API_URL = ENV.AUTH_SERVICE_URL;
   const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
