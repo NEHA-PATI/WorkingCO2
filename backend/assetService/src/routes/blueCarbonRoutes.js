@@ -1,0 +1,46 @@
+const express = require("express");
+const verifyToken = require("../middleware/blueCarbonAuth");
+const controller = require("../controllers/blueCarbonController");
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024, files: 10 }, fileFilter: (_req, file, cb) => {
+  const allowed = /^(image|video|audio)\//.test(file.mimetype) || file.mimetype === 'application/pdf';
+  cb(allowed ? null : new Error('Only image, video, audio, or PDF evidence is allowed'), allowed);
+} });
+
+const router = express.Router();
+router.use(verifyToken);
+router.get("/summary", controller.getSummary);
+router.get("/reports/monitoring.csv", controller.exportReport);
+router.get("/methodologies", controller.getMethodologies);
+router.get("/projects", controller.listProjects);
+router.post("/projects", controller.createProject);
+router.get("/projects/:projectId", controller.getProject);
+router.get("/projects/:projectId/tiles", controller.listTiles);
+router.post("/projects/:projectId/tiles/generate", controller.generateTiles);
+router.get("/projects/:projectId/assignments", controller.listAssignments);
+router.post("/projects/:projectId/assignments", controller.assignTiles);
+router.delete("/projects/:projectId/assignments", controller.clearProjectAssignments);
+router.post("/projects/:projectId/schedules", controller.createSchedule);
+router.get("/tasks", controller.listTasks);
+router.post("/schedules/generate-tasks", async (req,res) => { try { res.json({success:true,data:await controller.generateScheduledTasks()}); } catch(error) { res.status(500).json({success:false,message:error.message}); } });
+router.post("/tasks/:taskId/visits", controller.startVisit);
+router.post("/visits/:visitId/media", upload.array('media', 10), controller.uploadVisitMedia);
+router.get("/visits/:visitId/media", controller.listVisitMedia);
+router.get("/tiles/:tileId/history", controller.tileHistory);
+router.post("/evidence/:evidenceId/review", controller.reviewMedia);
+router.get("/evidence/:evidenceId/review-history", controller.mediaReviewHistory);
+router.post("/visits/:visitId/submit", controller.submitVisit);
+router.patch("/projects/:projectId", controller.updateProject);
+router.get("/projects/:projectId/baselines", controller.getBaselines);
+router.get("/projects/:projectId/evidence/:recordType/:recordId/revisions", controller.listEvidenceRevisions);
+router.get("/projects/:projectId/review-history/:recordId", controller.listReviewHistory);
+router.get("/projects/:projectId/observations", controller.listObservations);
+router.post("/projects/:projectId/observations", controller.createObservation);
+router.post("/projects/:projectId/observations/:observationId/review", controller.reviewObservation);
+router.patch("/projects/:projectId/observations/:observationId/correction", controller.correctObservation);
+router.get("/projects/:projectId/samples", controller.listSamples);
+router.post("/projects/:projectId/samples", controller.createSample);
+router.post("/projects/:projectId/samples/:sampleId/review", controller.reviewSample);
+router.patch("/projects/:projectId/samples/:sampleId/correction", controller.correctSample);
+
+module.exports = router;

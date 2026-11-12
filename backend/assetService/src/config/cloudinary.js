@@ -104,6 +104,19 @@ const uploadImage = async (fileBuffer, folder = 'co2plus-assets') => {
   }
 };
 
+const uploadMedia = async (fileBuffer, folder = 'co2plus-blue-carbon', resourceType = 'auto') => {
+  if (!Buffer.isBuffer(fileBuffer) || !fileBuffer.length) throw new Error('Invalid or empty media file');
+  if (!isCloudinaryConfigured) throw new Error('Secure media storage is not configured. Set Cloudinary credentials before uploading field evidence.');
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream({ folder, resource_type: resourceType }, (error, result) => {
+      if (error) return reject(error);
+      resolve({ public_id: result.public_id, url: result.secure_url, resource_type: result.resource_type, format: result.format, bytes: result.bytes });
+    });
+    stream.on('error', reject);
+    stream.end(fileBuffer);
+  });
+};
+
 // Delete image from Cloudinary
 const deleteImage = async (publicId) => {
   // Skip if Cloudinary not configured or mock image
@@ -136,6 +149,7 @@ const getImageUrl = (publicId, transformations = {}) => {
 module.exports = {
   cloudinary,
   uploadImage,
+  uploadMedia,
   deleteImage,
   getImageUrl,
   isConfigured: isCloudinaryConfigured

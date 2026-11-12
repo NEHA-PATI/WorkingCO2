@@ -54,6 +54,9 @@ import OrgDashboard, {
 } from "@features/org/pages/OrgDashboard";
 import OrgProfile from "@features/org/components/OrgProfile";
 import AddAsset from "@features/org/components/AddAsset";
+import BlueCarbonPage from "@features/org/pages/BlueCarbonPage";
+import BlueCarbonOperations from "@features/org/pages/BlueCarbonOperations";
+import FieldDashboard from "@features/field/pages/FieldDashboard";
 
 import AdminOverview from "@features/admin/pages/Overview";
 import AdminUsers from "@features/admin/pages/User Management";
@@ -72,6 +75,8 @@ import AdminOrgRequest from "@features/admin/pages/OrgRequest";
 import AdminOrganizationList from "@features/admin/pages/OrganizationList";
 import AdminUserCard from "@features/admin/pages/UserCard";
 import AdminProfile from "@features/admin/components/AdminProfile";
+import BlueCarbonAdmin from "@features/admin/pages/BlueCarbonAdmin";
+import BlueCarbonEvidenceReview from "@features/admin/pages/BlueCarbonEvidenceReview";
 
 const RoleProfilePage = () => {
   const { role, authLoading } = useAuth();
@@ -84,6 +89,8 @@ const RoleProfilePage = () => {
 
 const getOrgTabElement = (tabId) => {
   const Component = ORG_DASHBOARD_TAB_COMPONENTS[tabId];
+  if (tabId === "blue-carbon-operations") return <BlueCarbonOperations />;
+  if (tabId.startsWith("blue-carbon-")) return <BlueCarbonPage />;
   return Component ? <Component /> : null;
 };
 
@@ -253,18 +260,23 @@ const AppRoutes = () => {
           <Route path="dashboard" element={<OrgDashboard />}>
             <Route index element={<Navigate to={ORG_DEFAULT_TAB_ID} replace />} />
             <Route path="add-asset" element={<AddAsset />} />
+            <Route path="blue-carbon/*" element={<BlueCarbonPage />} />
+            <Route path="blue-carbon-operations" element={<BlueCarbonOperations />} />
             {ORG_TAB_CONFIG.map((tab) => (
               <Route
                 key={tab.id}
                 path={tab.path ?? tab.id}
                 element={getOrgTabElement(tab.id)}
               />
+
             ))}
             <Route path="*" element={<Navigate to={ORG_DEFAULT_TAB_ID} replace />} />
           </Route>
           <Route path="profile" element={<OrgProfile />} />
           <Route path="" element={<Navigate to="dashboard" replace />} />
         </Route>
+
+        <Route path="/field/dashboard" element={<ProtectedRoute requiredRole="field_user"><FieldDashboard /></ProtectedRoute>} />
 
         <Route
           path="/admin/*"
@@ -310,6 +322,8 @@ const AppRoutes = () => {
           />
           <Route path="contest" element={<AdminContestManagement />} />
           <Route path="mrv-management" element={<AdminMRVManagement />} />
+          <Route path="blue-carbon" element={<BlueCarbonAdmin />} />
+          <Route path="blue-carbon/evidence" element={<BlueCarbonEvidenceReview />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="" element={<Navigate to="overview" replace />} />

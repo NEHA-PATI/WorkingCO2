@@ -8,10 +8,11 @@ const API_CONFIG = {
   ASSET_API:
     (
       import.meta.env.VITE_ASSET_SERVICE_URL ||
-      (import.meta.env.PROD
-        ? "https://asset-service2026.onrender.com"
-        : "http://localhost:5000")
+      "http://localhost:5000"
     ) + "/api/v1",
+
+  BLUE_CARBON_API:
+    (import.meta.env.VITE_BLUE_CARBON_SERVICE_URL || "http://localhost:5000") + "/api/v1",
 
   // Auth Service (port 5002)
   AUTH_API: import.meta.env.VITE_AUTH_API || "http://localhost:5002",
@@ -136,6 +137,10 @@ const createApiClient = (baseURL, serviceName = "API") => {
 export const assetApiClient = createApiClient(
   API_CONFIG.ASSET_API,
   "Asset Service",
+);
+export const blueCarbonApiClient = createApiClient(
+  API_CONFIG.BLUE_CARBON_API,
+  "Blue Carbon Asset Service",
 );
 export const authApiClient = createApiClient(
   API_CONFIG.AUTH_API,

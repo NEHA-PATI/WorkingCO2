@@ -17,10 +17,7 @@ export const ENV = {
     viteEnv.VITE_NOTIFICATION_SERVICE_URL || "http://localhost:5001",
   CAREER_SERVICE_URL: viteEnv.VITE_CAREER_SERVICE_URL || "http://localhost:5006",
   BLOG_API_URL: normalizeBlogApiUrl(
-    viteEnv.VITE_BLOG_API_URL ||
-      (viteEnv.PROD
-        ? "https://blogservice-2026.onrender.com"
-        : "http://localhost:4000")
+    viteEnv.VITE_BLOG_API_URL || "http://localhost:4000"
   ),
   REWARD_SERVICE_URL:
     viteEnv.VITE_REWARD_SERVICE_URL || "http://localhost:5008",

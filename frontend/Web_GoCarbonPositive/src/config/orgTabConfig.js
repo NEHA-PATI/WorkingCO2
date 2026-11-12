@@ -43,6 +43,8 @@ export const ORG_TAB_CONFIG = [
     iconKey: "actions",
     accent: "#06b6d4",
   },
+  { id: "blue-carbon-overview", path: "blue-carbon/overview", label: "Blue Carbon", iconKey: "blueCarbon", accent: "#0f766e" },
+  { id: "blue-carbon-operations", path: "blue-carbon-operations", label: "BC Operations", iconKey: "blueCarbon", accent: "#047857" },
 ];
 
 export const ORG_DEFAULT_TAB_ID = ORG_TAB_CONFIG[0]?.id ?? "overview";
@@ -54,10 +56,11 @@ export const getOrgTabPath = (tabId) => {
 };
 
 export const getOrgTabIdFromPath = (pathname) => {
-  const match = pathname.match(/\/org\/dashboard\/([^/]+)/);
+  const match = pathname.match(/\/org\/dashboard\/(blue-carbon\/[^/]+|[^/]+)/);
   if (!match) return null;
 
   const tabPath = match[1];
+  if (tabPath.startsWith("blue-carbon/")) return "blue-carbon-overview";
   const tab = ORG_TAB_CONFIG.find((entry) => entry.path === tabPath);
   return tab?.id ?? null;
 };

@@ -24,7 +24,7 @@ const Upload = () => {
   const handleSaveEV = async (formData) => {
     try {
       const res = await axios.post(
-        "https://add-asset-service.onrender.com/api/evmasterdata",
+        "http://localhost:5000/api/v1/evmasterdata",
         formData
       );
 

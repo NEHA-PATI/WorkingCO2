@@ -9,6 +9,7 @@ import {
   FaRocket,
   FaEye,
 } from "react-icons/fa";
+import { FaWater } from "react-icons/fa";
 import {
   ORG_DEFAULT_TAB_ID,
   ORG_TAB_CONFIG,
@@ -24,6 +25,7 @@ const TAB_ICONS = {
   compliance: FaShieldAlt,
   team: FaUsers,
   actions: FaRocket,
+  blueCarbon: FaWater,
 };
 
 const OrgTab = ({ isVisible = true, onTabChange }) => {

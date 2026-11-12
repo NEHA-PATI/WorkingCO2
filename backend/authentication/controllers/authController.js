@@ -538,9 +538,15 @@ exports.login = async (req, res) => {
       [user.id]
     );
 
+    // Organization users must carry a real organizations.org_id, not their users.id.
+    const organizationContext = user.role_name === "organization"
+      ? await pool.query("SELECT org_id FROM organizations WHERE org_mail = $1 LIMIT 1", [normalizedEmail])
+      : { rows: [] };
+    const resolvedOrgId = user.org_id || user.organization_id || organizationContext.rows[0]?.org_id || null;
+
     // Generate JWT token
     const token = jwt.sign(
-      { id: user.id,u_id: user.u_id, role: user.role_name, status: user.status },
+      { id: user.id, u_id: user.u_id, org_id: resolvedOrgId, role: user.role_name, status: user.status },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );

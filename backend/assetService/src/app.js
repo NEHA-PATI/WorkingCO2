@@ -5,6 +5,7 @@ const config = require("./config/env");
 const logger = require("./utils/logger");
 const assetRoutes = require("./routes/assetRoutes");
  const orgAssetRoutes = require("./routes/orgAssetRoutes");
+const blueCarbonRoutes = require("./routes/blueCarbonRoutes");
 
 
 
@@ -67,6 +68,8 @@ if (config.nodeEnv === "development") {
 //asset management route 
 app.use("/api/assets", assetRoutes);
 app.use("/api/org-assets", orgAssetRoutes);
+app.use("/api/v1/blue-carbon", blueCarbonRoutes);
+setInterval(() => require('./controllers/blueCarbonController').generateScheduledTasks().catch((error) => logger.error(`Blue Carbon scheduler: ${error.message}`)), 15 * 60 * 1000).unref();
 
 // Root
 app.get("/", (req, res) => {
