@@ -69,7 +69,11 @@ function generateTiles(geometry, tileSizeM = 250, shape = 'square', blockSizeM =
     const blockX = Math.min(...xs) + blockColumn * blockWidth;
     const blockY = Math.min(...ys) + blockRow * blockWidth;
     const blockCell = [[blockX,blockY],[blockX+blockWidth,blockY],[blockX+blockWidth,blockY+blockWidth],[blockX,blockY+blockWidth]];
-    const clippedBlock = convexBoundary ? clipToConvexPolygon(blockCell, points) : clipRect(blockCell, blockX, blockX+blockWidth, blockY, blockY+blockWidth);
+    // Keep the parent monitoring block as a complete square. Only the inner
+    // monitoring cell is clipped to the project boundary; the UI uses this
+    // raw parent geometry to draw the reference-style block framework around
+    // the clipped coloured cells.
+    const clippedBlock = blockCell;
     const geo = clipped.concat([clipped[0]]).map(p => unproject(p, zone, southern));
     const blockGeo = clippedBlock.length >= 3 ? clippedBlock.concat([clippedBlock[0]]).map(p => unproject(p, zone, southern)) : null;
     const centroid = unproject(metric.centroid, zone, southern);

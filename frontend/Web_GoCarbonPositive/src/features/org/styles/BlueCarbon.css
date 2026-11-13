@@ -2536,3 +2536,19 @@ body .blue-carbon-data-popup-card p:nth-child(4n){border-left:4px solid #9c72df!
 body .blue-carbon-data-popup-close{position:absolute!important;right:18px!important;top:18px!important;z-index:3;width:36px!important;height:36px!important;padding:0!important;border:1px solid #cfe5d8!important;border-radius:50%!important;background:#fff!important;color:#27734c!important;font-size:23px!important;line-height:30px!important;cursor:pointer!important}
 body .blue-carbon-data-popup-close:hover{background:#e8f8ed!important;transform:rotate(90deg)!important;transition:.2s ease!important}
 @media(max-width:600px){body .blue-carbon-data-popup-card{padding:24px 18px!important;border-radius:18px!important}body .blue-carbon-data-popup-card>div{grid-template-columns:1fr!important}body .blue-carbon-data-popup-card h3{font-size:20px!important}}
+/* Health filter pills */
+.bc-gis-legend{gap:10px!important;padding:12px 18px!important;align-items:center}
+.bc-gis-filter-label{margin-right:4px;color:#7890a1;font-size:9px;font-weight:900;letter-spacing:.1em}
+.bc-gis-filter{display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:0 12px;border:1px solid #d7e5eb;border-radius:999px;background:#fff;color:#557185;font-size:10px;font-weight:900;letter-spacing:.04em;cursor:pointer;transition:.18s ease}
+.bc-gis-filter:hover{transform:translateY(-1px);box-shadow:0 4px 10px #123b4b18}
+.bc-gis-filter.active{color:#fff;border-color:transparent;box-shadow:0 5px 12px #123b4b22}
+.bc-gis-filter i{width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 0 0 3px currentColor}
+.bc-gis-filter.green i{background:#22c55e;color:#22c55e}.bc-gis-filter.amber i{background:#f59e0b;color:#f59e0b}.bc-gis-filter.red i{background:#ef4444;color:#ef4444}.bc-gis-filter.grey i{background:#94a3b8;color:#94a3b8}
+.bc-gis-filter.green.active{background:#16a34a}.bc-gis-filter.amber.active{background:#d97706}.bc-gis-filter.red.active{background:#dc2626}.bc-gis-filter.grey.active{background:#64748b}
+/* Field-data project scope filter */
+.blue-carbon-project-filter{display:flex;align-items:center;gap:8px;margin-right:auto;color:#547286;font-size:11px;font-weight:800}
+.blue-carbon-project-filter select{min-height:34px;padding:0 10px;border:1px solid #cfe0e8;border-radius:8px;background:#fff;color:#183650;font:inherit}
+.blue-carbon-record.bc-project-filter-hidden{display:none!important}
+body .blue-carbon-page .blue-carbon-panel:has(.blue-carbon-record) .blue-carbon-record.bc-project-filter-hidden{display:none!important}
+/* Compact CRUD icon actions shared by project cards and field-data rows. */
+.blue-carbon-crud-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:10px}.blue-carbon-crud-actions button{width:32px;height:30px;border:1px solid #b9e5dc;border-radius:8px;background:#f0fdfa;color:#075985;cursor:pointer;font-size:17px}.blue-carbon-crud-actions button:hover{background:#0f766e;color:#fff}.blue-carbon-crud-actions button.danger:hover{background:#dc2626}

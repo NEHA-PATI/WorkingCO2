@@ -4,8 +4,6 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Link } from "react-router-dom";
-
 import { blueCarbonApi } from "@features/org/services/blueCarbonApi";
 import "@features/org/styles/BlueCarbon.css";
 import "leaflet/dist/leaflet.css";
@@ -39,14 +37,44 @@ const gridPalette = [
   "#f59e0b", // amber — in progress
   "#ef4444", // red — pending
 ];
+const VISUAL_COLOR_MODE = true;
 
 function gridDisplayColor(tile) {
-  const key = String(tile.tile_id || tile.tile_code || "grid");
-  let hash = 0;
-  for (let index = 0; index < key.length; index += 1) {
-    hash = (hash * 31 + key.charCodeAt(index)) | 0;
+  if (VISUAL_COLOR_MODE) {
+    const visualSeed = JSON.stringify({ tile: tile.tile_id || tile.tile_code, indicators: tile.satellite_indicators || tile.indicators || {}, observed: tile.satellite_observed_on || tile.observed_on || "" });
+    let visualHash = 0;
+    for (let index = 0; index < visualSeed.length; index += 1) visualHash = (visualHash * 31 + visualSeed.charCodeAt(index)) | 0;
+    return gridPalette[Math.abs(visualHash) % gridPalette.length];
   }
-  return gridPalette[Math.abs(hash) % gridPalette.length];
+  // Deterministic data-seeded shade: the health status selects the color
+  // family, while the satellite values select a stable shade within it.
+  const seed = JSON.stringify({
+    tile: tile.tile_id || tile.tile_code,
+    indicators: tile.satellite_indicators || tile.indicators || {},
+    observed: tile.satellite_observed_on || tile.observed_on || "",
+  });
+  let hash = 0;
+  for (let index = 0; index < seed.length; index += 1) hash = (hash * 31 + seed.charCodeAt(index)) | 0;
+  const palettes = {
+    GREEN: ["#86efac", "#4ade80", "#22c55e", "#16a34a"],
+    AMBER: ["#fde68a", "#fbbf24", "#f59e0b", "#d97706"],
+    RED: ["#fca5a5", "#f87171", "#ef4444", "#dc2626"],
+    GREY: ["#cbd5e1", "#94a3b8", "#64748b"],
+  };
+  const palette = palettes[status] || palettes.GREY;
+  return palette[Math.abs(hash) % palette.length];
+}
+
+function satelliteStatus(tile) {
+  return String(tile.satellite_health_status || tile.health_status || "GREY").toUpperCase();
+}
+
+function tilePopupContent(tile) {
+  const indicators = tile.satellite_indicators || tile.indicators || {};
+  const indicatorRows = ["NDVI", "EVI", "NDMI", "NDWI", "MNDWI", "NDRE"]
+    .map((key) => `${key}: ${Number.isFinite(Number(indicators[key]?.mean)) ? Number(indicators[key].mean).toFixed(3) : "—"}`)
+    .join("<br>");
+  return `<div class="bc-tile-popup"><strong>${tile.tile_code || tile.tile_id}</strong><br>Status: <b>${satelliteStatus(tile)}</b><br>Observed: ${tile.satellite_observed_on || "—"}<br>Valid pixels: ${tile.satellite_valid_pixel_percentage == null ? "—" : `${Number(tile.satellite_valid_pixel_percentage).toFixed(1)}%`}<br>Quality: ${tile.satellite_data_quality || "—"}<hr>${indicatorRows}</div>`;
 }
 
 export default function BlueCarbonOperations() {
@@ -57,6 +85,7 @@ export default function BlueCarbonOperations() {
 
   const [boundary, setBoundary] = useState([]);
   const [drawing, setDrawing] = useState(false);
+  const [editingBoundary, setEditingBoundary] = useState(false);
   const [assignee, setAssignee] = useState("");
   const [blockSize, setBlockSize] = useState(300);
   const [innerGridSize, setInnerGridSize] = useState(30);
@@ -66,6 +95,8 @@ export default function BlueCarbonOperations() {
   const [selectedBlock, setSelectedBlock] = useState(null);
   const [selectedTile, setSelectedTile] = useState(null);
   const [tileHistory, setTileHistory] = useState(null);
+  const [satelliteHistory, setSatelliteHistory] = useState([]);
+  const [healthFilter, setHealthFilter] = useState("ALL");
   const [isGenerating, setIsGenerating] = useState(false);
   const generationRequest = useRef(0);
 
@@ -89,6 +120,15 @@ export default function BlueCarbonOperations() {
           );
           return {
             ...tile,
+            // Keep the map independent of API/driver casing differences.
+            // The SQL endpoint uses snake_case, while some deployments return
+            // the observation field without the join alias.
+            satellite_health_status: String(
+              tile.satellite_health_status ||
+                tile.health_status ||
+                tile.satelliteHealthStatus ||
+                "GREY"
+            ).toUpperCase(),
             assignee_id: tile.assignee_id || activeAssignment?.assignee_id,
             status: activeAssignment ? "assigned" : tile.status,
           };
@@ -117,9 +157,18 @@ export default function BlueCarbonOperations() {
   }, []);
 
   useEffect(() => {
-    refresh();
+    // projectId is set asynchronously after the project list loads. Fetch here
+    // with the captured id so a reload always hydrates the persisted grid.
     setSelectedBlock(null);
     setSelectedTile(null);
+    if (projectId) {
+      refresh(projectId);
+      // A reload can happen while the last satellite write is finishing.
+      // Re-read once shortly afterward so persisted observations become
+      // visible without requiring tile regeneration.
+      const retry = window.setTimeout(() => refresh(projectId), 1500);
+      return () => window.clearTimeout(retry);
+    }
   }, [projectId]);
 
   useEffect(() => {
@@ -150,9 +199,14 @@ export default function BlueCarbonOperations() {
       .tileHistory(selectedTile.tile_id)
       .then((result) => setTileHistory(result.data))
       .catch(() => setTileHistory(null));
-  }, [selectedTile]);
+    blueCarbonApi.satelliteHistory(projectId, selectedTile.tile_id)
+      .then((result) => setSatelliteHistory(result.data || []))
+      .catch(() => setSatelliteHistory([]));
+  }, [selectedTile, projectId]);
 
   const blocks = useMemo(() => makeBlocks(tiles, blockSize, innerGridSize), [tiles, blockSize, innerGridSize]);
+  const visibleBlocks = useMemo(() => blocks.map((block) => ({ ...block, tiles: block.tiles.filter((tile) => healthFilter === "ALL" || satelliteStatus(tile) === healthFilter) })).filter((block) => healthFilter === "ALL" || block.tiles.length), [blocks, healthFilter]);
+  const processSatellite = async () => { setMessage("Queued Sentinel-2 processing for every grid…"); try { const queued = await blueCarbonApi.processSatellite(projectId); const jobId = queued.data?.job_id; if (!jobId) throw new Error("Satellite job was not created"); const poll = async () => { const result = await blueCarbonApi.satelliteJob(jobId); const job = result.data; if (Number(job.processed || 0) > 0) await refresh(projectId); if (job.status === "complete") { setMessage(`${job.processed} grids processed from Copernicus.`); await refresh(projectId); } else if (job.status === "failed") setMessage(`Satellite processing failed: ${job.error}`); else { setMessage(`Satellite processing ${job.status}… ${job.processed || 0}/${job.total || "?"} grids`); window.setTimeout(poll, 2000); } }; await poll(); } catch (error) { setMessage(error?.response?.data?.message || "Satellite processing could not be started."); } };
 
   const generate = async (boundaryOverride = boundary) => {
     if (boundaryOverride.length < 3) {
@@ -206,10 +260,11 @@ export default function BlueCarbonOperations() {
 
   useEffect(() => {
     if (boundary.length >= 3 && projectId) generate();
-    // Size selectors are intentionally live: changing either one regenerates
-    // the clipped projected grid immediately.
+    // Only the inner monitoring-cell size changes persisted tile geometry and
+    // therefore requires satellite recalculation. Outer block size is a local
+    // visual grouping and must not delete/recreate cached monitoring grids.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blockSize, innerGridSize]);
+  }, [innerGridSize]);
 
   const assign = async () => {
     if (!assignee || !tiles.length) {
@@ -320,16 +375,6 @@ export default function BlueCarbonOperations() {
           Explore the project boundary, organize monitoring blocks, and
           assign field-ready grid visits.
         </p>
-        <div className="bc-end-user-entry">
-          <button type="button" className="bc-end-user-button">
-            <FaUserCheck /> End User workspace
-          </button>
-          <div className="bc-end-user-options">
-            <Link to="/field/dashboard"><FaMapMarkedAlt /> My monitoring tasks</Link>
-            <Link to="/field/dashboard"><FaCheckCircle /> Start or submit a field visit</Link>
-            <Link to="/profile"><FaUserCheck /> My profile</Link>
-          </div>
-        </div>
       </header>
 
       {message && <div className="blue-carbon-note">{message}</div>}
@@ -349,17 +394,19 @@ export default function BlueCarbonOperations() {
             </span>
 
             <div>
+              <button className={`bc-gis-tool ${editingBoundary ? "active" : ""}`} onClick={() => { if (editingBoundary && boundary.length >= 3) generate(boundary); setEditingBoundary((value) => !value); }}><FaDrawPolygon />{editingBoundary ? "Finish editing" : "Edit map boundary"}</button>
               <button className={`bc-gis-tool ${drawing ? "active" : ""}`} onClick={drawing ? () => setDrawing(false) : startNewDrawing}><FaDrawPolygon />{drawing ? "Drawing enabled" : "Draw boundary"}</button>
               <button className="bc-gis-tool" onClick={finishDrawing}><FaCheckCircle />Finish &amp; generate</button>
-              <button className="bc-gis-tool bc-gis-clear-tool" onClick={clearGridData}><FaTrashAlt />Clear drawing</button>
+              <button className="bc-gis-tool" onClick={processSatellite}><FaWater />Update satellite data</button>
             </div>
           </div>
 
           <HierarchicalMap
+            key={`${projectId}-${blockSize}-${innerGridSize}`}
             boundary={boundary}
             setBoundary={setBoundary}
-            drawing={drawing}
-            blocks={blocks}
+            drawing={drawing || editingBoundary}
+            blocks={visibleBlocks}
             selectedBlock={selectedBlock}
             selectedTile={selectedTile}
             onBlock={setSelectedBlock}
@@ -370,22 +417,8 @@ export default function BlueCarbonOperations() {
           />
 
           <div className="bc-gis-legend">
-            <span><FaWater className="bc-gis-stat-icon water" />
-              <i style={{ background: statusColor.monitored }} />
-              Monitored
-            </span>
-            <span><FaLayerGroup className="bc-gis-stat-icon layers" />
-              <i style={{ background: statusColor.pending }} />
-              Pending
-            </span>
-            <span><FaUserCheck className="bc-gis-stat-icon users" />
-              <i style={{ background: statusColor.in_progress }} />
-              In progress
-            </span>
-            <span><FaInfoCircle className="bc-gis-stat-icon info" />
-              <i style={{ background: statusColor.unassigned }} />
-              Unassigned
-            </span>
+            <span className="bc-gis-filter-label">FILTER BY HEALTH</span>
+            {["GREEN", "AMBER", "RED", "GREY"].map((status) => <button type="button" className={`bc-gis-filter ${healthFilter === status ? "active" : ""} ${status.toLowerCase()}`} key={status} onClick={() => setHealthFilter(healthFilter === status ? "ALL" : status)}><i />{status}</button>)}
           </div>
         </div>
 
@@ -534,7 +567,7 @@ export default function BlueCarbonOperations() {
           )}
 
           {selectedTile && (
-            <TileDetails tile={selectedTile} history={tileHistory} />
+            <TileDetails tile={selectedTile} history={tileHistory} satelliteHistory={satelliteHistory} />
           )}
         </aside>
       </section>
@@ -550,21 +583,90 @@ function makeBlocks(tiles, blockSize = 300, innerGridSize = 30) {
   // block; never round the ratio (100m/30m must not become a 90m block).
   const blockWidth = Number(blockSize);
   const cellWidth = Number(innerGridSize);
+  const reference = tiles.find((tile) => tile.geometry_geojson?.coordinates?.[0]?.length);
+  const referenceCoords = reference?.geometry_geojson?.coordinates?.[0] || [];
+  const referenceLats = referenceCoords.map((point) => Number(point[1])).filter(Number.isFinite);
+  const referenceLngs = referenceCoords.map((point) => Number(point[0])).filter(Number.isFinite);
+  const cosLat = Math.max(Math.cos((Number(reference?.centroid_lat) || 0) * Math.PI / 180), 0.01);
+  const cellLat = cellWidth / 111320;
+  const cellLng = cellWidth / (111320 * cosLat);
+  const originLat = tiles.reduce((origin, tile) => {
+    const coords = tile.geometry_geojson?.coordinates?.[0] || [];
+    const lats = coords.map((point) => Number(point[1])).filter(Number.isFinite);
+    const row = Number(tile.grid_row || 0);
+    return lats.length ? Math.min(origin, Math.min(...lats) - row * cellLat) : origin;
+  }, Infinity);
+  const originLng = tiles.reduce((origin, tile) => {
+    const coords = tile.geometry_geojson?.coordinates?.[0] || [];
+    const lngs = coords.map((point) => Number(point[0])).filter(Number.isFinite);
+    const column = Number(tile.grid_column || 0);
+    return lngs.length ? Math.min(origin, Math.min(...lngs) - column * cellLng) : origin;
+  }, Infinity);
+  let gridOriginLat = Number.isFinite(originLat) ? originLat : (referenceLats[0] || 0);
+  let gridOriginLng = Number.isFinite(originLng) ? originLng : (referenceLngs[0] || 0);
   const grouped = new Map();
+  let minBlockRow = Infinity, maxBlockRow = -Infinity, minBlockColumn = Infinity, maxBlockColumn = -Infinity;
   tiles.forEach((tile) => {
     const row = Number(tile.grid_row || 0), column = Number(tile.grid_column || 0);
-    const key = tile.geometry_geojson?.properties?.block_geometry_geojson
-      ? `${tile.geometry_geojson.properties.block_geometry_geojson.coordinates[0][0][0]}-${tile.geometry_geojson.properties.block_geometry_geojson.coordinates[0][0][1]}`
-      : `${Math.floor((row * cellWidth) / blockWidth)}-${Math.floor((column * cellWidth) / blockWidth)}`;
+    // Block size is a display/grouping setting. Do not use the block geometry
+    // persisted during the last generation, otherwise changing this dropdown
+    // appears to do nothing until tiles are regenerated.
+    const key = `${Math.floor((row * cellWidth) / blockWidth)}-${Math.floor((column * cellWidth) / blockWidth)}`;
+    const [blockRow, blockColumn] = key.split("-").map(Number);
+    minBlockRow = Math.min(minBlockRow, blockRow); maxBlockRow = Math.max(maxBlockRow, blockRow);
+    minBlockColumn = Math.min(minBlockColumn, blockColumn); maxBlockColumn = Math.max(maxBlockColumn, blockColumn);
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key).push(tile);
   });
-  return [...grouped.values()].map((group, index) => ({
+  // Re-anchor to a complete persisted block whenever it matches the selected
+  // display size. This avoids accumulated WGS84 rounding at the project edges.
+  const anchor = tiles.find((tile) => {
+    const ring = tile.geometry_geojson?.properties?.block_geometry_geojson?.coordinates?.[0];
+    if (!ring?.length) return false;
+    const lats = ring.map((point) => Number(point[1])).filter(Number.isFinite);
+    const lngs = ring.map((point) => Number(point[0])).filter(Number.isFinite);
+    if (lats.length < 4 || lngs.length < 4) return false;
+    const size = Math.max((Math.max(...lats) - Math.min(...lats)) * 111320, (Math.max(...lngs) - Math.min(...lngs)) * 111320 * cosLat);
+    return Math.abs(size - blockWidth) < Math.max(5, blockWidth * 0.15);
+  });
+  if (anchor) {
+    const ring = anchor.geometry_geojson.properties.block_geometry_geojson.coordinates[0];
+    const lats = ring.map((point) => Number(point[1]));
+    const lngs = ring.map((point) => Number(point[0]));
+    const anchorRow = Math.floor(Number(anchor.grid_row || 0) * cellWidth / blockWidth);
+    const anchorColumn = Math.floor(Number(anchor.grid_column || 0) * cellWidth / blockWidth);
+    gridOriginLat = Math.min(...lats) - anchorRow * blockWidth / 111320;
+    gridOriginLng = Math.min(...lngs) - anchorColumn * blockWidth / (111320 * cosLat);
+  }
+  return [...grouped.entries()].map(([key, group], index) => {
+    const [blockRow, blockColumn] = key.split("-").map(Number);
+    const persisted = group[0]?.geometry_geojson?.properties?.block_geometry_geojson?.coordinates?.[0];
+    const persistedLat = persisted?.map(([lng, lat]) => Number(lat)).filter(Number.isFinite) || [];
+    const persistedLng = persisted?.map(([lng, lat]) => Number(lng)).filter(Number.isFinite) || [];
+    const persistedSize = persistedLat.length && persistedLng.length
+      ? Math.max((Math.max(...persistedLat) - Math.min(...persistedLat)) * 111320, (Math.max(...persistedLng) - Math.min(...persistedLng)) * 111320 * cosLat)
+      : 0;
+    const blockBounds = persisted?.length >= 4 && Math.abs(persistedSize - blockWidth) < Math.max(5, blockWidth * 0.15)
+      ? persisted.slice(0, -1).map(([lng, lat]) => [lat, lng])
+      : (() => {
+        const blockLat = gridOriginLat + blockRow * blockWidth / 111320;
+        const blockLng = gridOriginLng + blockColumn * blockWidth / (111320 * cosLat);
+        return [
+          [blockLat, blockLng],
+          [blockLat, blockLng + blockWidth / (111320 * cosLat)],
+          [blockLat + blockWidth / 111320, blockLng + blockWidth / (111320 * cosLat)],
+          [blockLat + blockWidth / 111320, blockLng],
+        ];
+      })();
+    return {
       id: `block-${index + 1}`,
       label: `Block ${String(index + 1).padStart(2, "0")}`,
       tiles: group,
       subBlocks: [],
-      bounds: group[0].geometry_geojson?.properties?.block_geometry_geojson?.coordinates?.[0]?.map(([lng, lat]) => [lat, lng]) || boundsFor(group),
+      // Always derive the outline from the currently selected display size.
+      // Persisted block geometry belongs to the generation-time size and would
+      // make 100m/500m selections appear unchanged.
+      bounds: blockBounds,
       area: group.reduce(
         (sum, tile) => sum + Number(tile.area_hectares || 0),
         0
@@ -578,7 +680,8 @@ function makeBlocks(tiles, blockSize = 300, innerGridSize = 30) {
           )
           ? "in_progress"
           : "pending",
-    }));
+    };
+  });
 }
 
 function makeSubBlocks(tiles, blockIndex) {
@@ -601,7 +704,7 @@ function makeSubBlocks(tiles, blockIndex) {
   }));
 }
 
-function boundsFor(tiles) {
+function boundsFor(tiles, blockSizeM = null) {
   const positions = tiles.flatMap((tile) =>
     tile.geometry_geojson?.coordinates?.[0]?.map(([lng, lat]) => [lat, lng]) ||
     [[Number(tile.centroid_lat), Number(tile.centroid_lng)]]
@@ -609,11 +712,26 @@ function boundsFor(tiles) {
   const lat = positions.map(([value]) => value).filter(Number.isFinite);
   const lng = positions.map(([, value]) => value).filter(Number.isFinite);
 
+  const minLat = Math.min(...lat), maxLat = Math.max(...lat);
+  const minLng = Math.min(...lng), maxLng = Math.max(...lng);
+  const centerLat = (minLat + maxLat) / 2;
+  const centerLng = (minLng + maxLng) / 2;
+  // Make the display block square in metres (longitude degrees shrink with
+  // latitude), while keeping the group centred on its tiles.
+  const metresPerDegreeLat = 111320;
+  const metresPerDegreeLng = metresPerDegreeLat * Math.max(Math.cos(centerLat * Math.PI / 180), 0.01);
+  const requestedLat = blockSizeM ? Number(blockSizeM) / metresPerDegreeLat : 0;
+  const requestedLng = blockSizeM ? Number(blockSizeM) / metresPerDegreeLng : 0;
+  const fallbackHalfLat = Math.max(maxLat - minLat, (maxLng - minLng) * Math.cos(centerLat * Math.PI / 180)) / 2;
+  const fallbackHalfLng = fallbackHalfLat / Math.max(Math.cos(centerLat * Math.PI / 180), 0.01);
+  // Anchor each square to the lower-left of its grouped cells. This prevents
+  // the centre-based squares from overlapping when boundary cells are absent.
+  const south = blockSizeM ? minLat : centerLat - fallbackHalfLat;
+  const west = blockSizeM ? minLng : centerLng - fallbackHalfLng;
+  const north = blockSizeM ? south + requestedLat : centerLat + fallbackHalfLat;
+  const east = blockSizeM ? west + requestedLng : centerLng + fallbackHalfLng;
   return [
-    [Math.min(...lat), Math.min(...lng)],
-    [Math.min(...lat), Math.max(...lng)],
-    [Math.max(...lat), Math.max(...lng)],
-    [Math.max(...lat), Math.min(...lng)],
+    [south, west], [south, east], [north, east], [north, west],
   ];
 }
 
@@ -657,6 +775,7 @@ function HierarchicalMap({
   const ref = useRef(null);
   const map = useRef(null);
   const layers = useRef([]);
+  const lastFitSignature = useRef("");
 
   useEffect(() => {
     const L = window.L;
@@ -733,6 +852,13 @@ function HierarchicalMap({
             return next;
           });
         });
+        handle.on("contextmenu", (event) => {
+          L.DomEvent.stopPropagation(event);
+          if (boundary.length <= 3) return;
+          const next = boundary.filter((_, index) => index !== pointIndex);
+          setBoundary(next);
+          onBoundaryEdited(next);
+        });
         layers.current.push(handle);
       });
     }
@@ -796,6 +922,7 @@ function HierarchicalMap({
             weight:
               selectedTile?.tile_id === tile.tile_id ? 3 : 1,
           })
+            .bindPopup(tilePopupContent(tile), { maxWidth: 240 })
             .bindTooltip(tile.tile_code || tile.tile_id, {
               sticky: true,
             })
@@ -815,14 +942,21 @@ function HierarchicalMap({
     // above the 1px inner-cell boundaries.
     majorBlockLayers.forEach((layer) => layer.bringToFront());
 
-    if (boundary.length > 2) {
-      map.current.fitBounds(L.latLngBounds(boundary).pad(0.15));
-    } else if (blocks.length) {
-      map.current.fitBounds(
-        L.latLngBounds(
-          blocks.flatMap((block) => block.bounds)
-        ).pad(0.15)
-      );
+    const fitSignature = JSON.stringify({
+      boundary,
+      blocks: blocks.map((block) => block.bounds),
+    });
+    if (fitSignature !== lastFitSignature.current) {
+      lastFitSignature.current = fitSignature;
+      if (boundary.length > 2) {
+        map.current.fitBounds(L.latLngBounds(boundary).pad(0.15));
+      } else if (blocks.length) {
+        map.current.fitBounds(
+          L.latLngBounds(
+            blocks.flatMap((block) => block.bounds)
+          ).pad(0.15)
+        );
+      }
     }
   }, [
     boundary,
@@ -945,7 +1079,7 @@ function clipPolygon(subject, clipBoundary) {
   return output;
 }
 
-function TileDetails({ tile, history, assignments = [] }) {
+function TileDetails({ tile, history, satelliteHistory = [], assignments = [] }) {
   const visits = history?.visits || [];
 
   const assignment = assignments.find(
@@ -969,7 +1103,7 @@ function TileDetails({ tile, history, assignments = [] }) {
           color: statusColor[tile.status] || statusColor.unassigned,
         }}
       >
-        {statusLabel(tile.status)}
+        {tile.satellite_health_status || "GREY"}
       </span>
 
       <dl>
@@ -1002,6 +1136,13 @@ function TileDetails({ tile, history, assignments = [] }) {
           files
         </dd>
       </dl>
+      <p>{tile.satellite_health_explanation || "No satellite observation available."}</p>
+      <dl>
+        <dt>Latest Sentinel-2</dt><dd>{tile.satellite_observed_on || "Unavailable"}</dd>
+        <dt>Data quality</dt><dd>{tile.satellite_data_quality || "unavailable"} · {tile.satellite_valid_pixel_percentage ? `${Number(tile.satellite_valid_pixel_percentage).toFixed(1)}% valid pixels` : "—"}</dd>
+      </dl>
+      <div className="bc-gis-satellite-metrics">{["NDVI", "EVI", "NDMI", "NDWI", "MNDWI", "NDRE"].map((key) => <span key={key}><b>{key}</b>{tile.satellite_indicators?.[key]?.mean == null ? "—" : Number(tile.satellite_indicators[key].mean).toFixed(4)}</span>)}</div>
+      {satelliteHistory.length > 1 && <small>{satelliteHistory.length} historical observations available for this grid</small>}
     </div>
   );
 }

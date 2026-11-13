@@ -1,0 +1,17 @@
+.blue-carbon-notice-dialog,.blue-carbon-confirm-dialog{background:rgba(8,47,58,.58);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:blueCarbonFadeIn .2s ease-out}
+.blue-carbon-notice-card{width:min(430px,calc(100vw - 36px));padding:30px 30px 26px!important;text-align:center;border:1px solid rgba(255,255,255,.7);border-radius:22px!important;box-shadow:0 25px 70px rgba(0,31,46,.28),0 5px 18px rgba(15,118,110,.12);animation:blueCarbonDialogIn .24s cubic-bezier(.2,.8,.2,1)}
+.blue-carbon-notice-card h2{margin:0;color:#12343b;font-size:21px;letter-spacing:-.02em}
+.blue-carbon-notice-card p{margin:14px auto 24px;max-width:340px;color:#52717a;line-height:1.55;font-size:14px}
+.blue-carbon-dialog-actions{display:flex;justify-content:center;gap:11px}.blue-carbon-dialog-actions .blue-carbon-cancel{background:#eef5f5;color:#31545b;border:1px solid #d5e5e5}.blue-carbon-dialog-actions .blue-carbon-confirm{background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;box-shadow:0 6px 14px rgba(185,28,28,.2)}.blue-carbon-dialog-actions button{min-width:104px;padding:10px 17px!important;border-radius:11px!important;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}.blue-carbon-dialog-actions button:hover{transform:translateY(-1px);box-shadow:0 7px 16px rgba(15,65,75,.14)}.blue-carbon-dialog-actions .blue-carbon-cancel:hover{background:#dcebec;color:#12343b}.blue-carbon-dialog-actions .blue-carbon-confirm:hover{background:linear-gradient(135deg,#ef4444,#dc2626)}
+.blue-carbon-dialog-actions button:focus-visible{outline:3px solid rgba(20,184,166,.35);outline-offset:3px}
+@keyframes blueCarbonFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes blueCarbonDialogIn{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:480px){.blue-carbon-notice-card{padding:25px 20px 22px!important}.blue-carbon-dialog-actions{flex-direction:column-reverse}.blue-carbon-dialog-actions button{width:100%}}
+.blue-carbon-crud-actions{align-items:center;flex:0 0 auto}
+.blue-carbon-crud-actions button{display:inline-flex!important;align-items:center;justify-content:center;padding:0!important;line-height:1;font-family:inherit}
+.blue-carbon-crud-actions button:first-child{color:#075985}
+.blue-carbon-crud-actions button.danger{color:#b91c1c;background:#fff1f2}
+.blue-carbon-crud-actions button.danger:hover{background:#dc2626;color:#fff}
+.blue-carbon-row-crud{margin-top:0;margin-left:auto;padding-left:8px}
+.blue-carbon-project>.blue-carbon-row-crud{align-self:center}
+@media(max-width:560px){.blue-carbon-row-crud{margin-left:0;padding-left:0}.blue-carbon-project>.blue-carbon-row-crud{align-self:flex-start}}

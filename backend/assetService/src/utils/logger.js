@@ -59,12 +59,7 @@ const logger = winston.createLogger({
 });
 
 // If we're not in production, log to the console with simple format
-if (config.nodeEnv !== "production") {
-  logger.add(
-    new winston.transports.Console({
-      format: consoleFormat,
-    })
-  );
-}
+// The console transport above already handles development output. Adding a
+// second development console caused every satellite log line to appear twice.
 
 module.exports = logger;

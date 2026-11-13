@@ -3,6 +3,10 @@ const { validateGeoJSON, calculateGeometry } = require("../utils/blueCarbonGeome
 const { generateTiles } = require("../utils/blueCarbonTiles");
 const crypto = require('crypto');
 const { uploadMedia } = require('../config/cloudinary');
+const satellite = require('../services/sentinelMonitoringService');
+const logger = require('../utils/logger');
+const satelliteJobs = new Map();
+const activeSatelliteJobs = new Map();
 
 const allowedEcosystems = new Set(["mangrove", "tidal_wetland", "seagrass"]);
 const methodologyCatalog = [
@@ -61,8 +65,63 @@ exports.listProjects = async (req, res) => {
 };
 
 exports.listTiles = async (req, res) => {
-  const result = await query(`SELECT * FROM blue_carbon_tiles WHERE project_id=$1 AND org_id=$2 ORDER BY grid_row, grid_column`, [req.params.projectId, getOrgId(req)]);
+  // Tile data changes asynchronously when satellite processing completes.
+  // Never let a browser/proxy reuse the pre-processing response on a reload.
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  const result = await query(`SELECT t.*, s.health_status AS satellite_health_status, s.health_explanation AS satellite_health_explanation, s.observed_on AS satellite_observed_on, s.data_quality AS satellite_data_quality, s.valid_pixel_percentage AS satellite_valid_pixel_percentage, s.indicators AS satellite_indicators, s.source AS satellite_source FROM blue_carbon_tiles t LEFT JOIN LATERAL (SELECT * FROM blue_carbon_satellite_observations so WHERE so.tile_id=t.tile_id ORDER BY (so.processing_status='processed') DESC, so.observed_on DESC, so.created_at DESC LIMIT 1) s ON true WHERE t.project_id=$1 AND t.org_id=$2 ORDER BY t.grid_row, t.grid_column`, [req.params.projectId, getOrgId(req)]);
   res.json({ success: true, data: result.rows });
+};
+
+exports.listSatelliteObservations = async (req, res) => {
+  const tile = await query('SELECT tile_id, project_id FROM blue_carbon_tiles WHERE tile_id=$1 AND project_id=$2 AND org_id=$3', [req.params.tileId, req.params.projectId, getOrgId(req)]);
+  if (!tile.rows.length) return res.status(404).json({ success: false, message: 'Monitoring grid not found' });
+  const result = await query('SELECT * FROM blue_carbon_satellite_observations WHERE tile_id=$1 ORDER BY observed_on DESC', [req.params.tileId]);
+  res.json({ success: true, data: result.rows });
+};
+
+exports.processSatellite = async (req, res) => {
+  if (!satellite.credentialsPresent()) return res.status(503).json({ success: false, message: 'Copernicus credentials are not configured. Set COPERNICUS_CLIENT_ID and COPERNICUS_CLIENT_SECRET on the backend.' });
+  const jobKey = `${getOrgId(req)}:${req.params.projectId}`;
+  const activeJobId = activeSatelliteJobs.get(jobKey);
+  if (activeJobId) {
+    const active = satelliteJobs.get(activeJobId);
+    if (active && !['complete', 'failed'].includes(active.status)) return res.status(202).json({ success: true, data: { job_id: activeJobId, status: active.status, duplicate: true } });
+    activeSatelliteJobs.delete(jobKey);
+  }
+  const jobId = crypto.randomUUID();
+  activeSatelliteJobs.set(jobKey, jobId);
+  satelliteJobs.set(jobId, { status: 'queued', processed: 0, total: 0, error: null, createdAt: new Date().toISOString() });
+  logger.info(`Satellite job queued: job=${jobId} project=${req.params.projectId} org=${getOrgId(req)}`);
+  (async () => {
+    const job = satelliteJobs.get(jobId);
+    try {
+      const tiles = (await query('SELECT COUNT(*)::int AS total FROM blue_carbon_tiles WHERE project_id=$1 AND org_id=$2', [req.params.projectId, getOrgId(req)])).rows[0];
+      job.status = 'processing'; job.total = tiles.total;
+      logger.info(`Satellite job started: job=${jobId} totalTiles=${job.total}`);
+      const firstTile = (await query('SELECT t.*, p.satellite_thresholds FROM blue_carbon_tiles t JOIN blue_carbon_projects p ON p.project_id=t.project_id AND p.org_id=t.org_id WHERE t.project_id=$1 AND t.org_id=$2 ORDER BY t.grid_row,t.grid_column LIMIT 1', [req.params.projectId, getOrgId(req)])).rows[0];
+      if (firstTile) {
+        logger.info(`Satellite preflight started: job=${jobId} tile=${firstTile.tile_code || firstTile.tile_id}`);
+        const preflight = await satellite.processTile(firstTile, { date: req.body?.date, lookbackDays: req.body?.lookback_days });
+        if (preflight.health_status === 'GREY' && preflight.error) throw new Error(`Satellite preflight failed: ${preflight.error}`);
+        logger.info(`Satellite preflight passed: job=${jobId} tile=${firstTile.tile_code || firstTile.tile_id}`);
+        job.processed = 1;
+      }
+      const results = await satellite.processProject(req.params.projectId, getOrgId(req), { date: req.body?.date, lookbackDays: req.body?.lookback_days, concurrency: 1, skipTileId: firstTile?.tile_id, onProgress: (processed, total, tile, result) => { job.processed = processed; job.total = total; logger.info(`Satellite grid saved: job=${jobId} tile=${tile?.tile_code || tile?.tile_id || 'unknown'} progress=${processed}/${total} status=${result?.health_status || 'cached'}`); } });
+      job.status = 'complete'; job.processed = job.total; job.results = results;
+      logger.info(`Satellite job complete: job=${jobId} processed=${job.processed}`);
+    } catch (error) { job.status = 'failed'; job.error = error.message; logger.error(`Satellite job failed: job=${jobId} message=${error.message}`); }
+    finally { if (activeSatelliteJobs.get(jobKey) === jobId) activeSatelliteJobs.delete(jobKey); }
+  })();
+  res.status(202).json({ success: true, data: { job_id: jobId, status: 'queued' } });
+};
+
+exports.satelliteJobStatus = async (req, res) => {
+  const job = satelliteJobs.get(req.params.jobId);
+  if (!job) return res.status(404).json({ success: false, message: 'Satellite job not found or expired' });
+  res.json({ success: true, data: { ...job, results: undefined } });
+  if (['complete', 'failed'].includes(job.status)) setTimeout(() => satelliteJobs.delete(req.params.jobId), 10 * 60 * 1000).unref();
 };
 
 exports.generateTiles = async (req, res) => {
@@ -197,6 +256,24 @@ exports.updateProject = async (req, res) => {
     return updated;
   });
   if (!result.rows.length) return res.status(404).json({ success: false, message: "Blue Carbon project not found" });
+  res.json({ success: true, data: result.rows[0] });
+};
+
+exports.deleteProject = async (req, res) => {
+  const result = await query('DELETE FROM blue_carbon_projects WHERE project_id=$1 AND org_id=$2 RETURNING project_id', [req.params.projectId, getOrgId(req)]);
+  if (!result.rows.length) return res.status(404).json({ success: false, message: 'Blue Carbon project not found' });
+  res.json({ success: true, data: result.rows[0] });
+};
+
+exports.deleteObservation = async (req, res) => {
+  const result = await query('DELETE FROM blue_carbon_observations WHERE observation_id=$1 AND project_id=$2 AND org_id=$3 RETURNING observation_id', [req.params.observationId, req.params.projectId, getOrgId(req)]);
+  if (!result.rows.length) return res.status(404).json({ success: false, message: 'Observation not found' });
+  res.json({ success: true, data: result.rows[0] });
+};
+
+exports.deleteSample = async (req, res) => {
+  const result = await query('DELETE FROM blue_carbon_soil_samples WHERE sample_id=$1 AND project_id=$2 AND org_id=$3 RETURNING sample_id', [req.params.sampleId, req.params.projectId, getOrgId(req)]);
+  if (!result.rows.length) return res.status(404).json({ success: false, message: 'Soil sample not found' });
   res.json({ success: true, data: result.rows[0] });
 };
 

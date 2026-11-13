@@ -8,7 +8,12 @@ export const blueCarbonApi = {
   projects: async () => (await blueCarbonApiClient.get(`${BASE}/projects`)).data,
   createProject: async (payload) => (await blueCarbonApiClient.post(`${BASE}/projects`, payload)).data,
   project: async (projectId) => (await blueCarbonApiClient.get(`${BASE}/projects/${projectId}`)).data,
-  tiles: async (projectId) => (await blueCarbonApiClient.get(`${BASE}/projects/${projectId}/tiles`)).data,
+  // The timestamp prevents stale GET responses without triggering a CORS
+  // preflight (Cache-Control is a non-simple request header).
+  tiles: async (projectId) => (await blueCarbonApiClient.get(`${BASE}/projects/${projectId}/tiles`, { params: { _ts: Date.now() } })).data,
+  satelliteHistory: async (projectId, tileId) => (await blueCarbonApiClient.get(`${BASE}/projects/${projectId}/tiles/${tileId}/satellite`)).data,
+  processSatellite: async (projectId, payload = {}) => (await blueCarbonApiClient.post(`${BASE}/projects/${projectId}/satellite/process`, payload)).data,
+  satelliteJob: async (jobId) => (await blueCarbonApiClient.get(`${BASE}/satellite/jobs/${jobId}`)).data,
   generateTiles: async (projectId, payload) => (await blueCarbonApiClient.post(`${BASE}/projects/${projectId}/tiles/generate`, payload)).data,
   assignments: async (projectId) => (await blueCarbonApiClient.get(`${BASE}/projects/${projectId}/assignments`)).data,
   assignTiles: async (projectId, payload) => (await blueCarbonApiClient.post(`${BASE}/projects/${projectId}/assignments`, payload)).data,
@@ -23,11 +28,14 @@ export const blueCarbonApi = {
   reviewMedia: async (evidenceId, payload) => (await blueCarbonApiClient.post(`${BASE}/evidence/${evidenceId}/review`, payload)).data,
   mediaReviewHistory: async (evidenceId) => (await blueCarbonApiClient.get(`${BASE}/evidence/${evidenceId}/review-history`)).data,
   updateProject: async (projectId, payload) => (await blueCarbonApiClient.patch(`${BASE}/projects/${projectId}`, payload)).data,
+  deleteProject: async (projectId) => (await blueCarbonApiClient.delete(`${BASE}/projects/${projectId}`)).data,
   baselines: async (projectId) => (await blueCarbonApiClient.get(`${BASE}/projects/${projectId}/baselines`)).data,
   observations: async (projectId) => (await blueCarbonApiClient.get(`${BASE}/projects/${projectId}/observations`)).data,
   createObservation: async (projectId, payload) => (await blueCarbonApiClient.post(`${BASE}/projects/${projectId}/observations`, payload)).data,
+  deleteObservation: async (projectId, observationId) => (await blueCarbonApiClient.delete(`${BASE}/projects/${projectId}/observations/${observationId}`)).data,
   samples: async (projectId) => (await blueCarbonApiClient.get(`${BASE}/projects/${projectId}/samples`)).data,
   createSample: async (projectId, payload) => (await blueCarbonApiClient.post(`${BASE}/projects/${projectId}/samples`, payload)).data,
+  deleteSample: async (projectId, sampleId) => (await blueCarbonApiClient.delete(`${BASE}/projects/${projectId}/samples/${sampleId}`)).data,
   reviewObservation: async (projectId, observationId, payload) => (await blueCarbonApiClient.post(`${BASE}/projects/${projectId}/observations/${observationId}/review`, payload)).data,
   reviewSample: async (projectId, sampleId, payload) => (await blueCarbonApiClient.post(`${BASE}/projects/${projectId}/samples/${sampleId}/review`, payload)).data,
   revisions: async (projectId, recordType, recordId) => {
