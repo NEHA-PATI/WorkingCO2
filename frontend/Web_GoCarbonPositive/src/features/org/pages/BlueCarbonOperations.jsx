@@ -41,32 +41,25 @@ const gridPalette = [
 const VISUAL_COLOR_MODE = true;
 
 function gridDisplayColor(tile) {
-  if (VISUAL_COLOR_MODE) {
-    // Keep a tile's visual identity stable across map redraws and data refreshes.
-    // Satellite values can change, but the same tile must not visibly jump
-    // between colors just because Leaflet rebuilt its layers.
-    const visualSeed = String(tile.tile_id || tile.tile_code || "tile");
-    let visualHash = 0;
-    for (let index = 0; index < visualSeed.length; index += 1) visualHash = (visualHash * 31 + visualSeed.charCodeAt(index)) | 0;
-    return gridPalette[Math.abs(visualHash) % gridPalette.length];
+  const status = satelliteStatus(tile);
+  const indicators = tile.satellite_indicators || tile.indicators || {};
+  const ndvi = Number(indicators.NDVI?.mean ?? indicators.NDVI);
+  const evi = Number(indicators.EVI?.mean ?? indicators.EVI);
+  // Explicit backend warnings always win. When the provider labels every
+  // tile GREEN, use the vegetation index values to create a useful three-band
+  // visual scale instead of showing a misleading all-green map.
+  if (status === "RED") return "#ef4444";
+  if (status === "AMBER") return "#f59e0b";
+  if (Number.isFinite(ndvi) || Number.isFinite(evi)) {
+    const score = [ndvi, evi].filter(Number.isFinite).reduce((sum, value, _, values) => sum + value / values.length, 0);
+    // The provider's normalized coastal indices commonly sit below 0.6;
+    // these bands keep the map useful for that range.
+    if (score < 0.20) return "#ef4444";
+    if (score < 0.40) return "#f59e0b";
+    return "#22c55e";
   }
-  // Deterministic data-seeded shade: the health status selects the color
-  // family, while the satellite values select a stable shade within it.
-  const seed = JSON.stringify({
-    tile: tile.tile_id || tile.tile_code,
-    indicators: tile.satellite_indicators || tile.indicators || {},
-    observed: tile.satellite_observed_on || tile.observed_on || "",
-  });
-  let hash = 0;
-  for (let index = 0; index < seed.length; index += 1) hash = (hash * 31 + seed.charCodeAt(index)) | 0;
-  const palettes = {
-    GREEN: ["#86efac", "#4ade80", "#22c55e", "#16a34a"],
-    AMBER: ["#fde68a", "#fbbf24", "#f59e0b", "#d97706"],
-    RED: ["#fca5a5", "#f87171", "#ef4444", "#dc2626"],
-    GREY: ["#cbd5e1", "#94a3b8", "#64748b"],
-  };
-  const palette = palettes[status] || palettes.GREY;
-  return palette[Math.abs(hash) % palette.length];
+  if (status === "GREEN") return "#22c55e";
+  return "#94a3b8";
 }
 
 function satelliteStatus(tile) {
@@ -137,21 +130,31 @@ export default function BlueCarbonOperations() {
 
       // Ignore a slower response for the project that was previously selected.
       if (requestId !== refreshRequest.current || String(id) !== String(projectId)) return;
+      const satelliteCacheKey = `blue-carbon-satellite:${id}`;
+      const satelliteCache = JSON.parse(window.localStorage.getItem(satelliteCacheKey) || "{}");
+      rows.forEach((tile) => {
+        const status = String(tile.satellite_health_status || tile.health_status || "GREY").toUpperCase();
+        if (status !== "GREY" || tile.satellite_indicators) satelliteCache[String(tile.tile_id)] = tile;
+      });
+      window.localStorage.setItem(satelliteCacheKey, JSON.stringify(satelliteCache));
 
       setAssignments(uniqueAssignments);
       setTiles(
         rows.map((tile) => {
+          const cachedTile = satelliteCache[String(tile.tile_id)];
+          const satelliteTile = String(tile.satellite_health_status || tile.health_status || "GREY").toUpperCase() === "GREY" && cachedTile ? { ...tile, ...cachedTile } : tile;
           const activeAssignment = activeAssignments.find(
             (item) => String(item.tile_id) === String(tile.tile_id)
           );
           return {
-            ...tile,
+            ...satelliteTile,
+            ...((String(tile.satellite_health_status || tile.health_status || "GREY").toUpperCase() === "GREY" && satelliteCache[String(tile.tile_id)]) ? satelliteCache[String(tile.tile_id)] : {}),
             // Keep the map independent of API/driver casing differences.
             // The SQL endpoint uses snake_case, while some deployments return
             // the observation field without the join alias.
             satellite_health_status: String(
-              tile.satellite_health_status ||
-                tile.health_status ||
+              satelliteTile.satellite_health_status ||
+                satelliteTile.health_status ||
                 tile.satelliteHealthStatus ||
                 "GREY"
             ).toUpperCase(),
@@ -285,13 +288,9 @@ export default function BlueCarbonOperations() {
     else setMessage("Add at least three polygon points before finishing.");
   };
 
-  useEffect(() => {
-    if (boundary.length >= 3 && projectId) generate();
-    // Only the inner monitoring-cell size changes persisted tile geometry and
-    // therefore requires satellite recalculation. Outer block size is a local
-    // visual grouping and must not delete/recreate cached monitoring grids.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [innerGridSize]);
+  // Tile generation is intentionally explicit. Refreshing the page or
+  // restoring saved grid settings must never recreate tiles and detach their
+  // persisted satellite observations.
 
   const assign = async () => {
     if (!assignee || !tiles.length) {
@@ -433,7 +432,7 @@ export default function BlueCarbonOperations() {
               <button className={`bc-gis-tool ${editingBoundary ? "active" : ""}`} onClick={() => { if (editingBoundary && boundary.length >= 3) generate(boundary); setEditingBoundary((value) => !value); }}><FaDrawPolygon />{editingBoundary ? "Finish editing" : "Edit map boundary"}</button>
               <button className={`bc-gis-tool ${drawing ? "active" : ""}`} onClick={drawing ? () => setDrawing(false) : startNewDrawing}><FaDrawPolygon />{drawing ? "Drawing enabled" : "Draw boundary"}</button>
               <button className="bc-gis-tool" onClick={finishDrawing}><FaCheckCircle />Finish &amp; generate</button>
-              <button className="bc-gis-tool" onClick={processSatellite}><FaWater />Update satellite data</button>
+              <button className="bc-gis-tool" onClick={() => { window.localStorage.removeItem(`blue-carbon-satellite:${projectId}`); setTiles((current) => current.map((tile) => ({ ...tile, satellite_health_status: "GREY", health_status: "GREY", satellite_indicators: null, satellite_observed_on: null, satellite_data_quality: null }))); processSatellite(); }}><FaWater />Update satellite data</button>
             </div>
           </div>
 
@@ -1007,7 +1006,12 @@ function HierarchicalMap({
     if (fitSignature !== lastFitSignature.current) {
       lastFitSignature.current = fitSignature;
       if (boundary.length > 2) {
-        map.current.fitBounds(L.latLngBounds(boundary).pad(0.15));
+        map.current.invalidateSize();
+        map.current.fitBounds(L.latLngBounds(boundary), {
+          padding: [48, 48],
+          maxZoom: 17,
+          animate: false,
+        });
       } else if (blocks.length) {
         map.current.fitBounds(
           L.latLngBounds(
