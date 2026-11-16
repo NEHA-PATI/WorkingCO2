@@ -91,7 +91,7 @@ const PopupForms = ({
     try {
       const response = await evService.createEV(payload);
 
-      if (response.status === "success") {
+      if (response?.success === true || response?.status === "success") {
         showToast(`EV saved successfully!`, "success");
         toastify.success("EV added successfully!");
 
@@ -183,7 +183,7 @@ const PopupForms = ({
         }
 
         if (typeof setSolarCount === "function") {
-          setSolarCount(response.solarCount || 1);
+          setSolarCount(response.data?.solarCount || response.solarCount || 1);
         }
 
         // Reset form

@@ -4,7 +4,8 @@ import { ENV } from "@config/env";
 
 const apiV1Base = (value) => {
   const base = String(value || "").replace(/\/+$/, "");
-  return base.endsWith("/api/v1") ? base : `${base}/api/v1`;
+  const normalized = base.replace(/(?:\/api\/v1)+$/, "");
+  return `${normalized}/api/v1`;
 };
 
 // Get base URLs from environment or use defaults
