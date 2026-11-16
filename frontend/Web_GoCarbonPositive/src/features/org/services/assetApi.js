@@ -1,7 +1,8 @@
 import { assetApiClient as apiClient } from "@shared/utils/apiClient";
 import { ENV } from "@config/env";
 
-const API_BASE_URL = `${ENV.ASSET_SERVICE_URL}/api/v1`;
+// assetApiClient already owns the normalized /api/v1 base URL.
+const API_BASE_URL = "";
 const isSuccessResponse = (payload) =>
   payload?.success === true || payload?.status === "success";
 

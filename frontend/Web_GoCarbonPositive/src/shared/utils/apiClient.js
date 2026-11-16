@@ -2,12 +2,16 @@ import axios from "axios";
 import { fireToast } from "./toastService";
 import { ENV } from "@config/env";
 
+const apiV1Base = (value) => {
+  const base = String(value || "").replace(/\/+$/, "");
+  return base.endsWith("/api/v1") ? base : `${base}/api/v1`;
+};
+
 // Get base URLs from environment or use defaults
 const API_CONFIG = {
   // Asset Service (port 5000)
   ASSET_API:
-    import.meta.env.VITE_ASSET_API ||
-    `${ENV.ASSET_SERVICE_URL}/api/v1`,
+    apiV1Base(import.meta.env.VITE_ASSET_API || ENV.ASSET_SERVICE_URL),
 
   BLUE_CARBON_API:
     (import.meta.env.VITE_BLUE_CARBON_SERVICE_URL || "http://localhost:5000") + "/api/v1",

@@ -351,6 +351,9 @@ const DUMMY_PLANTATION_ASSET = {
 
 const getPlantationMapData = (asset) => {
   const raw = asset?.originalData || {};
+  const savedPoints = Array.isArray(raw.points) ? raw.points
+    .map((point) => [Number(point.lat), Number(point.lng)])
+    .filter(([lat, lng]) => Number.isFinite(lat) && Number.isFinite(lng)) : [];
   const locationText = String(raw.location || asset.location || "");
   const match = locationText.match(/(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)/);
 
@@ -372,12 +375,14 @@ const getPlantationMapData = (asset) => {
     [center[0] - dLat, center[1] - dLng],
   ];
 
-  return { center, polygonCoords };
+  return { center, polygonCoords: savedPoints.length >= 3 ? savedPoints : polygonCoords };
 };
 
 const PlantationAssetCard = ({ asset }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [blockSize, setBlockSize] = useState(300);
+  const [innerGridSize, setInnerGridSize] = useState(30);
 
   const modalId = String(asset.id || "plantation")
     .replace(/[^a-zA-Z0-9_-]/g, "")
@@ -465,12 +470,41 @@ const PlantationAssetCard = ({ asset }) => {
       weight: 2,
     }).addTo(map);
 
+    const bounds = polygon.getBounds();
+    const rows = Math.max(1, Math.min(24, Math.ceil(300 / Number(innerGridSize))));
+    const latStep = (bounds.getNorth() - bounds.getSouth()) / rows;
+    const lngStep = (bounds.getEast() - bounds.getWest()) / rows;
+    const colors = ["#22c55e", "#f59e0b", "#ef4444"];
+    const gridLayers = [];
+    const stableCellHash = (row, col) => {
+      const seed = `${asset.id || details.id}-${row}-${col}`;
+      let hash = 0;
+      for (let index = 0; index < seed.length; index += 1) hash = (hash * 31 + seed.charCodeAt(index)) | 0;
+      return Math.abs(hash);
+    };
+    for (let row = 0; row < rows; row += 1) {
+      for (let col = 0; col < rows; col += 1) {
+        const cell = [[bounds.getSouth() + row * latStep, bounds.getWest() + col * lngStep], [bounds.getSouth() + (row + 1) * latStep, bounds.getWest() + col * lngStep], [bounds.getSouth() + (row + 1) * latStep, bounds.getWest() + (col + 1) * lngStep], [bounds.getSouth() + row * latStep, bounds.getWest() + (col + 1) * lngStep]];
+        const color = colors[stableCellHash(row, col) % colors.length];
+        const tileId = `${asset.id || "PLANT"}-${String(row + 1).padStart(2, "0")}-${String(col + 1).padStart(2, "0")}`;
+        const tileArea = Number(details.totalArea.replace(/[^0-9.]/g, "") || 0) / (rows * rows);
+        const condition = color === "#22c55e" ? "Healthy" : color === "#f59e0b" ? "Monitoring" : "Needs review";
+        const layer = L.polygon(cell, { color: "#fff", weight: 0.8, fillColor: color, fillOpacity: 0.5 })
+          .bindPopup(`<div class="pc-plantation-tile-popup"><b>Tile ${tileId}</b><br/><small>${details.name}</small><hr/><b>Condition:</b> ${condition}<br/><b>Area:</b> ${tileArea.toFixed(3)} ha<br/><b>Grid:</b> ${blockSize} m block · ${innerGridSize} m inner cell<br/><b>Center:</b> ${((cell[0][0] + cell[2][0]) / 2).toFixed(6)}, ${((cell[0][1] + cell[2][1]) / 2).toFixed(6)}<br/><b>Species:</b> ${details.vegetation.species}</div>`)
+          .addTo(map);
+        gridLayers.push(layer);
+      }
+    }
+
+    polygon.bringToFront();
+
     map.fitBounds(polygon.getBounds());
 
     return () => {
+      gridLayers.forEach((layer) => map.removeLayer(layer));
       map.remove();
     };
-  }, [asset, mapElementId, showMap]);
+  }, [asset, mapElementId, showMap, blockSize, innerGridSize]);
 
   return (
     <>
@@ -644,6 +678,7 @@ const PlantationAssetCard = ({ asset }) => {
                 </button>
               </div>
             </div>
+            <div className="pc-map-grid-config"><label>Block size <input type="number" min="30" value={blockSize} onChange={(event) => setBlockSize(Number(event.target.value) || 300)} /> m</label><label>Inner grid <input type="number" min="10" value={innerGridSize} onChange={(event) => setInnerGridSize(Number(event.target.value) || 30)} /> m</label><span><i className="pc-grid-green" /> Healthy <i className="pc-grid-amber" /> Monitoring <i className="pc-grid-red" /> Needs review</span></div>
             <div id={mapElementId} className="pc-leaflet-map"></div>
           </div>
         </div>
