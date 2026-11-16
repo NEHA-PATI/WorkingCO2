@@ -4,11 +4,12 @@ const path = require("path");
 require("dotenv").config();
 require("dotenv").config({ path: path.resolve(__dirname, "../../authentication/.env") });
 
+const useSsl = process.env.DB_SSL === "true" || process.env.NODE_ENV === "production";
 
 const connectionConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
-      ssl: { require: true, rejectUnauthorized: false },
+      ssl: useSsl ? { require: true, rejectUnauthorized: false } : false,
     }
   : {
       user: process.env.DB_USER,
@@ -16,6 +17,7 @@ const connectionConfig = process.env.DATABASE_URL
       database: process.env.DB_NAME,
       password: process.env.DB_PASSWORD,
       port: process.env.DB_PORT || 5432,
+      ssl: useSsl ? { rejectUnauthorized: false } : false,
     };
 
 const pool = new Pool({

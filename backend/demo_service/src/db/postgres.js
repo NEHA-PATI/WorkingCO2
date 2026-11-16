@@ -2,12 +2,13 @@ const { Pool } = require("pg");
 require("dotenv").config();
 
 const isProduction = process.env.NODE_ENV === "production";
+const useSsl = process.env.DB_SSL === "true" || isProduction;
 
 // ✅ Choose between DATABASE_URL and individual credentials
 const connectionConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
-      ssl: { require: true, rejectUnauthorized: false }, // Render requires SSL
+      ssl: useSsl ? { require: true, rejectUnauthorized: false } : false,
     }
   : {
       user: process.env.DB_USER,
@@ -15,7 +16,7 @@ const connectionConfig = process.env.DATABASE_URL
       database: process.env.DB_NAME,
       password: process.env.DB_PASSWORD,
       port: process.env.DB_PORT || 5432,
-      ssl: false, // local dev (no SSL)
+      ssl: useSsl ? { rejectUnauthorized: false } : false,
     };
 
 // ✅ Connection pool setup
