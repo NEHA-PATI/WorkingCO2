@@ -23,6 +23,27 @@
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
 }
 
+.blue-carbon-project-modal {
+  width: min(96vw, 1500px);
+  height: min(96vh, 1000px);
+  max-height: 96vh;
+}
+
+.blue-carbon-project-modal .map-container {
+  height: clamp(480px, 62vh, 760px);
+}
+
+@media (max-width: 700px) {
+  .blue-carbon-project-modal {
+    width: 98vw;
+    height: 96vh;
+  }
+
+  .blue-carbon-project-modal .map-container {
+    height: 52vh;
+  }
+}
+
 /* ── Header ── */
 .modal-header {
   background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
@@ -1036,4 +1057,195 @@
 
 .brand-wrapper img {
   height: 24px;
+}
+.map-region-selector{display:grid;gap:6px;margin:10px 0 12px}.map-region-selector select{width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#334155}.map-region-note{color:#9a3412;font-size:11px;line-height:1.4}
+
+/* Responsive modal layout refinement. */
+.modal-overlay {
+  padding: 20px;
+  background: rgba(15, 30, 45, .62);
+  overflow: hidden;
+}
+.modal-container.blue-carbon-project-modal {
+  width: min(88vw, 820px);
+  height: min(90vh, 760px);
+  max-height: 90vh;
+  border-radius: 18px;
+  overflow: hidden;
+}
+.blue-carbon-project-modal .modal-header {
+  position: relative;
+  z-index: 5;
+  min-height: 72px;
+  box-sizing: border-box;
+  padding: 13px 64px 13px 22px;
+  background: linear-gradient(135deg, #087b65, #10b981);
+}
+.blue-carbon-project-modal .header-left { gap: 10px; }
+.blue-carbon-project-modal .modal-title { font-size: 18px; }
+.blue-carbon-project-modal .modal-subtitle { font-size: 11px; }
+.blue-carbon-project-modal .close-btn {
+  position: absolute !important;
+  top: 50% !important;
+  right: 16px !important;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  transform: translateY(-50%) !important;
+  border-radius: 9px;
+  background: #0877c9;
+  color: #fff;
+  font-size: 0;
+  box-shadow: 0 5px 12px #064e3b33;
+}
+.blue-carbon-project-modal .close-btn:before {
+  content: "×";
+  font-size: 25px;
+  line-height: 1;
+}
+.blue-carbon-project-modal .close-btn:hover { background: #075985; }
+.blue-carbon-project-modal .modal-steps {
+  padding: 12px 22px 10px;
+  background: #f5fbfb;
+}
+.blue-carbon-project-modal .step-circle { width: 34px; height: 34px; font-size: 13px; }
+.blue-carbon-project-modal .step-line { top: 17px; }
+.blue-carbon-project-modal .step-label { margin-top: 4px; font-size: 10px; }
+.blue-carbon-project-modal .modal-body {
+  min-height: 0;
+  padding: 20px 24px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.blue-carbon-project-modal .step-content { gap: 14px; }
+.blue-carbon-project-modal .field-label { font-size: 12px; color: #3d536b; }
+.blue-carbon-project-modal .field-input,
+.blue-carbon-project-modal .map-region-selector select { min-height: 42px; padding: 10px 13px; font-size: 13px; }
+.blue-carbon-project-modal .map-container {
+  height: clamp(220px, 32vh, 320px);
+  border-radius: 12px;
+}
+.blue-carbon-project-modal .modal-footer {
+  position: relative;
+  z-index: 5;
+  min-height: 66px;
+  box-sizing: border-box;
+  padding: 11px 24px;
+  background: #fff;
+  box-shadow: 0 -6px 16px #173e5c0b;
+}
+.blue-carbon-project-modal .btn-back,
+.blue-carbon-project-modal .btn-next,
+.blue-carbon-project-modal .btn-submit {
+  min-width: 108px;
+  height: 40px;
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+.blue-carbon-project-modal .btn-back { border-color: #cbdbe7; background: #f4f8fb; color: #58728a; }
+.blue-carbon-project-modal .btn-next,
+.blue-carbon-project-modal .btn-submit { background: linear-gradient(135deg, #087bb6, #0a9b98); box-shadow: 0 6px 14px #087bb633; }
+.blue-carbon-project-modal .btn-next:hover,
+.blue-carbon-project-modal .btn-submit:hover { background: #075985; }
+@media (max-width: 700px) {
+  .modal-overlay { padding: 10px; }
+  .modal-container.blue-carbon-project-modal { width: 100%; height: 94vh; max-height: 94vh; border-radius: 14px; }
+  .blue-carbon-project-modal .modal-header { min-height: 64px; padding-left: 16px; }
+  .blue-carbon-project-modal .modal-title { font-size: 16px; }
+  .blue-carbon-project-modal .modal-body { padding: 16px; }
+  .blue-carbon-project-modal .modal-footer { padding: 10px 16px; }
+  .blue-carbon-project-modal .btn-back,
+  .blue-carbon-project-modal .btn-next,
+  .blue-carbon-project-modal .btn-submit { flex: 1; min-width: 0; }
+}
+@media (max-width: 420px) {
+  .blue-carbon-project-modal .modal-subtitle { max-width: 190px; line-height: 1.25; }
+  .blue-carbon-project-modal .close-btn { right: 10px !important; width: 32px; height: 32px; }
+  .blue-carbon-project-modal .modal-steps { padding-inline: 12px; }
+  .blue-carbon-project-modal .modal-body { padding: 14px 12px; }
+  .blue-carbon-project-modal .map-container { height: 220px; }
+}
+
+/* Blue Carbon palette for the project-registration modal. */
+.blue-carbon-project-modal .modal-header {
+  background: linear-gradient(135deg, #075985 0%, #087bb6 58%, #0a9b98 100%);
+}
+.blue-carbon-project-modal .step-circle.active,
+.blue-carbon-project-modal .step-circle.completed {
+  background: #087bb6;
+  box-shadow: 0 0 0 4px #087bb626;
+}
+.blue-carbon-project-modal .step-label.active-label { color: #087bb6; }
+.blue-carbon-project-modal .step-line.completed-line { background: #087bb6; }
+.blue-carbon-project-modal .field-input:focus,
+.blue-carbon-project-modal .map-region-selector select:focus {
+  border-color: #087bb6;
+  box-shadow: 0 0 0 3px #087bb61a;
+}
+.blue-carbon-project-modal .use-location-btn {
+  border-color: #087bb6;
+  background: #eef8ff;
+  color: #087bb6;
+}
+.blue-carbon-project-modal .use-location-btn:hover { background: #dceffd; }
+.blue-carbon-project-modal .btn-next,
+.blue-carbon-project-modal .btn-submit {
+  background: linear-gradient(135deg, #0877c9, #0a9b98);
+  box-shadow: 0 6px 14px #0877c933;
+}
+.blue-carbon-project-modal .btn-next:hover,
+.blue-carbon-project-modal .btn-submit:hover { background: #075985; }
+.blue-carbon-project-modal .btn-back { background: #f0f7fb; color: #4f718a; border-color: #c8dce9; }
+.blue-carbon-project-modal .modal-footer {
+  justify-content: space-between;
+  gap: 10px;
+}
+.blue-carbon-project-modal .modal-footer .btn-back,
+.blue-carbon-project-modal .modal-footer .btn-next,
+.blue-carbon-project-modal .modal-footer .btn-submit {
+  flex: 0 0 96px;
+  width: 96px;
+  min-width: 96px;
+  height: 38px;
+  min-height: 38px;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.blue-carbon-project-modal .use-location-btn {
+  min-height: 36px;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+@media (max-width: 700px) {
+  .blue-carbon-project-modal .modal-footer .btn-back,
+  .blue-carbon-project-modal .modal-footer .btn-next,
+  .blue-carbon-project-modal .modal-footer .btn-submit {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
+}
+
+/* Keep every modal close control anchored; it must never follow pointer movement. */
+.modal-container .close-btn,
+.blue-carbon-project-modal .close-btn {
+  position: absolute !important;
+  top: 18px !important;
+  right: 16px !important;
+  transform: none !important;
+  margin: 0 !important;
+  transition: background-color .2s ease, color .2s ease !important;
+  cursor: pointer;
+  will-change: auto;
+}
+@media (max-width: 420px) {
+  .modal-container .close-btn,
+  .blue-carbon-project-modal .close-btn {
+    top: 16px !important;
+    right: 10px !important;
+  }
 }

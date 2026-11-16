@@ -9,6 +9,9 @@ const API_CONFIG = {
     import.meta.env.VITE_ASSET_API ||
     `${ENV.ASSET_SERVICE_URL}/api/v1`,
 
+  BLUE_CARBON_API:
+    (import.meta.env.VITE_BLUE_CARBON_SERVICE_URL || "http://localhost:5000") + "/api/v1",
+
   // Auth Service (port 5002)
   AUTH_API: ENV.AUTH_SERVICE_URL,
 
@@ -103,7 +106,11 @@ const createApiClient = (baseURL, serviceName = "API") => {
       // Handle 500 Server Error
       if (error.response?.status === 500) {
         return Promise.reject(
-          new Error("Server error. Please try again later."),
+          new Error(
+            error.response?.data?.message ||
+              error.response?.data?.data?.error ||
+              "Server error. Please try again later.",
+          ),
         );
       }
 
@@ -133,6 +140,10 @@ const createApiClient = (baseURL, serviceName = "API") => {
 export const assetApiClient = createApiClient(
   API_CONFIG.ASSET_API,
   "Asset Service",
+);
+export const blueCarbonApiClient = createApiClient(
+  API_CONFIG.BLUE_CARBON_API,
+  "Blue Carbon Asset Service",
 );
 export const authApiClient = createApiClient(
   API_CONFIG.AUTH_API,

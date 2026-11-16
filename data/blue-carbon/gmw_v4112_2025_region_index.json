@@ -1,0 +1,106 @@
+{
+  "dataset": "Global Mangrove Watch",
+  "dataset_version": "v4.1.1",
+  "observation_year": 2025,
+  "source_crs": "EPSG:4326",
+  "country": "India",
+  "feature_count": 47695,
+  "named_regions_available": false,
+  "limitation": "Source attributes contain country only; named regional boundaries are not asserted or fabricated.",
+  "india_bounds": [
+    68.19725141471301,
+    6.811641067097817,
+    93.91915925626516,
+    23.970627863109673
+  ],
+  "regions": {
+    "Sundarbans": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Subernarekha Estuary": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Bhitarkanika": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Mahanadi Delta": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Chilika": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Coringa/Godavari": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Krishna Delta": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Pulicat": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Pichavaram/Kazhuveli": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Muthupet/Ramnad": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Rann of Kachchh": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Gulf of Khambhat": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Dumas-Ubharat": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Mumbra-Diva/Vikhroli": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Veldur/Kundalika": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Ratnagiri/Malwan": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Mandovi-Zuari": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Karwar": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Kundapura": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Mangalore": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Kannur": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    },
+    "Vembanad": {
+      "status": "unsupported",
+      "reason": "No authoritative region polygon supplied; country-level mangrove features cannot define this named region."
+    }
+  }
+}

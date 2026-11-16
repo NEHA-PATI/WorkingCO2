@@ -197,9 +197,7 @@ const PopupForms = ({
     const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
     const orgId =
       authUser?.org_id ||
-      authUser?.u_id ||
-      localStorage.getItem("orgId") ||
-      localStorage.getItem("userId");
+      localStorage.getItem("orgId");
 
     if (!orgId) {
       showToast("Organization ID not found. Please login again.", "error");
@@ -270,9 +268,14 @@ const PopupForms = ({
   const handleSolarSubmit = async (e) => {
     e.preventDefault();
 
-    // Get user ID from localStorage
-    const U_ID = localStorage.getItem("userId");
-    if (!U_ID) {
+    // Organization sessions store the identity in authUser rather than userId.
+    const authUserRaw = localStorage.getItem("authUser");
+    const authUser = authUserRaw ? JSON.parse(authUserRaw) : null;
+    const ORG_ID = authUser?.org_id;
+    const U_ID = ORG_ID
+      ? null
+      : authUser?.u_id || authUser?.id || localStorage.getItem("userId");
+    if (!U_ID && !ORG_ID) {
       showToast("User ID not found. Please log in first.", "error");
       return;
     }
@@ -280,6 +283,7 @@ const PopupForms = ({
     const payload = {
       SUID: crypto.randomUUID(),
       U_ID,
+      ORG_ID,
       Installed_Capacity: solarPanelData.Installed_Capacity,
       Installation_Date: solarPanelData.Installation_Date,
       Energy_Generation_Value: Number(solarPanelData.Energy_Generation_Value),
@@ -292,9 +296,18 @@ const PopupForms = ({
     console.log('Submitting Solar Panel Payload:', payload);
 
     // ✅ Quick client-side validation
-    const missingFields = Object.entries(payload).filter(([_, val]) =>
-      val === undefined || val === null || val === '' || (typeof val === 'string' && val.trim() === '')
-    );
+    const missingFields = Object.entries(payload).filter(([key, val]) => {
+      // Organization-owned solar panels use ORG_ID instead of U_ID.
+      if (key === 'U_ID' || key === 'ORG_ID') return false;
+      return (
+        val === undefined ||
+        val === null ||
+        val === '' ||
+        (typeof val === 'string' && val.trim() === '')
+      );
+    });
+
+    if (!U_ID && !ORG_ID) missingFields.unshift('U_ID or ORG_ID');
 
     if (missingFields.length > 0) {
       showToast(`Missing fields: ${missingFields.map(f => f[0]).join(', ')}`, 'error');
@@ -314,7 +327,11 @@ const PopupForms = ({
         showToast('Failed: ' + (result.message || 'Unknown error'), 'error');
       }
     } catch (err) {
-      showToast('Server error: ' + err.message, 'error');
+      showToast(
+        'Server error: ' +
+          (err?.response?.data?.message || err.message),
+        'error'
+      );
     }
   };
 

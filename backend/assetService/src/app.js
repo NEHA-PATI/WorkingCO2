@@ -5,6 +5,7 @@ const config = require("./config/env");
 const logger = require("./utils/logger");
 const assetRoutes = require("./routes/assetRoutes");
  const orgAssetRoutes = require("./routes/orgAssetRoutes");
+const blueCarbonRoutes = require("./routes/blueCarbonRoutes");
 
 
 
@@ -67,6 +68,15 @@ if (config.nodeEnv === "development") {
 //asset management route 
 app.use("/api/assets", assetRoutes);
 app.use("/api/org-assets", orgAssetRoutes);
+app.use("/api/v1/blue-carbon", blueCarbonRoutes);
+setInterval(() => require('./controllers/blueCarbonController').generateScheduledTasks().catch((error) => logger.error(`Blue Carbon scheduler: ${error.message}`)), 15 * 60 * 1000).unref();
+// Satellite refresh is deliberately disabled until backend credentials exist.
+// Once configured, this refreshes every active project on a conservative cadence;
+// the unique tile/date constraint prevents duplicate provider requests/storage.
+setInterval(() => {
+  const service = require('./services/sentinelMonitoringService');
+  if (service.credentialsPresent()) service.processAllProjects().catch((error) => logger.error(`Satellite refresh: ${error.message}`));
+}, Number(process.env.COPERNICUS_REFRESH_INTERVAL_MS || 6 * 60 * 60 * 1000)).unref();
 
 // Root
 app.get("/", (req, res) => {

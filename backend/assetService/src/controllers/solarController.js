@@ -16,6 +16,7 @@ class SolarController {
     try {
       const {
         U_ID,
+        ORG_ID,
         Installed_Capacity,
         Installation_Date,
         Energy_Generation_Value,
@@ -24,7 +25,7 @@ class SolarController {
       } = req.body;
 
       // Validate required fields
-      if (!U_ID || !Installed_Capacity || !Installation_Date) {
+      if ((!U_ID && !ORG_ID) || !Installed_Capacity || !Installation_Date) {
         return res.status(400).json({
           success: false,
           message: 'Missing required fields: U_ID, Installed_Capacity, Installation_Date',
@@ -36,9 +37,9 @@ class SolarController {
       const newSolar = await SolarModel.create(req.body);
 
       // Get total count for user
-      const solarCount = await SolarModel.getCountByUser(U_ID);
+      const solarCount = await SolarModel.getCountByOwner({ U_ID, ORG_ID });
 
-      logger.info(`Solar Panel created successfully for user ${U_ID}`, { suid: newSolar.suid });
+      logger.info(`Solar Panel created successfully for ${ORG_ID || U_ID}`, { suid: newSolar.suid });
 
       res.status(201).json({
         success: true,

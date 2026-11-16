@@ -1137,7 +1137,10 @@ const AssetManagement = () => {
           response = await assetAPI.deleteEV(asset.originalData.ev_id);
           break;
         case "Solar":
-          response = await assetAPI.deleteSolar(asset.originalData.solar_id);
+          response = await assetAPI.deleteSolar(
+            asset.originalData.suid,
+            asset.originalData.org_id || asset.originalData.u_id
+          );
           break;
         case "Trees":
           response = await assetAPI.deleteTree(asset.originalData.tree_id);

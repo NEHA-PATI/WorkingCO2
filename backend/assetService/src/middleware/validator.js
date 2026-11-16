@@ -91,8 +91,12 @@ const validateEVUpdate = [
  */
 const validateSolarCreate = [
   body('U_ID')
-    .notEmpty().withMessage('User ID is required')
+    .optional({ nullable: true })
     .isString().withMessage('User ID must be a string'),
+
+  body('ORG_ID')
+    .optional({ nullable: true })
+    .isString().withMessage('Organization ID must be a string'),
   
   body('Installed_Capacity')
     .notEmpty().withMessage('Installed capacity is required')

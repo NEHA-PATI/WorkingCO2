@@ -8,6 +8,7 @@ import { BsShieldCheck } from "react-icons/bs";
 import { FaBoxesStacked } from "react-icons/fa6";
 import { FaBuilding } from "react-icons/fa";
 import { FaChevronDown } from "react-icons/fa6";
+import { FaWater } from "react-icons/fa";
 
 import "@features/admin/styles/AdminNavbar.css";
 
@@ -31,6 +32,8 @@ const AdminNavbar = () => {
       return "case-study-management";
     if (path.includes("/admin/contest")) return "contest";
     if (path.includes("/admin/mrv-management")) return "mrv-management";
+    if (path.includes("/admin/blue-carbon/evidence")) return "blue-carbon-evidence";
+    if (path.includes("/admin/blue-carbon")) return "blue-carbon";
     if (path.includes("/admin/reports")) return "reports";
     return "overview"; // default
   };
@@ -150,6 +153,18 @@ const AdminNavbar = () => {
       label: "MRV Management",
       icon: <MdFactCheck className="icon mrv-icon" />,
       path: "/admin/mrv-management",
+    },
+    {
+      id: "blue-carbon",
+      label: "Blue Carbon dMRV",
+      icon: <FaWater className="icon mrv-icon" />,
+      path: "/admin/blue-carbon",
+    },
+    {
+      id: "blue-carbon-evidence",
+      label: "Blue Carbon Evidence",
+      icon: <FaWater className="icon mrv-icon" />,
+      path: "/admin/blue-carbon/evidence",
     },
     {
       id: "reports",

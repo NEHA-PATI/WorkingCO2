@@ -61,6 +61,10 @@ const ProtectedRoute = ({
         return "/org/dashboard";
       case "user":
         return "/user/dashboard";
+      case "field_user":
+      case "enumerator":
+      case "community_member":
+        return "/field/dashboard";
       default:
         return "/";
     }

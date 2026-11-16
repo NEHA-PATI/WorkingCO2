@@ -406,6 +406,7 @@ exports.login = async (req, res) => {
         {
           id: organization.org_id,
           u_id: organization.org_id,
+          org_id: organization.org_id,
           role: "organization",
           status: "active",
         },
@@ -421,6 +422,7 @@ exports.login = async (req, res) => {
           user: {
             id: organization.org_id,
             u_id: organization.org_id,
+            org_id: organization.org_id,
             email: organization.org_mail,
             role_name: "organization",
             verified: true,
@@ -494,7 +496,7 @@ exports.login = async (req, res) => {
       
       // ✅ Send failed login notification event
       try {
-        await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notifications/event`, {
+        await axios.post(`${NOTIFICATION_SERVICE_URL}/api/v1/notifications/event`, {
           event_type: 'user.login.failed',
           user: {
             id: user.id,
@@ -511,7 +513,7 @@ exports.login = async (req, res) => {
       // ✅ Send account locked notification if max attempts reached
       if (lockUntil) {
         try {
-          await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notifications/event`, {
+          await axios.post(`${NOTIFICATION_SERVICE_URL}/api/v1/notifications/event`, {
             event_type: 'user.account.locked',
             user: {
               id: user.id,
@@ -538,9 +540,15 @@ exports.login = async (req, res) => {
       [user.id]
     );
 
+    // Organization users must carry a real organizations.org_id, not their users.id.
+    const organizationContext = user.role_name === "organization"
+      ? await pool.query("SELECT org_id FROM organizations WHERE org_mail = $1 LIMIT 1", [normalizedEmail])
+      : { rows: [] };
+    const resolvedOrgId = user.org_id || user.organization_id || organizationContext.rows[0]?.org_id || null;
+
     // Generate JWT token
     const token = jwt.sign(
-      { id: user.id,u_id: user.u_id, role: user.role_name, status: user.status },
+      { id: user.id, u_id: user.u_id, org_id: resolvedOrgId, role: user.role_name, status: user.status },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );
@@ -553,7 +561,7 @@ exports.login = async (req, res) => {
 
     // ✅ Send successful login notification event
     try {
-    await axios.post(`${NOTIFICATION_SERVICE_URL}/api/notifications/event`, {
+    await axios.post(`${NOTIFICATION_SERVICE_URL}/api/v1/notifications/event`, {
   event_type: 'user.login',
   user: {
     id: user.id,
@@ -572,6 +580,7 @@ exports.login = async (req, res) => {
     const safeUser = {
       id: user.id,
       u_id: user.u_id,
+      org_id: resolvedOrgId,
       username: user.username,
       email: user.email,
       role_name: user.role_name,

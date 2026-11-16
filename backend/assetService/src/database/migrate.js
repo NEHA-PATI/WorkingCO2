@@ -30,15 +30,20 @@ async function runMigration() {
       throw new Error(`Schema file not found at: ${schemaPath}`);
     }
     
-    const schema = fs.readFileSync(schemaPath, 'utf8');
-    
-    logger.info('Schema file loaded, size:', schema.length, 'bytes');
+    const migrationDir = path.join(__dirname, 'migrations');
+    const migrationFiles = fs.existsSync(migrationDir)
+      ? fs.readdirSync(migrationDir).filter((file) => file.endsWith('.sql')).sort()
+      : [];
 
     // Execute schema
     logger.info('Running database migrations...');
     
     try {
-      await pool.query(schema);
+      await pool.query(fs.readFileSync(schemaPath, 'utf8'));
+      for (const file of migrationFiles) {
+        logger.info(`Applying migration ${file}`);
+        await pool.query(fs.readFileSync(path.join(migrationDir, file), 'utf8'));
+      }
       logger.info('✅ Database migration completed successfully!');
     } catch (queryError) {
       logger.error('SQL Execution Error:', queryError.message);

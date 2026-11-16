@@ -266,11 +266,27 @@ export const assetAPI = {
     }
   },
 
+  // Create Solar Panel
+  createSolar: async (data) => {
+    try {
+      const response = await apiClient.post(`${API_BASE_URL}/solarpanel`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating Solar Panel:", error);
+      throw error;
+    }
+  },
+
   // Delete Solar Panel
-  deleteSolar: async (solarId) => {
+  deleteSolar: async (solarId, ownerId) => {
     try {
       const response = await apiClient.delete(
-        `${API_BASE_URL}/solarpanel/${solarId}`
+        `${API_BASE_URL}/solarpanel/${solarId}`,
+        {
+          data: ownerId?.startsWith?.("ORG")
+            ? { ORG_ID: ownerId }
+            : { U_ID: ownerId },
+        }
       );
       return response.data;
     } catch (error) {

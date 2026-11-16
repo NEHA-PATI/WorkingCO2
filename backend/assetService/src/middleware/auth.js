@@ -10,7 +10,13 @@ const logger = winston.createLogger({
  * Validate User ID middleware
  */
 const validateUserId = (req, res, next) => {
-  const userId = req.params.userId || req.body.U_ID || req.body.u_id || req.body.UID;
+  const userId =
+    req.params.userId ||
+    req.body.U_ID ||
+    req.body.u_id ||
+    req.body.UID ||
+    req.body.ORG_ID ||
+    req.body.org_id;
   
   if (!userId) {
     return res.status(400).json({
@@ -69,7 +75,13 @@ const logUserAction = (actionType) => {
       
       // Only try to access req.body if it exists and is not a multipart request
       if (req.body && typeof req.body === 'object' && !req.headers['content-type']?.includes('multipart/form-data')) {
-        userId = req.body.U_ID || req.body.u_id || req.body.UID || userId;
+        userId =
+          req.body.U_ID ||
+          req.body.u_id ||
+          req.body.UID ||
+          req.body.ORG_ID ||
+          req.body.org_id ||
+          userId;
       }
       
       const ip = req.ip || req.connection.remoteAddress;

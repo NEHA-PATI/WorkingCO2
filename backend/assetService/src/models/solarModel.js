@@ -8,6 +8,7 @@ class SolarModel {
   static async create(solarData) {
     const {
       U_ID,
+      ORG_ID,
       Installed_Capacity,
       Installation_Date,
       Energy_Generation_Value,
@@ -19,15 +20,16 @@ class SolarModel {
 
     const queryText = `
       INSERT INTO solar_panels (
-        s_uid, u_id, installed_capacity, installation_date,
+        s_uid, u_id, org_id, installed_capacity, installation_date,
         energy_generation_value, grid_emission_factor, inverter_type, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
 
     const values = [
       S_UID,
-      U_ID,
+      U_ID || null,
+      ORG_ID || null,
       Installed_Capacity,
       Installation_Date,
       Energy_Generation_Value,
@@ -46,11 +48,19 @@ class SolarModel {
   static async getByUserId(userId) {
     const queryText = `
       SELECT * FROM solar_panels 
-      WHERE u_id = $1 
+      WHERE u_id = $1 OR org_id = $1
       ORDER BY created_at DESC
     `;
     const result = await query(queryText, [userId]);
     return result.rows;
+  }
+
+  static async getCountByOwner({ U_ID, ORG_ID }) {
+    const result = await query(
+      `SELECT COUNT(*)::int AS count FROM solar_panels WHERE u_id = $1 OR org_id = $2`,
+      [U_ID || null, ORG_ID || null]
+    );
+    return result.rows[0].count;
   }
 
   /**

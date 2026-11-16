@@ -16,6 +16,8 @@ const TOP_SPECIES_OPTIONS = [
   "Mixed",
   "Other",
 ];
+const ARCGIS_MANGROVE_LAYER = "https://livingatlas.esri.in/server1/rest/services/ForestSurvey/Map/FeatureServer/0";
+const GMW_INDIA_DISPLAY = "/blue-carbon/gmw_v4112_2025_india_mangrove_extent_display.geojson";
 
 function toRadians(deg) {
   return (deg * Math.PI) / 180;
@@ -23,27 +25,26 @@ function toRadians(deg) {
 
 function calculatePolygonAreaSqm(points) {
   if (!Array.isArray(points) || points.length < 3) return 0;
-  const avgLatRad = toRadians(
-    points.reduce((sum, point) => sum + point.lat, 0) / points.length
-  );
-  const projected = points.map((point) => ({
-    x: EARTH_RADIUS_M * toRadians(point.lng) * Math.cos(avgLatRad),
-    y: EARTH_RADIUS_M * toRadians(point.lat),
-  }));
-
-  let area = 0;
-  for (let i = 0; i < projected.length; i += 1) {
-    const current = projected[i];
-    const next = projected[(i + 1) % projected.length];
-    area += current.x * next.y - next.x * current.y;
+  const closed = [...points, points[0]];
+  let spherical = 0;
+  for (let i = 0; i < closed.length - 1; i += 1) {
+    const a = toRadians(closed[i].lng), b = toRadians(closed[i + 1].lng);
+    spherical += (b - a) * (Math.sin(toRadians(closed[i].lat)) + Math.sin(toRadians(closed[i + 1].lat)));
   }
-  return Math.abs(area) / 2;
+  return Math.abs(spherical) * EARTH_RADIUS_M * EARTH_RADIUS_M / 2;
 }
 
 function convertArea(sqm, unit) {
   if (unit === "ha") return sqm / 10000;
   if (unit === "acres") return sqm / 4046.8564224;
   return sqm;
+}
+
+export function pointsToPolygonGeoJSON(points) {
+  if (!Array.isArray(points) || points.length < 3) return null;
+  const coordinates = points.map((point) => [Number(point.lng), Number(point.lat)]);
+  coordinates.push(coordinates[0]);
+  return { type: "Polygon", coordinates: [coordinates] };
 }
 
 function formatAreaForUnit(value, unit) {
@@ -78,13 +79,16 @@ function StepIndicator({ currentStep }) {
   );
 }
 
-function MapComponent({ points, onPointAdd, onPointRemove, onPointUpdate }) {
+function MapComponent({ points, onPointAdd, onPointRemove, onPointUpdate, arcgisStyle = false }) {
   const mapRef = useRef(null);
   const leafletMap = useRef(null);
   const markersRef = useRef([]);
   const polygonRef = useRef(null);
   const gridLayerRef = useRef(null);
+  const indiaDistrictMangroveLayerRef = useRef(null);
   const [locating, setLocating] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState("");
+  const [districts, setDistricts] = useState([]);
 
   useEffect(() => {
     if (!window.L || leafletMap.current) return;
@@ -94,14 +98,47 @@ function MapComponent({ points, onPointAdd, onPointRemove, onPointUpdate }) {
       center: [20.5937, 78.9629],
       zoom: 10,
     });
+    map.createPane("mangroveReference");
+    map.getPane("mangroveReference").style.zIndex = 360;
+
+    fetch(`${ARCGIS_MANGROVE_LAYER}/query?where=${encodeURIComponent("totmancover2023 > 0")}&outFields=districtname,totmancover2023&returnGeometry=false&returnDistinctValues=true&orderByFields=districtname&f=json`)
+      .then((response) => response.json())
+      .then((json) => setDistricts([...new Set((json.features || []).map((feature) => feature.attributes?.districtname).filter(Boolean))].sort((a, b) => a.localeCompare(b))))
+      .catch(() => setDistricts([]));
+
+    const mangroveLoadTimer = window.setTimeout(() => {
+      fetch(GMW_INDIA_DISPLAY)
+        .then((response) => { if (!response.ok) throw new Error("GMW layer unavailable"); return response.json(); })
+        .then((geojson) => {
+          if (!leafletMap.current) return;
+          indiaDistrictMangroveLayerRef.current = L.geoJSON(geojson, {
+            interactive: false,
+            pane: "mangroveReference",
+            style: { color: "#022c22", weight: 1.1, fillColor: "#064e3b", fillOpacity: 0.86 },
+          }).addTo(leafletMap.current);
+          indiaDistrictMangroveLayerRef.current.bringToFront();
+          const mangroveBounds = indiaDistrictMangroveLayerRef.current.getBounds();
+          if (mangroveBounds.isValid() && points.length === 0) {
+            leafletMap.current.fitBounds(mangroveBounds, { padding: [24, 24], maxZoom: 7 });
+          }
+        })
+        .catch(() => {});
+    }, 900);
 
    L.tileLayer(
-  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  arcgisStyle
+    ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+    : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
   {
     attribution: "Tiles © Esri"
   }
   
 ).addTo(map);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
+      attribution: "Labels © Esri",
+      pane: "overlayPane",
+      opacity: 0.95,
+    }).addTo(map);
 map.attributionControl.setPrefix(false);
 map.attributionControl.setPosition("bottomleft");
 const brandControl = L.control({ position: "bottomright" });
@@ -127,10 +164,12 @@ brandControl.addTo(map);
     leafletMap.current = map;
 
     return () => {
+      window.clearTimeout(mangroveLoadTimer);
       map.remove();
+      indiaDistrictMangroveLayerRef.current = null;
       leafletMap.current = null;
     };
-  }, []);
+  }, [arcgisStyle]);
 
   useEffect(() => {
     const L = window.L;
@@ -252,6 +291,28 @@ brandControl.addTo(map);
         </button>
       </div>
 
+      <div className="map-region-selector">
+        <label className="field-label" htmlFor="india-mangrove-region">ArcGIS mangrove district</label>
+        <select id="india-mangrove-region" value={selectedRegion} onChange={(event) => {
+          const district = event.target.value;
+          setSelectedRegion(district);
+          if (!district || !leafletMap.current) return;
+          const where = encodeURIComponent(`districtname='${district.replace(/'/g, "''")}'`);
+          fetch(`${ARCGIS_MANGROVE_LAYER}/query?where=${where}&returnExtentOnly=true&outSR=4326&f=json`)
+            .then((response) => response.json())
+            .then((json) => {
+              const extent = json.extent;
+              if (extent) leafletMap.current.fitBounds([[extent.ymin, extent.xmin], [extent.ymax, extent.xmax]], { padding: [30, 30] });
+            }).catch(() => {});
+          // The district reference is an ImageOverlay, not a FeatureGroup.
+          // Selection styling is supplied by the ArcGIS export request above.
+        }}>
+          <option value="">Select a mangrove district to zoom</option>
+          {districts.map((district) => <option key={district} value={district}>{district}</option>)}
+        </select>
+        {selectedRegion && <small className="map-region-note">Showing the ArcGIS district extent for {selectedRegion}. Draw your project boundary on the map.</small>}
+      </div>
+
       <div className="map-container" ref={mapRef} />
       <p className="map-hint">Click to add points and drag markers to adjust location</p>
 
@@ -284,6 +345,7 @@ function Step1({
   onPointAdd,
   onPointRemove,
   onPointUpdate,
+  arcgisStyle,
 }) {
   const isOtherSpecies = step2.speciesName === "Other";
 
@@ -308,6 +370,7 @@ function Step1({
         onPointAdd={onPointAdd}
         onPointRemove={onPointRemove}
         onPointUpdate={onPointUpdate}
+        arcgisStyle={arcgisStyle}
       />
 
       <div className="field-group">
@@ -472,7 +535,7 @@ function Step3({ step1, step2, points }) {
   );
 }
 
-export default function AddPlantationModal({ onClose, onSubmit }) {
+export default function AddPlantationModal({ onClose, onSubmit, variant = "plantation" }) {
   const [step, setStep] = useState(1);
   const [points, setPoints] = useState([]);
   const [stepError, setStepError] = useState("");
@@ -557,6 +620,8 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
         speciesName: getSpeciesDisplayValue(step2),
       },
       points,
+      boundary_geojson: pointsToPolygonGeoJSON(points),
+      boundary_source: "custom_user_drawn",
     };
     let shouldClose = true;
     if (typeof onSubmit === "function") {
@@ -568,15 +633,15 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-container">
+      <div className={`modal-container ${variant === "blueCarbon" ? "blue-carbon-project-modal" : ""}`}>
         <div className="modal-header">
           <div className="header-left">
             <div className="header-icon">
               <GiTreeBranch color="#ffffff" size={22} />
             </div>
             <div className="header-text">
-              <h1 className="modal-title">Add Plantation Details</h1>
-              <p className="modal-subtitle">Step {step} of 2</p>
+              <h1 className="modal-title">{variant === "blueCarbon" ? "Register Blue Carbon Project" : "Add Plantation Details"}</h1>
+              <p className="modal-subtitle">{variant === "blueCarbon" ? "Project details, map boundary and review" : `Step ${step} of 2`}</p>
             </div>
           </div>
           <button className="close-btn" onClick={onClose}>X</button>
@@ -597,6 +662,7 @@ export default function AddPlantationModal({ onClose, onSubmit }) {
               onPointAdd={handlePointAdd}
               onPointRemove={handlePointRemove}
               onPointUpdate={handlePointUpdate}
+              arcgisStyle={variant === "blueCarbon"}
             />
           )}
           {step === 2 && <Step3 step1={step1} step2={step2} points={points} />}
