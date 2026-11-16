@@ -6,7 +6,7 @@ import { MdSolarPower, MdElectricCar } from "react-icons/md";
 import { GiWindmill, GiWaterMill, GiPowder } from "react-icons/gi";
 import { FaFire, FaPagelines } from "react-icons/fa";
 
-import axios from "axios";
+import { assetApiClient } from "@shared/utils/apiClient";
 import { useNavigate } from "react-router-dom";
 import { ENV } from "@config/env";
 
@@ -36,7 +36,7 @@ const AddAsset = () => {
     }
 
     try {
-      const res = await axios.post(`${ENV.ASSET_SERVICE_URL}/api/v1/evmasterdata`, formData);
+      const res = await assetApiClient.post("/evmasterdata", formData);
       setEvCount(res.data.evCount);
       setActiveEVPopup(false);
     } catch (error) {

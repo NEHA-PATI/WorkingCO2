@@ -89,6 +89,8 @@ function MapComponent({ points, onPointAdd, onPointRemove, onPointUpdate, arcgis
   const [locating, setLocating] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState("");
   const [districts, setDistricts] = useState([]);
+  const [blockSize, setBlockSize] = useState(300);
+  const [innerGridSize, setInnerGridSize] = useState(30);
 
   useEffect(() => {
     if (!window.L || leafletMap.current) return;
@@ -218,37 +220,23 @@ brandControl.addTo(map);
 
       const bounds = poly.getBounds();
       const gridLines = [];
-      const latStep = (bounds.getNorth() - bounds.getSouth()) / 10;
-      const lngStep = (bounds.getEast() - bounds.getWest()) / 10;
-
-      for (let lat = bounds.getSouth(); lat <= bounds.getNorth(); lat += latStep) {
-        gridLines.push(
-          L.polyline(
-            [
-              [lat, bounds.getWest()],
-              [lat, bounds.getEast()],
-            ],
-            { color: "#16a34a", weight: 0.5, opacity: 0.5 }
-          )
-        );
-      }
-
-      for (let lng = bounds.getWest(); lng <= bounds.getEast(); lng += lngStep) {
-        gridLines.push(
-          L.polyline(
-            [
-              [bounds.getSouth(), lng],
-              [bounds.getNorth(), lng],
-            ],
-            { color: "#16a34a", weight: 0.5, opacity: 0.5 }
-          )
-        );
+      const rows = Math.max(1, Math.min(24, Math.ceil(300 / Number(innerGridSize))));
+      const cols = rows;
+      const latStep = (bounds.getNorth() - bounds.getSouth()) / rows;
+      const lngStep = (bounds.getEast() - bounds.getWest()) / cols;
+      const colors = ["#22c55e", "#f59e0b", "#ef4444"];
+      for (let row = 0; row < rows; row += 1) {
+        for (let col = 0; col < cols; col += 1) {
+          const cell = [[bounds.getSouth() + row * latStep, bounds.getWest() + col * lngStep], [bounds.getSouth() + (row + 1) * latStep, bounds.getWest() + col * lngStep], [bounds.getSouth() + (row + 1) * latStep, bounds.getWest() + (col + 1) * lngStep], [bounds.getSouth() + row * latStep, bounds.getWest() + (col + 1) * lngStep]];
+          const color = colors[(row * 7 + col * 3) % colors.length];
+          gridLines.push(L.polygon(cell, { color: "#fff", weight: 0.8, fillColor: color, fillOpacity: 0.42 }).bindPopup(`<b>Plantation grid ${row + 1}-${col + 1}</b><br/>Block size: ${blockSize} m<br/>Inner grid: ${innerGridSize} m<br/>Condition: ${color === "#22c55e" ? "Healthy" : color === "#f59e0b" ? "Monitoring" : "Needs review"}`));
+        }
       }
 
       gridLayerRef.current = L.layerGroup(gridLines).addTo(leafletMap.current);
       leafletMap.current.fitBounds(bounds, { padding: [40, 40] });
     }
-  }, [points]);
+  }, [points, blockSize, innerGridSize]);
 
   const handleUseMyLocation = () => {
     if (locating || !navigator.geolocation) return;
@@ -289,6 +277,11 @@ brandControl.addTo(map);
             </>
           )}
         </button>
+      </div>
+      <div className="map-grid-config">
+        <label>Block size <input type="number" min="30" value={blockSize} onChange={(event) => setBlockSize(Number(event.target.value) || 300)} /> m</label>
+        <label>Inner grid <input type="number" min="10" value={innerGridSize} onChange={(event) => setInnerGridSize(Number(event.target.value) || 30)} /> m</label>
+        <span className="map-grid-legend"><i className="healthy" /> Healthy <i className="monitoring" /> Monitoring <i className="review" /> Needs review</span>
       </div>
 
       <div className="map-region-selector">

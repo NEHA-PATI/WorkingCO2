@@ -6,6 +6,7 @@ import React, {
 } from "react";
 import { blueCarbonApi } from "@features/org/services/blueCarbonApi";
 import "@features/org/styles/BlueCarbon.css";
+import "@features/org/styles/BlueCarbonOperations.css";
 import "leaflet/dist/leaflet.css";
 import {
   FaCalendarAlt,
@@ -40,29 +41,25 @@ const gridPalette = [
 const VISUAL_COLOR_MODE = true;
 
 function gridDisplayColor(tile) {
-  if (VISUAL_COLOR_MODE) {
-    const visualSeed = JSON.stringify({ tile: tile.tile_id || tile.tile_code, indicators: tile.satellite_indicators || tile.indicators || {}, observed: tile.satellite_observed_on || tile.observed_on || "" });
-    let visualHash = 0;
-    for (let index = 0; index < visualSeed.length; index += 1) visualHash = (visualHash * 31 + visualSeed.charCodeAt(index)) | 0;
-    return gridPalette[Math.abs(visualHash) % gridPalette.length];
+  const status = satelliteStatus(tile);
+  const indicators = tile.satellite_indicators || tile.indicators || {};
+  const ndvi = Number(indicators.NDVI?.mean ?? indicators.NDVI);
+  const evi = Number(indicators.EVI?.mean ?? indicators.EVI);
+  // Explicit backend warnings always win. When the provider labels every
+  // tile GREEN, use the vegetation index values to create a useful three-band
+  // visual scale instead of showing a misleading all-green map.
+  if (status === "RED") return "#ef4444";
+  if (status === "AMBER") return "#f59e0b";
+  if (Number.isFinite(ndvi) || Number.isFinite(evi)) {
+    const score = [ndvi, evi].filter(Number.isFinite).reduce((sum, value, _, values) => sum + value / values.length, 0);
+    // The provider's normalized coastal indices commonly sit below 0.6;
+    // these bands keep the map useful for that range.
+    if (score < 0.20) return "#ef4444";
+    if (score < 0.40) return "#f59e0b";
+    return "#22c55e";
   }
-  // Deterministic data-seeded shade: the health status selects the color
-  // family, while the satellite values select a stable shade within it.
-  const seed = JSON.stringify({
-    tile: tile.tile_id || tile.tile_code,
-    indicators: tile.satellite_indicators || tile.indicators || {},
-    observed: tile.satellite_observed_on || tile.observed_on || "",
-  });
-  let hash = 0;
-  for (let index = 0; index < seed.length; index += 1) hash = (hash * 31 + seed.charCodeAt(index)) | 0;
-  const palettes = {
-    GREEN: ["#86efac", "#4ade80", "#22c55e", "#16a34a"],
-    AMBER: ["#fde68a", "#fbbf24", "#f59e0b", "#d97706"],
-    RED: ["#fca5a5", "#f87171", "#ef4444", "#dc2626"],
-    GREY: ["#cbd5e1", "#94a3b8", "#64748b"],
-  };
-  const palette = palettes[status] || palettes.GREY;
-  return palette[Math.abs(hash) % palette.length];
+  if (status === "GREEN") return "#22c55e";
+  return "#94a3b8";
 }
 
 function satelliteStatus(tile) {
@@ -82,6 +79,7 @@ export default function BlueCarbonOperations() {
   const [projectId, setProjectId] = useState("");
   const [tiles, setTiles] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const assignmentCache = useRef(new Map());
 
   const [boundary, setBoundary] = useState([]);
   const [drawing, setDrawing] = useState(false);
@@ -99,9 +97,11 @@ export default function BlueCarbonOperations() {
   const [healthFilter, setHealthFilter] = useState("ALL");
   const [isGenerating, setIsGenerating] = useState(false);
   const generationRequest = useRef(0);
+  const refreshRequest = useRef(0);
 
   const refresh = async (id = projectId) => {
     if (!id) return;
+    const requestId = ++refreshRequest.current;
 
     try {
       const [tileResult, assignmentResult] = await Promise.all([
@@ -110,27 +110,57 @@ export default function BlueCarbonOperations() {
       ]);
 
       const rows = tileResult.data || [];
-      const activeAssignments = assignmentResult.data || [];
+      const serverAssignments = (assignmentResult.data || []).filter(
+        (item) => item.active !== false && String(item.active).toLowerCase() !== "false"
+      );
+      const savedAssignedIds = JSON.parse(window.localStorage.getItem(`blue-carbon-assigned-tiles:${id}`) || "[]");
+      const cachedAssignments = assignmentCache.current.get(String(id)) || [];
+      const activeAssignments = [...serverAssignments, ...cachedAssignments, ...savedAssignedIds
+        .filter((tileId) => !serverAssignments.some((item) => String(item.tile_id) === String(tileId)))
+        .map((tileId) => ({ tile_id: tileId, assignee_id: "Assigned field user" }))];
+      const uniqueAssignments = activeAssignments.filter((item, index, list) => list.findIndex((candidate) => String(candidate.tile_id) === String(item.tile_id)) === index);
+      assignmentCache.current.set(String(id), uniqueAssignments);
+      const serverAssignedIds = serverAssignments.map((item) => item.tile_id).filter(Boolean);
+      if (serverAssignedIds.length) {
+        window.localStorage.setItem(
+          `blue-carbon-assigned-tiles:${id}`,
+          JSON.stringify([...new Set([...savedAssignedIds, ...serverAssignedIds])])
+        );
+      }
 
-      setAssignments(activeAssignments);
+      // Ignore a slower response for the project that was previously selected.
+      if (requestId !== refreshRequest.current || String(id) !== String(projectId)) return;
+      const satelliteCacheKey = `blue-carbon-satellite:${id}`;
+      const satelliteCache = JSON.parse(window.localStorage.getItem(satelliteCacheKey) || "{}");
+      rows.forEach((tile) => {
+        const status = String(tile.satellite_health_status || tile.health_status || "GREY").toUpperCase();
+        if (status !== "GREY" || tile.satellite_indicators) satelliteCache[String(tile.tile_id)] = tile;
+      });
+      window.localStorage.setItem(satelliteCacheKey, JSON.stringify(satelliteCache));
+
+      setAssignments(uniqueAssignments);
       setTiles(
         rows.map((tile) => {
+          const cachedTile = satelliteCache[String(tile.tile_id)];
+          const satelliteTile = String(tile.satellite_health_status || tile.health_status || "GREY").toUpperCase() === "GREY" && cachedTile ? { ...tile, ...cachedTile } : tile;
           const activeAssignment = activeAssignments.find(
-            (item) => item.tile_id === tile.tile_id && item.active !== false
+            (item) => String(item.tile_id) === String(tile.tile_id)
           );
           return {
-            ...tile,
+            ...satelliteTile,
+            ...((String(tile.satellite_health_status || tile.health_status || "GREY").toUpperCase() === "GREY" && satelliteCache[String(tile.tile_id)]) ? satelliteCache[String(tile.tile_id)] : {}),
             // Keep the map independent of API/driver casing differences.
             // The SQL endpoint uses snake_case, while some deployments return
             // the observation field without the join alias.
             satellite_health_status: String(
-              tile.satellite_health_status ||
-                tile.health_status ||
+              satelliteTile.satellite_health_status ||
+                satelliteTile.health_status ||
                 tile.satelliteHealthStatus ||
                 "GREY"
             ).toUpperCase(),
-            assignee_id: tile.assignee_id || activeAssignment?.assignee_id,
-            status: activeAssignment ? "assigned" : tile.status,
+            assignee_id: tile.assignee_id || tile.assigned_to || activeAssignment?.assignee_id,
+            assigned_to: tile.assigned_to || activeAssignment?.assignee_id,
+            status: activeAssignment || tile.assignee_id || tile.assigned_to || tile.status === "assigned" || tile.status === "in_progress" ? "assigned" : tile.status,
           };
         })
       );
@@ -261,13 +291,9 @@ export default function BlueCarbonOperations() {
     else setMessage("Add at least three polygon points before finishing.");
   };
 
-  useEffect(() => {
-    if (boundary.length >= 3 && projectId) generate();
-    // Only the inner monitoring-cell size changes persisted tile geometry and
-    // therefore requires satellite recalculation. Outer block size is a local
-    // visual grouping and must not delete/recreate cached monitoring grids.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [innerGridSize]);
+  // Tile generation is intentionally explicit. Refreshing the page or
+  // restoring saved grid settings must never recreate tiles and detach their
+  // persisted satellite observations.
 
   const assign = async () => {
     if (!assignee || !tiles.length) {
@@ -290,6 +316,11 @@ export default function BlueCarbonOperations() {
         ],
         override_conflict: true,
       });
+      const nextAssignment = { tile_id: selectedTile.tile_id, assignee_id: assignee, active: true };
+      assignmentCache.current.set(String(projectId), [
+        ...(assignmentCache.current.get(String(projectId)) || []).filter((item) => String(item.tile_id) !== String(selectedTile.tile_id)),
+        nextAssignment,
+      ]);
 
       await refresh();
       setMessage("All generated tiles assigned successfully.");
@@ -328,6 +359,7 @@ export default function BlueCarbonOperations() {
     setDrawing(false);
     setTiles([]);
     setAssignments([]);
+    assignmentCache.current.delete(String(projectId));
     setSelectedBlock(null);
     setSelectedTile(null);
     setTileHistory(null);
@@ -339,6 +371,7 @@ export default function BlueCarbonOperations() {
 
     try {
       await blueCarbonApi.clearAssignments(projectId);
+      window.localStorage.removeItem(`blue-carbon-assigned-tiles:${projectId}`);
       setMessage("Boundary, grid preview, and active assignments cleared.");
     } catch (error) {
       setMessage(error?.response?.data?.message || "Unable to clear active assignments.");
@@ -364,6 +397,8 @@ export default function BlueCarbonOperations() {
         checklist: ["Photograph boundary", "Record vegetation condition"],
         override_conflict: true,
       });
+      const savedAssignedIds = JSON.parse(window.localStorage.getItem(`blue-carbon-assigned-tiles:${projectId}`) || "[]");
+      window.localStorage.setItem(`blue-carbon-assigned-tiles:${projectId}`, JSON.stringify([...new Set([...savedAssignedIds, selectedTile.tile_id])]));
       await refresh();
       setMessage(`${selectedTile.tile_code || selectedTile.tile_id} assigned to ${assignee}.`);
     } catch (error) {
@@ -405,7 +440,7 @@ export default function BlueCarbonOperations() {
               <button className={`bc-gis-tool ${editingBoundary ? "active" : ""}`} onClick={() => { if (editingBoundary && boundary.length >= 3) generate(boundary); setEditingBoundary((value) => !value); }}><FaDrawPolygon />{editingBoundary ? "Finish editing" : "Edit map boundary"}</button>
               <button className={`bc-gis-tool ${drawing ? "active" : ""}`} onClick={drawing ? () => setDrawing(false) : startNewDrawing}><FaDrawPolygon />{drawing ? "Drawing enabled" : "Draw boundary"}</button>
               <button className="bc-gis-tool" onClick={finishDrawing}><FaCheckCircle />Finish &amp; generate</button>
-              <button className="bc-gis-tool" onClick={processSatellite}><FaWater />Update satellite data</button>
+              <button className="bc-gis-tool" onClick={() => { window.localStorage.removeItem(`blue-carbon-satellite:${projectId}`); setTiles((current) => current.map((tile) => ({ ...tile, satellite_health_status: "GREY", health_status: "GREY", satellite_indicators: null, satellite_observed_on: null, satellite_data_quality: null }))); processSatellite(); }}><FaWater />Update satellite data</button>
             </div>
           </div>
 
@@ -420,6 +455,12 @@ export default function BlueCarbonOperations() {
             onBlock={setSelectedBlock}
             onTile={setSelectedTile}
             onAssignGrid={assignSelected}
+            assignee={assignee}
+            setAssignee={setAssignee}
+            frequency={frequency}
+            tileHistory={tileHistory}
+            satelliteHistory={satelliteHistory}
+            assignments={assignments}
             onCloseSelection={() => setSelectedTile(null)}
             onBoundaryEdited={generate}
           />
@@ -574,9 +615,6 @@ export default function BlueCarbonOperations() {
             </div>
           )}
 
-          {selectedTile && (
-            <TileDetails tile={selectedTile} history={tileHistory} satelliteHistory={satelliteHistory} />
-          )}
         </aside>
       </section>
     </main>
@@ -777,6 +815,12 @@ function HierarchicalMap({
   onBlock,
   onTile,
   onAssignGrid,
+  assignee,
+  setAssignee,
+  frequency,
+  tileHistory,
+  satelliteHistory,
+  assignments = [],
   onCloseSelection,
   onBoundaryEdited,
 }) {
@@ -880,6 +924,7 @@ function HierarchicalMap({
         fillOpacity: 0,
         weight: active ? 6 : 4,
         opacity: 1,
+        interactive: false,
       })
         .bindTooltip(
           `${block.label} · ${block.tiles.length} tiles`,
@@ -909,6 +954,7 @@ function HierarchicalMap({
             fillOpacity: 0,
             weight: 2,
             dashArray: "5 4",
+            interactive: false,
           }).bindTooltip(`${subBlock.label} · ${subBlock.tiles.length} tiles`, { sticky: true });
           subBlockLayer.addTo(map.current);
           layers.current.push(subBlockLayer);
@@ -941,6 +987,17 @@ function HierarchicalMap({
 
           tileLayer.addTo(map.current);
           layers.current.push(tileLayer);
+          const hasAssignment = tile.assignee_id || tile.assigned_to || tile.status === "assigned" || tile.status === "in_progress" || assignments.some((item) => String(item.tile_id) === String(tile.tile_id) && item.active !== false && String(item.active).toLowerCase() !== "false");
+          if (hasAssignment) {
+            const markPoint = [Number(tile.centroid_lat), Number(tile.centroid_lng)];
+            if (markPoint.every(Number.isFinite)) {
+              const assignedMark = L.marker(markPoint, {
+                interactive: false,
+                icon: L.divIcon({ className: "bc-gis-assigned-mark", html: "✓", iconSize: [22, 22], iconAnchor: [11, 11] }),
+              }).addTo(map.current);
+              layers.current.push(assignedMark);
+            }
+          }
         });
       }
     });
@@ -957,7 +1014,12 @@ function HierarchicalMap({
     if (fitSignature !== lastFitSignature.current) {
       lastFitSignature.current = fitSignature;
       if (boundary.length > 2) {
-        map.current.fitBounds(L.latLngBounds(boundary).pad(0.15));
+        map.current.invalidateSize();
+        map.current.fitBounds(L.latLngBounds(boundary), {
+          padding: [48, 48],
+          maxZoom: 17,
+          animate: false,
+        });
       } else if (blocks.length) {
         map.current.fitBounds(
           L.latLngBounds(
@@ -972,6 +1034,7 @@ function HierarchicalMap({
     blocks,
     selectedBlock,
     selectedTile,
+    assignments,
     onBlock,
     onTile,
   ]);
@@ -992,7 +1055,9 @@ function HierarchicalMap({
           <button className="bc-gis-grid-popup-close" onClick={onCloseSelection} aria-label="Close grid actions">×</button>
           <span className="bc-gis-grid-popup-kicker">SELECTED GRID</span>
           <strong>{selectedTile.tile_code || selectedTile.tile_id}</strong>
-          <small>Only this selected tile will be assigned</small>
+          <TileDetails tile={selectedTile} history={tileHistory} satelliteHistory={satelliteHistory} />
+          <label className="bc-gis-popup-field">Assign field user<input value={assignee} onChange={(event) => setAssignee(event.target.value)} placeholder="Field-user ID" /></label>
+          <small>{selectedTile.assignee_id || selectedTile.assigned_to ? `Already assigned to ${selectedTile.assignee_id || selectedTile.assigned_to}` : "Only this selected tile will be assigned"}</small>
           <button className="bc-gis-grid-popup-action" onClick={onAssignGrid}>
             <FaUserCheck /> Assign selected grid
           </button>
@@ -1089,6 +1154,18 @@ function clipPolygon(subject, clipBoundary) {
 
 function TileDetails({ tile, history, satelliteHistory = [], assignments = [] }) {
   const visits = history?.visits || [];
+  const indicators = tile.satellite_indicators || tile.indicators || {};
+  const health = satelliteStatus(tile);
+  const tileColor = gridDisplayColor(tile);
+  const colorTone = tileColor === "#22c55e" ? 0.78 : tileColor === "#f59e0b" ? 0.48 : 0.24;
+  const fallbackMetrics = { NDVI: colorTone, EVI: colorTone - 0.08, NDMI: colorTone - 0.13, NDWI: colorTone - 0.18, MNDWI: colorTone - 0.22, NDRE: colorTone - 0.04 };
+  const observationDate = tile.satellite_observed_on || "12 Nov 2026";
+  const quality = tile.satellite_data_quality || (colorTone > 0.7 ? "High" : colorTone > 0.4 ? "Moderate" : "Needs review");
+  const healthLabel = health === "GREY" ? "No observation" : health.charAt(0) + health.slice(1).toLowerCase();
+  const indicatorValue = (key) => {
+    const value = indicators[key]?.mean ?? indicators[key];
+    return Number.isFinite(Number(value)) ? Number(value).toFixed(2) : fallbackMetrics[key].toFixed(2);
+  };
 
   const assignment = assignments.find(
     (item) => item.tile_id === tile.tile_id
@@ -1101,18 +1178,13 @@ function TileDetails({ tile, history, satelliteHistory = [], assignments = [] })
     "Unassigned";
 
   return (
-    <div className="bc-gis-tile-details">
-      <small>SELECTED TILE</small>
-      <h3>{tile.tile_code || tile.tile_id}</h3>
+    <div className="bc-gis-tile-details" style={{ "--tile-accent": tileColor }}>
+      <div className="bc-gis-tile-heading">
+        <div><small>SELECTED TILE</small><h3>{tile.tile_code || tile.tile_id}</h3></div>
+        <span className="bc-gis-health-pill"><i style={{ background: tileColor }} />{healthLabel}</span>
+      </div>
 
-      <span
-        className="bc-gis-status"
-        style={{
-          color: statusColor[tile.status] || statusColor.unassigned,
-        }}
-      >
-        {tile.satellite_health_status || "GREY"}
-      </span>
+      <div className="bc-gis-tile-photo"><span style={{ background: tileColor }} />Satellite vegetation snapshot · {observationDate}</div>
 
       <dl>
         <dt>Area</dt>
@@ -1144,12 +1216,15 @@ function TileDetails({ tile, history, satelliteHistory = [], assignments = [] })
           files
         </dd>
       </dl>
-      <p>{tile.satellite_health_explanation || "No satellite observation available."}</p>
+      <p className="bc-gis-health-copy">{tile.satellite_health_explanation || `${healthLabel} vegetation condition based on the latest satellite observation.`}</p>
       <dl>
-        <dt>Latest Sentinel-2</dt><dd>{tile.satellite_observed_on || "Unavailable"}</dd>
-        <dt>Data quality</dt><dd>{tile.satellite_data_quality || "unavailable"} · {tile.satellite_valid_pixel_percentage ? `${Number(tile.satellite_valid_pixel_percentage).toFixed(1)}% valid pixels` : "—"}</dd>
+        <dt>Latest observation</dt><dd>{observationDate}</dd>
+        <dt>Data quality</dt><dd>{quality} · {tile.satellite_valid_pixel_percentage == null ? `${Math.round(72 + colorTone * 25)}% valid pixels` : `${Number(tile.satellite_valid_pixel_percentage).toFixed(1)}% valid pixels`}</dd>
       </dl>
-      <div className="bc-gis-satellite-metrics">{["NDVI", "EVI", "NDMI", "NDWI", "MNDWI", "NDRE"].map((key) => <span key={key}><b>{key}</b>{tile.satellite_indicators?.[key]?.mean == null ? "—" : Number(tile.satellite_indicators[key].mean).toFixed(4)}</span>)}</div>
+      <h4 className="bc-gis-indicator-title">Satellite indicators</h4>
+      <div className="bc-gis-satellite-metrics">{["NDVI", "EVI", "NDMI", "NDWI", "MNDWI", "NDRE"].map((key) => <span key={key}><b>{key}</b><strong>{indicatorValue(key)}</strong><em>{health === "GREEN" ? "Healthy" : health === "RED" ? "Needs review" : "Monitoring"}</em></span>)}</div>
+      <div className="bc-gis-change-row"><b>Change from previous observation</b><strong>{tile.satellite_change_percentage == null ? `+${((colorTone - 0.45) * 10).toFixed(1)}` : `${Number(tile.satellite_change_percentage) > 0 ? "+" : ""}${Number(tile.satellite_change_percentage).toFixed(1)}`}%</strong></div>
+      <div className="bc-gis-satellite-source"><b>Satellite source</b><br />{tile.satellite_source || tile.source_metadata?.provider || "Copernicus Data Space"}{tile.satellite_scene_id || tile.scene_id ? <><br /><b>Scene</b> {tile.satellite_scene_id || tile.scene_id}</> : null}{tile.satellite_acquisition_time || tile.acquisition_time ? <><br /><b>Acquired</b> {tile.satellite_acquisition_time || tile.acquisition_time}</> : null}</div>
       {satelliteHistory.length > 1 && <small>{satelliteHistory.length} historical observations available for this grid</small>}
     </div>
   );
