@@ -15,7 +15,7 @@ const API_CONFIG = {
     apiV1Base(import.meta.env.VITE_ASSET_API || ENV.ASSET_SERVICE_URL),
 
   BLUE_CARBON_API:
-    (import.meta.env.VITE_BLUE_CARBON_SERVICE_URL || "http://localhost:5000") + "/api/v1",
+    `${import.meta.env.VITE_BLUE_CARBON_SERVICE_URL || (import.meta.env.PROD ? "" : "http://localhost:5000")}/api/v1`,
 
   // Auth Service (port 5002)
   AUTH_API: ENV.AUTH_SERVICE_URL,

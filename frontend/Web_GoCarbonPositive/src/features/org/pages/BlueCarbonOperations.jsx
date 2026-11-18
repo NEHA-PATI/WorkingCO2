@@ -209,7 +209,7 @@ export default function BlueCarbonOperations() {
       try {
         const settings = JSON.parse(saved);
         if ([100, 300, 500].includes(Number(settings.blockSize))) setBlockSize(Number(settings.blockSize));
-        if ([10, 30, 50].includes(Number(settings.innerGridSize))) setInnerGridSize(Number(settings.innerGridSize));
+        if ([10, 30, 50, 250, 500].includes(Number(settings.innerGridSize))) setInnerGridSize(Number(settings.innerGridSize));
         if (settings.frequency) setFrequency(settings.frequency);
       } catch { /* ignore malformed browser cache */ }
     }
@@ -511,6 +511,8 @@ export default function BlueCarbonOperations() {
                 <option value={10}>10 × 10 m</option>
                 <option value={30}>30 × 30 m</option>
                 <option value={50}>50 × 50 m</option>
+                <option value={250}>250 × 250 m</option>
+                <option value={500}>500 × 500 m</option>
               </select>
               <small>individual monitoring grid</small>
             </label>
@@ -1161,7 +1163,12 @@ function TileDetails({ tile, history, satelliteHistory = [], assignments = [] })
   const fallbackMetrics = { NDVI: colorTone, EVI: colorTone - 0.08, NDMI: colorTone - 0.13, NDWI: colorTone - 0.18, MNDWI: colorTone - 0.22, NDRE: colorTone - 0.04 };
   const observationDate = tile.satellite_observed_on || "12 Nov 2026";
   const quality = tile.satellite_data_quality || (colorTone > 0.7 ? "High" : colorTone > 0.4 ? "Moderate" : "Needs review");
-  const healthLabel = health === "GREY" ? "No observation" : health.charAt(0) + health.slice(1).toLowerCase();
+  const healthLabel = {
+    "#22c55e": "Green",
+    "#f59e0b": "Amber",
+    "#ef4444": "Red",
+    "#94a3b8": "No observation",
+  }[tileColor] || (health === "GREY" ? "No observation" : health.charAt(0) + health.slice(1).toLowerCase());
   const indicatorValue = (key) => {
     const value = indicators[key]?.mean ?? indicators[key];
     return Number.isFinite(Number(value)) ? Number(value).toFixed(2) : fallbackMetrics[key].toFixed(2);

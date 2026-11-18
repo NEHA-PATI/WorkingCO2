@@ -135,6 +135,13 @@ exports.generateTiles = async (req, res) => {
     const requestedBoundary = req.body?.boundary_geojson || project.rows[0].boundary_geojson;
     const boundary = validateGeoJSON(requestedBoundary);
     const generated = generateTiles(boundary, size, req.body?.shape, Number(req.body?.block_size_m || size));
+    const maxTiles = 10000;
+    if (generated.length > maxTiles) {
+      return res.status(400).json({
+        success: false,
+        message: `The selected boundary generates ${generated.length.toLocaleString()} grids. Increase the inner grid size or draw a smaller boundary. Maximum supported grids: ${maxTiles.toLocaleString()}.`,
+      });
+    }
     const rows = await transaction(async (db) => {
       if (req.body?.boundary_geojson) await db.query('UPDATE blue_carbon_projects SET boundary_geojson=$1::jsonb,updated_at=NOW() WHERE project_id=$2 AND org_id=$3', [JSON.stringify(boundary), req.params.projectId, getOrgId(req)]);
       await db.query('DELETE FROM blue_carbon_tiles WHERE project_id=$1 AND org_id=$2', [req.params.projectId, getOrgId(req)]);
